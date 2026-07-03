@@ -1,0 +1,107 @@
+/* GASAK esports utilities */
+
+/* Subtle tactical grid backdrop for hero / auth surfaces */
+.bg-grid {
+  background-image:
+    linear-gradient(
+      color-mix(in oklab, var(--border) 60%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--border) 60%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 42px 42px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black, transparent);
+  -webkit-mask-image: radial-gradient(
+    ellipse 80% 70% at 50% 30%,
+    black,
+    transparent
+  );
+}
+
+/* Angled corner cut — jersey/HUD style panels */
+.corner-cut {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
+}
+
+/* Volt accent stripe (skewed) placed above titles */
+.stripe {
+  display: inline-block;
+  width: 2.5rem;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--primary),
+    color-mix(in oklab, var(--primary) 30%, transparent)
+  );
+  transform: skewX(-20deg);
+}
+
+/* Neon glow for the primary accent */
+.text-glow {
+  text-shadow: 0 0 24px color-mix(in oklab, var(--primary) 55%, transparent);
+}
+
+.shadow-glow {
+  box-shadow: 0 0 32px -6px color-mix(in oklab, var(--primary) 45%, transparent);
+}
+
+/* Scanline shimmer on hover for cards that link somewhere */
+.hover-lift {
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--primary) 55%, var(--border));
+  box-shadow: 0 8px 32px -12px
+    color-mix(in oklab, var(--primary) 35%, transparent);
+}
+
+/* FullCalendar theme bridge */
+.fc {
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: var(--muted);
+  --fc-today-bg-color: color-mix(in oklab, var(--primary) 10%, transparent);
+  --fc-button-bg-color: var(--secondary);
+  --fc-button-border-color: var(--border);
+  --fc-button-text-color: var(--foreground);
+  --fc-button-hover-bg-color: var(--accent);
+  --fc-button-hover-border-color: var(--border);
+  --fc-button-active-bg-color: var(--primary);
+  --fc-button-active-border-color: var(--primary);
+}
+
+.fc .fc-button {
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+
+/* FullCalendar injects its stylesheet at runtime, so match its own
+   active-button selector to win the cascade without !important */
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.fc .fc-toolbar-title {
+  text-transform: uppercase;
+  font-style: italic;
+  letter-spacing: 0.03em;
+}

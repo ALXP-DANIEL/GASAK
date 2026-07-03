@@ -1,0 +1,395 @@
+# GASAK Management System V1
+
+## Modules
+
+### 1. Authentication
+
+* Login
+* Logout
+* Forgot Password
+* Role-based access control
+
+Roles:
+
+* Admin
+* Leader
+* Member
+* Seller
+
+---
+
+## 2. Dashboard
+
+### Admin
+
+* Overview statistics
+* Squad count
+* Player count
+* Pending recruitment
+* Recent orders
+* Upcoming events
+
+### Leader
+
+* Own squad overview
+* Squad members
+* Upcoming events
+* Recent announcements
+
+### Member
+
+* Own squad
+* Upcoming events
+* Announcements
+
+### Seller
+
+* Orders
+* Revenue
+* Products
+
+---
+
+# Esports Management
+
+## Squad Management
+
+Admin can
+
+* Create squad
+* Edit squad
+* Archive squad
+* Restore squad
+* Assign Leader
+* Assign Coach
+* Assign Members
+* Upload squad logo/banner
+
+Each squad contains
+
+* Name
+* Logo
+* Banner
+* Description
+* Leader
+* Coach
+* Members
+* Reserve Members
+
+---
+
+## Player Management
+
+Player Profile
+
+* Full Name
+* Nickname
+* IGN
+* MLBB ID
+* Server ID
+* Email
+* Phone
+* Avatar
+* Preferred Lane
+* Current Rank
+* Peak Rank
+
+Member
+
+* View own profile
+* Edit own profile
+
+Leader
+
+* View squad members
+
+Admin
+
+* Manage everyone
+
+---
+
+## Recruitment
+
+Public page
+
+Applicant submits
+
+* Full Name
+* Email
+* Phone
+* IGN
+* MLBB ID
+* Server ID
+* Current Rank
+* Preferred Lane
+* Hero Pool
+* Previous Team
+* Short Introduction
+
+Workflow
+
+Applied
+
+↓
+
+Under Review
+
+↓
+
+Trial
+
+↓
+
+Accepted
+
+or
+
+Rejected
+
+Admin
+
+* View applications
+* Assign to Leader
+* Approve
+* Reject
+
+Leader
+
+* Review assigned applications
+* Accept
+* Reject
+
+---
+
+## Calendar
+
+Events
+
+* Practice
+* Tournament
+* Meeting
+* Scrim
+
+Each event
+
+* Title
+* Description
+* Date
+* Time
+* Location
+* Squad
+* Event Type
+
+Admin
+
+* All events
+
+Leader
+
+* Own squad events
+
+Member
+
+* View own squad events
+
+---
+
+## Tournament
+
+Store
+
+* Tournament Name
+* Organizer
+* Date
+* Prize
+* Opponent
+* Result
+* MVP
+* Screenshot
+
+---
+
+## Scrim
+
+Store
+
+* Opponent
+* Date
+* Result
+* Notes
+* Replay Link
+
+---
+
+## Announcement
+
+Admin
+
+* Global announcement
+
+Leader
+
+* Squad announcement
+
+Members
+
+* Read announcements
+
+---
+
+# Shop
+
+## Products
+
+Categories
+
+* Diamonds
+* Weekly Pass
+* Joki
+* Coaching
+
+Product
+
+* Name
+* Category
+* Description
+* Price
+* Stock
+* Image
+* Active
+
+Seller manages products.
+
+---
+
+## Orders
+
+Guest checkout supported.
+
+Customer provides
+
+* Name
+* Phone
+* Email
+* Product
+* Quantity
+
+Workflow
+
+Pending
+
+↓
+
+Waiting Payment
+
+↓
+
+Paid
+
+↓
+
+Processing
+
+↓
+
+Completed
+
+↓
+
+Cancelled
+
+Seller updates order status.
+
+---
+
+## Payment
+
+Methods
+
+* DuitNow QR
+* Bank Transfer
+* FPX (future)
+
+Payment proof upload.
+
+Seller verifies payment.
+
+---
+
+# Public Website
+
+Pages
+
+* Home
+* About GASAK
+* Squads
+* Players
+* Recruitment
+* Shop
+* Contact
+
+---
+
+# Admin Panel
+
+Manage
+
+* Users
+* Squads
+* Recruitment
+* Events
+* Announcements
+* Products
+* Orders
+
+---
+
+# Seller Panel
+
+Manage
+
+* Products
+* Orders
+* Revenue summary
+
+---
+
+# Leader Panel
+
+Manage
+
+* Own squad
+* Recruitment
+* Calendar
+* Announcements
+
+---
+
+# Member Panel
+
+View
+
+* Squad
+* Members
+* Calendar
+* Announcements
+* Own profile
+
+---
+
+# Technology Stack
+
+* Next.js 16
+* TypeScript
+* Tailwind CSS v4
+* ShadCN UI
+* better-auth
+* Drizzle ORM
+* PostgreSQL
+* UploadThing
+* React Hook Form
+* Zod
+* TanStack Query
+* FullCalendar
+* Recharts
