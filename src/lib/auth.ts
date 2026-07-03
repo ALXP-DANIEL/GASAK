@@ -9,6 +9,15 @@ export const auth = betterAuth({
   appName: "GASAK",
   secret: env.AUTH_SECRET,
   baseURL: env.NEXT_PUBLIC_SITE_URL,
+  // In dev, trust whatever origin the request came from (e.g. your phone
+  // hitting the dev server over LAN IP) instead of only NEXT_PUBLIC_SITE_URL.
+  trustedOrigins:
+    env.NODE_ENV === "development"
+      ? async (request) => {
+          const origin = request?.headers.get("origin");
+          return origin ? [origin] : [];
+        }
+      : undefined,
   database: drizzleAdapter(db, { provider: "pg" }),
   emailAndPassword: {
     enabled: true,

@@ -30,6 +30,11 @@ jobs:
       - name: Lint (Biome)
         run: npm run lint
 
+      - name: Generate Next.js route types
+        run: npx next typegen
+        env:
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+
       - name: Type check
         run: npx tsc --noEmit
 

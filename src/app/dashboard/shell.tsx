@@ -214,9 +214,9 @@ export function DashboardShell({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex min-h-dvh">
+    <div className="flex min-h-screen">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 border-r bg-card p-4 lg:block">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r bg-card p-4 lg:block">
         <SidebarContent user={user} />
       </aside>
 
