@@ -42,6 +42,8 @@ import {
   products,
   squads,
 } from "@/server/db";
+import { Badge } from "@/components/ui/shadcn/badge";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/shadcn/card";
 
 export const dynamic = "force-dynamic";
 
@@ -69,11 +71,9 @@ function UpcomingEvents({
     <DashboardPanel
       title="Upcoming events"
       description={
-        <>
-          <Link href="/dashboard/calendar" className="hover:text-foreground">
-            Open calendar →
-          </Link>
-        </>
+        <Link href="/dashboard/calendar" className="hover:text-foreground">
+          Open calendar →
+        </Link>
       }
     >
       <div className="grid gap-3">
@@ -89,7 +89,11 @@ function UpcomingEvents({
             }
             badge={
               <BrandBadge>
-              {EVENT_TYPE_LABELS[event.type as keyof typeof EVENT_TYPE_LABELS]}
+                {
+                  EVENT_TYPE_LABELS[
+                    event.type as keyof typeof EVENT_TYPE_LABELS
+                  ]
+                }
               </BrandBadge>
             }
           />
