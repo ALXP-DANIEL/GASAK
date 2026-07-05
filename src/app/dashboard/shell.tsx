@@ -1,25 +1,10 @@
 "use client";
 
 import type { Icon } from "@phosphor-icons/react";
-import { CalendarBlank } from "@phosphor-icons/react/dist/ssr/CalendarBlank";
-import { ClipboardText } from "@phosphor-icons/react/dist/ssr/ClipboardText";
-import { GameController } from "@phosphor-icons/react/dist/ssr/GameController";
-import { Lightning } from "@phosphor-icons/react/dist/ssr/Lightning";
-import { List } from "@phosphor-icons/react/dist/ssr/List";
-import { Megaphone } from "@phosphor-icons/react/dist/ssr/Megaphone";
-import { Package } from "@phosphor-icons/react/dist/ssr/Package";
-import { Receipt } from "@phosphor-icons/react/dist/ssr/Receipt";
-import { SignOut } from "@phosphor-icons/react/dist/ssr/SignOut";
-import { SquaresFour } from "@phosphor-icons/react/dist/ssr/SquaresFour";
-import { Sword } from "@phosphor-icons/react/dist/ssr/Sword";
-import { Trophy } from "@phosphor-icons/react/dist/ssr/Trophy";
-import { User } from "@phosphor-icons/react/dist/ssr/User";
-import { UsersFour } from "@phosphor-icons/react/dist/ssr/UsersFour";
-import { UsersThree } from "@phosphor-icons/react/dist/ssr/UsersThree";
-import { X } from "@phosphor-icons/react/dist/ssr/X";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { Icons } from "@/components/icons";
 import { Badge } from "@/components/ui/shadcn/badge";
 import { Button } from "@/components/ui/shadcn/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -39,79 +24,79 @@ const NAV_ITEMS: NavItem[] = [
   {
     href: "/dashboard",
     label: "Overview",
-    Icon: SquaresFour,
+    Icon: Icons.Domain.Squads,
     roles: ["admin", "leader", "member", "seller"],
   },
   {
     href: "/dashboard/squads",
     label: "Squads",
-    Icon: UsersThree,
+    Icon: Icons.Stats.Squads,
     roles: ["admin"],
   },
   {
     href: "/dashboard/my-squad",
     label: "My Squad",
-    Icon: UsersThree,
+    Icon: Icons.Stats.Squads,
     roles: ["leader", "member"],
   },
   {
     href: "/dashboard/players",
     label: "Players",
-    Icon: UsersFour,
+    Icon: Icons.Domain.Members,
     roles: ["admin", "leader"],
   },
   {
     href: "/dashboard/recruitment",
     label: "Recruitment",
-    Icon: ClipboardText,
+    Icon: Icons.Domain.Recruitment,
     roles: ["admin", "leader"],
   },
   {
     href: "/dashboard/calendar",
     label: "Calendar",
-    Icon: CalendarBlank,
+    Icon: Icons.Domain.Calendar,
     roles: ["admin", "leader", "member"],
   },
   {
     href: "/dashboard/tournaments",
     label: "Tournaments",
-    Icon: Trophy,
+    Icon: Icons.Stats.Trophies,
     roles: ["admin", "leader", "member"],
   },
   {
     href: "/dashboard/scrims",
     label: "Scrims",
-    Icon: Sword,
+    Icon: Icons.Domain.Scrims,
     roles: ["admin", "leader", "member"],
   },
   {
     href: "/dashboard/announcements",
     label: "Announcements",
-    Icon: Megaphone,
+    Icon: Icons.Domain.Announcements,
     roles: ["admin", "leader", "member"],
   },
   {
     href: "/dashboard/products",
     label: "Products",
-    Icon: Package,
+    Icon: Icons.Domain.Products,
     roles: ["admin", "seller"],
   },
   {
     href: "/dashboard/orders",
     label: "Orders",
-    Icon: Receipt,
+    Icon: Icons.Domain.Orders,
     roles: ["admin", "seller"],
   },
   {
     href: "/dashboard/users",
     label: "Users",
-    Icon: GameController,
+    Icon: Icons.Domain.Players,
     roles: ["admin"],
   },
   {
     href: "/dashboard/profile",
     label: "My Profile",
-    Icon: User,
+    Icon: Icons.Stats.Players,
     roles: ["admin", "leader", "member", "seller"],
   },
 ];
@@ -146,7 +131,11 @@ function SidebarContent({
         className="flex items-center gap-2 px-2 text-foreground"
         onClick={onNavigate}
       >
-        <Lightning weight="fill" size={22} className="text-primary" />
+        <Icons.Domain.Lightning
+          weight="fill"
+          size={22}
+          className="text-primary"
+        />
         <span className="text-lg font-black uppercase italic tracking-wide">
           GASAK
         </span>
@@ -194,7 +183,7 @@ function SidebarContent({
             className="flex-1"
             onClick={handleSignOut}
           >
-            <SignOut size={16} />
+            <Icons.Actions.SignOut size={16} />
             Sign out
           </Button>
           <ThemeToggle />
@@ -224,13 +213,17 @@ export function DashboardShell({
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-40 flex items-center justify-between border-b bg-background/80 px-4 py-3 backdrop-blur lg:hidden">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <Lightning weight="fill" size={20} className="text-primary" />
+            <Icons.Domain.Lightning
+              weight="fill"
+              size={20}
+              className="text-primary"
+            />
             <span className="font-black uppercase italic tracking-wide">
               GASAK
             </span>
           </Link>
           <Button variant="ghost" size="icon" onClick={() => setOpen(true)}>
-            <List size={20} />
+            <Icons.Layout.Navigation.Menu size={20} />
           </Button>
         </header>
 
@@ -249,7 +242,7 @@ export function DashboardShell({
                   size="icon"
                   onClick={() => setOpen(false)}
                 >
-                  <X size={18} />
+                  <Icons.Layout.Navigation.Close size={18} />
                 </Button>
               </div>
               <SidebarContent user={user} onNavigate={() => setOpen(false)} />

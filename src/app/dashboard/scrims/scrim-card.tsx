@@ -1,10 +1,9 @@
 "use client";
 
-import { ArrowSquareOut } from "@phosphor-icons/react/dist/ssr/ArrowSquareOut";
-import { Trash } from "@phosphor-icons/react/dist/ssr/Trash";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
+import { Icons } from "@/components/icons";
 import { Badge } from "@/components/ui/shadcn/badge";
 import { Button } from "@/components/ui/shadcn/button";
 import {
@@ -57,7 +56,7 @@ export function ScrimCard({
               disabled={pending}
               onClick={onDelete}
             >
-              <Trash size={16} className="text-destructive" />
+              <Icons.Actions.Delete size={16} className="text-destructive" />
             </Button>
           )}
         </div>
@@ -77,7 +76,7 @@ export function ScrimCard({
             rel="noreferrer"
             className="flex w-fit items-center gap-1 text-sm text-primary hover:underline"
           >
-            Watch replay <ArrowSquareOut size={14} />
+            Watch replay <Icons.Contact.ExternalLink size={14} />
           </a>
         )}
       </CardContent>

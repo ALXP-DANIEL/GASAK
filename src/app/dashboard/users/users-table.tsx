@@ -1,10 +1,9 @@
 "use client";
 
-import { Plus } from "@phosphor-icons/react/dist/ssr/Plus";
-import { Trash } from "@phosphor-icons/react/dist/ssr/Trash";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { Icons } from "@/components/icons";
 import { Badge } from "@/components/ui/shadcn/badge";
 import { Button } from "@/components/ui/shadcn/button";
 import {
@@ -77,7 +76,7 @@ export function CreateUserDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus size={16} />
+          <Icons.Actions.Add size={16} />
           New user
         </Button>
       </DialogTrigger>
@@ -230,7 +229,10 @@ export function UsersTable({
                   disabled={pending || user.id === currentUserId}
                   onClick={() => removeUser(user.id, user.name)}
                 >
-                  <Trash size={16} className="text-destructive" />
+                  <Icons.Actions.Delete
+                    size={16}
+                    className="text-destructive"
+                  />
                 </Button>
               </TableCell>
             </TableRow>

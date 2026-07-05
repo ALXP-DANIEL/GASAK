@@ -1,9 +1,9 @@
 "use client";
 
-import { Plus } from "@phosphor-icons/react/dist/ssr/Plus";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/shadcn/button";
 import { Checkbox } from "@/components/ui/shadcn/checkbox";
 import {
@@ -71,7 +71,7 @@ export function ProductFormDialog({ product }: { product?: Product }) {
           </Button>
         ) : (
           <Button>
-            <Plus size={16} />
+            <Icons.Actions.Add size={16} />
             New product
           </Button>
         )}

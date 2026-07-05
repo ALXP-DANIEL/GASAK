@@ -1,9 +1,9 @@
 "use client";
 
-import { Plus } from "@phosphor-icons/react/dist/ssr/Plus";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/shadcn/button";
 import {
   Dialog,
@@ -61,7 +61,7 @@ export function ScrimFormDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus size={16} />
+          <Icons.Actions.Add size={16} />
           Record scrim
         </Button>
       </DialogTrigger>

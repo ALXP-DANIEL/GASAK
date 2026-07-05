@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Oswald } from "next/font/google";
 import { ViewTransition } from "react";
 import "@/styles/globals.css";
 import SplashGate from "@/components/layouts/splash-gate";
@@ -10,9 +10,19 @@ import { env } from "@/env";
 import { cn } from "@/lib/utils";
 import Maintenance from "./maintenance";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+});
+
+const oswald = Oswald({
+  subsets: ["latin"],
+  variable: "--font-oswald",
 });
 
 export const metadata: Metadata = {
@@ -66,9 +76,14 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("h-full antialiased font-mono", jetbrainsMono.variable)}
+      className={cn(
+        "h-full antialiased font-sans",
+        inter.variable,
+        jetbrainsMono.variable,
+        oswald.variable,
+      )}
     >
-      <body className="min-h-full font-mono">
+      <body className="min-h-full font-sans">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           {isMaintenance ? (
             <Maintenance />

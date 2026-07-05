@@ -1,9 +1,3 @@
-import { ClipboardText } from "@phosphor-icons/react/dist/ssr/ClipboardText";
-import { CurrencyCircleDollar } from "@phosphor-icons/react/dist/ssr/CurrencyCircleDollar";
-import { Package } from "@phosphor-icons/react/dist/ssr/Package";
-import { Receipt } from "@phosphor-icons/react/dist/ssr/Receipt";
-import { UsersFour } from "@phosphor-icons/react/dist/ssr/UsersFour";
-import { UsersThree } from "@phosphor-icons/react/dist/ssr/UsersThree";
 import { subDays } from "date-fns";
 import {
   and,
@@ -22,18 +16,14 @@ import {
   type RevenuePoint,
 } from "@/components/dashboard/revenue-chart";
 import {
+  DashboardListItem,
+  DashboardPanel,
   EmptyState,
   PageHeader,
   StatCard,
 } from "@/components/dashboard/widgets";
-import { Badge } from "@/components/ui/shadcn/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/shadcn/card";
+import { Icons } from "@/components/icons";
+import { BrandBadge } from "@/components/ui/brand";
 import { formatDate, formatDateTime, formatRM } from "@/lib/format";
 import {
   EVENT_TYPE_LABELS,
@@ -76,36 +66,37 @@ function UpcomingEvents({
   }[];
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Upcoming events</CardTitle>
-        <CardDescription>
+    <DashboardPanel
+      title="Upcoming events"
+      description={
+        <>
           <Link href="/dashboard/calendar" className="hover:text-foreground">
             Open calendar →
           </Link>
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-3">
+        </>
+      }
+    >
+      <div className="grid gap-3">
         {items.map((event) => (
-          <div
+          <DashboardListItem
             key={event.id}
-            className="flex items-center justify-between gap-2 text-sm"
-          >
-            <div className="min-w-0">
-              <p className="truncate font-medium">{event.title}</p>
-              <p className="truncate text-xs text-muted-foreground">
+            title={event.title}
+            description={
+              <>
                 {formatDateTime(event.startsAt)}
                 {event.location ? ` · ${event.location}` : ""}
-              </p>
-            </div>
-            <Badge variant="outline">
+              </>
+            }
+            badge={
+              <BrandBadge>
               {EVENT_TYPE_LABELS[event.type as keyof typeof EVENT_TYPE_LABELS]}
-            </Badge>
-          </div>
+              </BrandBadge>
+            }
+          />
         ))}
         {items.length === 0 && <EmptyState message="No upcoming events." />}
-      </CardContent>
-    </Card>
+      </div>
+    </DashboardPanel>
   );
 }
 
@@ -151,18 +142,22 @@ async function AdminDashboard() {
         <StatCard
           label="Active squads"
           value={squadCount.value}
-          Icon={UsersThree}
+          Icon={Icons.Stats.Squads}
         />
-        <StatCard label="Players" value={playerCount.value} Icon={UsersFour} />
+        <StatCard
+          label="Players"
+          value={playerCount.value}
+          Icon={Icons.Domain.Members}
+        />
         <StatCard
           label="Pending recruitment"
           value={pendingApps.value}
-          Icon={ClipboardText}
+          Icon={Icons.Domain.Recruitment}
         />
         <StatCard
           label="Recent orders"
           value={recentOrders.length}
-          Icon={Receipt}
+          Icon={Icons.Domain.Orders}
         />
       </div>
 
@@ -258,22 +253,22 @@ async function SellerDashboard() {
         <StatCard
           label="Total revenue (paid)"
           value={formatRM(Number(paidAgg[0]?.revenue ?? 0))}
-          Icon={CurrencyCircleDollar}
+          Icon={Icons.Domain.Revenue}
         />
         <StatCard
           label="Paid orders"
           value={paidAgg[0]?.orderCount ?? 0}
-          Icon={Receipt}
+          Icon={Icons.Domain.Orders}
         />
         <StatCard
           label="Awaiting action"
           value={pendingCount.value}
-          Icon={ClipboardText}
+          Icon={Icons.Domain.Recruitment}
         />
         <StatCard
           label="Active products"
           value={productCount.value}
-          Icon={Package}
+          Icon={Icons.Domain.Products}
         />
       </div>
 
