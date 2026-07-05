@@ -13,6 +13,8 @@
       "!.next",
       "!dist",
       "!build",
+      "!backup",
+      "!reference",
       "!public/*.svg",
       "!src/components/ui/shadcn",
       "!src/app/old",

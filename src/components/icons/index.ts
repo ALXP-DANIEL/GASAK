@@ -7,6 +7,8 @@ import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareOu
 import { CalendarBlankIcon } from "@phosphor-icons/react/dist/ssr/CalendarBlank";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
 import { CaretUpIcon } from "@phosphor-icons/react/dist/ssr/CaretUp";
+import { CaretUpDownIcon } from "@phosphor-icons/react/dist/ssr/CaretUpDown";
+import { ChartBarIcon } from "@phosphor-icons/react/dist/ssr/ChartBar";
 import { CheckCircleIcon } from "@phosphor-icons/react/dist/ssr/CheckCircle";
 import { CircleIcon } from "@phosphor-icons/react/dist/ssr/Circle";
 import { ClipboardTextIcon } from "@phosphor-icons/react/dist/ssr/ClipboardText";
@@ -16,6 +18,7 @@ import { EnvelopeSimpleIcon } from "@phosphor-icons/react/dist/ssr/EnvelopeSimpl
 import { EyedropperIcon } from "@phosphor-icons/react/dist/ssr/Eyedropper";
 import { FacebookLogoIcon } from "@phosphor-icons/react/dist/ssr/FacebookLogo";
 import { GameControllerIcon } from "@phosphor-icons/react/dist/ssr/GameController";
+import { GearIcon } from "@phosphor-icons/react/dist/ssr/Gear";
 import { HandFistIcon } from "@phosphor-icons/react/dist/ssr/HandFist";
 import { HouseIcon } from "@phosphor-icons/react/dist/ssr/House";
 import { InstagramLogoIcon } from "@phosphor-icons/react/dist/ssr/InstagramLogo";
@@ -103,6 +106,7 @@ export const Icons = {
     Lightning: LightningIcon,
     News: NewspaperIcon,
     Shop: ShoppingBagIcon,
+    Reports: ChartBarIcon,
   },
 
   Actions: {
@@ -110,5 +114,7 @@ export const Icons = {
     Delete: TrashIcon,
     Eyedropper: EyedropperIcon,
     SignOut: SignOutIcon,
+    Settings: GearIcon,
+    CaretUpDown: CaretUpDownIcon,
   },
 } as const;

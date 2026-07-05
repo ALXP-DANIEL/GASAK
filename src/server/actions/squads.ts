@@ -17,9 +17,9 @@ function slugify(name: string) {
 }
 
 function revalidateSquads() {
-  revalidatePath("/old/dashboard/squads");
-  revalidatePath("/old/dashboard/my-squad");
-  revalidatePath("/old/squads");
+  revalidatePath("/dashboard/teams");
+  revalidatePath("/dashboard/my-squad");
+  revalidatePath("/teams");
   revalidatePath("/");
 }
 
@@ -82,7 +82,7 @@ export async function updateSquad(
   squadId: string,
   formData: FormData,
 ): Promise<ActionResult> {
-  const user = await actionUser("admin", "leader");
+  const user = await actionUser();
   if (!user) return { ok: false, error: "Unauthorized" };
   if (user.role !== "admin" && !(await isSquadLeader(user.id, squadId))) {
     return { ok: false, error: "You do not lead this squad" };
@@ -132,7 +132,7 @@ export async function updateSquad(
   await db.update(squads).set(updates).where(eq(squads.id, squadId));
 
   revalidateSquads();
-  revalidatePath(`/old/dashboard/squads/${squadId}`);
+  revalidatePath(`/dashboard/teams/${squadId}`);
   return { ok: true, message: "Squad updated" };
 }
 
@@ -146,7 +146,7 @@ export async function setSquadArchived(
   await db.update(squads).set({ archived }).where(eq(squads.id, squadId));
 
   revalidateSquads();
-  revalidatePath(`/old/dashboard/squads/${squadId}`);
+  revalidatePath(`/dashboard/teams/${squadId}`);
   return { ok: true, message: archived ? "Squad archived" : "Squad restored" };
 }
 
@@ -179,7 +179,7 @@ export async function addSquadMember(
   await db.insert(squadMembers).values(parsed.data);
 
   revalidateSquads();
-  revalidatePath(`/old/dashboard/squads/${parsed.data.squadId}`);
+  revalidatePath(`/dashboard/teams/${parsed.data.squadId}`);
   return { ok: true, message: "Member assigned" };
 }
 
@@ -198,7 +198,7 @@ export async function updateSquadMemberRole(
   if (!row) return { ok: false, error: "Member not found" };
 
   revalidateSquads();
-  revalidatePath(`/old/dashboard/squads/${row.squadId}`);
+  revalidatePath(`/dashboard/teams/${row.squadId}`);
   return { ok: true, message: "Role updated" };
 }
 
@@ -215,6 +215,6 @@ export async function removeSquadMember(
   if (!row) return { ok: false, error: "Member not found" };
 
   revalidateSquads();
-  revalidatePath(`/old/dashboard/squads/${row.squadId}`);
+  revalidatePath(`/dashboard/teams/${row.squadId}`);
   return { ok: true, message: "Member removed" };
 }

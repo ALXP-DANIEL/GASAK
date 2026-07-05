@@ -20,8 +20,8 @@ import {
 import type { ActionResult } from "./public";
 
 function revalidateRecruitment() {
-  revalidatePath("/old/dashboard/recruitment");
-  revalidatePath("/old/dashboard");
+  revalidatePath("/dashboard/recruitment");
+  revalidatePath("/dashboard");
 }
 
 export async function assignApplication(
@@ -179,9 +179,9 @@ export async function onboardApplicant(
   });
 
   revalidateRecruitment();
-  revalidatePath("/old/dashboard/squads");
-  revalidatePath("/old/dashboard/users");
-  revalidatePath("/old/players");
+  revalidatePath("/dashboard/teams");
+  revalidatePath("/dashboard/users");
+  revalidatePath("/teams");
   return {
     ok: true,
     message: `${application.fullName} onboarded to ${squad.name}`,

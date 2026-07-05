@@ -18,7 +18,7 @@ export default function Forbidden() {
       description="The page exists, but it is restricted to another GASAK role or a higher permission level."
       actions={[
         {
-          href: "/old/dashboard",
+          href: "/dashboard",
           label: "Back to dashboard",
         },
         {

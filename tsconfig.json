@@ -30,5 +30,12 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "gasak-esports-website"]
+  "exclude": [
+    "node_modules",
+    "gasak-esports-website",
+    "backup",
+    "backup/**",
+    "reference",
+    "reference/**"
+  ]
 }

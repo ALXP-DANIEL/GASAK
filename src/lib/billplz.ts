@@ -53,7 +53,7 @@ export async function createBillplzBill(input: {
       name: input.name,
       amount: String(input.amountSen),
       callback_url: `${env.NEXT_PUBLIC_SITE_URL}/api/webhooks/billplz`,
-      redirect_url: `${env.NEXT_PUBLIC_SITE_URL}/shop/order/${input.orderNo}`,
+      redirect_url: `${env.NEXT_PUBLIC_SITE_URL}/pricing?orderNo=${input.orderNo}`,
       description: input.description,
       reference_1_label: "Order No",
       reference_1: input.orderNo,

@@ -4,7 +4,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { userRole } from "@/lib/session";
-import { actionUser, isSquadLeader } from "@/server/authz";
+import { actionUser, canManageSquad } from "@/server/authz";
 import { announcementReads, announcements, db } from "@/server/db";
 import type { ActionResult } from "./public";
 
@@ -17,7 +17,7 @@ const announcementSchema = z.object({
 export async function createAnnouncement(
   input: z.infer<typeof announcementSchema>,
 ): Promise<ActionResult> {
-  const actor = await actionUser("admin", "leader");
+  const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   const parsed = announcementSchema.safeParse(input);
@@ -30,7 +30,7 @@ export async function createAnnouncement(
     if (!parsed.data.squadId) {
       return { ok: false, error: "Only admins can post global announcements" };
     }
-    if (!(await isSquadLeader(actor.id, parsed.data.squadId))) {
+    if (!(await canManageSquad(actor.id, role, parsed.data.squadId))) {
       return { ok: false, error: "You do not lead this squad" };
     }
   }
@@ -42,14 +42,14 @@ export async function createAnnouncement(
     authorId: actor.id,
   });
 
-  revalidatePath("/old/dashboard/announcements");
-  revalidatePath("/old/dashboard");
+  revalidatePath("/dashboard/announcements");
+  revalidatePath("/dashboard");
   revalidatePath("/");
   return { ok: true, message: "Announcement posted" };
 }
 
 export async function deleteAnnouncement(id: string): Promise<ActionResult> {
-  const actor = await actionUser("admin", "leader");
+  const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   const row = await db.query.announcements.findFirst({
@@ -63,8 +63,8 @@ export async function deleteAnnouncement(id: string): Promise<ActionResult> {
 
   await db.delete(announcements).where(eq(announcements.id, id));
 
-  revalidatePath("/old/dashboard/announcements");
-  revalidatePath("/old/dashboard");
+  revalidatePath("/dashboard/announcements");
+  revalidatePath("/dashboard");
   revalidatePath("/");
   return { ok: true, message: "Announcement deleted" };
 }

@@ -26,6 +26,17 @@ export async function isSquadLeader(userId: string, squadId: string) {
   return Boolean(row);
 }
 
+/** Admins manage globally; squad leaders manage only their own squad. */
+export async function canManageSquad(
+  userId: string,
+  role: Role,
+  squadId: string | null,
+) {
+  if (role === "admin") return true;
+  if (!squadId) return false;
+  return isSquadLeader(userId, squadId);
+}
+
 /** Squads where the user sits as squad leader. */
 export async function getLedSquadIds(userId: string) {
   const rows = await db

@@ -10,11 +10,9 @@ import { cn } from "@/lib/utils";
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
-  { label: "Squads", href: "/squads" },
-  { label: "Players", href: "/players" },
-  { label: "Recruitment", href: "/recruitment" },
-  { label: "Shop", href: "/shop" },
-  { label: "News", href: "/news" },
+  { label: "Tournaments", href: "/tournaments" },
+  { label: "Squads", href: "/teams" },
+  { label: "Shop", href: "/pricing" },
   { label: "Contact", href: "/contact" },
 ];
 

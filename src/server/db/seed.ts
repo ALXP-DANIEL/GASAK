@@ -27,9 +27,26 @@ async function createUser(
   return res.user;
 }
 
+async function syncDemoAccountRoles() {
+  const rolesByEmail = [
+    { email: "admin@gasak.gg", role: "admin" },
+    { email: "leader@gasak.gg", role: "leader" },
+    { email: "member@gasak.gg", role: "member" },
+    { email: "seller@gasak.gg", role: "seller" },
+  ] satisfies { email: string; role: Role }[];
+
+  for (const account of rolesByEmail) {
+    await db
+      .update(user)
+      .set({ role: account.role })
+      .where(eq(user.email, account.email));
+  }
+}
+
 async function main() {
   const existing = await db.select().from(user).limit(1);
   if (existing.length > 0) {
+    await syncDemoAccountRoles();
     console.log("Database already seeded, skipping.");
     return;
   }

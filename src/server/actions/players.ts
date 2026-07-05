@@ -84,8 +84,8 @@ export async function updateProfile(
       set: { ...profile, updatedAt: new Date() },
     });
 
-  revalidatePath("/old/dashboard/profile");
-  revalidatePath("/old/dashboard/players");
-  revalidatePath("/old/players");
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/players");
+  revalidatePath("/teams");
   return { ok: true, message: "Profile saved" };
 }

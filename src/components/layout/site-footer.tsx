@@ -7,20 +7,18 @@ import { siteConfig } from "@/config/site";
 const QUICK_LINKS = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
-  { label: "Squads", href: "/squads" },
-  { label: "Players", href: "/players" },
-  { label: "Recruitment", href: "/recruitment" },
-  { label: "Shop", href: "/shop" },
-  { label: "News", href: "/news" },
+  { label: "Tournaments", href: "/tournaments" },
+  { label: "Squads", href: "/teams" },
+  { label: "Shop", href: "/pricing" },
   { label: "Contact", href: "/contact" },
 ];
 
 const SUPPORT_LINKS = [
   { label: "FAQ", href: "/contact" },
-  { label: "How to Order", href: "/shop" },
-  { label: "Payment Guide", href: "/shop" },
-  { label: "Terms of Service", href: "/more" },
-  { label: "Privacy Policy", href: "/more" },
+  { label: "How to Order", href: "/pricing" },
+  { label: "Payment Guide", href: "/pricing" },
+  { label: "Terms of Service", href: "/contact" },
+  { label: "Privacy Policy", href: "/contact" },
 ];
 
 const SOCIALS = [

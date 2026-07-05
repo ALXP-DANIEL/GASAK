@@ -1,0 +1,95 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
+import { Badge } from "@/components/ui/shadcn/badge";
+import { Card, CardContent } from "@/components/ui/shadcn/card";
+import { getPlayer } from "@/features/players/queries";
+import { LANE_LABELS, ROLE_LABELS, SQUAD_ROLE_LABELS } from "@/lib/labels";
+import { userRole } from "@/lib/session";
+import { requireDashboardRole } from "../../_components/dashboard-section";
+
+export const dynamic = "force-dynamic";
+
+export default async function PlayerDetailPage({
+  params,
+}: {
+  params: Promise<{ playerId: string }>;
+}) {
+  await requireDashboardRole("admin", "leader");
+  const { playerId } = await params;
+  const player = await getPlayer(playerId);
+  if (!player) notFound();
+
+  const profile = player.profile;
+  const details: Array<[string, string]> = [
+    ["Full Name", profile?.fullName ?? "—"],
+    ["Nickname", profile?.nickname ?? "—"],
+    ["IGN", profile?.ign ?? "—"],
+    ["MLBB ID", profile?.mlbbId ?? "—"],
+    ["Server ID", profile?.serverId ?? "—"],
+    ["Phone", profile?.phone ?? "—"],
+    [
+      "Preferred Lane",
+      profile?.preferredLane ? LANE_LABELS[profile.preferredLane] : "—",
+    ],
+    ["Current Rank", profile?.currentRank ?? "—"],
+    ["Peak Rank", profile?.peakRank ?? "—"],
+    ["Email", player.email],
+  ];
+
+  return (
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={player.name}
+        description="Player profile"
+        actions={
+          <Badge variant="outline">{ROLE_LABELS[userRole(player)]}</Badge>
+        }
+      />
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Card>
+          <CardContent>
+            <dl className="grid gap-4 desktop:grid-cols-2">
+              {details.map(([label, value]) => (
+                <div key={label} className="grid gap-1">
+                  <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {label}
+                  </dt>
+                  <dd className="text-sm">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex flex-col gap-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Squads
+            </p>
+            {player.memberships.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                Not in any squad yet.
+              </p>
+            )}
+            {player.memberships.map((membership) => (
+              <div
+                key={membership.id}
+                className="flex items-center justify-between gap-3 rounded-md border px-3 py-2"
+              >
+                <Link
+                  href={`/dashboard/teams/${membership.squadId}`}
+                  className="text-sm font-medium hover:underline"
+                >
+                  {membership.squad.name}
+                </Link>
+                <Badge variant="outline">
+                  {SQUAD_ROLE_LABELS[membership.squadRole]}
+                </Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

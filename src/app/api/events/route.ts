@@ -25,8 +25,7 @@ export async function GET() {
     });
   }
 
-  const ledSquadIds =
-    role === "leader" ? await getLedSquadIds(session.user.id) : [];
+  const ledSquadIds = await getLedSquadIds(session.user.id);
 
   return NextResponse.json(
     rows.map((event) => ({
@@ -41,9 +40,7 @@ export async function GET() {
         squadName: event.squad?.name ?? null,
         canManage:
           role === "admin" ||
-          (role === "leader" &&
-            event.squadId !== null &&
-            ledSquadIds.includes(event.squadId)),
+          (event.squadId !== null && ledSquadIds.includes(event.squadId)),
       },
     })),
   );

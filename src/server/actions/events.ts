@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { userRole } from "@/lib/session";
-import { actionUser, isSquadLeader } from "@/server/authz";
+import { actionUser, canManageSquad } from "@/server/authz";
 import { db, events, eventTypeEnum } from "@/server/db";
 import type { ActionResult } from "./public";
 
@@ -18,35 +18,17 @@ const eventSchema = z.object({
   squadId: z.uuid().nullable(),
 });
 
-async function canManageSquadEvents(
-  actorId: string,
-  role: string,
-  squadId: string | null,
-) {
-  if (role === "admin") return true;
-  if (role !== "leader") return false;
-  // leaders can only manage events for squads they lead — not org-wide ones
-  if (!squadId) return false;
-  return isSquadLeader(actorId, squadId);
-}
-
 export async function createEvent(
   input: z.infer<typeof eventSchema>,
 ): Promise<ActionResult> {
-  const actor = await actionUser("admin", "leader");
+  const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   const parsed = eventSchema.safeParse(input);
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
 
-  if (
-    !(await canManageSquadEvents(
-      actor.id,
-      userRole(actor),
-      parsed.data.squadId,
-    ))
-  ) {
+  if (!(await canManageSquad(actor.id, userRole(actor), parsed.data.squadId))) {
     return { ok: false, error: "You can only create events for your squad" };
   }
 
@@ -70,13 +52,13 @@ export async function createEvent(
     createdBy: actor.id,
   });
 
-  revalidatePath("/old/dashboard/calendar");
-  revalidatePath("/old/dashboard");
+  revalidatePath("/dashboard/schedules");
+  revalidatePath("/dashboard");
   return { ok: true, message: "Event created" };
 }
 
 export async function deleteEvent(eventId: string): Promise<ActionResult> {
-  const actor = await actionUser("admin", "leader");
+  const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   const event = await db.query.events.findFirst({
@@ -84,13 +66,13 @@ export async function deleteEvent(eventId: string): Promise<ActionResult> {
   });
   if (!event) return { ok: false, error: "Event not found" };
 
-  if (!(await canManageSquadEvents(actor.id, userRole(actor), event.squadId))) {
+  if (!(await canManageSquad(actor.id, userRole(actor), event.squadId))) {
     return { ok: false, error: "You cannot delete this event" };
   }
 
   await db.delete(events).where(eq(events.id, eventId));
 
-  revalidatePath("/old/dashboard/calendar");
-  revalidatePath("/old/dashboard");
+  revalidatePath("/dashboard/schedules");
+  revalidatePath("/dashboard");
   return { ok: true, message: "Event deleted" };
 }

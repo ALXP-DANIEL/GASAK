@@ -5,19 +5,9 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { userRole } from "@/lib/session";
 import { saveUpload } from "@/lib/uploads";
-import { actionUser, isSquadLeader } from "@/server/authz";
+import { actionUser, canManageSquad } from "@/server/authz";
 import { db, scrims, tournaments } from "@/server/db";
 import type { ActionResult } from "./public";
-
-async function canManageSquad(
-  actorId: string,
-  role: string,
-  squadId: string | null,
-) {
-  if (role === "admin") return true;
-  if (role !== "leader" || !squadId) return false;
-  return isSquadLeader(actorId, squadId);
-}
 
 const tournamentSchema = z.object({
   name: z.string().min(2, "Tournament name is required"),
@@ -33,7 +23,7 @@ const tournamentSchema = z.object({
 export async function createTournament(
   formData: FormData,
 ): Promise<ActionResult> {
-  const actor = await actionUser("admin", "leader");
+  const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   const parsed = tournamentSchema.safeParse({
@@ -78,12 +68,12 @@ export async function createTournament(
     squadId: parsed.data.squadId,
   });
 
-  revalidatePath("/old/dashboard/tournaments");
+  revalidatePath("/dashboard/tournaments");
   return { ok: true, message: "Tournament recorded" };
 }
 
 export async function deleteTournament(id: string): Promise<ActionResult> {
-  const actor = await actionUser("admin", "leader");
+  const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   const row = await db.query.tournaments.findFirst({
@@ -95,7 +85,7 @@ export async function deleteTournament(id: string): Promise<ActionResult> {
   }
 
   await db.delete(tournaments).where(eq(tournaments.id, id));
-  revalidatePath("/old/dashboard/tournaments");
+  revalidatePath("/dashboard/tournaments");
   return { ok: true, message: "Tournament deleted" };
 }
 
@@ -111,7 +101,7 @@ const scrimSchema = z.object({
 export async function createScrim(
   input: z.infer<typeof scrimSchema>,
 ): Promise<ActionResult> {
-  const actor = await actionUser("admin", "leader");
+  const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   const parsed = scrimSchema.safeParse(input);
@@ -134,12 +124,12 @@ export async function createScrim(
     replayLink: parsed.data.replayLink || null,
   });
 
-  revalidatePath("/old/dashboard/scrims");
+  revalidatePath("/dashboard/matches");
   return { ok: true, message: "Scrim recorded" };
 }
 
 export async function deleteScrim(id: string): Promise<ActionResult> {
-  const actor = await actionUser("admin", "leader");
+  const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   const row = await db.query.scrims.findFirst({ where: eq(scrims.id, id) });
@@ -149,6 +139,6 @@ export async function deleteScrim(id: string): Promise<ActionResult> {
   }
 
   await db.delete(scrims).where(eq(scrims.id, id));
-  revalidatePath("/old/dashboard/scrims");
+  revalidatePath("/dashboard/matches");
   return { ok: true, message: "Scrim deleted" };
 }

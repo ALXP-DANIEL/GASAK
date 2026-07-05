@@ -39,7 +39,7 @@ export async function submitApplication(
     previousTeam: parsed.data.previousTeam || null,
   });
 
-  revalidatePath("/old/dashboard/recruitment");
+  revalidatePath("/dashboard/recruitment");
   return {
     ok: true,
     message: "Application received! We will contact you by email.",
@@ -92,7 +92,8 @@ export async function placeOrder(
     status: "pending",
   });
 
-  revalidatePath("/old/dashboard/orders");
+  revalidatePath("/dashboard/orders");
+  revalidatePath("/pricing");
   return { ok: true, data: { orderNo } };
 }
 
@@ -132,8 +133,8 @@ export async function createBillplzPayment(
     })
     .where(eq(orders.id, order.id));
 
-  revalidatePath(`/old/shop/order/${order.orderNo}`);
-  revalidatePath("/old/dashboard/orders");
+  revalidatePath("/dashboard/orders");
+  revalidatePath("/pricing");
   return { ok: true, data: { url: bill.url } };
 }
 
