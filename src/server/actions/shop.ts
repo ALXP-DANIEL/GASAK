@@ -15,10 +15,10 @@ import {
 import type { ActionResult } from "./public";
 
 function revalidateShop() {
-  revalidatePath("/dashboard/products");
-  revalidatePath("/dashboard/orders");
-  revalidatePath("/dashboard");
-  revalidatePath("/shop");
+  revalidatePath("/old/dashboard/products");
+  revalidatePath("/old/dashboard/orders");
+  revalidatePath("/old/dashboard");
+  revalidatePath("/old/shop");
   revalidatePath("/");
 }
 
@@ -160,7 +160,7 @@ export async function markOrderPaid(
     .where(eq(orders.id, order.id));
 
   revalidateShop();
-  revalidatePath(`/shop/order/${order.orderNo}`);
+  revalidatePath(`/old/shop/order/${order.orderNo}`);
 }
 
 export async function updateOrderStatus(
@@ -185,7 +185,7 @@ export async function updateOrderStatus(
   if (status === "paid") {
     await markOrderPaid(order, actor.id);
     revalidateShop();
-    revalidatePath(`/shop/order/${order.orderNo}`);
+    revalidatePath(`/old/shop/order/${order.orderNo}`);
     return { ok: true, message: `Order ${order.orderNo} → paid` };
   }
 
@@ -206,6 +206,6 @@ export async function updateOrderStatus(
     .where(eq(orders.id, orderId));
 
   revalidateShop();
-  revalidatePath(`/shop/order/${order.orderNo}`);
+  revalidatePath(`/old/shop/order/${order.orderNo}`);
   return { ok: true, message: `Order ${order.orderNo} → ${status}` };
 }

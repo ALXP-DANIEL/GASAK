@@ -70,8 +70,8 @@ export async function createEvent(
     createdBy: actor.id,
   });
 
-  revalidatePath("/dashboard/calendar");
-  revalidatePath("/dashboard");
+  revalidatePath("/old/dashboard/calendar");
+  revalidatePath("/old/dashboard");
   return { ok: true, message: "Event created" };
 }
 
@@ -90,7 +90,7 @@ export async function deleteEvent(eventId: string): Promise<ActionResult> {
 
   await db.delete(events).where(eq(events.id, eventId));
 
-  revalidatePath("/dashboard/calendar");
-  revalidatePath("/dashboard");
+  revalidatePath("/old/dashboard/calendar");
+  revalidatePath("/old/dashboard");
   return { ok: true, message: "Event deleted" };
 }

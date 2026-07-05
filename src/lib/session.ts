@@ -18,12 +18,12 @@ export function userRole(user: { role?: string | null }): Role {
 
 export async function requireUser(): Promise<SessionUser> {
   const session = await getSession();
-  if (!session) redirect("/login");
+  if (!session) redirect("/old/login");
   return session.user;
 }
 
 export async function requireRole(...roles: Role[]): Promise<SessionUser> {
   const user = await requireUser();
-  if (!roles.includes(userRole(user))) redirect("/dashboard");
+  if (!roles.includes(userRole(user))) redirect("/old/dashboard");
   return user;
 }

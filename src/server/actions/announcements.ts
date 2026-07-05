@@ -42,8 +42,8 @@ export async function createAnnouncement(
     authorId: actor.id,
   });
 
-  revalidatePath("/dashboard/announcements");
-  revalidatePath("/dashboard");
+  revalidatePath("/old/dashboard/announcements");
+  revalidatePath("/old/dashboard");
   revalidatePath("/");
   return { ok: true, message: "Announcement posted" };
 }
@@ -63,8 +63,8 @@ export async function deleteAnnouncement(id: string): Promise<ActionResult> {
 
   await db.delete(announcements).where(eq(announcements.id, id));
 
-  revalidatePath("/dashboard/announcements");
-  revalidatePath("/dashboard");
+  revalidatePath("/old/dashboard/announcements");
+  revalidatePath("/old/dashboard");
   revalidatePath("/");
   return { ok: true, message: "Announcement deleted" };
 }

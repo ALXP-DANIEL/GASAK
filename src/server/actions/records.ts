@@ -78,7 +78,7 @@ export async function createTournament(
     squadId: parsed.data.squadId,
   });
 
-  revalidatePath("/dashboard/tournaments");
+  revalidatePath("/old/dashboard/tournaments");
   return { ok: true, message: "Tournament recorded" };
 }
 
@@ -95,7 +95,7 @@ export async function deleteTournament(id: string): Promise<ActionResult> {
   }
 
   await db.delete(tournaments).where(eq(tournaments.id, id));
-  revalidatePath("/dashboard/tournaments");
+  revalidatePath("/old/dashboard/tournaments");
   return { ok: true, message: "Tournament deleted" };
 }
 
@@ -134,7 +134,7 @@ export async function createScrim(
     replayLink: parsed.data.replayLink || null,
   });
 
-  revalidatePath("/dashboard/scrims");
+  revalidatePath("/old/dashboard/scrims");
   return { ok: true, message: "Scrim recorded" };
 }
 
@@ -149,6 +149,6 @@ export async function deleteScrim(id: string): Promise<ActionResult> {
   }
 
   await db.delete(scrims).where(eq(scrims.id, id));
-  revalidatePath("/dashboard/scrims");
+  revalidatePath("/old/dashboard/scrims");
   return { ok: true, message: "Scrim deleted" };
 }
