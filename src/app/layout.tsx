@@ -3,7 +3,6 @@ import { Inter, JetBrains_Mono, Oswald } from "next/font/google";
 import { ViewTransition } from "react";
 import "@/styles/globals.css";
 import SplashGate from "@/components/layouts/splash-gate";
-import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/shadcn/sonner";
 import { siteConfig } from "@/config/site";
 import { env } from "@/env";
@@ -77,23 +76,21 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       className={cn(
-        "h-full antialiased font-sans",
+        "dark h-full antialiased font-sans",
         inter.variable,
         jetbrainsMono.variable,
         oswald.variable,
       )}
     >
       <body className="min-h-full font-sans">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          {isMaintenance ? (
-            <Maintenance />
-          ) : (
-            <SplashGate>
-              <ViewTransition default="page-fade">{children}</ViewTransition>
-            </SplashGate>
-          )}
-          <Toaster richColors position="top-center" />
-        </ThemeProvider>
+        {isMaintenance ? (
+          <Maintenance />
+        ) : (
+          <SplashGate>
+            <ViewTransition default="page-fade">{children}</ViewTransition>
+          </SplashGate>
+        )}
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );

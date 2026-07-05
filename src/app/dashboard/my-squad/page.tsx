@@ -1,15 +1,13 @@
 import { inArray } from "drizzle-orm";
 import Image from "next/image";
-import { EmptyState, PageHeader } from "@/components/dashboard/widgets";
-import { SquadAccent } from "@/components/squad-accent";
-import { Badge } from "@/components/ui/shadcn/badge";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/shadcn/card";
+  DashboardListItem,
+  DashboardPanel,
+  EmptyState,
+  PageHeader,
+} from "@/components/dashboard/widgets";
+import { SquadAccent } from "@/components/squad-accent";
+import { BrandBadge } from "@/components/ui/brand";
 import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@/lib/labels";
 import { requireRole, userRole } from "@/lib/session";
 import { getLedSquadIds, getMemberSquadIds } from "@/server/authz";
@@ -55,47 +53,45 @@ export default async function MySquadPage() {
       <div className="grid gap-6">
         {mySquads.map((squad) => (
           <SquadAccent key={squad.id} color={squad.accentColor}>
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  {squad.logoUrl && (
-                    <Image
-                      src={squad.logoUrl}
-                      alt={`${squad.name} logo`}
-                      width={44}
-                      height={44}
-                      className="rounded-full border object-cover"
-                      unoptimized
-                    />
-                  )}
-                  <div>
-                    <CardTitle>{squad.name}</CardTitle>
-                    <CardDescription>{squad.description}</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
+            <DashboardPanel
+              title={squad.name}
+              description={squad.description}
+              action={
+                squad.logoUrl && (
+                  <Image
+                    src={squad.logoUrl}
+                    alt={`${squad.name} logo`}
+                    width={44}
+                    height={44}
+                    className="rounded-full border object-cover"
+                    unoptimized
+                  />
+                )
+              }
+            >
+              <div>
+                <div className="flex items-center gap-3"></div>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                   {[...squad.members]
                     .sort(
                       (a, b) => roleOrder[a.squadRole] - roleOrder[b.squadRole],
                     )
                     .map((member) => (
-                      <div key={member.id} className="rounded-lg border p-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="truncate text-sm font-semibold">
-                            {member.user.profile?.ign ?? member.user.name}
-                          </p>
-                          <Badge
-                            variant={
+                      <DashboardListItem
+                        key={member.id}
+                        title={member.user.profile?.ign ?? member.user.name}
+                        badge={
+                          <BrandBadge
+                            className={
                               member.squadRole === "leader"
-                                ? "default"
-                                : "secondary"
+                                ? "bg-primary text-primary-foreground"
+                                : ""
                             }
                           >
                             {SQUAD_ROLE_LABELS[member.squadRole]}
-                          </Badge>
-                        </div>
+                          </BrandBadge>
+                        }
+                      >
                         <div className="mt-1 grid gap-0.5 text-xs text-muted-foreground">
                           <p>{member.user.name}</p>
                           {member.user.profile?.preferredLane && (
@@ -121,20 +117,20 @@ export default async function MySquadPage() {
                             </>
                           )}
                         </div>
-                      </div>
+                      </DashboardListItem>
                     ))}
                 </div>
 
                 {ledSquadIds.includes(squad.id) && (
-                  <div className="mt-6 rounded-lg border p-4">
+                  <div className="mt-6 rounded-lg border border-primary/20 bg-background/35 p-4">
                     <p className="mb-4 text-sm font-semibold">
                       Edit squad details
                     </p>
                     <SquadEditForm squad={squad} />
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </DashboardPanel>
           </SquadAccent>
         ))}
       </div>

@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import { ProfileForm } from "@/components/dashboard/profile-form";
-import { PageHeader } from "@/components/dashboard/widgets";
-import { Card, CardContent } from "@/components/ui/shadcn/card";
+import { DashboardPanel, PageHeader } from "@/components/dashboard/widgets";
 import { requireUser } from "@/lib/session";
 import { db, playerProfiles, user } from "@/server/db";
 
@@ -23,16 +22,14 @@ export default async function ProfilePage() {
         title="My Profile"
         description="Your player identity — shown on the public site and to your squad."
       />
-      <Card className="max-w-3xl">
-        <CardContent className="pt-6">
-          <ProfileForm
-            targetUserId={sessionUser.id}
-            displayName={account?.name ?? sessionUser.name}
-            avatarUrl={account?.image ?? null}
-            profile={profile ?? null}
-          />
-        </CardContent>
-      </Card>
+      <DashboardPanel title="Profile details" className="max-w-3xl">
+        <ProfileForm
+          targetUserId={sessionUser.id}
+          displayName={account?.name ?? sessionUser.name}
+          avatarUrl={account?.image ?? null}
+          profile={profile ?? null}
+        />
+      </DashboardPanel>
     </div>
   );
 }

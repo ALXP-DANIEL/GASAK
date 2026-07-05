@@ -4,15 +4,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/shadcn/badge";
+import { DashboardPanel } from "@/components/dashboard/widgets";
+import { BrandBadge } from "@/components/ui/brand";
 import { Button } from "@/components/ui/shadcn/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/shadcn/card";
 import {
   Dialog,
   DialogContent,
@@ -24,18 +18,6 @@ import { formatDateTime, formatRM } from "@/lib/format";
 import { ORDER_STATUS_LABELS, PAYMENT_METHOD_LABELS } from "@/lib/labels";
 import { updateOrderStatus } from "@/server/actions/shop";
 import type { Order, OrderStatus, Product } from "@/server/db/schema";
-
-const STATUS_VARIANTS: Record<
-  OrderStatus,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
-  pending: "outline",
-  waiting_payment: "secondary",
-  paid: "default",
-  processing: "default",
-  completed: "default",
-  cancelled: "destructive",
-};
 
 const NEXT_ACTIONS: Partial<
   Record<OrderStatus, { status: OrderStatus; label: string }[]>
@@ -67,19 +49,24 @@ export function OrderCard({ order }: { order: Order & { product: Product } }) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <CardTitle className="text-base">{order.orderNo}</CardTitle>
-            <CardDescription>{formatDateTime(order.createdAt)}</CardDescription>
-          </div>
-          <Badge variant={STATUS_VARIANTS[order.status]}>
-            {ORDER_STATUS_LABELS[order.status]}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="grid gap-3 text-sm">
+    <DashboardPanel
+      title={order.orderNo}
+      description={formatDateTime(order.createdAt)}
+      action={
+        <BrandBadge
+          className={
+            order.status === "cancelled"
+              ? "border-destructive/50 bg-destructive/10 text-destructive"
+              : order.status === "completed"
+                ? "bg-primary text-primary-foreground"
+                : ""
+          }
+        >
+          {ORDER_STATUS_LABELS[order.status]}
+        </BrandBadge>
+      }
+    >
+      <div className="grid gap-3 text-sm">
         <div className="grid gap-1">
           <p className="font-medium">
             {order.product.name} × {order.quantity} — {formatRM(order.totalSen)}
@@ -141,7 +128,7 @@ export function OrderCard({ order }: { order: Order & { product: Product } }) {
             </Button>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </DashboardPanel>
   );
 }

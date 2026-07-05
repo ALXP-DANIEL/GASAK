@@ -3,15 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/shadcn/badge";
+import { DashboardPanel } from "@/components/dashboard/widgets";
+import { BrandBadge } from "@/components/ui/brand";
 import { Button } from "@/components/ui/shadcn/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/shadcn/card";
 import {
   Dialog,
   DialogContent,
@@ -47,17 +41,6 @@ import {
   type SquadRole,
   squadRoleEnum,
 } from "@/server/db/schema";
-
-const STATUS_VARIANTS: Record<
-  ApplicationStatus,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
-  applied: "outline",
-  under_review: "secondary",
-  trial: "default",
-  accepted: "default",
-  rejected: "destructive",
-};
 
 export function ApplicationCard({
   application,
@@ -137,25 +120,37 @@ export function ApplicationCard({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between gap-2">
-          <CardTitle className="text-base">
-            {application.ign}{" "}
-            <span className="font-normal text-muted-foreground">
-              · {application.fullName}
-            </span>
-          </CardTitle>
-          <Badge variant={STATUS_VARIANTS[application.status]}>
-            {APPLICATION_STATUS_LABELS[application.status]}
-          </Badge>
-        </div>
-        <CardDescription>
+    <DashboardPanel
+      title={
+        <>
+          {application.ign}{" "}
+          <span className="font-normal text-muted-foreground">
+            · {application.fullName}
+          </span>
+        </>
+      }
+      description={
+        <>
           {LANE_LABELS[application.preferredLane]} · {application.currentRank} ·
           Applied {formatDateTime(application.createdAt)}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-3">
+        </>
+      }
+      action={
+        <BrandBadge
+          className={
+            application.status === "rejected"
+              ? "border-destructive/50 bg-destructive/10 text-destructive"
+              : application.status === "accepted" ||
+                  application.status === "trial"
+                ? "bg-primary text-primary-foreground"
+                : ""
+          }
+        >
+          {APPLICATION_STATUS_LABELS[application.status]}
+        </BrandBadge>
+      }
+    >
+      <div className="grid gap-3">
         <p className="text-sm text-muted-foreground">
           Assigned to:{" "}
           <span className="font-medium text-foreground">
@@ -235,7 +230,7 @@ export function ApplicationCard({
         </div>
 
         {isAdmin && !decided && (
-          <div className="grid gap-2 rounded-lg border p-3 sm:grid-cols-[1fr_auto]">
+          <div className="grid gap-2 rounded-lg border border-primary/20 bg-background/35 p-3 sm:grid-cols-[1fr_auto]">
             <Select value={leaderId} onValueChange={setLeaderId}>
               <SelectTrigger>
                 <SelectValue placeholder="Assign to leader…" />
@@ -280,7 +275,7 @@ export function ApplicationCard({
         )}
 
         {isAdmin && application.status === "accepted" && (
-          <div className="grid gap-2 rounded-lg border p-3">
+          <div className="grid gap-2 rounded-lg border border-primary/20 bg-background/35 p-3">
             <p className="text-sm font-semibold">
               Onboard — create account & squad slot
             </p>
@@ -322,7 +317,7 @@ export function ApplicationCard({
             </div>
           </div>
         )}
-      </CardContent>
+      </div>
 
       <Dialog
         open={credentials !== null}
@@ -337,7 +332,7 @@ export function ApplicationCard({
             </DialogDescription>
           </DialogHeader>
           {credentials && (
-            <div className="grid gap-2 rounded-lg border bg-muted/40 p-4 font-mono text-sm">
+            <div className="grid gap-2 rounded-lg border border-primary/20 bg-background/35 p-4 font-mono text-sm">
               <p>
                 <span className="text-muted-foreground">Email: </span>
                 {credentials.email}
@@ -350,7 +345,7 @@ export function ApplicationCard({
           )}
         </DialogContent>
       </Dialog>
-    </Card>
+    </DashboardPanel>
   );
 }
 

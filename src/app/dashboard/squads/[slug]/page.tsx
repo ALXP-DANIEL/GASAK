@@ -1,16 +1,9 @@
 import { eq, notInArray } from "drizzle-orm";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { PageHeader } from "@/components/dashboard/widgets";
+import { DashboardPanel, PageHeader } from "@/components/dashboard/widgets";
 import { SquadAccent } from "@/components/squad-accent";
-import { Badge } from "@/components/ui/shadcn/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/shadcn/card";
+import { BrandBadge } from "@/components/ui/brand";
 import { requireRole } from "@/lib/session";
 import { db, squads, user } from "@/server/db";
 import { SquadEditForm } from "../squad-form";
@@ -19,14 +12,16 @@ import { MembersManager } from "./members-manager";
 
 export const dynamic = "force-dynamic";
 
-export default async function SquadManagePage(
-  props: PageProps<"/dashboard/squads/[id]">,
-) {
+export default async function SquadManagePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   await requireRole("admin");
-  const { id } = await props.params;
+  const { slug } = await params;
 
   const squad = await db.query.squads.findFirst({
-    where: eq(squads.id, id),
+    where: eq(squads.slug, slug),
     with: {
       members: { with: { user: { with: { profile: true } } } },
     },
@@ -55,20 +50,17 @@ export default async function SquadManagePage(
       </PageHeader>
 
       {squad.archived && (
-        <Badge variant="destructive" className="mb-4">
+        <BrandBadge className="mb-4 border-destructive/50 bg-destructive/10 text-destructive">
           This squad is archived and hidden from the public site.
-        </Badge>
+        </BrandBadge>
       )}
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Squad details</CardTitle>
-            <CardDescription>
-              Name, description, logo and banner.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
+        <DashboardPanel
+          title="Squad details"
+          description="Name, description, logo and banner."
+        >
+          <div className="grid gap-4">
             {(squad.logoUrl || squad.bannerUrl) && (
               <div className="flex items-center gap-4">
                 {squad.logoUrl && (
@@ -95,8 +87,8 @@ export default async function SquadManagePage(
               </div>
             )}
             <SquadEditForm squad={squad} />
-          </CardContent>
-        </Card>
+          </div>
+        </DashboardPanel>
 
         <MembersManager
           squadId={squad.id}

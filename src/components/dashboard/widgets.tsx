@@ -7,7 +7,7 @@ export function PageHeader({
   description,
   children,
 }: {
-  title: string;
+  title: React.ReactNode;
   description?: string;
   children?: React.ReactNode;
 }) {
@@ -77,7 +77,7 @@ export function DashboardPanel({
   children,
   className,
 }: {
-  title: string;
+  title: React.ReactNode;
   description?: React.ReactNode;
   action?: React.ReactNode;
   children: React.ReactNode;

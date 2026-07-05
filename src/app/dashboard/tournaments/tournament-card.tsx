@@ -4,16 +4,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
+import { DashboardPanel } from "@/components/dashboard/widgets";
 import { Icons } from "@/components/icons";
-import { Badge } from "@/components/ui/shadcn/badge";
+import { BrandBadge } from "@/components/ui/brand";
 import { Button } from "@/components/ui/shadcn/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/shadcn/card";
 import { formatDateTime } from "@/lib/format";
 import { deleteTournament } from "@/server/actions/records";
 import type { Tournament } from "@/server/db/schema";
@@ -43,37 +37,29 @@ export function TournamentCard({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <CardTitle className="text-base">{tournament.name}</CardTitle>
-            <CardDescription>
-              {formatDateTime(tournament.date)}
-              {tournament.organizer ? ` · ${tournament.organizer}` : ""}
-            </CardDescription>
-          </div>
-          {canManage && (
-            <Button
-              variant="ghost"
-              size="icon"
-              disabled={pending}
-              onClick={onDelete}
-            >
-              <Icons.Actions.Delete size={16} className="text-destructive" />
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="grid gap-3">
+    <DashboardPanel
+      title={tournament.name}
+      description={`${formatDateTime(tournament.date)}${
+        tournament.organizer ? ` · ${tournament.organizer}` : ""
+      }`}
+      action={
+        canManage && (
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={pending}
+            onClick={onDelete}
+          >
+            <Icons.Actions.Delete size={16} className="text-destructive" />
+          </Button>
+        )
+      }
+    >
+      <div className="grid gap-3">
         <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary">{squadName}</Badge>
-          {tournament.result && (
-            <Badge variant="outline">{tournament.result}</Badge>
-          )}
-          {tournament.prize && (
-            <Badge variant="outline">🏆 {tournament.prize}</Badge>
-          )}
+          <BrandBadge>{squadName}</BrandBadge>
+          {tournament.result && <BrandBadge>{tournament.result}</BrandBadge>}
+          {tournament.prize && <BrandBadge>{tournament.prize}</BrandBadge>}
         </div>
         <div className="grid gap-1 text-sm text-muted-foreground">
           {tournament.opponent && <p>Opponent: {tournament.opponent}</p>}
@@ -90,7 +76,7 @@ export function TournamentCard({
             />
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </DashboardPanel>
   );
 }

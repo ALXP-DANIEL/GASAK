@@ -1,15 +1,12 @@
 import { count, eq } from "drizzle-orm";
 import Link from "next/link";
-import { EmptyState, PageHeader } from "@/components/dashboard/widgets";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { Button } from "@/components/ui/shadcn/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/shadcn/card";
+  DashboardPanel,
+  EmptyState,
+  PageHeader,
+} from "@/components/dashboard/widgets";
+import { BrandBadge } from "@/components/ui/brand";
+import { Button } from "@/components/ui/shadcn/button";
 import {
   Tabs,
   TabsContent,
@@ -44,28 +41,30 @@ export default async function SquadsPage() {
     ) : (
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {list.map(({ squad, memberCount }) => (
-          <Card key={squad.id}>
-            <CardHeader>
-              <div className="flex items-center justify-between gap-2">
-                <CardTitle className="text-base">{squad.name}</CardTitle>
-                {squad.archived ? (
-                  <Badge variant="destructive">Archived</Badge>
-                ) : (
-                  <Badge variant="secondary">
-                    {memberCount} member{memberCount === 1 ? "" : "s"}
-                  </Badge>
-                )}
-              </div>
-              <CardDescription className="line-clamp-2">
+          <DashboardPanel
+            key={squad.id}
+            title={squad.name}
+            description={
+              <p className="line-clamp-2">
                 {squad.description || "No description"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild variant="outline" size="sm">
-                <Link href={`/dashboard/squads/${squad.id}`}>Manage</Link>
-              </Button>
-            </CardContent>
-          </Card>
+              </p>
+            }
+            action={
+              squad.archived ? (
+                <BrandBadge className="border-destructive/50 bg-destructive/10 text-destructive">
+                  Archived
+                </BrandBadge>
+              ) : (
+                <BrandBadge>
+                  {memberCount} member{memberCount === 1 ? "" : "s"}
+                </BrandBadge>
+              )
+            }
+          >
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/dashboard/squads/${squad.slug}`}>Manage</Link>
+            </Button>
+          </DashboardPanel>
         ))}
       </div>
     );
