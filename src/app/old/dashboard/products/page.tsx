@@ -1,6 +1,6 @@
 import { desc } from "drizzle-orm";
 import Image from "next/image";
-import { EmptyState, PageHeader } from "@/components/dashboard/widgets";
+import { EmptyState, PageHeader } from "@/components/old/dashboard/widgets";
 import { Badge } from "@/components/ui/shadcn/badge";
 import {
   Table,

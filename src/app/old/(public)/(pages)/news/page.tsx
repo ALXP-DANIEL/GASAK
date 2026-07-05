@@ -1,5 +1,5 @@
 import { desc, isNull } from "drizzle-orm";
-import { NewsCard } from "@/components/public/content-cards";
+import { NewsCard } from "@/components/old/public/content-cards";
 import { PageHero } from "@/components/ui/brand";
 import { createPageMetadata } from "@/lib/metadata";
 import { announcements, db } from "@/server/db";

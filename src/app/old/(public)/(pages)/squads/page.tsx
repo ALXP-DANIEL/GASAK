@@ -1,5 +1,5 @@
 import { count, eq } from "drizzle-orm";
-import { SquadCard } from "@/components/public/content-cards";
+import { SquadCard } from "@/components/old/public/content-cards";
 import { BrandBadge, LinkButton, PageHero } from "@/components/ui/brand";
 import { createPageMetadata } from "@/lib/metadata";
 import { db, squadMembers, squads } from "@/server/db";

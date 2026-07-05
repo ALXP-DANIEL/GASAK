@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
@@ -16,6 +18,7 @@ type StatusPageProps = {
   description: string;
   actions?: StatusPageAction[];
   className?: string;
+  onAction?: (href: string) => void;
 };
 
 const actionClassNames: Record<
@@ -35,6 +38,7 @@ export default function StatusPage({
   description,
   actions = [],
   className,
+  onAction,
 }: StatusPageProps) {
   return (
     <div
@@ -60,18 +64,31 @@ export default function StatusPage({
 
           {actions.length > 0 ? (
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              {actions.map(({ href, label, variant = "primary" }) => (
-                <Button
-                  key={`${href}-${label}`}
-                  asChild
-                  className={cn(
-                    "glass rounded-full px-4",
-                    actionClassNames[variant],
-                  )}
-                >
-                  <Link href={href}>{label}</Link>
-                </Button>
-              ))}
+              {actions.map(({ href, label, variant = "primary" }) => {
+                const className = cn(
+                  "glass rounded-full px-4",
+                  actionClassNames[variant],
+                );
+
+                return onAction && href.startsWith("#") ? (
+                  <Button
+                    key={`${href}-${label}`}
+                    type="button"
+                    className={className}
+                    onClick={() => onAction(href)}
+                  >
+                    {label}
+                  </Button>
+                ) : (
+                  <Button
+                    key={`${href}-${label}`}
+                    asChild
+                    className={className}
+                  >
+                    <Link href={href}>{label}</Link>
+                  </Button>
+                );
+              })}
             </div>
           ) : null}
         </div>

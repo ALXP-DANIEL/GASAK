@@ -1,5 +1,5 @@
 import { desc, eq } from "drizzle-orm";
-import { EmptyState, PageHeader } from "@/components/dashboard/widgets";
+import { EmptyState, PageHeader } from "@/components/old/dashboard/widgets";
 import { requireRole, userRole } from "@/lib/session";
 import { applications, db, squads, user } from "@/server/db";
 import { ApplicationCard } from "./application-card";

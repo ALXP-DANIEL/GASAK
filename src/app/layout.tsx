@@ -2,8 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Oswald } from "next/font/google";
 import { ViewTransition } from "react";
 import "@/styles/globals.css";
-import SplashGate from "@/components/layouts/splash-gate";
+import SplashGate from "@/components/layout/splash-gate";
 import { Toaster } from "@/components/ui/shadcn/sonner";
+import { TooltipProvider } from "@/components/ui/shadcn/tooltip";
 import { siteConfig } from "@/config/site";
 import { env } from "@/env";
 import { cn } from "@/lib/utils";
@@ -87,7 +88,9 @@ export default function RootLayout({
           <Maintenance />
         ) : (
           <SplashGate>
-            <ViewTransition default="page-fade">{children}</ViewTransition>
+            <ViewTransition default="page-fade">
+              <TooltipProvider>{children}</TooltipProvider>
+            </ViewTransition>
           </SplashGate>
         )}
         <Toaster richColors position="top-center" />

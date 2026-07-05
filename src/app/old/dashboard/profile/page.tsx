@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import { ProfileForm } from "@/components/dashboard/profile-form";
-import { DashboardPanel, PageHeader } from "@/components/dashboard/widgets";
+import { ProfileForm } from "@/components/old/dashboard/profile-form";
+import { DashboardPanel, PageHeader } from "@/components/old/dashboard/widgets";
 import { requireUser } from "@/lib/session";
 import { db, playerProfiles, user } from "@/server/db";
 

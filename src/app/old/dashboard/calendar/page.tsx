@@ -1,5 +1,5 @@
 import { eq, inArray } from "drizzle-orm";
-import { PageHeader } from "@/components/dashboard/widgets";
+import { PageHeader } from "@/components/old/dashboard/widgets";
 import { requireRole, userRole } from "@/lib/session";
 import { getLedSquadIds } from "@/server/authz";
 import { db, squads } from "@/server/db";

@@ -1,5 +1,5 @@
 import { desc, eq, inArray, isNull, or } from "drizzle-orm";
-import { EmptyState, PageHeader } from "@/components/dashboard/widgets";
+import { EmptyState, PageHeader } from "@/components/old/dashboard/widgets";
 import { requireRole, userRole } from "@/lib/session";
 import {
   getUnreadAnnouncementIds,

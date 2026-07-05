@@ -7,7 +7,7 @@ import {
   DashboardPanel,
   EmptyState,
   StatCard,
-} from "@/components/dashboard/widgets";
+} from "@/components/old/dashboard/widgets";
 import { Icons } from "@/components/icons";
 import { BrandBadge } from "@/components/ui/brand";
 import { Button } from "@/components/ui/shadcn/button";

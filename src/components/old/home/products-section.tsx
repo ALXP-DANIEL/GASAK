@@ -1,4 +1,4 @@
-import { ProductCard } from "@/components/public/content-cards";
+import { ProductCard } from "@/components/old/public/content-cards";
 import { LinkButton, SectionHeader } from "@/components/ui/brand";
 import type { Product } from "@/server/db/schema";
 

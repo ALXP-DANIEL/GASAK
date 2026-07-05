@@ -4,7 +4,7 @@ import type { CSSProperties, ReactNode } from "react";
  * Overrides the theme accent within its subtree using a squad's custom
  * accent color (hex). Renders children unchanged when no color is set.
  */
-export function SquadAccent({
+export function Accent({
   color,
   children,
 }: {
@@ -30,6 +30,8 @@ export function SquadAccent({
     </div>
   );
 }
+
+export { Accent as SquadAccent };
 
 function contrastForeground(hex: string): string {
   const r = parseInt(hex.slice(1, 3), 16) / 255;

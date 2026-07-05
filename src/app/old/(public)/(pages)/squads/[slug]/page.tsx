@@ -1,7 +1,7 @@
 import { desc, eq } from "drizzle-orm";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { SquadAccent } from "@/components/squad-accent";
+import { SquadAccent } from "@/components/accent";
 import { BrandBadge, BrandCard, SectionHeader } from "@/components/ui/brand";
 import { formatDate } from "@/lib/format";
 import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@/lib/labels";

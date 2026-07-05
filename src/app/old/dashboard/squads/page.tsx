@@ -4,7 +4,7 @@ import {
   DashboardPanel,
   EmptyState,
   PageHeader,
-} from "@/components/dashboard/widgets";
+} from "@/components/old/dashboard/widgets";
 import { BrandBadge } from "@/components/ui/brand";
 import { Button } from "@/components/ui/shadcn/button";
 import {

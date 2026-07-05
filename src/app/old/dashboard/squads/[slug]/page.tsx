@@ -1,8 +1,8 @@
 import { eq, notInArray } from "drizzle-orm";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { DashboardPanel, PageHeader } from "@/components/dashboard/widgets";
-import { SquadAccent } from "@/components/squad-accent";
+import { DashboardPanel, PageHeader } from "@/components/old/dashboard/widgets";
+import { SquadAccent } from "@/components/accent";
 import { BrandBadge } from "@/components/ui/brand";
 import { requireRole } from "@/lib/session";
 import { db, squads, user } from "@/server/db";

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { ProfileForm } from "@/components/dashboard/profile-form";
-import { DashboardPanel, PageHeader } from "@/components/dashboard/widgets";
+import { ProfileForm } from "@/components/old/dashboard/profile-form";
+import { DashboardPanel, PageHeader } from "@/components/old/dashboard/widgets";
 import { requireRole } from "@/lib/session";
 import { db, user } from "@/server/db";
 

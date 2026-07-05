@@ -1,5 +1,5 @@
 import { and, eq, gt } from "drizzle-orm";
-import { ProductCard } from "@/components/public/content-cards";
+import { ProductCard } from "@/components/old/public/content-cards";
 import { PageHero, SectionHeader } from "@/components/ui/brand";
 import { PRODUCT_CATEGORY_LABELS } from "@/lib/labels";
 import { createPageMetadata } from "@/lib/metadata";

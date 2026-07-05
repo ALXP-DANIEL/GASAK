@@ -1,5 +1,5 @@
 import { desc } from "drizzle-orm";
-import { EmptyState, PageHeader } from "@/components/dashboard/widgets";
+import { EmptyState, PageHeader } from "@/components/old/dashboard/widgets";
 import { Input } from "@/components/ui/shadcn/input";
 import {
   Tabs,

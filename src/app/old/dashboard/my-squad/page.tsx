@@ -5,8 +5,8 @@ import {
   DashboardPanel,
   EmptyState,
   PageHeader,
-} from "@/components/dashboard/widgets";
-import { SquadAccent } from "@/components/squad-accent";
+} from "@/components/old/dashboard/widgets";
+import { SquadAccent } from "@/components/accent";
 import { BrandBadge } from "@/components/ui/brand";
 import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@/lib/labels";
 import { requireRole, userRole } from "@/lib/session";

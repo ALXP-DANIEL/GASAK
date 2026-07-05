@@ -1,4 +1,4 @@
-import { SquadCard } from "@/components/public/content-cards";
+import { SquadCard } from "@/components/old/public/content-cards";
 import { LinkButton, SectionHeader } from "@/components/ui/brand";
 import type { Squad } from "@/server/db/schema";
 

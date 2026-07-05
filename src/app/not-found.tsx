@@ -1,4 +1,4 @@
-import StatusPage from "@/components/layouts/status-page";
+import StatusPage from "@/components/layout/status-page";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({

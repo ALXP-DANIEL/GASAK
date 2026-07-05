@@ -3,7 +3,7 @@ import {
   DashboardListItem,
   DashboardPanel,
   EmptyState,
-} from "@/components/dashboard/widgets";
+} from "@/components/old/dashboard/widgets";
 import { BrandBadge } from "@/components/ui/brand";
 import { formatDateTime } from "@/lib/format";
 import { EVENT_TYPE_LABELS } from "@/lib/labels";

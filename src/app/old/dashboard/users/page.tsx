@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/dashboard/widgets";
+import { PageHeader } from "@/components/old/dashboard/widgets";
 import { requireRole } from "@/lib/session";
 import { db } from "@/server/db";
 import { CreateUserDialog, UsersTable } from "./users-table";

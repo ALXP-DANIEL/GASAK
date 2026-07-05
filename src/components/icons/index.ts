@@ -13,6 +13,7 @@ import { ClipboardTextIcon } from "@phosphor-icons/react/dist/ssr/ClipboardText"
 import { CrosshairIcon } from "@phosphor-icons/react/dist/ssr/Crosshair";
 import { CurrencyCircleDollarIcon } from "@phosphor-icons/react/dist/ssr/CurrencyCircleDollar";
 import { EnvelopeSimpleIcon } from "@phosphor-icons/react/dist/ssr/EnvelopeSimple";
+import { EyedropperIcon } from "@phosphor-icons/react/dist/ssr/Eyedropper";
 import { FacebookLogoIcon } from "@phosphor-icons/react/dist/ssr/FacebookLogo";
 import { GameControllerIcon } from "@phosphor-icons/react/dist/ssr/GameController";
 import { HandFistIcon } from "@phosphor-icons/react/dist/ssr/HandFist";
@@ -107,6 +108,7 @@ export const Icons = {
   Actions: {
     Add: PlusIcon,
     Delete: TrashIcon,
+    Eyedropper: EyedropperIcon,
     SignOut: SignOutIcon,
   },
 } as const;

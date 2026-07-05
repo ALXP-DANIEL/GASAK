@@ -13,7 +13,10 @@
       "!.next",
       "!dist",
       "!build",
-      "!public/*.svg"
+      "!public/*.svg",
+      "!src/components/ui/shadcn",
+      "!src/app/old",
+      "!src/components/old"
     ]
   },
   "formatter": {
@@ -35,7 +38,8 @@
     "rules": {
       "preset": "recommended",
       "suspicious": {
-        "noUnknownAtRules": "off"
+        "noUnknownAtRules": "off",
+        "useBiomeIgnoreFolder": "error"
       }
     },
     "domains": {

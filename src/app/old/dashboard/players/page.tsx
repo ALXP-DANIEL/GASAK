@@ -1,6 +1,6 @@
 import { inArray } from "drizzle-orm";
 import Link from "next/link";
-import { EmptyState, PageHeader } from "@/components/dashboard/widgets";
+import { EmptyState, PageHeader } from "@/components/old/dashboard/widgets";
 import { Badge } from "@/components/ui/shadcn/badge";
 import { Button } from "@/components/ui/shadcn/button";
 import {

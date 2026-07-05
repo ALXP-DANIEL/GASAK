@@ -1,11 +1,11 @@
 import { count, desc, eq, isNull } from "drizzle-orm";
-import { AboutSection } from "@/components/home/about-section";
-import { CtaBanner } from "@/components/home/cta-banner";
-import { Hero } from "@/components/home/hero";
-import { NewsSection } from "@/components/home/news-section";
-import { ProductsSection } from "@/components/home/products-section";
-import { SquadsSection } from "@/components/home/squads-section";
-import { StatsBar } from "@/components/home/stats-bar";
+import { AboutSection } from "@/components/old/home/about-section";
+import { CtaBanner } from "@/components/old/home/cta-banner";
+import { Hero } from "@/components/old/home/hero";
+import { NewsSection } from "@/components/old/home/news-section";
+import { ProductsSection } from "@/components/old/home/products-section";
+import { SquadsSection } from "@/components/old/home/squads-section";
+import { StatsBar } from "@/components/old/home/stats-bar";
 import { createPageMetadata } from "@/lib/metadata";
 import {
   announcements,

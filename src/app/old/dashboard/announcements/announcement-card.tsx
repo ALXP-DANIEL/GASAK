@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { DashboardPanel } from "@/components/dashboard/widgets";
+import { DashboardPanel } from "@/components/old/dashboard/widgets";
 import { Icons } from "@/components/icons";
 import { BrandBadge } from "@/components/ui/brand";
 import { Button } from "@/components/ui/shadcn/button";

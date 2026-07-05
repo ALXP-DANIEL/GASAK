@@ -1,4 +1,4 @@
-import { NewsCard } from "@/components/public/content-cards";
+import { NewsCard } from "@/components/old/public/content-cards";
 import { LinkButton, SectionHeader } from "@/components/ui/brand";
 import type { Announcement } from "@/server/db/schema";
 

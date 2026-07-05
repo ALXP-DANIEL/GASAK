@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Icons } from "@/components/icons";
-import { ScrollTopButton } from "@/components/layouts/scroll-top-button";
+import { ScrollTopButton } from "@/components/ui/scroll-top-button";
 import { siteConfig } from "@/config/site";
 
 const QUICK_LINKS = [

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   DashboardListItem,
   DashboardPanel,
-} from "@/components/dashboard/widgets";
+} from "@/components/old/dashboard/widgets";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/shadcn/button";
 import { Label } from "@/components/ui/shadcn/label";
