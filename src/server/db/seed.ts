@@ -1,11 +1,11 @@
 import { and, eq } from "drizzle-orm";
 import { auth } from "../auth";
 import {
-  announcements,
   applications,
   authSlides,
   db,
   events,
+  news,
   type OrgRole,
   orders,
   playerProfiles,
@@ -434,7 +434,7 @@ async function main() {
     })),
   ]);
 
-  await db.insert(announcements).values([
+  await db.insert(news).values([
     {
       title: "Welcome to the GASAK Management System",
       content:
@@ -461,7 +461,7 @@ async function main() {
       ["Monthly townhall reminder", null],
     ].map(([title, squadId]) => ({
       title: title as string,
-      content: `${title} — seeded announcement content for app testing.`,
+      content: `${title} — seeded news content for app testing.`,
       squadId: squadId as string | null,
       authorId: admin.id,
     })),

@@ -325,15 +325,15 @@ export const scrims = createTable(
   (t) => [index("gasak_scrims_squad_idx").on(t.squadId)],
 );
 
-export const announcements = createTable(
-  "announcements",
+export const news = createTable(
+  "news",
   {
     id: uuid("id")
       .primaryKey()
       .$defaultFn(() => generateId()),
     title: text("title").notNull(),
     content: text("content").notNull(),
-    // null squadId means a global announcement
+    // null squadId means global news
     squadId: uuid("squad_id").references(() => squads.id, {
       onDelete: "cascade",
     }),
@@ -344,26 +344,21 @@ export const announcements = createTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => [index("gasak_announcements_squad_idx").on(t.squadId)],
+  (t) => [index("gasak_news_squad_idx").on(t.squadId)],
 );
 
-export const announcementReads = createTable(
-  "announcement_reads",
+export const newsReads = createTable(
+  "news_reads",
   {
-    announcementId: uuid("announcement_id")
+    newsId: uuid("news_id")
       .notNull()
-      .references(() => announcements.id, { onDelete: "cascade" }),
+      .references(() => news.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     readAt: timestamp("read_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
-    uniqueIndex("gasak_announcement_reads_announcement_user_idx").on(
-      t.announcementId,
-      t.userId,
-    ),
-  ],
+  (t) => [uniqueIndex("gasak_news_reads_news_user_idx").on(t.newsId, t.userId)],
 );
 
 export const authSlides = createTable("auth_slides", {
@@ -498,7 +493,7 @@ export const squadRelations = relations(squads, ({ many }) => ({
   events: many(events),
   scrims: many(scrims),
   tournaments: many(tournaments),
-  announcements: many(announcements),
+  news: many(news),
 }));
 
 export const squadMemberRelations = relations(squadMembers, ({ one }) => ({
@@ -532,34 +527,28 @@ export const scrimRelations = relations(scrims, ({ one }) => ({
   squad: one(squads, { fields: [scrims.squadId], references: [squads.id] }),
 }));
 
-export const announcementRelations = relations(
-  announcements,
-  ({ one, many }) => ({
-    squad: one(squads, {
-      fields: [announcements.squadId],
-      references: [squads.id],
-    }),
-    author: one(user, {
-      fields: [announcements.authorId],
-      references: [user.id],
-    }),
-    reads: many(announcementReads),
+export const newsRelations = relations(news, ({ one, many }) => ({
+  squad: one(squads, {
+    fields: [news.squadId],
+    references: [squads.id],
   }),
-);
+  author: one(user, {
+    fields: [news.authorId],
+    references: [user.id],
+  }),
+  reads: many(newsReads),
+}));
 
-export const announcementReadRelations = relations(
-  announcementReads,
-  ({ one }) => ({
-    announcement: one(announcements, {
-      fields: [announcementReads.announcementId],
-      references: [announcements.id],
-    }),
-    user: one(user, {
-      fields: [announcementReads.userId],
-      references: [user.id],
-    }),
+export const newsReadRelations = relations(newsReads, ({ one }) => ({
+  news: one(news, {
+    fields: [newsReads.newsId],
+    references: [news.id],
   }),
-);
+  user: one(user, {
+    fields: [newsReads.userId],
+    references: [user.id],
+  }),
+}));
 
 export const productRelations = relations(products, ({ many }) => ({
   orders: many(orders),
@@ -592,8 +581,8 @@ export type Application = typeof applications.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type Tournament = typeof tournaments.$inferSelect;
 export type Scrim = typeof scrims.$inferSelect;
-export type Announcement = typeof announcements.$inferSelect;
-export type AnnouncementRead = typeof announcementReads.$inferSelect;
+export type News = typeof news.$inferSelect;
+export type NewsRead = typeof newsReads.$inferSelect;
 export type AuthSlide = typeof authSlides.$inferSelect;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type Product = typeof products.$inferSelect;

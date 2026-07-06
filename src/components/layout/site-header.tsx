@@ -1,20 +1,12 @@
 "use client";
 
 import { Icons } from "@components/icons";
+import { publicNavigation } from "@config/navigation";
 import { cn } from "@lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "./logo";
-
-const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "About Us", href: "/about" },
-  { label: "Tournaments", href: "/tournaments" },
-  { label: "Squads", href: "/squads" },
-  { label: "Shop", href: "/shop" },
-  { label: "Contact", href: "/contact" },
-];
 
 function AuthLink({
   isLoggedIn,
@@ -72,7 +64,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           className="hidden items-center gap-5 desktop:flex"
           aria-label="Main navigation"
         >
-          {NAV_LINKS.map(({ label, href }) => (
+          {publicNavigation.map(({ label, href }) => (
             <Link
               key={label}
               href={href}
@@ -123,7 +115,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           aria-label="Mobile navigation"
         >
           <div className="flex flex-col gap-3">
-            {NAV_LINKS.map(({ label, href }) => (
+            {publicNavigation.map(({ label, href }) => (
               <Link
                 key={label}
                 href={href}

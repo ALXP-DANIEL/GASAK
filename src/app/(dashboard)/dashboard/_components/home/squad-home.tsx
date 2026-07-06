@@ -3,14 +3,7 @@ import { Badge } from "@components/ui/shadcn/badge";
 import { formatDate, formatDateTime } from "@lib/format";
 import { EVENT_TYPE_LABELS } from "@lib/labels";
 import { getMemberSquadIds } from "@server/authz";
-import {
-  announcements,
-  db,
-  events,
-  scrims,
-  squads,
-  tournaments,
-} from "@server/db";
+import { db, events, news, scrims, squads, tournaments } from "@server/db";
 import { and, desc, gte, inArray, isNull, or } from "drizzle-orm";
 import {
   EmptyState,
@@ -30,7 +23,7 @@ export async function SquadHome({
   const squadIds = await getMemberSquadIds(userId);
   const now = new Date();
 
-  const [mySquads, upcoming, news, squadMatches, squadTournaments] =
+  const [mySquads, upcoming, newsItems, squadMatches, squadTournaments] =
     await Promise.all([
       squadIds.length
         ? db.query.squads.findMany({
@@ -51,14 +44,11 @@ export async function SquadHome({
         )
         .orderBy(events.startsAt)
         .limit(4),
-      db.query.announcements.findMany({
+      db.query.news.findMany({
         where: squadIds.length
-          ? or(
-              isNull(announcements.squadId),
-              inArray(announcements.squadId, squadIds),
-            )
-          : isNull(announcements.squadId),
-        orderBy: desc(announcements.createdAt),
+          ? or(isNull(news.squadId), inArray(news.squadId, squadIds))
+          : isNull(news.squadId),
+        orderBy: desc(news.createdAt),
         limit: 3,
         with: { squad: true },
       }),
@@ -194,12 +184,9 @@ export async function SquadHome({
         </HomePanel>
       </div>
 
-      {news.length > 0 && (
-        <HomePanel
-          title="Announcements"
-          description="Latest updates for your squads"
-        >
-          {news.map((item) => (
+      {newsItems.length > 0 && (
+        <HomePanel title="News" description="Latest updates for your squads">
+          {newsItems.map((item) => (
             <HomeListItem
               key={item.id}
               title={item.title}

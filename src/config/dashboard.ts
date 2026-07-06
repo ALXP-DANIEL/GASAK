@@ -80,9 +80,9 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         canAccess: canViewSquadArea,
       },
       {
-        href: "/dashboard/announcements",
-        label: "Announcements",
-        icon: Icons.Domain.Announcements,
+        href: "/dashboard/news",
+        label: "News",
+        icon: Icons.Domain.News,
         canAccess: canViewSquadArea,
       },
       {
@@ -148,23 +148,6 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
     ],
   },
 ];
-
-export const dashboardNavigation = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/dashboard/tournaments", label: "Tournaments" },
-  { href: "/dashboard/squads", label: "Squads" },
-  { href: "/dashboard/players", label: "Players" },
-  { href: "/dashboard/matches", label: "Matches" },
-  { href: "/dashboard/schedules", label: "Schedules" },
-  { href: "/dashboard/announcements", label: "Announcements" },
-  { href: "/dashboard/my-squad", label: "My Squad" },
-  { href: "/dashboard/recruitment", label: "Recruitment" },
-  { href: "/dashboard/orders", label: "Orders" },
-  { href: "/dashboard/products", label: "Products" },
-  { href: "/dashboard/users", label: "Users" },
-  { href: "/dashboard/reports", label: "Reports" },
-  { href: "/dashboard/settings", label: "Settings" },
-] as const;
 
 export function canAccessDashboardItem(
   item: DashboardNavItem,

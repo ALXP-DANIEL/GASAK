@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@components/ui/shadcn/dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createAnnouncement } from "@server/actions/announcements";
+import { createNews } from "@server/actions/news";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -29,7 +29,7 @@ const schema = z.object({
 
 type Values = z.infer<typeof schema>;
 
-export function AnnouncementFormDialog({
+export function NewsFormDialog({
   squads,
   allowGlobal,
 }: {
@@ -56,7 +56,7 @@ export function AnnouncementFormDialog({
 
   function onSubmit(values: Values) {
     startTransition(async () => {
-      const result = await createAnnouncement({
+      const result = await createNews({
         title: values.title,
         content: values.content,
         squadId: values.audience === GLOBAL ? null : values.audience,
@@ -78,12 +78,12 @@ export function AnnouncementFormDialog({
       <DialogTrigger asChild>
         <Button>
           <Icons.Actions.Add />
-          New announcement
+          New news post
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New announcement</DialogTitle>
+          <DialogTitle>New news post</DialogTitle>
           <DialogDescription>
             {allowGlobal
               ? "Post globally or to a specific squad."
@@ -107,7 +107,7 @@ export function AnnouncementFormDialog({
             rows={5}
           />
           <Button type="submit" disabled={pending}>
-            {pending ? "Posting..." : "Post announcement"}
+            {pending ? "Posting..." : "Post news"}
           </Button>
         </form>
       </DialogContent>

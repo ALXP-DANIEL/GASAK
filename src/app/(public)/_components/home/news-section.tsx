@@ -1,8 +1,8 @@
 import { ContentCardGrid, NewsCard } from "@components/cards";
 import { LinkButton, SectionHeader } from "@components/ui/brand";
-import type { Announcement } from "@server/db/schema";
+import type { News } from "@server/db/schema";
 
-export function NewsSection({ items }: { items: Announcement[] }) {
+export function NewsSection({ items }: { items: News[] }) {
   if (items.length === 0) return null;
 
   return (

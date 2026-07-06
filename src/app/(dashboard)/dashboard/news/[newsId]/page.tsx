@@ -8,8 +8,8 @@ import {
   CardTitle,
 } from "@components/ui/shadcn/card";
 import { formatDateTime } from "@lib/format";
-import { deleteAnnouncement } from "@server/actions/announcements";
-import { announcements, db } from "@server/db";
+import { deleteNews } from "@server/actions/news";
+import { db, news } from "@server/db";
 import { requireUser, userOrgRole } from "@server/session";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
@@ -17,38 +17,38 @@ import { DetailRow, PageHeader } from "../../_components/page-surface";
 
 export const dynamic = "force-dynamic";
 
-export default async function AnnouncementDetailPage({
+export default async function NewsDetailPage({
   params,
 }: {
-  params: Promise<{ announcementId: string }>;
+  params: Promise<{ newsId: string }>;
 }) {
   const actor = await requireUser();
   const role = userOrgRole(actor);
-  const { announcementId } = await params;
-  const announcement = await db.query.announcements.findFirst({
-    where: eq(announcements.id, announcementId),
+  const { newsId } = await params;
+  const item = await db.query.news.findFirst({
+    where: eq(news.id, newsId),
     with: { squad: true, author: true },
   });
-  if (!announcement) notFound();
+  if (!item) notFound();
 
-  const canDelete = role === "admin" || announcement.authorId === actor.id;
+  const canDelete = role === "admin" || item.authorId === actor.id;
 
   return (
     <main>
       <PageHeader
-        title={announcement.title}
-        description="Preview and manage this announcement."
+        title={item.title}
+        description="Preview and manage this news post."
       />
 
       <div className="grid gap-6 desktop:grid-cols-[minmax(0,1fr)_24rem]">
         <ContentCardGrid>
           <NewsCard
-            item={announcement}
+            item={item}
             variant="default"
             meta={
               <p className="text-xs text-muted-foreground">
-                {announcement.author?.name ?? "Unknown"} ·{" "}
-                {formatDateTime(announcement.createdAt)}
+                {item.author?.name ?? "Unknown"} ·{" "}
+                {formatDateTime(item.createdAt)}
               </p>
             }
           />
@@ -58,14 +58,14 @@ export default async function AnnouncementDetailPage({
           {canDelete && (
             <Card className="shadow-xs">
               <CardHeader>
-                <CardTitle>Manage announcement</CardTitle>
+                <CardTitle>Manage news post</CardTitle>
               </CardHeader>
               <CardContent>
                 <DeleteButton
-                  action={deleteAnnouncement.bind(null, announcement.id)}
-                  title="Delete announcement?"
-                  description={`This will permanently remove "${announcement.title}".`}
-                  redirectTo="/dashboard/announcements"
+                  action={deleteNews.bind(null, item.id)}
+                  title="Delete news post?"
+                  description={`This will permanently remove "${item.title}".`}
+                  redirectTo="/dashboard/news"
                 />
               </CardContent>
             </Card>
@@ -73,24 +73,24 @@ export default async function AnnouncementDetailPage({
 
           <Card className="shadow-xs">
             <CardHeader>
-              <CardTitle>Announcement details</CardTitle>
+              <CardTitle>News details</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4">
               <DetailRow
                 label="Scope"
                 value={
-                  <Badge variant={announcement.squad ? "outline" : "default"}>
-                    {announcement.squad?.name ?? "Global"}
+                  <Badge variant={item.squad ? "outline" : "default"}>
+                    {item.squad?.name ?? "Global"}
                   </Badge>
                 }
               />
               <DetailRow
                 label="Author"
-                value={announcement.author?.name ?? "Unknown"}
+                value={item.author?.name ?? "Unknown"}
               />
               <DetailRow
                 label="Created"
-                value={formatDateTime(announcement.createdAt)}
+                value={formatDateTime(item.createdAt)}
               />
             </CardContent>
           </Card>

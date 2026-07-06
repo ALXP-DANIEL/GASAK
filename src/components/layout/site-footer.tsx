@@ -1,25 +1,9 @@
 import { Icons } from "@components/icons";
 import { ScrollTopButton } from "@components/ui/scroll-top-button";
+import { footerQuickLinks, footerSupportLinks } from "@config/navigation";
 import { siteConfig } from "@config/site";
 import Link from "next/link";
 import { Logo } from "./logo";
-
-const QUICK_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "About Us", href: "/about" },
-  { label: "Tournaments", href: "/tournaments" },
-  { label: "Squads", href: "/squads" },
-  { label: "Shop", href: "/shop" },
-  { label: "Contact", href: "/contact" },
-];
-
-const SUPPORT_LINKS = [
-  { label: "FAQ", href: "/contact" },
-  { label: "How to Order", href: "/shop" },
-  { label: "Payment Guide", href: "/shop" },
-  { label: "Terms of Service", href: "/contact" },
-  { label: "Privacy Policy", href: "/contact" },
-];
 
 const SOCIALS = [
   {
@@ -87,7 +71,7 @@ export function SiteFooter() {
             Quick Links
           </h3>
           <ul className="mt-4 flex flex-col gap-2">
-            {QUICK_LINKS.map(({ label, href }) => (
+            {footerQuickLinks.map(({ label, href }) => (
               <li key={label}>
                 <Link
                   href={href}
@@ -105,7 +89,7 @@ export function SiteFooter() {
             Support
           </h3>
           <ul className="mt-4 flex flex-col gap-2">
-            {SUPPORT_LINKS.map(({ label, href }) => (
+            {footerSupportLinks.map(({ label, href }) => (
               <li key={label}>
                 <Link
                   href={href}

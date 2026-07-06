@@ -1,19 +1,16 @@
 import { ContentCardGrid } from "@components/cards";
-import {
-  getUnreadAnnouncementIds,
-  markAnnouncementsRead,
-} from "@server/actions/announcements";
+import { getUnreadNewsIds, markNewsRead } from "@server/actions/news";
 import { getManagedSquadIds, getMemberSquadIds } from "@server/authz";
-import { announcements, db, squads } from "@server/db";
+import { db, news, squads } from "@server/db";
 import { requireUser, userOrgRole } from "@server/session";
 import { desc, eq, inArray, isNull, or } from "drizzle-orm";
 import { EmptyState, PageHeader } from "../_components/page-surface";
-import { AnnouncementCard } from "./_components/announcement-card";
-import { AnnouncementFormDialog } from "./_components/announcement-form";
+import { NewsFormDialog } from "./_components/news-form";
+import { NewsListCard } from "./_components/news-list-card";
 
 export const dynamic = "force-dynamic";
 
-export default async function AnnouncementsPage() {
+export default async function NewsPage() {
   const actor = await requireUser();
   const role = userOrgRole(actor);
 
@@ -29,14 +26,11 @@ export default async function AnnouncementsPage() {
       .orderBy(squads.name);
   } else {
     const squadIds = await getMemberSquadIds(actor.id);
-    rows = await db.query.announcements.findMany({
+    rows = await db.query.news.findMany({
       where: squadIds.length
-        ? or(
-            isNull(announcements.squadId),
-            inArray(announcements.squadId, squadIds),
-          )
-        : isNull(announcements.squadId),
-      orderBy: desc(announcements.createdAt),
+        ? or(isNull(news.squadId), inArray(news.squadId, squadIds))
+        : isNull(news.squadId),
+      orderBy: desc(news.createdAt),
       with: { squad: true, author: true },
     });
 
@@ -51,17 +45,17 @@ export default async function AnnouncementsPage() {
   }
 
   const ids = rows.map((row) => row.id);
-  const unreadIds = await getUnreadAnnouncementIds(actor.id, ids);
-  await markAnnouncementsRead(ids);
+  const unreadIds = await getUnreadNewsIds(actor.id, ids);
+  await markNewsRead(ids);
 
   return (
     <main>
       <PageHeader
-        title="Announcements"
+        title="News"
         description="Global organization news and squad-specific updates."
       >
         {(role === "admin" || postableSquads.length > 0) && (
-          <AnnouncementFormDialog
+          <NewsFormDialog
             squads={postableSquads}
             allowGlobal={role === "admin"}
           />
@@ -69,16 +63,16 @@ export default async function AnnouncementsPage() {
       </PageHeader>
 
       {rows.length === 0 ? (
-        <EmptyState message="No announcements yet." />
+        <EmptyState message="No news yet." />
       ) : (
         <ContentCardGrid>
-          {rows.map((announcement) => (
-            <AnnouncementCard
-              key={announcement.id}
-              announcement={announcement}
-              squadName={announcement.squad?.name ?? null}
-              authorName={announcement.author?.name ?? "Unknown"}
-              isUnread={unreadIds.has(announcement.id)}
+          {rows.map((item) => (
+            <NewsListCard
+              key={item.id}
+              news={item}
+              squadName={item.squad?.name ?? null}
+              authorName={item.author?.name ?? "Unknown"}
+              isUnread={unreadIds.has(item.id)}
             />
           ))}
         </ContentCardGrid>
@@ -88,8 +82,8 @@ export default async function AnnouncementsPage() {
 }
 
 function queryAll() {
-  return db.query.announcements.findMany({
-    orderBy: desc(announcements.createdAt),
+  return db.query.news.findMany({
+    orderBy: desc(news.createdAt),
     with: { squad: true, author: true },
   });
 }

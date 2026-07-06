@@ -9,9 +9,8 @@ import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 async function getNews(newsId: string) {
-  return db.query.announcements.findFirst({
-    where: (announcement, { and }) =>
-      and(eq(announcement.id, newsId), isNull(announcement.squadId)),
+  return db.query.news.findFirst({
+    where: (news, { and }) => and(eq(news.id, newsId), isNull(news.squadId)),
   });
 }
 

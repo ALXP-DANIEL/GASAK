@@ -2,26 +2,26 @@
 
 import { logActivity } from "@server/activity-log";
 import { actionUser, canManageSquad } from "@server/authz";
-import { announcementReads, announcements, db } from "@server/db";
+import { db, news, newsReads } from "@server/db";
 import { userOrgRole } from "@server/session";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "./public";
 
-const announcementSchema = z.object({
+const newsSchema = z.object({
   title: z.string().min(2, "Title is required"),
   content: z.string().min(2, "Content is required"),
   squadId: z.uuid().nullable(),
 });
 
-export async function createAnnouncement(
-  input: z.infer<typeof announcementSchema>,
+export async function createNews(
+  input: z.infer<typeof newsSchema>,
 ): Promise<ActionResult> {
   const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
-  const parsed = announcementSchema.safeParse(input);
+  const parsed = newsSchema.safeParse(input);
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
 
@@ -29,7 +29,7 @@ export async function createAnnouncement(
   if (role !== "admin") {
     // leaders can only post to squads they lead — never globally
     if (!parsed.data.squadId) {
-      return { ok: false, error: "Only admins can post global announcements" };
+      return { ok: false, error: "Only admins can post global news" };
     }
     if (!(await canManageSquad(actor.id, role, parsed.data.squadId))) {
       return { ok: false, error: "You do not lead this squad" };
@@ -37,7 +37,7 @@ export async function createAnnouncement(
   }
 
   const [row] = await db
-    .insert(announcements)
+    .insert(news)
     .values({
       title: parsed.data.title,
       content: parsed.data.content,
@@ -49,72 +49,67 @@ export async function createAnnouncement(
   await logActivity({
     actor,
     action: "create",
-    entityType: "announcement",
+    entityType: "news",
     entityId: row.id,
-    description: `Posted announcement "${row.title}"`,
+    description: `Posted news "${row.title}"`,
   });
 
-  revalidatePath("/dashboard/announcements");
+  revalidatePath("/dashboard/news");
   revalidatePath("/dashboard");
   revalidatePath("/");
-  return { ok: true, message: "Announcement posted" };
+  return { ok: true, message: "News posted" };
 }
 
-export async function deleteAnnouncement(id: string): Promise<ActionResult> {
+export async function deleteNews(id: string): Promise<ActionResult> {
   const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
-  const row = await db.query.announcements.findFirst({
-    where: eq(announcements.id, id),
+  const row = await db.query.news.findFirst({
+    where: eq(news.id, id),
   });
-  if (!row) return { ok: false, error: "Announcement not found" };
+  if (!row) return { ok: false, error: "News not found" };
 
   if (userOrgRole(actor) !== "admin" && row.authorId !== actor.id) {
-    return { ok: false, error: "You can only delete your own announcements" };
+    return { ok: false, error: "You can only delete your own news" };
   }
 
-  await db.delete(announcements).where(eq(announcements.id, id));
+  await db.delete(news).where(eq(news.id, id));
   await logActivity({
     actor,
     action: "delete",
-    entityType: "announcement",
+    entityType: "news",
     entityId: row.id,
-    description: `Deleted announcement "${row.title}"`,
+    description: `Deleted news "${row.title}"`,
   });
 
-  revalidatePath("/dashboard/announcements");
+  revalidatePath("/dashboard/news");
   revalidatePath("/dashboard");
   revalidatePath("/");
-  return { ok: true, message: "Announcement deleted" };
+  return { ok: true, message: "News deleted" };
 }
 
-export async function markAnnouncementsRead(ids: string[]): Promise<void> {
+export async function markNewsRead(ids: string[]): Promise<void> {
   if (ids.length === 0) return;
   const actor = await actionUser();
   if (!actor) return;
 
   await db
-    .insert(announcementReads)
-    .values(ids.map((announcementId) => ({ announcementId, userId: actor.id })))
+    .insert(newsReads)
+    .values(ids.map((newsId) => ({ newsId, userId: actor.id })))
     .onConflictDoNothing();
 }
 
-export async function getUnreadAnnouncementIds(
+export async function getUnreadNewsIds(
   userId: string,
   ids: string[],
 ): Promise<Set<string>> {
   if (ids.length === 0) return new Set();
 
   const readRows = await db
-    .select({ announcementId: announcementReads.announcementId })
-    .from(announcementReads)
-    .where(
-      and(
-        eq(announcementReads.userId, userId),
-        inArray(announcementReads.announcementId, ids),
-      ),
-    );
+    .select({ newsId: newsReads.newsId })
+    .from(newsReads)
+    .where(and(eq(newsReads.userId, userId), inArray(newsReads.newsId, ids)));
 
-  const readIds = new Set(readRows.map((r) => r.announcementId));
+  const readIds = new Set(readRows.map((r) => r.newsId));
   return new Set(ids.filter((id) => !readIds.has(id)));
 }

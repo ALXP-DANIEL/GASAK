@@ -1,8 +1,26 @@
 export const publicNavigation = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/tournaments", label: "Tournaments" },
-  { href: "/squads", label: "Squads" },
-  { href: "/shop", label: "shop" },
-  { href: "/contact", label: "Contact" },
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about" },
+  { label: "Tournaments", href: "/tournaments" },
+  { label: "Squads", href: "/squads" },
+  { label: "Shop", href: "/shop" },
+  { label: "News", href: "/news" },
+  { label: "Contact", href: "/contact" },
+] as const;
+
+export const footerQuickLinks = [
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about" },
+  { label: "Tournaments", href: "/tournaments" },
+  { label: "Squads", href: "/squads" },
+  { label: "Shop", href: "/shop" },
+  { label: "Contact", href: "/contact" },
+] as const;
+
+export const footerSupportLinks = [
+  { label: "FAQ", href: "/contact" },
+  { label: "How to Order", href: "/shop" },
+  { label: "Payment Guide", href: "/shop" },
+  { label: "Terms of Service", href: "/contact" },
+  { label: "Privacy Policy", href: "/contact" },
 ] as const;

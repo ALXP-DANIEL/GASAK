@@ -21,7 +21,7 @@ export default function ContactPage() {
     {
       Icon: Icons.Social.Instagram,
       title: "Instagram",
-      description: "Match updates, highlights, and announcements.",
+      description: "Match updates, highlights, and news.",
       href: siteConfig.links.instagram,
       label: "@thealifhaker1",
     },

@@ -155,20 +155,18 @@ export function AccentPlayground() {
             Example elements
           </h2>
           <div className="mt-5 grid gap-4 desktop:grid-cols-4">
-            {["Roster card", "Shop item", "Announcement", "Tournament"].map(
-              (title) => (
-                <div
-                  key={title}
-                  className="rounded-lg border border-primary/20 bg-card p-4"
-                >
-                  <div className="mb-4 size-10 rounded bg-primary/15 text-primary" />
-                  <p className="font-semibold">{title}</p>
-                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                    Accent-aware sample element using shared tokens.
-                  </p>
-                </div>
-              ),
-            )}
+            {["Roster card", "Shop item", "News", "Tournament"].map((title) => (
+              <div
+                key={title}
+                className="rounded-lg border border-primary/20 bg-card p-4"
+              >
+                <div className="mb-4 size-10 rounded bg-primary/15 text-primary" />
+                <p className="font-semibold">{title}</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  Accent-aware sample element using shared tokens.
+                </p>
+              </div>
+            ))}
           </div>
         </BrandCard>
       </div>

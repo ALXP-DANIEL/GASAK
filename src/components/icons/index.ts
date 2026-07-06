@@ -27,7 +27,6 @@ import { LightningIcon } from "@phosphor-icons/react/dist/ssr/Lightning";
 import { LinkedinLogoIcon } from "@phosphor-icons/react/dist/ssr/LinkedinLogo";
 import { ListIcon } from "@phosphor-icons/react/dist/ssr/List";
 import { MapPinIcon } from "@phosphor-icons/react/dist/ssr/MapPin";
-import { MegaphoneIcon } from "@phosphor-icons/react/dist/ssr/Megaphone";
 import { MoonIcon } from "@phosphor-icons/react/dist/ssr/Moon";
 import { NewspaperIcon } from "@phosphor-icons/react/dist/ssr/Newspaper";
 import { PackageIcon } from "@phosphor-icons/react/dist/ssr/Package";
@@ -98,7 +97,6 @@ export const Icons = {
     Players: GameControllerIcon,
     Scrims: SwordIcon,
     Calendar: CalendarBlankIcon,
-    Announcements: MegaphoneIcon,
     Recruitment: ClipboardTextIcon,
     Products: PackageIcon,
     Orders: ReceiptIcon,

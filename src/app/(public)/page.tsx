@@ -1,7 +1,7 @@
 import { createPageMetadata } from "@lib/metadata";
 import {
-  announcements,
   db,
+  news,
   playerProfiles,
   products,
   squads,
@@ -31,7 +31,7 @@ export default async function HomePage() {
     [playerCount],
     [tournamentCount],
     featuredSquads,
-    news,
+    newsItems,
     topProducts,
   ] = await Promise.all([
     db
@@ -48,9 +48,9 @@ export default async function HomePage() {
       .limit(4),
     db
       .select()
-      .from(announcements)
-      .where(isNull(announcements.squadId))
-      .orderBy(desc(announcements.createdAt))
+      .from(news)
+      .where(isNull(news.squadId))
+      .orderBy(desc(news.createdAt))
       .limit(3),
     db
       .select()
@@ -72,7 +72,7 @@ export default async function HomePage() {
       />
       <SquadsSection squads={featuredSquads} />
       <AboutSection />
-      <NewsSection items={news} />
+      <NewsSection items={newsItems} />
       <ProductsSection products={topProducts} />
       <CtaBanner />
     </>

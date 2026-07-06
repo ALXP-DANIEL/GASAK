@@ -1,27 +1,27 @@
 import { NewsCard } from "@components/cards";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatDateTime } from "@lib/format";
-import type { Announcement } from "@server/db/schema";
+import type { News } from "@server/db/schema";
 
-export function AnnouncementCard({
-  announcement,
+export function NewsListCard({
+  news,
   squadName,
   authorName,
   isUnread,
 }: {
-  announcement: Announcement;
+  news: News;
   squadName: string | null;
   authorName: string;
   isUnread: boolean;
 }) {
   return (
     <NewsCard
-      item={announcement}
+      item={news}
       variant="default"
-      href={`/dashboard/announcements/${announcement.id}`}
+      href={`/dashboard/news/${news.id}`}
       meta={
         <p className="text-xs text-muted-foreground">
-          {authorName} · {formatDateTime(announcement.createdAt)}
+          {authorName} · {formatDateTime(news.createdAt)}
         </p>
       }
       action={

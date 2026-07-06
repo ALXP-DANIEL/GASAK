@@ -6,12 +6,12 @@ import {
 import { Icons } from "@components/icons";
 import { formatDate } from "@lib/format";
 import { cn } from "@lib/utils";
-import type { Announcement } from "@server/db/schema";
+import type { News } from "@server/db/schema";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 export type NewsCardProps = {
-  item: Announcement;
+  item: News;
   variant?: ContentCardVariant;
   meta?: ReactNode;
   action?: ReactNode;
@@ -54,7 +54,7 @@ function NewsCardContent({
   action,
   linked,
 }: {
-  item: Announcement;
+  item: News;
   variant: ContentCardVariant;
   meta?: ReactNode;
   action?: ReactNode;
@@ -70,8 +70,8 @@ function NewsCardContent({
       <div className="flex flex-1 flex-col p-6">
         <div className="flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
-            <Icons.Domain.Announcements size={13} aria-hidden />
-            Announcement
+            <Icons.Domain.News size={13} aria-hidden />
+            News
           </span>
           <time
             dateTime={new Date(item.createdAt).toISOString()}
