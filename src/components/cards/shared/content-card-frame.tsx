@@ -1,5 +1,6 @@
 import { BrandCard } from "@components/ui/brand";
 import { cn } from "@lib/utils";
+import type { ComponentProps } from "react";
 
 export type ContentCardVariant = "compact" | "default";
 
@@ -8,13 +9,15 @@ export const contentCardSize: Record<ContentCardVariant, string> = {
   default: "min-h-[21.5rem]",
 };
 
+export type ContentCardGridProps = ComponentProps<"div"> & {
+  density?: "default" | "compact" | "wide";
+};
+
 export function ContentCardGrid({
   className,
   density = "default",
   ...props
-}: React.ComponentProps<"div"> & {
-  density?: "default" | "compact" | "wide";
-}) {
+}: ContentCardGridProps) {
   return (
     <div
       className={cn(
@@ -32,11 +35,13 @@ export function ContentCardGrid({
   );
 }
 
+export type ContentCardFrameProps = ComponentProps<typeof BrandCard>;
+
 export function ContentCardFrame({
   className,
   interactive,
   ...props
-}: React.ComponentProps<typeof BrandCard>) {
+}: ContentCardFrameProps) {
   return (
     <BrandCard
       className={cn("flex h-full flex-col overflow-hidden", className)}

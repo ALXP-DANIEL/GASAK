@@ -1,10 +1,21 @@
-export { BuyButton } from "./buy-button";
+export { NewsCard, type NewsCardProps } from "./news";
+export {
+  BuyButton,
+  type BuyButtonProps,
+  ProductCard,
+  type ProductCardProps,
+} from "./product";
 export {
   ContentCardFrame,
+  type ContentCardFrameProps,
   ContentCardGrid,
+  type ContentCardGridProps,
   type ContentCardVariant,
   contentCardSize,
-} from "./content-card-frame";
-export { NewsCard } from "./news-card";
-export { ProductCard } from "./product-card";
-export { isDevelopmentSquad, SquadCard } from "./squad-card";
+} from "./shared";
+export {
+  isDevelopmentSquad,
+  SquadCard,
+  type SquadCardProps,
+  type SquadCardVariant,
+} from "./squad";

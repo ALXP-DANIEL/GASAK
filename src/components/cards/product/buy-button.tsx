@@ -20,22 +20,26 @@ import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const schema = z.object({
+const buyButtonSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
   customerPhone: z.string().min(6, "Enter a valid phone number"),
   customerEmail: z.email("Enter a valid email"),
   quantity: z.number("Enter a quantity").int().min(1, "Minimum 1").max(99),
 });
 
-type Values = z.infer<typeof schema>;
+type BuyButtonValues = z.infer<typeof buyButtonSchema>;
 
-export function BuyButton({ product }: { product: Product }) {
+export type BuyButtonProps = {
+  product: Product;
+};
+
+export function BuyButton({ product }: BuyButtonProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  const { control, handleSubmit } = useForm<Values>({
-    resolver: zodResolver(schema),
+  const { control, handleSubmit } = useForm<BuyButtonValues>({
+    resolver: zodResolver(buyButtonSchema),
     defaultValues: {
       customerName: "",
       customerPhone: "",
@@ -46,13 +50,17 @@ export function BuyButton({ product }: { product: Product }) {
 
   const quantity = useWatch({ control, name: "quantity" }) || 1;
 
-  function onSubmit(values: Values) {
+  function onSubmit(values: BuyButtonValues) {
     startTransition(async () => {
       const result = await placeOrder({ ...values, productId: product.id });
+
       if (result.ok && result.data?.orderNo) {
         toast.success("Order placed! Complete your payment.");
         router.push(`/pricing/order/${result.data.orderNo}`);
-      } else if (!result.ok) {
+        return;
+      }
+
+      if (!result.ok) {
         toast.error(result.error);
       }
     });
@@ -67,8 +75,8 @@ export function BuyButton({ product }: { product: Product }) {
         <DialogHeader>
           <DialogTitle>{product.name}</DialogTitle>
           <DialogDescription>
-            Guest checkout — no account needed. We deliver via your MLBB ID or
-            WhatsApp after payment.
+            Guest checkout. We deliver via your MLBB ID or WhatsApp after
+            payment.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
@@ -77,7 +85,7 @@ export function BuyButton({ product }: { product: Product }) {
             control={control}
             name="customerPhone"
             label="Phone (WhatsApp)"
-            placeholder="+60…"
+            placeholder="+60..."
           />
           <FormField
             control={control}
@@ -93,8 +101,8 @@ export function BuyButton({ product }: { product: Product }) {
           />
           <Button type="submit" disabled={pending}>
             {pending
-              ? "Placing order…"
-              : `Place order — ${formatRM(product.priceSen * quantity)}`}
+              ? "Placing order..."
+              : `Place order - ${formatRM(product.priceSen * quantity)}`}
           </Button>
         </form>
       </DialogContent>
