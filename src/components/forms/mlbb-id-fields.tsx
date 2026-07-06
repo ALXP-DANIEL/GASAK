@@ -19,21 +19,21 @@ export function MlbbIdFields<
   disabled?: boolean;
 }) {
   return (
-    <div className="grid gap-4 desktop:grid-cols-[minmax(0,1fr)_10rem]">
-      <FormField
-        control={control}
-        name={mlbbIdName}
-        label="Game ID"
-        inputMode="numeric"
-        placeholder="123456789"
-        disabled={disabled}
-      />
+    <div className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3">
       <FormField
         control={control}
         name={serverIdName}
         label="Server ID"
         inputMode="numeric"
-        placeholder="2001"
+        placeholder="(2001)"
+        disabled={disabled}
+      />
+      <FormField
+        control={control}
+        name={mlbbIdName}
+        label="Player ID"
+        inputMode="numeric"
+        placeholder="123456789"
         disabled={disabled}
       />
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Diawer } from "@components/ui/diawer";
 import { Badge } from "@components/ui/shadcn/badge";
 import { Button } from "@components/ui/shadcn/button";
 import {
@@ -8,7 +9,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@components/ui/shadcn/dialog";
 import { Label } from "@components/ui/shadcn/label";
 import {
@@ -41,7 +41,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { DashboardPanel, DetailRow } from "../../_components/page-surface";
+import { DetailRow } from "../../_components/page-surface";
 
 export function ApplicationCard({
   application,
@@ -126,214 +126,212 @@ export function ApplicationCard({
   }
 
   return (
-    <DashboardPanel
-      title={
-        <>
-          {application.ign}{" "}
-          <span className="font-normal text-muted-foreground">
-            · {application.fullName}
-          </span>
-        </>
-      }
-      description={
-        <>
-          {LANE_LABELS[application.preferredLane]} · {application.currentRank} ·
-          Applied {formatDateTime(application.createdAt)}
-        </>
-      }
-      action={
-        <Badge
-          variant={
-            application.status === "rejected"
-              ? "destructive"
-              : application.status === "accepted" ||
-                  application.status === "trial"
-                ? "default"
-                : "outline"
-          }
-        >
-          {APPLICATION_STATUS_LABELS[application.status]}
-        </Badge>
-      }
-    >
-      <div className="grid gap-3">
-        <p className="text-sm text-muted-foreground">
-          Assigned to:{" "}
-          <span className="font-medium text-foreground">
-            {assignedLeaderName ?? "Unassigned"}
-          </span>
-        </p>
-        <p className="text-sm text-muted-foreground">
-          Preferred squad:{" "}
-          <span className="font-medium text-foreground">
-            {application.squad?.name ?? "No preference"}
-          </span>
-        </p>
-
-        <div className="flex flex-wrap gap-2">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                View details
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-h-[85dvh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{application.fullName}</DialogTitle>
-                <DialogDescription>
-                  Application {APPLICATION_STATUS_LABELS[application.status]}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-2">
-                <DetailRow label="IGN" value={application.ign} />
-                <DetailRow
-                  label="MLBB ID"
-                  value={`${application.mlbbId} · Server ${application.serverId}`}
-                />
-                <DetailRow
-                  label="Preferred squad"
-                  value={application.squad?.name ?? "No preference"}
-                />
-                <DetailRow label="Email" value={application.email} />
-                <DetailRow label="Phone" value={application.phone} />
-                <DetailRow
-                  label="Lane"
-                  value={LANE_LABELS[application.preferredLane]}
-                />
-                <DetailRow label="Rank" value={application.currentRank} />
-                <DetailRow label="Hero pool" value={application.heroPool} />
-                <DetailRow
-                  label="Previous squad"
-                  value={application.previousTeam || "-"}
-                />
-                <Separator />
-                <p className="text-sm leading-6 text-muted-foreground">
-                  {application.introduction}
+    <>
+      <Diawer
+        title={application.fullName}
+        description={`Application ${APPLICATION_STATUS_LABELS[application.status]}`}
+        dialogContentClassName="max-h-[85dvh] overflow-y-auto desktop:max-w-3xl"
+        drawerContentClassName="max-h-[92dvh]"
+        bodyClassName="grid gap-5"
+        trigger={
+          <button
+            type="button"
+            className="group w-full border bg-background p-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/5"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="truncate font-heading text-base font-bold uppercase tracking-wide group-hover:text-primary">
+                  {application.ign}
+                </h3>
+                <p className="mt-1 truncate text-xs text-muted-foreground">
+                  {application.fullName}
                 </p>
               </div>
-            </DialogContent>
-          </Dialog>
+              <Badge
+                variant={
+                  application.status === "rejected"
+                    ? "destructive"
+                    : application.status === "accepted" ||
+                        application.status === "trial"
+                      ? "default"
+                      : "outline"
+                }
+              >
+                {APPLICATION_STATUS_LABELS[application.status]}
+              </Badge>
+            </div>
 
-          {!decided && (
-            <>
-              {application.status !== "trial" && (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  disabled={pending}
-                  onClick={() => setStatus("trial")}
-                >
-                  Move to trial
-                </Button>
-              )}
-              <Button
-                size="sm"
-                disabled={pending}
-                onClick={() => setStatus("accepted")}
-              >
-                Accept
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                disabled={pending}
-                onClick={() => setStatus("rejected")}
-              >
-                Reject
-              </Button>
-            </>
-          )}
+            <div className="mt-3 grid gap-1.5 text-xs text-muted-foreground">
+              <p>
+                {LANE_LABELS[application.preferredLane]} ·{" "}
+                {application.currentRank}
+              </p>
+              <p className="truncate">
+                Squad: {application.squad?.name ?? "No preference"}
+              </p>
+              <p>Applied {formatDateTime(application.createdAt)}</p>
+            </div>
+          </button>
+        }
+      >
+        <div className="grid gap-3 rounded-none border bg-muted/10 p-4">
+          <DetailRow label="IGN" value={application.ign} />
+          <DetailRow
+            label="MLBB ID"
+            value={`${application.mlbbId} · Server ${application.serverId}`}
+          />
+          <DetailRow
+            label="Preferred squad"
+            value={application.squad?.name ?? "No preference"}
+          />
+          <DetailRow label="Email" value={application.email} />
+          <DetailRow label="Phone" value={application.phone} />
+          <DetailRow
+            label="Lane"
+            value={LANE_LABELS[application.preferredLane]}
+          />
+          <DetailRow label="Rank" value={application.currentRank} />
+          <DetailRow label="Hero pool" value={application.heroPool} />
+          <DetailRow
+            label="Previous squad"
+            value={application.previousTeam || "-"}
+          />
+          <Separator />
+          <p className="text-sm leading-6 text-muted-foreground">
+            {application.introduction}
+          </p>
         </div>
 
-        {isAdmin && !decided && (
-          <div className="grid gap-2 border bg-muted/20 p-3 desktop:grid-cols-[1fr_auto]">
-            <Select value={leaderId} onValueChange={setLeaderId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Assign to leader..." />
-              </SelectTrigger>
-              <SelectContent>
-                {leaders.map((leader) => (
-                  <SelectItem key={leader.id} value={leader.id}>
-                    {leader.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={pending || !leaderId}
-              onClick={assign}
-            >
-              Assign
-            </Button>
-          </div>
-        )}
-
-        {!decided && (
-          <div className="grid gap-1">
-            <Label htmlFor={`notes-${application.id}`} className="text-xs">
-              Review notes
-            </Label>
-            <Textarea
-              id={`notes-${application.id}`}
-              rows={2}
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
-            />
-          </div>
-        )}
-
-        {decided && application.reviewNotes && (
-          <p className="text-xs text-muted-foreground">
-            Notes: {application.reviewNotes}
+        <div className="grid gap-3 rounded-none border bg-muted/10 p-4">
+          <p className="text-sm text-muted-foreground">
+            Assigned to:{" "}
+            <span className="font-medium text-foreground">
+              {assignedLeaderName ?? "Unassigned"}
+            </span>
           </p>
-        )}
 
-        {isAdmin && application.status === "accepted" && (
-          <div className="grid gap-2 border bg-muted/20 p-3">
-            <p className="text-sm font-medium">
-              Onboard: create account and squad slot
-            </p>
-            <div className="grid gap-2 desktop:grid-cols-[1fr_140px_auto]">
-              <Select value={squadId} onValueChange={setSquadId}>
+          <div className="flex flex-wrap gap-2">
+            {!decided && (
+              <>
+                {application.status !== "trial" && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={pending}
+                    onClick={() => setStatus("trial")}
+                  >
+                    Move to trial
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  disabled={pending}
+                  onClick={() => setStatus("accepted")}
+                >
+                  Accept
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={pending}
+                  onClick={() => setStatus("rejected")}
+                >
+                  Reject
+                </Button>
+              </>
+            )}
+          </div>
+
+          {isAdmin && !decided && (
+            <div className="grid gap-2 border bg-background/60 p-3 desktop:grid-cols-[1fr_auto]">
+              <Select value={leaderId} onValueChange={setLeaderId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Pick a squad" />
+                  <SelectValue placeholder="Assign to leader..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {squads.map((squad) => (
-                    <SelectItem key={squad.id} value={squad.id}>
-                      {squad.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={squadRole}
-                onValueChange={(value) => setSquadRole(value as SquadRole)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {squadRoleEnum.enumValues.map((role) => (
-                    <SelectItem key={role} value={role}>
-                      {SQUAD_ROLE_LABELS[role]}
+                  {leaders.map((leader) => (
+                    <SelectItem key={leader.id} value={leader.id}>
+                      {leader.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <Button
                 size="sm"
-                disabled={pending || !squadId}
-                onClick={onboard}
+                variant="outline"
+                disabled={pending || !leaderId}
+                onClick={assign}
               >
-                Onboard
+                Assign
               </Button>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+
+          {!decided && (
+            <div className="grid gap-1">
+              <Label htmlFor={`notes-${application.id}`} className="text-xs">
+                Review notes
+              </Label>
+              <Textarea
+                id={`notes-${application.id}`}
+                rows={3}
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+              />
+            </div>
+          )}
+
+          {decided && application.reviewNotes && (
+            <p className="text-xs text-muted-foreground">
+              Notes: {application.reviewNotes}
+            </p>
+          )}
+
+          {isAdmin && application.status === "accepted" && (
+            <div className="grid gap-2 border bg-background/60 p-3">
+              <p className="text-sm font-medium">
+                Onboard: create account and squad slot
+              </p>
+              <div className="grid gap-2 desktop:grid-cols-[1fr_140px_auto]">
+                <Select value={squadId} onValueChange={setSquadId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pick a squad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {squads.map((squad) => (
+                      <SelectItem key={squad.id} value={squad.id}>
+                        {squad.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={squadRole}
+                  onValueChange={(value) => setSquadRole(value as SquadRole)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {squadRoleEnum.enumValues.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {SQUAD_ROLE_LABELS[role]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="sm"
+                  disabled={pending || !squadId}
+                  onClick={onboard}
+                >
+                  Onboard
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Diawer>
 
       <Dialog
         open={credentials !== null}
@@ -361,6 +359,6 @@ export function ApplicationCard({
           )}
         </DialogContent>
       </Dialog>
-    </DashboardPanel>
+    </>
   );
 }

@@ -1,11 +1,13 @@
 "use client";
 
 import { FormField, FormSelect } from "@components/forms/form-field";
+import { LaneRadioGroup } from "@components/forms/lane-radio-group";
 import { MlbbIdFields } from "@components/forms/mlbb-id-fields";
+import { PhonePrefixField } from "@components/forms/phone-prefix-field";
 import { BrandCard } from "@components/ui/brand";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LANE_LABELS, MLBB_RANKS } from "@lib/labels";
+import { MLBB_RANKS } from "@lib/labels";
 import { submitApplication } from "@server/actions/public";
 import { laneEnum } from "@server/db/schema";
 import { useState, useTransition } from "react";
@@ -33,10 +35,6 @@ type Values = z.infer<typeof schema>;
 const ANY_SQUAD_VALUE = "any";
 
 const rankOptions = MLBB_RANKS.map((rank) => ({ value: rank, label: rank }));
-const laneOptions = laneEnum.enumValues.map((lane) => ({
-  value: lane,
-  label: LANE_LABELS[lane],
-}));
 
 export function ApplicationForm({
   squads = [],
@@ -67,6 +65,7 @@ export function ApplicationForm({
     startTransition(async () => {
       const result = await submitApplication({
         ...values,
+        phone: toMalaysiaPhone(values.phone),
         squadId:
           values.squadId && values.squadId !== ANY_SQUAD_VALUE
             ? values.squadId
@@ -82,11 +81,14 @@ export function ApplicationForm({
 
   if (submitted) {
     return (
-      <BrandCard className="p-6">
-        <h2 className="font-heading text-2xl font-bold tracking-wide">
+      <BrandCard className="border-primary/40 p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+          Submitted
+        </p>
+        <h2 className="mt-3 font-heading text-2xl font-bold uppercase tracking-wide">
           Application received
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-3 text-sm leading-7 text-muted-foreground">
           Thanks for applying to GASAK. Our admins will review your application
           and reach out by email or WhatsApp.
         </p>
@@ -95,90 +97,173 @@ export function ApplicationForm({
   }
 
   return (
-    <BrandCard className="p-6">
-      <div>
-        <h2 className="font-heading text-2xl font-bold tracking-wide">
+    <BrandCard className="overflow-hidden">
+      <div className="border-b border-primary/20 bg-primary/5 p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
           Application form
+        </p>
+        <h2 className="mt-3 font-heading text-3xl font-bold uppercase tracking-wide">
+          Player trial request
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          All fields are required unless marked optional.
+        <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">
+          Fill in your contact details, MLBB profile, and trial preference. Use
+          accurate information so recruiters can review your application faster.
         </p>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-        <div className="grid gap-4 desktop:grid-cols-2">
-          <FormField control={control} name="fullName" label="Full name" />
-          <FormField
-            control={control}
-            name="email"
-            label="Email"
-            type="email"
-          />
-          <FormField
-            control={control}
-            name="phone"
-            label="Phone (WhatsApp)"
-            placeholder="+60…"
-          />
-          <FormField control={control} name="ign" label="In-game name (IGN)" />
-          <MlbbIdFields
-            control={control}
-            mlbbIdName="mlbbId"
-            serverIdName="serverId"
-          />
-          <FormSelect
-            control={control}
-            name="currentRank"
-            label="Current rank"
-            options={rankOptions}
-            placeholder="Select rank"
-          />
-          <FormSelect
-            control={control}
-            name="preferredLane"
-            label="Preferred lane"
-            options={laneOptions}
-            placeholder="Select lane"
-          />
-          {squads.length > 0 && (
+      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-0">
+        <FormSection
+          index="01"
+          title="Contact"
+          description="How the recruitment team should reach you."
+        >
+          <div className="grid gap-4 desktop:grid-cols-2">
+            <FormField control={control} name="fullName" label="Full name" />
+            <FormField
+              control={control}
+              name="email"
+              label="Email"
+              type="email"
+            />
+            <PhonePrefixField
+              control={control}
+              name="phone"
+              label="Phone (WhatsApp)"
+            />
+          </div>
+        </FormSection>
+
+        <FormSection
+          index="02"
+          title="MLBB profile"
+          description="Your in-game identity and current competitive level."
+        >
+          <div className="grid gap-4 desktop:grid-cols-2">
+            <FormField
+              control={control}
+              name="ign"
+              label="In-game name (IGN)"
+            />
+            <MlbbIdFields
+              control={control}
+              mlbbIdName="mlbbId"
+              serverIdName="serverId"
+            />
+            <FormSelect
+              control={control}
+              name="currentRank"
+              label="Current rank"
+              options={rankOptions}
+              placeholder="Select rank"
+            />
             <FormSelect
               control={control}
               name="squadId"
               label="Preferred squad (optional)"
               options={[
-                { value: ANY_SQUAD_VALUE, label: "No preference" },
+                {
+                  value: ANY_SQUAD_VALUE,
+                  label: "No specific squad request",
+                },
                 ...squads.map((squad) => ({
                   value: squad.id,
                   label: squad.name,
                 })),
               ]}
-              placeholder="No preference"
-              description="Only squads currently open for recruitment are listed."
+              placeholder="No specific squad request"
+              description={
+                squads.length > 0
+                  ? "Only squads currently open for recruitment are listed."
+                  : "No squad is currently open for direct requests."
+              }
             />
-          )}
+          </div>
+        </FormSection>
+
+        <FormSection
+          index="03"
+          title="Trial role"
+          description="The lane and heroes you want recruiters to evaluate."
+        >
+          <div className="grid gap-5">
+            <LaneRadioGroup
+              control={control}
+              name="preferredLane"
+              label="Preferred lane"
+              description="Pick the lane you want to trial for."
+            />
+            <FormField
+              control={control}
+              name="heroPool"
+              label="Hero pool"
+              placeholder="e.g. Ling, Fanny, Lancelot, Hayabusa"
+            />
+          </div>
+        </FormSection>
+
+        <FormSection
+          index="04"
+          title="Background"
+          description="Short context that helps the team understand your fit."
+        >
+          <div className="grid gap-4">
+            <FormField
+              control={control}
+              name="previousTeam"
+              label="Previous team (optional)"
+            />
+            <FormField
+              control={control}
+              name="introduction"
+              label="Short introduction"
+              as="textarea"
+              rows={4}
+              placeholder="Playstyle, availability, goals…"
+            />
+          </div>
+        </FormSection>
+
+        <div className="flex flex-col gap-3 border-t border-primary/20 bg-muted/10 p-6 desktop:flex-row desktop:items-center desktop:justify-between">
+          <p className="max-w-xl text-xs leading-6 text-muted-foreground">
+            By submitting, you confirm that the contact and game details are
+            accurate for recruitment review.
+          </p>
+          <Button type="submit" disabled={pending} className="desktop:w-fit">
+            {pending ? "Submitting…" : "Submit application"}
+          </Button>
         </div>
-        <FormField
-          control={control}
-          name="heroPool"
-          label="Hero pool"
-          placeholder="e.g. Ling, Fanny, Lancelot, Hayabusa"
-        />
-        <FormField
-          control={control}
-          name="previousTeam"
-          label="Previous team (optional)"
-        />
-        <FormField
-          control={control}
-          name="introduction"
-          label="Short introduction"
-          as="textarea"
-          rows={4}
-          placeholder="Playstyle, availability, goals…"
-        />
-        <Button type="submit" disabled={pending}>
-          {pending ? "Submitting…" : "Submit application"}
-        </Button>
       </form>
     </BrandCard>
   );
+}
+
+function FormSection({
+  index,
+  title,
+  description,
+  children,
+}: {
+  index: string;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="grid gap-5 border-t border-border p-6 first:border-t-0 desktop:grid-cols-[10rem_minmax(0,1fr)]">
+      <div>
+        <p className="font-mono text-xs text-primary">{index}</p>
+        <h3 className="mt-2 font-heading text-xl font-bold uppercase tracking-wide">
+          {title}
+        </h3>
+        <p className="mt-2 text-xs leading-6 text-muted-foreground">
+          {description}
+        </p>
+      </div>
+      <div className="min-w-0">{children}</div>
+    </section>
+  );
+}
+
+function toMalaysiaPhone(phone: string) {
+  const digits = phone.replace(/\D/g, "").replace(/^60/, "").replace(/^0/, "");
+  return `+60${digits}`;
 }

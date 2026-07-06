@@ -1,6 +1,10 @@
 "use client";
 
-import { FormField, FormSelect } from "@components/forms/form-field";
+import {
+  FormField,
+  FormFileInput,
+  FormSelect,
+} from "@components/forms/form-field";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LANE_LABELS } from "@lib/labels";
@@ -23,6 +27,7 @@ const profileFormSchema = z.object({
   preferredLane: z.string().optional(),
   currentRank: z.string().optional(),
   peakRank: z.string().optional(),
+  avatar: z.instanceof(File).nullable(),
 });
 
 type ProfileFormInput = z.infer<typeof profileFormSchema>;
@@ -30,9 +35,11 @@ type ProfileFormInput = z.infer<typeof profileFormSchema>;
 export function ProfileForm({
   userId,
   defaultValues,
+  imageUrl,
 }: {
   userId: string;
   defaultValues: ProfileFormInput;
+  imageUrl?: string | null;
 }) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -44,7 +51,7 @@ export function ProfileForm({
 
   const form = useForm<ProfileFormInput>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues,
+    defaultValues: { ...defaultValues, avatar: null },
   });
 
   async function onSubmit(values: ProfileFormInput) {
@@ -73,6 +80,19 @@ export function ProfileForm({
       <div className="grid gap-4 desktop:grid-cols-2">
         <FormField control={form.control} name="name" label="Display Name" />
         <FormField control={form.control} name="fullName" label="Full Name" />
+      </div>
+      <div className="grid gap-2">
+        <FormFileInput
+          control={form.control}
+          name="avatar"
+          label={`Profile picture ${imageUrl ? "(replace)" : ""}`}
+          accept="image/*"
+        />
+        {imageUrl && (
+          <p className="text-xs text-muted-foreground">
+            Current profile picture is used in the dashboard avatar.
+          </p>
+        )}
       </div>
       <div className="grid gap-4 desktop:grid-cols-2">
         <FormField control={form.control} name="nickname" label="Nickname" />

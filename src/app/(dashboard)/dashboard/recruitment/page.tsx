@@ -1,6 +1,11 @@
 import { listSquadManagers } from "@features/recruitment/queries";
+import { APPLICATION_STATUS_LABELS } from "@lib/labels";
 import { getManagedSquadIds } from "@server/authz";
 import { applications, db, squads } from "@server/db";
+import {
+  type ApplicationStatus,
+  applicationStatusEnum,
+} from "@server/db/schema";
 import { requireUser, userOrgRole } from "@server/session";
 import { desc, eq, inArray, isNull, or } from "drizzle-orm";
 import { forbidden } from "next/navigation";
@@ -8,6 +13,32 @@ import { EmptyState, PageHeader } from "../_components/page-surface";
 import { ApplicationCard } from "./_components/application-card";
 
 export const dynamic = "force-dynamic";
+
+const KANBAN_STATUS_META: Record<
+  ApplicationStatus,
+  { tone: string; description: string }
+> = {
+  applied: {
+    tone: "border-primary/30 bg-primary/5",
+    description: "New submissions waiting for first review.",
+  },
+  under_review: {
+    tone: "border-blue-500/30 bg-blue-500/5",
+    description: "Profiles being checked by recruitment.",
+  },
+  trial: {
+    tone: "border-amber-500/30 bg-amber-500/5",
+    description: "Players invited into trial or scrim review.",
+  },
+  accepted: {
+    tone: "border-emerald-500/30 bg-emerald-500/5",
+    description: "Approved applicants ready for onboarding.",
+  },
+  rejected: {
+    tone: "border-destructive/30 bg-destructive/5",
+    description: "Applications that are no longer moving forward.",
+  },
+};
 
 export default async function RecruitmentPage() {
   const actor = await requireUser();
@@ -40,14 +71,11 @@ export default async function RecruitmentPage() {
       : Promise.resolve([]),
   ]);
 
-  const open = rows.filter(
-    (application) =>
-      application.status !== "accepted" && application.status !== "rejected",
-  );
-  const closed = rows.filter(
-    (application) =>
-      application.status === "accepted" || application.status === "rejected",
-  );
+  const board = applicationStatusEnum.enumValues.map((status) => ({
+    status,
+    applications: rows.filter((application) => application.status === status),
+    ...KANBAN_STATUS_META[status],
+  }));
 
   return (
     <main>
@@ -60,45 +88,55 @@ export default async function RecruitmentPage() {
         }
       />
 
-      <div className="grid gap-8">
-        <section className="grid gap-4">
-          <h2 className="text-base font-medium">In progress ({open.length})</h2>
-          {open.length === 0 ? (
-            <EmptyState message="No open applications." />
-          ) : (
-            <div className="grid gap-4 xl:grid-cols-2">
-              {open.map((application) => (
-                <ApplicationCard
-                  key={application.id}
-                  application={application}
-                  assignedLeaderName={application.assignedLeader?.name ?? null}
-                  leaders={leaders}
-                  squads={activeSquads}
-                  isAdmin={isAdmin}
-                />
-              ))}
-            </div>
-          )}
-        </section>
+      {rows.length === 0 ? (
+        <EmptyState message="No applications yet." />
+      ) : (
+        <div className="-mx-4 overflow-x-auto px-4 pb-3 desktop:mx-0 desktop:px-0">
+          <div className="grid min-w-[92rem] grid-cols-5 gap-4">
+            {board.map((column) => (
+              <section
+                key={column.status}
+                className="flex min-h-[34rem] flex-col rounded-none border bg-card/60"
+              >
+                <div className={`border-b p-4 ${column.tone}`}>
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="font-heading text-lg font-bold uppercase tracking-wide">
+                      {APPLICATION_STATUS_LABELS[column.status]}
+                    </h2>
+                    <span className="grid size-7 place-items-center border border-border bg-background text-xs font-semibold">
+                      {column.applications.length}
+                    </span>
+                  </div>
+                  <p className="mt-2 min-h-10 text-xs leading-5 text-muted-foreground">
+                    {column.description}
+                  </p>
+                </div>
 
-        {closed.length > 0 && (
-          <section className="grid gap-4">
-            <h2 className="text-base font-medium">Decided ({closed.length})</h2>
-            <div className="grid gap-4 xl:grid-cols-2">
-              {closed.map((application) => (
-                <ApplicationCard
-                  key={application.id}
-                  application={application}
-                  assignedLeaderName={application.assignedLeader?.name ?? null}
-                  leaders={leaders}
-                  squads={activeSquads}
-                  isAdmin={isAdmin}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
+                <div className="grid flex-1 content-start gap-3 p-3">
+                  {column.applications.length === 0 ? (
+                    <div className="rounded-none border border-dashed px-3 py-8 text-center text-xs text-muted-foreground">
+                      No applications
+                    </div>
+                  ) : (
+                    column.applications.map((application) => (
+                      <ApplicationCard
+                        key={application.id}
+                        application={application}
+                        assignedLeaderName={
+                          application.assignedLeader?.name ?? null
+                        }
+                        leaders={leaders}
+                        squads={activeSquads}
+                        isAdmin={isAdmin}
+                      />
+                    ))
+                  )}
+                </div>
+              </section>
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -38,6 +38,7 @@ export default async function SettingsPage() {
         <CardContent>
           <ProfileForm
             userId={user.id}
+            imageUrl={user.image}
             defaultValues={{
               name: user.name ?? "",
               fullName: profile?.fullName ?? "",
@@ -49,6 +50,7 @@ export default async function SettingsPage() {
               preferredLane: profile?.preferredLane ?? "",
               currentRank: profile?.currentRank ?? "",
               peakRank: profile?.peakRank ?? "",
+              avatar: null,
             }}
           />
         </CardContent>
