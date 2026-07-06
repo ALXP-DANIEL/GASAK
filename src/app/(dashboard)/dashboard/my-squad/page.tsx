@@ -1,10 +1,12 @@
 import { Badge } from "@components/ui/shadcn/badge";
+import { Button } from "@components/ui/shadcn/button";
 import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
 import { getManagedSquadIds, getMemberSquadIds } from "@server/authz";
 import { db, squads } from "@server/db";
 import { requireUser } from "@server/session";
 import { inArray } from "drizzle-orm";
 import Image from "next/image";
+import Link from "next/link";
 import {
   DashboardPanel,
   EmptyState,
@@ -52,16 +54,25 @@ export default async function MySquadPage() {
               title={squad.name}
               description={squad.description}
               action={
-                squad.logoUrl ? (
-                  <Image
-                    src={squad.logoUrl}
-                    alt={`${squad.name} logo`}
-                    width={40}
-                    height={40}
-                    className="border object-cover"
-                    unoptimized
-                  />
-                ) : null
+                <div className="flex items-center gap-3">
+                  {squad.logoUrl && (
+                    <Image
+                      src={squad.logoUrl}
+                      alt={`${squad.name} logo`}
+                      width={40}
+                      height={40}
+                      className="border object-cover"
+                      unoptimized
+                    />
+                  )}
+                  {managedSquadIds.includes(squad.id) && (
+                    <Button size="sm" variant="outline" asChild>
+                      <Link href={`/dashboard/squads/${squad.id}`}>
+                        Manage squad
+                      </Link>
+                    </Button>
+                  )}
+                </div>
               }
             >
               <div className="grid gap-3 desktop:grid-cols-2 xl:grid-cols-3">

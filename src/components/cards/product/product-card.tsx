@@ -36,7 +36,11 @@ export function ProductCard({
 
   return (
     <ContentCardFrame
-      className={cn(contentCardSize[variant], className)}
+      className={cn(
+        contentCardSize[variant],
+        compact ? "h-[27rem]" : "h-[31rem]",
+        className,
+      )}
       interactive={hasLink}
     >
       {href && (
@@ -59,8 +63,8 @@ export function ProductCard({
           className={cn(
             "text-balance font-heading font-semibold uppercase tracking-wide",
             compact
-              ? "line-clamp-2 text-sm leading-snug"
-              : "line-clamp-2 text-2xl leading-tight",
+              ? "line-clamp-2 min-h-10 text-sm leading-5"
+              : "line-clamp-2 min-h-16 text-2xl leading-8",
           )}
         >
           {product.name}
@@ -88,7 +92,7 @@ export function ProductCard({
 
         {!compact && (
           <>
-            <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-3 line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-muted-foreground">
               {product.description}
             </p>
             <div className="mt-auto pt-5">

@@ -1,19 +1,23 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { Badge } from "@components/ui/shadcn/badge";
-import { Card, CardContent } from "@components/ui/shadcn/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@components/ui/shadcn/table";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@components/ui/shadcn/card";
 import { getSquad } from "@features/squads/queries";
-import { formatDate } from "@lib/format";
-import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
-import { notFound } from "next/navigation";
-import { requireDashboardRole } from "../../_components/dashboard-section";
+import { canManageSquad } from "@server/authz";
+import { db } from "@server/db";
+import { requireUser, userOrgRole } from "@server/session";
+import { forbidden, notFound } from "next/navigation";
+import {
+  AddSquadMemberDialog,
+  SquadArchiveButton,
+  SquadDeleteButton,
+  SquadEditDialog,
+  SquadRosterTable,
+} from "../_components/squad-manage";
 
 export const dynamic = "force-dynamic";
 
@@ -22,62 +26,70 @@ export default async function SquadDetailPage({
 }: {
   params: Promise<{ squadId: string }>;
 }) {
-  await requireDashboardRole("admin");
+  const actor = await requireUser();
+  const role = userOrgRole(actor);
   const { squadId } = await params;
+
   const squad = await getSquad(squadId);
   if (!squad) notFound();
 
+  const isAdmin = role === "admin";
+  const canManage = isAdmin || (await canManageSquad(actor.id, role, squadId));
+  if (!canManage) forbidden();
+
+  const candidates = canManage
+    ? (await db.query.user.findMany({ orderBy: (t, { asc }) => asc(t.name) }))
+        .filter((u) => !squad.members.some((m) => m.userId === u.id))
+        .map((u) => ({ id: u.id, name: u.name, email: u.email }))
+    : [];
+
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={squad.name}
-        description={squad.description ?? "Squad roster and details."}
-        actions={
-          squad.archived ? <Badge variant="outline">Archived</Badge> : undefined
-        }
-      />
-      <Card>
-        <CardContent>
-          {squad.members.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No members in this squad yet.
-            </p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Player</TableHead>
-                  <TableHead>IGN</TableHead>
-                  <TableHead>Lane</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Joined</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {squad.members.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell className="font-medium">
-                      {member.user.name}
-                    </TableCell>
-                    <TableCell>{member.user.profile?.ign ?? "—"}</TableCell>
-                    <TableCell>
-                      {member.user.profile?.preferredLane
-                        ? LANE_LABELS[member.user.profile.preferredLane]
-                        : "—"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {SQUAD_ROLE_LABELS[member.squadRole]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{formatDate(member.joinedAt)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+    <div className="grid gap-6 desktop:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="flex flex-col gap-6">
+        <PageHeader
+          title={squad.name}
+          description={squad.description ?? "Squad roster and details."}
+          actions={
+            squad.archived ? (
+              <Badge variant="outline">Archived</Badge>
+            ) : undefined
+          }
+        />
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Roster</CardTitle>
+            {canManage && (
+              <AddSquadMemberDialog
+                squadId={squad.id}
+                candidates={candidates}
+              />
+            )}
+          </CardHeader>
+          <CardContent>
+            <SquadRosterTable members={squad.members} canManage={canManage} />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid h-fit gap-4">
+        <Card className="shadow-xs">
+          <CardHeader>
+            <CardTitle>Manage squad</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            <SquadEditDialog squad={squad} />
+            {isAdmin && (
+              <>
+                <SquadArchiveButton
+                  squadId={squad.id}
+                  archived={squad.archived}
+                />
+                <SquadDeleteButton squadId={squad.id} squadName={squad.name} />
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

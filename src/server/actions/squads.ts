@@ -1,8 +1,9 @@
 "use server";
 
 import { logActivity } from "@server/activity-log";
-import { actionUser, isSquadLeader } from "@server/authz";
+import { actionUser, canManageSquad, isSquadLeader } from "@server/authz";
 import { db, squadMembers, squadRoleEnum, squads } from "@server/db";
+import { userOrgRole } from "@server/session";
 import { saveUpload } from "@server/uploads";
 import { and, eq, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -142,6 +143,28 @@ export async function updateSquad(
   return { ok: true, message: "Squad updated" };
 }
 
+export async function deleteSquad(squadId: string): Promise<ActionResult> {
+  const user = await actionUser("admin");
+  if (!user) return { ok: false, error: "Unauthorized" };
+
+  const [row] = await db
+    .delete(squads)
+    .where(eq(squads.id, squadId))
+    .returning();
+  if (!row) return { ok: false, error: "Squad not found" };
+
+  await logActivity({
+    actor: user,
+    action: "delete",
+    entityType: "squad",
+    entityId: row.id,
+    description: `Deleted squad "${row.name}"`,
+  });
+
+  revalidateSquads();
+  return { ok: true, message: "Squad deleted" };
+}
+
 export async function setSquadArchived(
   squadId: string,
   archived: boolean,
@@ -172,12 +195,18 @@ const memberSchema = z.object({
 export async function addSquadMember(
   input: z.infer<typeof memberSchema>,
 ): Promise<ActionResult> {
-  const user = await actionUser("admin");
+  const user = await actionUser();
   if (!user) return { ok: false, error: "Unauthorized" };
 
   const parsed = memberSchema.safeParse(input);
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
+
+  if (
+    !(await canManageSquad(user.id, userOrgRole(user), parsed.data.squadId))
+  ) {
+    return { ok: false, error: "You do not manage this squad" };
+  }
 
   const existing = await db.query.squadMembers.findFirst({
     where: and(
@@ -207,8 +236,16 @@ export async function updateSquadMemberRole(
   memberId: string,
   squadRole: (typeof squadRoleEnum.enumValues)[number],
 ): Promise<ActionResult> {
-  const user = await actionUser("admin");
+  const user = await actionUser();
   if (!user) return { ok: false, error: "Unauthorized" };
+
+  const existing = await db.query.squadMembers.findFirst({
+    where: eq(squadMembers.id, memberId),
+  });
+  if (!existing) return { ok: false, error: "Member not found" };
+  if (!(await canManageSquad(user.id, userOrgRole(user), existing.squadId))) {
+    return { ok: false, error: "You do not manage this squad" };
+  }
 
   const [row] = await db
     .update(squadMembers)
@@ -232,8 +269,16 @@ export async function updateSquadMemberRole(
 export async function removeSquadMember(
   memberId: string,
 ): Promise<ActionResult> {
-  const user = await actionUser("admin");
+  const user = await actionUser();
   if (!user) return { ok: false, error: "Unauthorized" };
+
+  const existing = await db.query.squadMembers.findFirst({
+    where: eq(squadMembers.id, memberId),
+  });
+  if (!existing) return { ok: false, error: "Member not found" };
+  if (!(await canManageSquad(user.id, userOrgRole(user), existing.squadId))) {
+    return { ok: false, error: "You do not manage this squad" };
+  }
 
   const [row] = await db
     .delete(squadMembers)

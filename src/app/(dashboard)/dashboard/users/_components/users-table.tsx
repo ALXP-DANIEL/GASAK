@@ -33,6 +33,7 @@ import {
   createDashboardUser,
   removeDashboardUser,
   setDashboardUserRole,
+  updateDashboardUser,
 } from "@server/actions/users";
 import { ORG_ROLES, type OrgRole } from "@server/db/schema";
 import { useRouter } from "next/navigation";
@@ -126,6 +127,67 @@ export function CreateUserDialog() {
           />
           <Button type="submit" disabled={pending}>
             {pending ? "Creating..." : "Create user"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const editUserFormSchema = z.object({
+  name: z.string().min(2, "Name is required"),
+  email: z.email("Enter a valid email"),
+});
+
+type EditUserFormValues = z.infer<typeof editUserFormSchema>;
+
+function EditUserDialog({ user }: { user: UserRow }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  const { control, handleSubmit } = useForm<EditUserFormValues>({
+    resolver: zodResolver(editUserFormSchema),
+    defaultValues: { name: user.name, email: user.email },
+  });
+
+  function onSubmit(values: EditUserFormValues) {
+    startTransition(async () => {
+      const result = await updateDashboardUser({ userId: user.id, ...values });
+
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success(result.message);
+      setOpen(false);
+      router.refresh();
+    });
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label={`Edit ${user.name}`}>
+          <Icons.Actions.Edit />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit user</DialogTitle>
+          <DialogDescription>Update name and email.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+          <FormField control={control} name="name" label="Name" />
+          <FormField
+            control={control}
+            name="email"
+            label="Email"
+            type="email"
+          />
+          <Button type="submit" disabled={pending}>
+            {pending ? "Saving..." : "Save changes"}
           </Button>
         </form>
       </DialogContent>
@@ -228,7 +290,8 @@ export function UsersTable({
                   </SelectContent>
                 </Select>
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="flex justify-end gap-1 text-right">
+                <EditUserDialog user={user} />
                 <Button
                   variant="ghost"
                   size="icon"

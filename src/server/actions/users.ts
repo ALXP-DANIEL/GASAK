@@ -3,7 +3,9 @@
 import { logActivity } from "@server/activity-log";
 import { auth } from "@server/auth";
 import { actionUser } from "@server/authz";
+import { db, user } from "@server/db";
 import { ORG_ROLES } from "@server/db/schema";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -19,6 +21,12 @@ const createUserSchema = z.object({
 const setUserRoleSchema = z.object({
   userId: z.string().min(1, "User is required"),
   role: z.enum(ORG_ROLES),
+});
+
+const updateUserSchema = z.object({
+  userId: z.string().min(1, "User is required"),
+  name: z.string().min(2, "Name is required"),
+  email: z.email("Enter a valid email"),
 });
 
 function revalidateUsers() {
@@ -101,6 +109,43 @@ export async function setDashboardUserRole(
 
   revalidateUsers();
   return { ok: true, message: "Role updated" };
+}
+
+export async function updateDashboardUser(
+  input: z.infer<typeof updateUserSchema>,
+): Promise<ActionResult> {
+  const actor = await actionUser("admin");
+  if (!actor) return { ok: false, error: "Unauthorized" };
+
+  const parsed = updateUserSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0].message };
+  }
+
+  const existing = await db.query.user.findFirst({
+    where: eq(user.email, parsed.data.email),
+  });
+  if (existing && existing.id !== parsed.data.userId) {
+    return { ok: false, error: "Another user already has that email" };
+  }
+
+  const [row] = await db
+    .update(user)
+    .set({ name: parsed.data.name, email: parsed.data.email })
+    .where(eq(user.id, parsed.data.userId))
+    .returning();
+  if (!row) return { ok: false, error: "User not found" };
+
+  await logActivity({
+    actor,
+    action: "update",
+    entityType: "user",
+    entityId: row.id,
+    description: `Updated user details for ${row.email}`,
+  });
+
+  revalidateUsers();
+  return { ok: true, message: "User updated" };
 }
 
 export async function removeDashboardUser(

@@ -21,7 +21,7 @@ export function ContentCardGrid({
   return (
     <div
       className={cn(
-        "flex flex-wrap justify-center gap-4 desktop:justify-start",
+        "flex flex-wrap justify-center gap-4",
         "*:w-full *:shrink-0",
         density === "default" && "*:desktop:w-[20rem] [&>*]:xl:w-[22rem]",
         density === "compact" &&
