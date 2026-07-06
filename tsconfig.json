@@ -41,12 +41,5 @@
   ],
   "exclude": [
     "node_modules",
-    "gasak-esports-website",
-    "backup",
-    "backup/**",
-    "reference",
-    "reference/**",
-    "redesign-components-from-scratch",
-    "redesign-components-from-scratch/**"
   ]
 }
