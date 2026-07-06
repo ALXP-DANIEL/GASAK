@@ -4,6 +4,7 @@ import { logActivity } from "@server/activity-log";
 import { actionUser, canManageSquad } from "@server/authz";
 import { db, news, newsReads } from "@server/db";
 import { userOrgRole } from "@server/session";
+import { saveUpload } from "@server/uploads";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -58,6 +59,78 @@ export async function createNews(
   revalidatePath("/dashboard");
   revalidatePath("/");
   return { ok: true, message: "News posted" };
+}
+
+export async function updateNews(
+  id: string,
+  input: z.infer<typeof newsSchema>,
+): Promise<ActionResult> {
+  const actor = await actionUser();
+  if (!actor) return { ok: false, error: "Unauthorized" };
+
+  const row = await db.query.news.findFirst({ where: eq(news.id, id) });
+  if (!row) return { ok: false, error: "News not found" };
+
+  const role = userOrgRole(actor);
+  if (role !== "admin" && row.authorId !== actor.id) {
+    return { ok: false, error: "You can only edit your own news" };
+  }
+
+  const parsed = newsSchema.safeParse(input);
+  if (!parsed.success)
+    return { ok: false, error: parsed.error.issues[0].message };
+
+  if (role !== "admin") {
+    if (!parsed.data.squadId) {
+      return { ok: false, error: "Only admins can post global news" };
+    }
+    if (!(await canManageSquad(actor.id, role, parsed.data.squadId))) {
+      return { ok: false, error: "You do not lead this squad" };
+    }
+  }
+
+  await db
+    .update(news)
+    .set({
+      title: parsed.data.title,
+      content: parsed.data.content,
+      squadId: parsed.data.squadId,
+    })
+    .where(eq(news.id, id));
+
+  await logActivity({
+    actor,
+    action: "update",
+    entityType: "news",
+    entityId: id,
+    description: `Updated news "${parsed.data.title}"`,
+  });
+
+  revalidatePath("/dashboard/news");
+  revalidatePath(`/dashboard/news/${id}`);
+  revalidatePath("/dashboard");
+  revalidatePath("/");
+  revalidatePath("/news");
+  return { ok: true, message: "News updated" };
+}
+
+export async function uploadNewsImage(
+  formData: FormData,
+): Promise<ActionResult> {
+  const actor = await actionUser();
+  if (!actor) return { ok: false, error: "Unauthorized" };
+
+  const file = formData.get("image");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "No image provided" };
+  }
+
+  try {
+    const url = await saveUpload(file, "news");
+    return { ok: true, data: { url } };
+  } catch (err) {
+    return { ok: false, error: (err as Error).message };
+  }
 }
 
 export async function deleteNews(id: string): Promise<ActionResult> {

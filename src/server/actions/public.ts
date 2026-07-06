@@ -3,7 +3,14 @@
 import { randomInt } from "node:crypto";
 import { logActivity } from "@server/activity-log";
 import { createBillplzBill, getBillplzBill } from "@server/billplz";
-import { applications, db, laneEnum, orders, products } from "@server/db";
+import {
+  applications,
+  db,
+  laneEnum,
+  orders,
+  products,
+  productVariants,
+} from "@server/db";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -58,6 +65,7 @@ export async function submitApplication(
 
 const checkoutSchema = z.object({
   productId: z.uuid(),
+  variantId: z.uuid().nullable().optional(),
   customerName: z.string().min(2, "Name is required"),
   customerPhone: z.string().min(6, "Enter a valid phone number"),
   customerEmail: z.email("Enter a valid email"),
@@ -85,7 +93,25 @@ export async function placeOrder(
   if (!product?.active) {
     return { ok: false, error: "This product is no longer available" };
   }
-  if (product.stock < parsed.data.quantity) {
+
+  let unitPriceSen = product.priceSen;
+  let availableStock = product.stock;
+
+  if (product.hasVariants) {
+    if (!parsed.data.variantId) {
+      return { ok: false, error: "Please select the product options" };
+    }
+    const variant = await db.query.productVariants.findFirst({
+      where: eq(productVariants.id, parsed.data.variantId),
+    });
+    if (!variant || variant.productId !== product.id || !variant.active) {
+      return { ok: false, error: "Selected option is not available" };
+    }
+    unitPriceSen = variant.priceSen;
+    availableStock = variant.stock;
+  }
+
+  if (availableStock < parsed.data.quantity) {
     return { ok: false, error: "Not enough stock for that quantity" };
   }
 
@@ -98,9 +124,10 @@ export async function placeOrder(
       customerPhone: parsed.data.customerPhone,
       customerEmail: parsed.data.customerEmail,
       productId: product.id,
+      variantId: product.hasVariants ? parsed.data.variantId : null,
       quantity: parsed.data.quantity,
-      unitPriceSen: product.priceSen,
-      totalSen: product.priceSen * parsed.data.quantity,
+      unitPriceSen,
+      totalSen: unitPriceSen * parsed.data.quantity,
       status: "pending",
     })
     .returning();

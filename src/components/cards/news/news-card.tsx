@@ -4,7 +4,7 @@ import {
   contentCardSize,
 } from "@components/cards/shared";
 import { Icons } from "@components/icons";
-import { formatDate } from "@lib/format";
+import { formatDate, stripHtml } from "@lib/format";
 import { cn } from "@lib/utils";
 import type { News } from "@server/db/schema";
 import Link from "next/link";
@@ -98,7 +98,7 @@ function NewsCardContent({
             compact ? "line-clamp-3 text-sm" : "line-clamp-4 text-sm",
           )}
         >
-          {item.content}
+          {stripHtml(item.content)}
         </p>
 
         <div className="mt-auto pt-6">

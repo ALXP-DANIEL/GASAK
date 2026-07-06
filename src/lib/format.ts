@@ -23,3 +23,11 @@ export function formatTime(date: Date | string) {
 export function toDateTimeLocal(date: Date | string) {
   return format(new Date(date), "yyyy-MM-dd'T'HH:mm");
 }
+
+/** Strips HTML tags for plain-text excerpts (card previews, meta tags). */
+export function stripHtml(source: string) {
+  return source
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}

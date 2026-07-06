@@ -3,6 +3,8 @@
 // createContext, which crashes when evaluated inside Server Component
 // chunks (e.g. "Failed to collect page data for /about"). The /ssr paths
 // export the same *Icon-suffixed names without that dependency.
+import { ArrowClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ArrowClockwise";
+import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ArrowCounterClockwise";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareOut";
 import { ArrowsLeftRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowsLeftRight";
 import { CalendarBlankIcon } from "@phosphor-icons/react/dist/ssr/CalendarBlank";
@@ -13,6 +15,7 @@ import { ChartBarIcon } from "@phosphor-icons/react/dist/ssr/ChartBar";
 import { CheckCircleIcon } from "@phosphor-icons/react/dist/ssr/CheckCircle";
 import { CircleIcon } from "@phosphor-icons/react/dist/ssr/Circle";
 import { ClipboardTextIcon } from "@phosphor-icons/react/dist/ssr/ClipboardText";
+import { CodeIcon } from "@phosphor-icons/react/dist/ssr/Code";
 import { CrosshairIcon } from "@phosphor-icons/react/dist/ssr/Crosshair";
 import { CurrencyCircleDollarIcon } from "@phosphor-icons/react/dist/ssr/CurrencyCircleDollar";
 import { EnvelopeSimpleIcon } from "@phosphor-icons/react/dist/ssr/EnvelopeSimple";
@@ -22,22 +25,37 @@ import { GameControllerIcon } from "@phosphor-icons/react/dist/ssr/GameControlle
 import { GearIcon } from "@phosphor-icons/react/dist/ssr/Gear";
 import { HandFistIcon } from "@phosphor-icons/react/dist/ssr/HandFist";
 import { HouseIcon } from "@phosphor-icons/react/dist/ssr/House";
+import { ImageIcon } from "@phosphor-icons/react/dist/ssr/Image";
 import { InstagramLogoIcon } from "@phosphor-icons/react/dist/ssr/InstagramLogo";
 import { LightningIcon } from "@phosphor-icons/react/dist/ssr/Lightning";
+import { LinkBreakIcon } from "@phosphor-icons/react/dist/ssr/LinkBreak";
 import { LinkedinLogoIcon } from "@phosphor-icons/react/dist/ssr/LinkedinLogo";
+import { LinkSimpleIcon } from "@phosphor-icons/react/dist/ssr/LinkSimple";
 import { ListIcon } from "@phosphor-icons/react/dist/ssr/List";
+import { ListBulletsIcon } from "@phosphor-icons/react/dist/ssr/ListBullets";
+import { ListNumbersIcon } from "@phosphor-icons/react/dist/ssr/ListNumbers";
 import { MapPinIcon } from "@phosphor-icons/react/dist/ssr/MapPin";
+import { MinusIcon } from "@phosphor-icons/react/dist/ssr/Minus";
 import { MoonIcon } from "@phosphor-icons/react/dist/ssr/Moon";
 import { NewspaperIcon } from "@phosphor-icons/react/dist/ssr/Newspaper";
 import { PackageIcon } from "@phosphor-icons/react/dist/ssr/Package";
+import { PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { PhoneIcon } from "@phosphor-icons/react/dist/ssr/Phone";
 import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { QuotesIcon } from "@phosphor-icons/react/dist/ssr/Quotes";
 import { ReceiptIcon } from "@phosphor-icons/react/dist/ssr/Receipt";
 import { ShoppingBagIcon } from "@phosphor-icons/react/dist/ssr/ShoppingBag";
 import { SignOutIcon } from "@phosphor-icons/react/dist/ssr/SignOut";
 import { SquaresFourIcon } from "@phosphor-icons/react/dist/ssr/SquaresFour";
 import { SunIcon } from "@phosphor-icons/react/dist/ssr/Sun";
 import { SwordIcon } from "@phosphor-icons/react/dist/ssr/Sword";
+import { TextBIcon } from "@phosphor-icons/react/dist/ssr/TextB";
+import { TextHOneIcon } from "@phosphor-icons/react/dist/ssr/TextHOne";
+import { TextHThreeIcon } from "@phosphor-icons/react/dist/ssr/TextHThree";
+import { TextHTwoIcon } from "@phosphor-icons/react/dist/ssr/TextHTwo";
+import { TextItalicIcon } from "@phosphor-icons/react/dist/ssr/TextItalic";
+import { TextStrikethroughIcon } from "@phosphor-icons/react/dist/ssr/TextStrikethrough";
+import { TextUnderlineIcon } from "@phosphor-icons/react/dist/ssr/TextUnderline";
 import { TiktokLogoIcon } from "@phosphor-icons/react/dist/ssr/TiktokLogo";
 import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { TrophyIcon } from "@phosphor-icons/react/dist/ssr/Trophy";
@@ -110,11 +128,32 @@ export const Icons = {
 
   Actions: {
     Add: PlusIcon,
+    Edit: PencilSimpleIcon,
     Delete: TrashIcon,
     Eyedropper: EyedropperIcon,
     SignOut: SignOutIcon,
     Settings: GearIcon,
     CaretUpDown: CaretUpDownIcon,
     SwitchFocus: ArrowsLeftRightIcon,
+  },
+
+  Editor: {
+    Bold: TextBIcon,
+    Italic: TextItalicIcon,
+    Underline: TextUnderlineIcon,
+    Strikethrough: TextStrikethroughIcon,
+    H1: TextHOneIcon,
+    H2: TextHTwoIcon,
+    H3: TextHThreeIcon,
+    Quote: QuotesIcon,
+    BulletList: ListBulletsIcon,
+    OrderedList: ListNumbersIcon,
+    Code: CodeIcon,
+    Link: LinkSimpleIcon,
+    Unlink: LinkBreakIcon,
+    HorizontalRule: MinusIcon,
+    Image: ImageIcon,
+    Undo: ArrowCounterClockwiseIcon,
+    Redo: ArrowClockwiseIcon,
   },
 } as const;

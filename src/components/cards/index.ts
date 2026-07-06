@@ -4,6 +4,8 @@ export {
   type BuyButtonProps,
   ProductCard,
   type ProductCardProps,
+  ProductPurchasePanel,
+  type ProductWithVariants,
 } from "./product";
 export {
   ContentCardFrame,

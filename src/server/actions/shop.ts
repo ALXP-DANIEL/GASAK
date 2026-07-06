@@ -7,7 +7,11 @@ import {
   type OrderStatus,
   orders,
   productCategoryEnum,
+  productOptions,
+  productOptionValues,
   products,
+  productVariantOptionValues,
+  productVariants,
 } from "@server/db";
 import { saveUpload } from "@server/uploads";
 import { eq, sql } from "drizzle-orm";
@@ -192,10 +196,19 @@ export async function markOrderPaid(
 ): Promise<void> {
   if (order.status === "paid") return; // already marked — avoid double stock deduction
 
-  await db
-    .update(products)
-    .set({ stock: sql`greatest(${products.stock} - ${order.quantity}, 0)` })
-    .where(eq(products.id, order.productId));
+  if (order.variantId) {
+    await db
+      .update(productVariants)
+      .set({
+        stock: sql`greatest(${productVariants.stock} - ${order.quantity}, 0)`,
+      })
+      .where(eq(productVariants.id, order.variantId));
+  } else {
+    await db
+      .update(products)
+      .set({ stock: sql`greatest(${products.stock} - ${order.quantity}, 0)` })
+      .where(eq(products.id, order.productId));
+  }
 
   await db
     .update(orders)
@@ -255,10 +268,17 @@ export async function updateOrderStatus(
     status === "cancelled" &&
     (order.status === "paid" || order.status === "processing")
   ) {
-    await db
-      .update(products)
-      .set({ stock: sql`${products.stock} + ${order.quantity}` })
-      .where(eq(products.id, order.productId));
+    if (order.variantId) {
+      await db
+        .update(productVariants)
+        .set({ stock: sql`${productVariants.stock} + ${order.quantity}` })
+        .where(eq(productVariants.id, order.variantId));
+    } else {
+      await db
+        .update(products)
+        .set({ stock: sql`${products.stock} + ${order.quantity}` })
+        .where(eq(products.id, order.productId));
+    }
   }
 
   await db
@@ -275,4 +295,154 @@ export async function updateOrderStatus(
 
   revalidateShop();
   return { ok: true, message: `Order ${order.orderNo} → ${status}` };
+}
+
+const variantOptionSchema = z.object({
+  name: z.string().min(1, "Option name is required"),
+  values: z.array(z.string().min(1)).min(1, "Add at least one value"),
+});
+
+const variantInputSchema = z.object({
+  optionValues: z.array(z.string()),
+  priceSen: z.number().int().min(0),
+  stock: z.number().int().min(0),
+  imageUrl: z.string().nullable().optional(),
+  sku: z.string().nullable().optional(),
+  active: z.boolean().default(true),
+});
+
+const setProductVariantsSchema = z.object({
+  options: z
+    .array(variantOptionSchema)
+    .max(2, "Up to 2 option types are supported"),
+  variants: z.array(variantInputSchema),
+});
+
+/**
+ * Replaces a product's whole variant matrix in one transaction — options,
+ * their values, the variant rows, and the variant↔option-value links.
+ * Simpler and safer than diffing an existing matrix against the new one.
+ */
+export async function setProductVariants(
+  productId: string,
+  input: z.infer<typeof setProductVariantsSchema>,
+): Promise<ActionResult> {
+  const actor = await actionUser("admin", "seller");
+  if (!actor) return { ok: false, error: "Unauthorized" };
+
+  const parsed = setProductVariantsSchema.safeParse(input);
+  if (!parsed.success)
+    return { ok: false, error: parsed.error.issues[0].message };
+
+  const product = await db.query.products.findFirst({
+    where: eq(products.id, productId),
+  });
+  if (!product) return { ok: false, error: "Product not found" };
+
+  const hasVariants =
+    parsed.data.options.length > 0 && parsed.data.variants.length > 0;
+
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(productOptions)
+      .where(eq(productOptions.productId, productId));
+    await tx
+      .delete(productVariants)
+      .where(eq(productVariants.productId, productId));
+
+    if (!hasVariants) {
+      await tx
+        .update(products)
+        .set({ hasVariants: false })
+        .where(eq(products.id, productId));
+      return;
+    }
+
+    const valueIdByOption: Record<string, string>[] = [];
+    for (let i = 0; i < parsed.data.options.length; i++) {
+      const option = parsed.data.options[i];
+      const [optionRow] = await tx
+        .insert(productOptions)
+        .values({ productId, name: option.name, sortOrder: i })
+        .returning();
+
+      valueIdByOption[i] = {};
+      for (let j = 0; j < option.values.length; j++) {
+        const [valueRow] = await tx
+          .insert(productOptionValues)
+          .values({
+            optionId: optionRow.id,
+            value: option.values[j],
+            sortOrder: j,
+          })
+          .returning();
+        valueIdByOption[i][option.values[j]] = valueRow.id;
+      }
+    }
+
+    for (const variant of parsed.data.variants) {
+      const [variantRow] = await tx
+        .insert(productVariants)
+        .values({
+          productId,
+          sku: variant.sku || null,
+          priceSen: variant.priceSen,
+          stock: variant.stock,
+          imageUrl: variant.imageUrl || null,
+          active: variant.active,
+        })
+        .returning();
+
+      const optionValueIds = variant.optionValues.map(
+        (value, i) => valueIdByOption[i]?.[value],
+      );
+      if (optionValueIds.some((id) => !id)) {
+        throw new Error("Variant references an unknown option value");
+      }
+
+      await tx.insert(productVariantOptionValues).values(
+        optionValueIds.map((optionValueId) => ({
+          variantId: variantRow.id,
+          optionValueId: optionValueId as string,
+        })),
+      );
+    }
+
+    await tx
+      .update(products)
+      .set({ hasVariants: true })
+      .where(eq(products.id, productId));
+  });
+
+  await logActivity({
+    actor,
+    action: "update",
+    entityType: "product",
+    entityId: productId,
+    description: `Updated variants for product "${product.name}"`,
+  });
+
+  revalidateShop();
+  revalidatePath(`/dashboard/products/${productId}`);
+  revalidatePath(`/shop/${productId}`);
+  return { ok: true, message: "Variants saved" };
+}
+
+export async function uploadVariantImage(
+  formData: FormData,
+): Promise<ActionResult> {
+  const actor = await actionUser("admin", "seller");
+  if (!actor) return { ok: false, error: "Unauthorized" };
+
+  const file = formData.get("image");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "No image provided" };
+  }
+
+  try {
+    const url = await saveUpload(file, "products");
+    return { ok: true, data: { url } };
+  } catch (err) {
+    return { ok: false, error: (err as Error).message };
+  }
 }

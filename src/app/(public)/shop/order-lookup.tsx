@@ -15,7 +15,7 @@ export function OrderLookup() {
       onSubmit={(e) => {
         e.preventDefault();
         if (orderNo.trim()) {
-          router.push(`/pricing/order/${orderNo.trim().toUpperCase()}`);
+          router.push(`/shop/order/${orderNo.trim().toUpperCase()}`);
         }
       }}
     >

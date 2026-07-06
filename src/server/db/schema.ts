@@ -418,6 +418,9 @@ export const products = createTable("products", {
   stock: integer("stock").notNull().default(0),
   imageUrl: text("image_url"),
   active: boolean("active").notNull().default(true),
+  // When true, price/stock/checkout are driven by productVariants instead of
+  // this row's own priceSen/stock — those become a "starting from" display.
+  hasVariants: boolean("has_variants").notNull().default(false),
   createdBy: text("created_by").references(() => user.id, {
     onDelete: "set null",
   }),
@@ -425,6 +428,78 @@ export const products = createTable("products", {
     .notNull()
     .defaultNow(),
 });
+
+// An option group for a product, e.g. "Size" or "Color" (max 2 per product,
+// enforced in the action layer — Shopee-style variant matrix).
+export const productOptions = createTable(
+  "product_options",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("gasak_product_options_product_idx").on(t.productId)],
+);
+
+// A single selectable value within an option group, e.g. "Red" under "Color".
+export const productOptionValues = createTable(
+  "product_option_values",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    optionId: uuid("option_id")
+      .notNull()
+      .references(() => productOptions.id, { onDelete: "cascade" }),
+    value: text("value").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [index("gasak_product_option_values_option_idx").on(t.optionId)],
+);
+
+// A concrete, orderable combination of option values (e.g. Red + M), with its
+// own price/stock/image — this is what actually gets ordered.
+export const productVariants = createTable(
+  "product_variants",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    sku: text("sku"),
+    priceSen: integer("price_sen").notNull(),
+    stock: integer("stock").notNull().default(0),
+    imageUrl: text("image_url"),
+    active: boolean("active").notNull().default(true),
+  },
+  (t) => [index("gasak_product_variants_product_idx").on(t.productId)],
+);
+
+// Join table: which option values make up a given variant.
+export const productVariantOptionValues = createTable(
+  "product_variant_option_values",
+  {
+    variantId: uuid("variant_id")
+      .notNull()
+      .references(() => productVariants.id, { onDelete: "cascade" }),
+    optionValueId: uuid("option_value_id")
+      .notNull()
+      .references(() => productOptionValues.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    uniqueIndex("gasak_variant_option_values_idx").on(
+      t.variantId,
+      t.optionValueId,
+    ),
+  ],
+);
 
 export const orders = createTable(
   "orders",
@@ -439,6 +514,9 @@ export const orders = createTable(
     productId: uuid("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "restrict" }),
+    variantId: uuid("variant_id").references(() => productVariants.id, {
+      onDelete: "restrict",
+    }),
     quantity: integer("quantity").notNull().default(1),
     unitPriceSen: integer("unit_price_sen").notNull(),
     totalSen: integer("total_sen").notNull(),
@@ -552,12 +630,66 @@ export const newsReadRelations = relations(newsReads, ({ one }) => ({
 
 export const productRelations = relations(products, ({ many }) => ({
   orders: many(orders),
+  options: many(productOptions),
+  variants: many(productVariants),
 }));
+
+export const productOptionRelations = relations(
+  productOptions,
+  ({ one, many }) => ({
+    product: one(products, {
+      fields: [productOptions.productId],
+      references: [products.id],
+    }),
+    values: many(productOptionValues),
+  }),
+);
+
+export const productOptionValueRelations = relations(
+  productOptionValues,
+  ({ one, many }) => ({
+    option: one(productOptions, {
+      fields: [productOptionValues.optionId],
+      references: [productOptions.id],
+    }),
+    variantLinks: many(productVariantOptionValues),
+  }),
+);
+
+export const productVariantRelations = relations(
+  productVariants,
+  ({ one, many }) => ({
+    product: one(products, {
+      fields: [productVariants.productId],
+      references: [products.id],
+    }),
+    optionValues: many(productVariantOptionValues),
+    orders: many(orders),
+  }),
+);
+
+export const productVariantOptionValueRelations = relations(
+  productVariantOptionValues,
+  ({ one }) => ({
+    variant: one(productVariants, {
+      fields: [productVariantOptionValues.variantId],
+      references: [productVariants.id],
+    }),
+    optionValue: one(productOptionValues, {
+      fields: [productVariantOptionValues.optionValueId],
+      references: [productOptionValues.id],
+    }),
+  }),
+);
 
 export const orderRelations = relations(orders, ({ one }) => ({
   product: one(products, {
     fields: [orders.productId],
     references: [products.id],
+  }),
+  variant: one(productVariants, {
+    fields: [orders.variantId],
+    references: [productVariants.id],
   }),
   verifier: one(user, {
     fields: [orders.paymentVerifiedBy],
@@ -586,6 +718,9 @@ export type NewsRead = typeof newsReads.$inferSelect;
 export type AuthSlide = typeof authSlides.$inferSelect;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type Product = typeof products.$inferSelect;
+export type ProductOption = typeof productOptions.$inferSelect;
+export type ProductOptionValue = typeof productOptionValues.$inferSelect;
+export type ProductVariant = typeof productVariants.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 
 export type Lane = (typeof laneEnum.enumValues)[number];

@@ -16,12 +16,17 @@ import { notFound } from "next/navigation";
 import { requireDashboardRole } from "../../_components/dashboard-section";
 import { DetailRow, PageHeader } from "../../_components/page-surface";
 import { ProductFormDialog } from "../_components/product-form";
+import { ProductVariantsDialog } from "../_components/product-variants-form";
 
 export const dynamic = "force-dynamic";
 
 async function getProduct(productId: string) {
   return db.query.products.findFirst({
     where: eq(products.id, productId),
+    with: {
+      options: { with: { values: true } },
+      variants: { with: { optionValues: { with: { optionValue: true } } } },
+    },
   });
 }
 
@@ -54,6 +59,7 @@ export default async function ProductDetailPage({
             </CardHeader>
             <CardContent className="grid gap-3">
               <ProductFormDialog product={product} />
+              <ProductVariantsDialog product={product} />
               <DeleteButton
                 action={deleteProduct.bind(null, product.id)}
                 title="Delete product?"
@@ -74,6 +80,14 @@ export default async function ProductDetailPage({
               />
               <DetailRow label="Price" value={formatRM(product.priceSen)} />
               <DetailRow label="Stock" value={product.stock} />
+              <DetailRow
+                label="Variants"
+                value={
+                  product.hasVariants
+                    ? `${product.variants.length} variant${product.variants.length === 1 ? "" : "s"}`
+                    : "None"
+                }
+              />
               <DetailRow
                 label="Status"
                 value={

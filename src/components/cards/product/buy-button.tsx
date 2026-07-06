@@ -31,9 +31,17 @@ type BuyButtonValues = z.infer<typeof buyButtonSchema>;
 
 export type BuyButtonProps = {
   product: Product;
+  variantId?: string;
+  /** Resolved unit price (variant price when applicable); defaults to the base product price. */
+  unitPriceSen?: number;
 };
 
-export function BuyButton({ product }: BuyButtonProps) {
+export function BuyButton({
+  product,
+  variantId,
+  unitPriceSen,
+}: BuyButtonProps) {
+  const priceSen = unitPriceSen ?? product.priceSen;
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -52,7 +60,11 @@ export function BuyButton({ product }: BuyButtonProps) {
 
   function onSubmit(values: BuyButtonValues) {
     startTransition(async () => {
-      const result = await placeOrder({ ...values, productId: product.id });
+      const result = await placeOrder({
+        ...values,
+        productId: product.id,
+        variantId,
+      });
 
       if (result.ok && result.data?.orderNo) {
         toast.success("Order placed! Complete your payment.");
@@ -110,7 +122,7 @@ export function BuyButton({ product }: BuyButtonProps) {
           >
             {pending
               ? "Placing order..."
-              : `Place order — ${formatRM(product.priceSen * quantity)}`}
+              : `Place order — ${formatRM(priceSen * quantity)}`}
           </Button>
         </form>
       </DialogContent>

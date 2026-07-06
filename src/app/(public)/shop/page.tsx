@@ -14,13 +14,13 @@ import { OrderLookup } from "./order-lookup";
 export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
-  title: "Pricing",
+  title: "shop",
   description:
     "MLBB diamonds, weekly passes, joki, and coaching from GASAK Esports.",
-  path: "/pricing",
+  path: "/shop",
 });
 
-export default async function PricingPage() {
+export default async function shopPage() {
   const items = await db
     .select()
     .from(products)
@@ -57,7 +57,7 @@ export default async function PricingPage() {
                 key={product.id}
                 product={product}
                 variant="default"
-                href={`/pricing/${product.id}`}
+                href={`/shop/${product.id}`}
                 action={<BuyButton product={product} />}
               />
             ))}

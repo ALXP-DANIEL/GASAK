@@ -1,6 +1,7 @@
 "use client";
 
 import { FormField, FormSelect } from "@components/forms/form-field";
+import { FormRichText } from "@components/forms/rich-text-editor";
 import { Icons } from "@components/icons";
 import { Button } from "@components/ui/shadcn/button";
 import {
@@ -45,7 +46,7 @@ export function NewsFormDialog({
     ...squads.map((squad) => ({ value: squad.id, label: squad.name })),
   ];
 
-  const { control, handleSubmit } = useForm<Values>({
+  const { control, handleSubmit, reset } = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: "",
@@ -65,6 +66,7 @@ export function NewsFormDialog({
       if (result.ok) {
         toast.success(result.message);
         setOpen(false);
+        reset();
         router.refresh();
         return;
       }
@@ -99,13 +101,7 @@ export function NewsFormDialog({
             options={audienceOptions}
             placeholder="Pick audience"
           />
-          <FormField
-            control={control}
-            name="content"
-            label="Content"
-            as="textarea"
-            rows={5}
-          />
+          <FormRichText control={control} name="content" label="Content" />
           <Button type="submit" disabled={pending}>
             {pending ? "Posting..." : "Post news"}
           </Button>
