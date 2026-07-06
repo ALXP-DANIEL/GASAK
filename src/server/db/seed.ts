@@ -238,27 +238,37 @@ async function main() {
         name: "GASAK Alpha",
         description:
           "The main competitive roster of GASAK, grinding MPL qualifiers and major community tournaments.",
+        logoUrl: "/images/squad-a.png",
+        accentColor: "#e0af3b",
       },
       {
         name: "GASAK Academy",
         description:
           "Development squad for rising talent — the pipeline into GASAK Alpha.",
+        logoUrl: "/images/squad-b.png",
+        accentColor: "#5fb0ff",
       },
       {
         name: "GASAK Bravo",
         description: "Second competitive roster focused on weekly cups.",
+        logoUrl: "/images/squad-retak.png",
+        accentColor: "#3ddc84",
       },
       {
         name: "GASAK Charlie",
         description: "Community tournament lineup for rising players.",
+        logoUrl: "/images/squad-vultra.png",
+        accentColor: "#ff6f5e",
       },
       {
         name: "GASAK Delta",
         description: "Scrim-heavy development roster for role specialists.",
+        accentColor: "#c792ff",
       },
       {
         name: "GASAK Creators",
         description: "Content and coaching squad for public sessions.",
+        accentColor: "#ffd35f",
       },
     ])
     .returning();
