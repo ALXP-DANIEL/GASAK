@@ -1,6 +1,5 @@
 "use server";
 
-import { saveUpload } from "@lib/uploads";
 import { logActivity } from "@server/activity-log";
 import { actionUser } from "@server/authz";
 import {
@@ -10,6 +9,7 @@ import {
   productCategoryEnum,
   products,
 } from "@server/db";
+import { saveUpload } from "@server/uploads";
 import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";

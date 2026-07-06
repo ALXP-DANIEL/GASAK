@@ -1,5 +1,4 @@
-import { ContentCardGrid } from "@components/cards";
-import { NewsCard } from "@components/news/news-card";
+import { ContentCardGrid, NewsCard } from "@components/cards";
 import { LinkButton, SectionHeader } from "@components/ui/brand";
 import type { Announcement } from "@server/db/schema";
 

@@ -4,7 +4,7 @@ import { Badge } from "@components/ui/shadcn/badge";
 import { Card, CardContent } from "@components/ui/shadcn/card";
 import { getMatch } from "@features/matches/queries";
 import { formatDateTime } from "@lib/format";
-import { deleteScrim } from "@server/actions/records";
+import { deleteScrim } from "@server/actions/scrims";
 import { canManageSquad } from "@server/authz";
 import Link from "next/link";
 import { notFound } from "next/navigation";

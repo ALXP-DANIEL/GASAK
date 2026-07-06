@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { OrgRole } from "@server/db";
 import { headers } from "next/headers";
 import { forbidden, unauthorized } from "next/navigation";
@@ -18,9 +20,6 @@ export function userOrgRole(user: { role?: string | null }): OrgRole {
   return "user";
 }
 
-// Temporary alias while call sites migrate to userOrgRole
-export const userRole = userOrgRole;
-
 export async function requireUser(): Promise<SessionUser> {
   const session = await getSession();
   if (!session) unauthorized();
@@ -34,6 +33,3 @@ export async function requireOrgRole(
   if (!roles.includes(userOrgRole(user))) forbidden();
   return user;
 }
-
-// Temporary alias while call sites migrate to requireOrgRole
-export const requireRole = requireOrgRole;

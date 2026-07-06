@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { auth } from "../../lib/auth";
+import { auth } from "../auth";
 import {
   announcements,
   applications,

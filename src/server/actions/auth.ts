@@ -9,7 +9,7 @@ import type {
   ForgotPasswordInput,
   ResetPasswordInput,
 } from "@features/auth/types";
-import { auth } from "@lib/auth";
+import { auth } from "@server/auth";
 
 function authError(error: unknown) {
   return error instanceof Error ? error.message : "Authentication failed";

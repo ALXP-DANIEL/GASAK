@@ -1,5 +1,4 @@
-import { ContentCardGrid } from "@components/cards";
-import { ProductCard } from "@components/products/product-card";
+import { ContentCardGrid, ProductCard } from "@components/cards";
 import { DeleteButton } from "@components/shared/delete-button";
 import { Badge } from "@components/ui/shadcn/badge";
 import {

@@ -1,6 +1,6 @@
-import { getSession, userRole } from "@lib/session";
 import { getManagedSquadIds, getMemberSquadIds } from "@server/authz";
 import { db, events } from "@server/db";
+import { getSession, userOrgRole } from "@server/session";
 import { inArray, isNull, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -10,7 +10,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const role = userRole(session.user);
+  const role = userOrgRole(session.user);
 
   let rows: Awaited<ReturnType<typeof queryAll>>;
   if (role === "admin") {

@@ -1,5 +1,5 @@
-import { requireOrgRole } from "@lib/session";
 import { db } from "@server/db";
+import { requireOrgRole } from "@server/session";
 import { PageHeader } from "../_components/page-surface";
 import { CreateUserDialog, UsersTable } from "./_components/users-table";
 

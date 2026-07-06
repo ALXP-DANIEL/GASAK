@@ -1,9 +1,9 @@
 "use server";
 
-import { userRole } from "@lib/session";
 import { logActivity } from "@server/activity-log";
 import { actionUser, canManageSquad } from "@server/authz";
 import { announcementReads, announcements, db } from "@server/db";
+import { userOrgRole } from "@server/session";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -25,7 +25,7 @@ export async function createAnnouncement(
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
 
-  const role = userRole(actor);
+  const role = userOrgRole(actor);
   if (role !== "admin") {
     // leaders can only post to squads they lead — never globally
     if (!parsed.data.squadId) {
@@ -69,7 +69,7 @@ export async function deleteAnnouncement(id: string): Promise<ActionResult> {
   });
   if (!row) return { ok: false, error: "Announcement not found" };
 
-  if (userRole(actor) !== "admin" && row.authorId !== actor.id) {
+  if (userOrgRole(actor) !== "admin" && row.authorId !== actor.id) {
     return { ok: false, error: "You can only delete your own announcements" };
   }
 

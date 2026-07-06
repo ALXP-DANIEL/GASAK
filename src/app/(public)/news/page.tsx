@@ -1,5 +1,4 @@
-import { ContentCardGrid } from "@components/cards";
-import { NewsCard } from "@components/news/news-card";
+import { ContentCardGrid, NewsCard } from "@components/cards";
 import { PageHero } from "@components/ui/brand";
 import { createPageMetadata } from "@lib/metadata";
 import { announcements, db } from "@server/db";

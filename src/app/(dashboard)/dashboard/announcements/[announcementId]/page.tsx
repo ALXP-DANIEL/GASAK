@@ -1,5 +1,4 @@
-import { ContentCardGrid } from "@components/cards";
-import { NewsCard } from "@components/news/news-card";
+import { ContentCardGrid, NewsCard } from "@components/cards";
 import { DeleteButton } from "@components/shared/delete-button";
 import { Badge } from "@components/ui/shadcn/badge";
 import {
@@ -9,9 +8,9 @@ import {
   CardTitle,
 } from "@components/ui/shadcn/card";
 import { formatDateTime } from "@lib/format";
-import { requireUser, userOrgRole } from "@lib/session";
 import { deleteAnnouncement } from "@server/actions/announcements";
 import { announcements, db } from "@server/db";
+import { requireUser, userOrgRole } from "@server/session";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { DetailRow, PageHeader } from "../../_components/page-surface";

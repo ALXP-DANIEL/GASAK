@@ -1,8 +1,8 @@
 "use server";
 
-import { userRole } from "@lib/session";
 import { actionUser, canManageSquad } from "@server/authz";
 import { db, tournaments } from "@server/db";
+import { userOrgRole } from "@server/session";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { tournamentSchema } from "./schema";
@@ -34,7 +34,9 @@ export async function createTournament(
   const parsed = parseInput(input);
   if ("error" in parsed) return { ok: false, error: parsed.error };
 
-  if (!(await canManageSquad(actor.id, userRole(actor), parsed.data.squadId))) {
+  if (
+    !(await canManageSquad(actor.id, userOrgRole(actor), parsed.data.squadId))
+  ) {
     return { ok: false, error: "You can only add records for your squad" };
   }
 
@@ -64,14 +66,16 @@ export async function updateTournament(
     where: eq(tournaments.id, id),
   });
   if (!row) return { ok: false, error: "Tournament not found" };
-  if (!(await canManageSquad(actor.id, userRole(actor), row.squadId))) {
+  if (!(await canManageSquad(actor.id, userOrgRole(actor), row.squadId))) {
     return { ok: false, error: "You cannot edit this record" };
   }
 
   const parsed = parseInput(input);
   if ("error" in parsed) return { ok: false, error: parsed.error };
 
-  if (!(await canManageSquad(actor.id, userRole(actor), parsed.data.squadId))) {
+  if (
+    !(await canManageSquad(actor.id, userOrgRole(actor), parsed.data.squadId))
+  ) {
     return { ok: false, error: "You can only assign your own squad" };
   }
 
@@ -103,7 +107,7 @@ export async function deleteTournament(
     where: eq(tournaments.id, id),
   });
   if (!row) return { ok: false, error: "Tournament not found" };
-  if (!(await canManageSquad(actor.id, userRole(actor), row.squadId))) {
+  if (!(await canManageSquad(actor.id, userOrgRole(actor), row.squadId))) {
     return { ok: false, error: "You cannot delete this record" };
   }
 

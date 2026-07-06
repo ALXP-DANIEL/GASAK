@@ -1,5 +1,4 @@
-import { ContentCardGrid } from "@components/cards";
-import { SquadCard } from "@components/squads/squad-card";
+import { ContentCardGrid, SquadCard } from "@components/cards";
 import { LinkButton, SectionHeader } from "@components/ui/brand";
 import type { Squad } from "@server/db/schema";
 

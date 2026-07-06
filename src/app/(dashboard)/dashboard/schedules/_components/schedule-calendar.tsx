@@ -1,6 +1,5 @@
 "use client";
 
-import { EventCalendarViews } from "@components/calendar/event-calendar-views";
 import { Button } from "@components/ui/shadcn/button";
 import { ButtonGroup } from "@components/ui/shadcn/button-group";
 import {
@@ -42,6 +41,7 @@ import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { EventCalendarViews } from "./event-calendar-views";
 import { EventForm } from "./event-form";
 
 type ScheduleEvent = {

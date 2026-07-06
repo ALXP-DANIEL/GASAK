@@ -1,9 +1,9 @@
 "use server";
 
-import { userRole } from "@lib/session";
 import { logActivity } from "@server/activity-log";
 import { actionUser, canManageSquad } from "@server/authz";
 import { db, events, eventTypeEnum } from "@server/db";
+import { userOrgRole } from "@server/session";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -29,7 +29,9 @@ export async function createEvent(
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
 
-  if (!(await canManageSquad(actor.id, userRole(actor), parsed.data.squadId))) {
+  if (
+    !(await canManageSquad(actor.id, userOrgRole(actor), parsed.data.squadId))
+  ) {
     return { ok: false, error: "You can only create events for your squad" };
   }
 
@@ -77,7 +79,7 @@ export async function deleteEvent(eventId: string): Promise<ActionResult> {
   });
   if (!event) return { ok: false, error: "Event not found" };
 
-  if (!(await canManageSquad(actor.id, userRole(actor), event.squadId))) {
+  if (!(await canManageSquad(actor.id, userOrgRole(actor), event.squadId))) {
     return { ok: false, error: "You cannot delete this event" };
   }
 

@@ -1,5 +1,5 @@
-import { getSession, type SessionUser, userOrgRole } from "@lib/session";
 import { db, type OrgRole, type SquadRole, squadMembers } from "@server/db";
+import { getSession, type SessionUser, userOrgRole } from "@server/session";
 import { and, eq, inArray } from "drizzle-orm";
 
 /**

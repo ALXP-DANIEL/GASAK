@@ -1,6 +1,6 @@
 import { SiteFooter } from "@components/layout/site-footer";
 import { SiteHeader } from "@components/layout/site-header";
-import { getSession } from "@lib/session";
+import { getSession } from "@server/session";
 
 export const dynamic = "force-dynamic";
 

@@ -1,7 +1,7 @@
 "use server";
 
-import { auth } from "@lib/auth";
 import { logActivity } from "@server/activity-log";
+import { auth } from "@server/auth";
 import { actionUser } from "@server/authz";
 import { ORG_ROLES } from "@server/db/schema";
 import { revalidatePath } from "next/cache";

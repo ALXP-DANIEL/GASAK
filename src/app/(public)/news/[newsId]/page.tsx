@@ -1,4 +1,4 @@
-import { NewsCard } from "@components/news/news-card";
+import { NewsCard } from "@components/cards";
 import { LinkButton, PageHero } from "@components/ui/brand";
 import { formatDateTime } from "@lib/format";
 import { createPageMetadata } from "@lib/metadata";

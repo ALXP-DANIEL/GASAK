@@ -1,4 +1,4 @@
-import { NewsCard } from "@components/news/news-card";
+import { NewsCard } from "@components/cards";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatDateTime } from "@lib/format";
 import type { Announcement } from "@server/db/schema";

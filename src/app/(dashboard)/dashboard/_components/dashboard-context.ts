@@ -1,11 +1,11 @@
 import type { DashboardAccess } from "@config/dashboard";
-import { requireUser, type SessionUser, userOrgRole } from "@lib/session";
 import {
   getManagedSquadIds,
   getMemberSquadIds,
   getPrimarySquadRole,
 } from "@server/authz";
 import type { SquadRole } from "@server/db";
+import { requireUser, type SessionUser, userOrgRole } from "@server/session";
 import { cookies } from "next/headers";
 import {
   parseSidebarFocus,

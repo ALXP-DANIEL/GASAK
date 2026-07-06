@@ -1,10 +1,10 @@
 "use server";
 
-import { userRole } from "@lib/session";
-import { saveUpload } from "@lib/uploads";
 import { logActivity } from "@server/activity-log";
 import { actionUser } from "@server/authz";
 import { db, laneEnum, playerProfiles, user } from "@server/db";
+import { userOrgRole } from "@server/session";
+import { saveUpload } from "@server/uploads";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -31,7 +31,7 @@ export async function updateProfile(
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   // Members edit their own profile; admins can edit anyone.
-  if (actor.id !== targetUserId && userRole(actor) !== "admin") {
+  if (actor.id !== targetUserId && userOrgRole(actor) !== "admin") {
     return { ok: false, error: "You can only edit your own profile" };
   }
 

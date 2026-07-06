@@ -4,7 +4,7 @@ import { FormField, FormSelect } from "@components/forms/form-field";
 import { Button } from "@components/ui/shadcn/button";
 import { matchSchema } from "@features/matches/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createScrim } from "@server/actions/records";
+import { createScrim } from "@server/actions/scrims";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";

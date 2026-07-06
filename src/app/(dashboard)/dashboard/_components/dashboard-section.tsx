@@ -1,5 +1,5 @@
-import { requireUser, userOrgRole } from "@lib/session";
 import type { OrgRole } from "@server/db";
+import { requireUser, userOrgRole } from "@server/session";
 import { forbidden } from "next/navigation";
 
 /**

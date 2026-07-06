@@ -3,7 +3,7 @@ import { Badge } from "@components/ui/shadcn/badge";
 import { Card, CardContent } from "@components/ui/shadcn/card";
 import { getPlayer } from "@features/players/queries";
 import { LANE_LABELS, ORG_ROLE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
-import { userOrgRole } from "@lib/session";
+import { userOrgRole } from "@server/session";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireDashboardRole } from "../../_components/dashboard-section";

@@ -1,6 +1,4 @@
-import { ContentCardGrid } from "@components/cards";
-import { BuyButton } from "@components/products/buy-button";
-import { ProductCard } from "@components/products/product-card";
+import { BuyButton, ContentCardGrid, ProductCard } from "@components/cards";
 import { LinkButton, SectionHeader } from "@components/ui/brand";
 import type { Product } from "@server/db/schema";
 

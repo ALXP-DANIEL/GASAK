@@ -1,9 +1,8 @@
 "use server";
 
 import { randomInt } from "node:crypto";
-import { auth } from "@lib/auth";
-import { userOrgRole } from "@lib/session";
 import { logActivity } from "@server/activity-log";
+import { auth } from "@server/auth";
 import { actionOrgUser, getManagedSquadIds } from "@server/authz";
 import {
   applicationStatusEnum,
@@ -15,6 +14,7 @@ import {
   squads,
   user,
 } from "@server/db";
+import { userOrgRole } from "@server/session";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
