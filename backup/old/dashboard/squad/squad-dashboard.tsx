@@ -375,7 +375,7 @@ function MemberDashboard({
 
 function MemberHero({ name, squadName }: { name: string; squadName?: string }) {
   return (
-    <section className="relative overflow-hidden rounded-lg border border-primary/25 bg-card px-5 py-8 shadow-[0_0_50px_oklch(0.78_0.14_85_/_0.1)] md:px-7">
+    <section className="relative overflow-hidden rounded-lg border border-primary/25 bg-card px-5 py-8 shadow-[0_0_50px_oklch(0.78_0.14_85/0.1)] md:px-7">
       <Image
         src="/images/hero.png"
         alt=""
@@ -383,7 +383,7 @@ function MemberHero({ name, squadName }: { name: string; squadName?: string }) {
         priority
         className="object-cover opacity-35"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/25" />
+      <div className="absolute inset-0 bg-linear-to-r from-background via-background/80 to-background/25" />
       <div className="relative max-w-2xl">
         <h1 className="font-heading text-3xl font-black tracking-wide md:text-4xl">
           {timeGreeting()}, {name}!
@@ -559,7 +559,7 @@ function MemberRecentScrimsPanel({
       }
     >
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[560px] text-left text-sm">
+        <table className="w-full min-w-140 text-left text-sm">
           <thead className="text-xs uppercase text-muted-foreground">
             <tr className="border-b border-primary/15">
               <th className="py-2 font-medium">Opponent</th>
@@ -672,7 +672,7 @@ function LeaderHero({
   memberCount: number;
 }) {
   return (
-    <section className="relative overflow-hidden rounded-lg border border-primary/25 bg-card px-5 py-6 shadow-[0_0_50px_oklch(0.78_0.14_85_/_0.1)] md:px-7">
+    <section className="relative overflow-hidden rounded-lg border border-primary/25 bg-card px-5 py-6 shadow-[0_0_50px_oklch(0.78_0.14_85/0.1)] md:px-7">
       <Image
         src="/images/hero.png"
         alt=""
@@ -680,14 +680,14 @@ function LeaderHero({
         priority
         className="object-cover opacity-30"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/82 to-background/30" />
+      <div className="absolute inset-0 bg-linear-to-r from-background via-background/82 to-background/30" />
       <div className="relative flex flex-col gap-5 md:flex-row md:items-center">
         <Image
           src={logoUrl || "/images/gasak-logo.png"}
           alt=""
           width={96}
           height={96}
-          className="size-20 rounded-full border border-primary/35 object-cover shadow-[0_0_24px_oklch(0.78_0.14_85_/_0.25)] md:size-24"
+          className="size-20 rounded-full border border-primary/35 object-cover shadow-[0_0_24px_oklch(0.78_0.14_85/0.25)] md:size-24"
           unoptimized={Boolean(logoUrl)}
         />
         <div className="min-w-0 flex-1">

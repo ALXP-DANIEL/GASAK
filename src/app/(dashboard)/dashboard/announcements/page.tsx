@@ -78,7 +78,6 @@ export default async function AnnouncementsPage() {
               announcement={announcement}
               squadName={announcement.squad?.name ?? null}
               authorName={announcement.author?.name ?? "Unknown"}
-              canDelete={role === "admin" || announcement.authorId === actor.id}
               isUnread={unreadIds.has(announcement.id)}
             />
           ))}

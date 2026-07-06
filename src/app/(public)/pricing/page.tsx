@@ -1,5 +1,6 @@
 import { and, eq, gt } from "drizzle-orm";
 import { ContentCardGrid } from "@/components/cards";
+import { BuyButton } from "@/components/products/buy-button";
 import { ProductCard } from "@/components/products/product-card";
 import { PageHero, SectionHeader } from "@/components/ui/brand";
 import { PRODUCT_CATEGORY_LABELS } from "@/lib/labels";
@@ -10,7 +11,6 @@ import {
   productCategoryEnum,
   products,
 } from "@/server/db";
-import { BuyButton } from "./buy-button";
 import { OrderLookup } from "./order-lookup";
 
 export const dynamic = "force-dynamic";
@@ -59,6 +59,7 @@ export default async function PricingPage() {
                 key={product.id}
                 product={product}
                 variant="default"
+                href={`/pricing/${product.id}`}
                 action={<BuyButton product={product} />}
               />
             ))}

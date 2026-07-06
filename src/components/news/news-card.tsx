@@ -15,16 +15,21 @@ export function NewsCard({
   variant = "compact",
   meta,
   action,
+  href,
 }: {
   item: Announcement;
   variant?: ContentCardVariant;
   meta?: React.ReactNode;
   action?: React.ReactNode;
+  href?: string;
 }) {
   const compact = variant === "compact";
 
-  return (
-    <ContentCardFrame className={contentCardSize[variant]}>
+  const card = (
+    <ContentCardFrame
+      className={cn(contentCardSize[variant], href && "cursor-pointer")}
+      interactive={Boolean(href)}
+    >
       <div
         className={cn(
           "relative flex items-center justify-center border-b border-primary/20 bg-linear-to-br from-primary/25 via-primary/5 to-transparent",
@@ -72,7 +77,7 @@ export function NewsCard({
           {item.content}
         </p>
         {action && <div className="mt-auto pt-4">{action}</div>}
-        {compact && (
+        {compact && !href && (
           <Link
             href="/news"
             className="mt-4 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-primary hover:underline"
@@ -82,5 +87,16 @@ export function NewsCard({
         )}
       </div>
     </ContentCardFrame>
+  );
+
+  if (!href) return card;
+
+  return (
+    <Link
+      href={href}
+      className="block h-full rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    >
+      {card}
+    </Link>
   );
 }

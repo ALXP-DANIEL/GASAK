@@ -71,10 +71,10 @@ export function AuthSideCarousel({
       <Carousel
         setApi={setApi}
         opts={{ loop: true }}
-        className="h-full [&>[data-slot=carousel-content]]:h-full"
+        className="h-full *:data-[slot=carousel-content]:h-full"
         aria-label="GASAK login highlights"
       >
-        <CarouselContent className="h-full -ml-0 [&>[data-slot=carousel-item]]:h-full">
+        <CarouselContent className="h-full ml-0 *:data-[slot=carousel-item]:h-full">
           {slides.map((slide, index) => (
             <CarouselItem key={slide.id} className="h-full pl-0">
               <div className="relative h-full overflow-hidden">

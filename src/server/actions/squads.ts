@@ -9,14 +9,6 @@ import { actionUser, isSquadLeader } from "@/server/authz";
 import { db, squadMembers, squadRoleEnum, squads } from "@/server/db";
 import type { ActionResult } from "./public";
 
-function slugify(name: string) {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 function revalidateSquads() {
   revalidatePath("/dashboard/squads");
   revalidatePath("/dashboard/my-squad");
@@ -45,9 +37,8 @@ export async function createSquad(formData: FormData): Promise<ActionResult> {
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
 
-  const slug = slugify(parsed.data.name);
   const existing = await db.query.squads.findFirst({
-    where: eq(squads.slug, slug),
+    where: eq(squads.name, parsed.data.name),
   });
   if (existing) return { ok: false, error: "A squad with that name exists" };
 
@@ -70,7 +61,6 @@ export async function createSquad(formData: FormData): Promise<ActionResult> {
     .insert(squads)
     .values({
       name: parsed.data.name,
-      slug,
       description: parsed.data.description ?? null,
       accentColor: parsed.data.accentColor ?? null,
       logoUrl,
@@ -119,12 +109,10 @@ export async function updateSquad(
   };
 
   if (parsed.data.name !== squad.name) {
-    const slug = slugify(parsed.data.name);
     const clash = await db.query.squads.findFirst({
-      where: and(eq(squads.slug, slug), ne(squads.id, squadId)),
+      where: and(eq(squads.name, parsed.data.name), ne(squads.id, squadId)),
     });
     if (clash) return { ok: false, error: "A squad with that name exists" };
-    updates.slug = slug;
   }
 
   try {

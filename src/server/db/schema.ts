@@ -11,6 +11,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { generateId } from "@/lib/id";
 
 // ---------------------------------------------------------------------------
 // Roles (stored as text on the Better Auth user table)
@@ -188,9 +189,10 @@ export const playerProfiles = createTable("player_profiles", {
 });
 
 export const squads = createTable("squads", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id")
+    .primaryKey()
+    .$defaultFn(() => generateId()),
   name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
   description: text("description"),
   logoUrl: text("logo_url"),
   bannerUrl: text("banner_url"),
@@ -205,7 +207,9 @@ export const squads = createTable("squads", {
 export const squadMembers = createTable(
   "squad_members",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
     squadId: uuid("squad_id")
       .notNull()
       .references(() => squads.id, { onDelete: "cascade" }),
@@ -223,7 +227,9 @@ export const squadMembers = createTable(
 );
 
 export const applications = createTable("applications", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id")
+    .primaryKey()
+    .$defaultFn(() => generateId()),
   fullName: text("full_name").notNull(),
   email: text("email").notNull(),
   phone: text("phone").notNull(),
@@ -248,74 +254,98 @@ export const applications = createTable("applications", {
     .defaultNow(),
 });
 
-export const events = createTable("events", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  title: text("title").notNull(),
-  description: text("description"),
-  type: eventTypeEnum("type").notNull().default("practice"),
-  startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
-  endsAt: timestamp("ends_at", { withTimezone: true }),
-  location: text("location"),
-  // null squadId means an org-wide event
-  squadId: uuid("squad_id").references(() => squads.id, {
-    onDelete: "cascade",
-  }),
-  createdBy: text("created_by").references(() => user.id, {
-    onDelete: "set null",
-  }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const events = createTable(
+  "events",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    title: text("title").notNull(),
+    description: text("description"),
+    type: eventTypeEnum("type").notNull().default("practice"),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }),
+    location: text("location"),
+    // null squadId means an org-wide event
+    squadId: uuid("squad_id").references(() => squads.id, {
+      onDelete: "cascade",
+    }),
+    createdBy: text("created_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("gasak_events_squad_idx").on(t.squadId)],
+);
 
-export const tournaments = createTable("tournaments", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-  organizer: text("organizer"),
-  date: timestamp("date", { withTimezone: true }).notNull(),
-  prize: text("prize"),
-  opponent: text("opponent"),
-  result: text("result"),
-  mvp: text("mvp"),
-  screenshotUrl: text("screenshot_url"),
-  squadId: uuid("squad_id").references(() => squads.id, {
-    onDelete: "cascade",
-  }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const tournaments = createTable(
+  "tournaments",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    name: text("name").notNull(),
+    organizer: text("organizer"),
+    date: timestamp("date", { withTimezone: true }).notNull(),
+    prize: text("prize"),
+    opponent: text("opponent"),
+    result: text("result"),
+    mvp: text("mvp"),
+    screenshotUrl: text("screenshot_url"),
+    squadId: uuid("squad_id").references(() => squads.id, {
+      onDelete: "cascade",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("gasak_tournaments_squad_idx").on(t.squadId)],
+);
 
-export const scrims = createTable("scrims", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  squadId: uuid("squad_id")
-    .notNull()
-    .references(() => squads.id, { onDelete: "cascade" }),
-  opponent: text("opponent").notNull(),
-  date: timestamp("date", { withTimezone: true }).notNull(),
-  result: text("result"),
-  notes: text("notes"),
-  replayLink: text("replay_link"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const scrims = createTable(
+  "scrims",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    squadId: uuid("squad_id")
+      .notNull()
+      .references(() => squads.id, { onDelete: "cascade" }),
+    opponent: text("opponent").notNull(),
+    date: timestamp("date", { withTimezone: true }).notNull(),
+    result: text("result"),
+    notes: text("notes"),
+    replayLink: text("replay_link"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("gasak_scrims_squad_idx").on(t.squadId)],
+);
 
-export const announcements = createTable("announcements", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  // null squadId means a global announcement
-  squadId: uuid("squad_id").references(() => squads.id, {
-    onDelete: "cascade",
-  }),
-  authorId: text("author_id").references(() => user.id, {
-    onDelete: "set null",
-  }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const announcements = createTable(
+  "announcements",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    title: text("title").notNull(),
+    content: text("content").notNull(),
+    // null squadId means a global announcement
+    squadId: uuid("squad_id").references(() => squads.id, {
+      onDelete: "cascade",
+    }),
+    authorId: text("author_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("gasak_announcements_squad_idx").on(t.squadId)],
+);
 
 export const announcementReads = createTable(
   "announcement_reads",
@@ -337,7 +367,9 @@ export const announcementReads = createTable(
 );
 
 export const authSlides = createTable("auth_slides", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id")
+    .primaryKey()
+    .$defaultFn(() => generateId()),
   title: text("title").notNull(),
   description: text("description").notNull(),
   eyebrow: text("eyebrow").notNull().default("GASAK Management"),
@@ -355,7 +387,9 @@ export const authSlides = createTable("auth_slides", {
 export const activityLogs = createTable(
   "activity_logs",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
     actorId: text("actor_id").references(() => user.id, {
       onDelete: "set null",
     }),
@@ -378,7 +412,9 @@ export const activityLogs = createTable(
 );
 
 export const products = createTable("products", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id")
+    .primaryKey()
+    .$defaultFn(() => generateId()),
   name: text("name").notNull(),
   category: productCategoryEnum("category").notNull(),
   description: text("description"),
@@ -395,33 +431,41 @@ export const products = createTable("products", {
     .defaultNow(),
 });
 
-export const orders = createTable("orders", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  orderNo: text("order_no").notNull().unique(),
-  customerName: text("customer_name").notNull(),
-  customerPhone: text("customer_phone").notNull(),
-  customerEmail: text("customer_email").notNull(),
-  productId: uuid("product_id")
-    .notNull()
-    .references(() => products.id, { onDelete: "restrict" }),
-  quantity: integer("quantity").notNull().default(1),
-  unitPriceSen: integer("unit_price_sen").notNull(),
-  totalSen: integer("total_sen").notNull(),
-  status: orderStatusEnum("status").notNull().default("pending"),
-  paymentMethod: paymentMethodEnum("payment_method"),
-  paymentProofUrl: text("payment_proof_url"),
-  billplzBillId: text("billplz_bill_id"),
-  paymentVerifiedBy: text("payment_verified_by").references(() => user.id, {
-    onDelete: "set null",
-  }),
-  paymentVerifiedAt: timestamp("payment_verified_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const orders = createTable(
+  "orders",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    orderNo: text("order_no").notNull().unique(),
+    customerName: text("customer_name").notNull(),
+    customerPhone: text("customer_phone").notNull(),
+    customerEmail: text("customer_email").notNull(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "restrict" }),
+    quantity: integer("quantity").notNull().default(1),
+    unitPriceSen: integer("unit_price_sen").notNull(),
+    totalSen: integer("total_sen").notNull(),
+    status: orderStatusEnum("status").notNull().default("pending"),
+    paymentMethod: paymentMethodEnum("payment_method"),
+    paymentProofUrl: text("payment_proof_url"),
+    billplzBillId: text("billplz_bill_id"),
+    paymentVerifiedBy: text("payment_verified_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    paymentVerifiedAt: timestamp("payment_verified_at", {
+      withTimezone: true,
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("gasak_orders_product_idx").on(t.productId)],
+);
 
 // ---------------------------------------------------------------------------
 // Relations

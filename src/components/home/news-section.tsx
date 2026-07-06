@@ -15,7 +15,7 @@ export function NewsSection({ items }: { items: Announcement[] }) {
 
       <ContentCardGrid className="mt-10">
         {items.map((item) => (
-          <NewsCard key={item.id} item={item} />
+          <NewsCard key={item.id} item={item} href={`/news/${item.id}`} />
         ))}
       </ContentCardGrid>
 

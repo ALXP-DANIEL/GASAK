@@ -51,7 +51,7 @@ export function SquadCard({
           {development ? "Development Squad" : "Competitive Squad"}
         </p>
         <LinkButton
-          href={`/squads/${squad.slug}`}
+          href={`/squads/${squad.id}`}
           size="sm"
           caret
           className="mt-auto"
@@ -63,7 +63,7 @@ export function SquadCard({
   }
 
   return (
-    <Link href={`/squads/${squad.slug}`} className="h-full">
+    <Link href={`/squads/${squad.id}`} className="h-full">
       <ContentCardFrame className={contentCardSize.default}>
         {squad.bannerUrl && (
           <div className="relative h-32 w-full">

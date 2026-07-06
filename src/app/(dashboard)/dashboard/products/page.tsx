@@ -36,6 +36,7 @@ export default async function ProductsPage() {
               key={product.id}
               product={product}
               variant="default"
+              href={`/dashboard/products/${product.id}`}
               meta={
                 <>
                   <Badge variant="secondary">

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   ContentCardFrame,
   type ContentCardVariant,
@@ -13,13 +14,15 @@ import type { Product } from "@/server/db/schema";
 export function ProductCard({
   product,
   action,
+  href,
   variant = "compact",
   meta,
   footer,
   className,
 }: {
   product: Product;
-  action?: React.ReactNode;
+  action?: React.ReactNode | false;
+  href?: string;
   variant?: ContentCardVariant;
   meta?: React.ReactNode;
   footer?: React.ReactNode;
@@ -30,14 +33,25 @@ export function ProductCard({
   return (
     <ContentCardFrame
       className={cn(
+        "relative",
         contentCardSize[variant],
         compact && "items-center p-5 text-center",
+        href && "transition-colors hover:border-primary/60",
         className,
       )}
+      interactive={Boolean(href)}
     >
+      {href && (
+        <Link
+          href={href}
+          aria-label={`View ${product.name}`}
+          className="absolute inset-0 z-10 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        />
+      )}
+
       <div
         className={cn(
-          "relative flex items-center justify-center overflow-hidden",
+          "relative z-20 pointer-events-none flex items-center justify-center overflow-hidden",
           compact ? "size-16 desktop:size-20" : "h-36 w-full",
         )}
       >
@@ -67,7 +81,7 @@ export function ProductCard({
 
       <div
         className={cn(
-          "flex flex-1 flex-col",
+          "relative z-20 pointer-events-none flex flex-1 flex-col",
           compact ? "w-full items-center" : "p-5",
         )}
       >
@@ -80,12 +94,13 @@ export function ProductCard({
             className={cn(
               "font-heading font-bold tracking-wide",
               compact
-                ? "mt-3 line-clamp-2 text-xs uppercase desktop:text-sm"
-                : "text-xl",
+                ? "mt-3 line-clamp-2 min-h-10 text-xs leading-5 uppercase desktop:text-sm"
+                : "line-clamp-2 min-h-14 text-xl leading-7",
             )}
           >
             {product.name}
           </h3>
+
           {compact ? (
             <p className="mt-1 text-[11px] font-semibold text-primary desktop:text-xs">
               {formatRM(product.priceSen)}
@@ -99,9 +114,10 @@ export function ProductCard({
 
         {!compact && (
           <>
-            <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+            <p className="mt-2 line-clamp-3 min-h-18 text-sm leading-6 text-muted-foreground">
               {product.description}
             </p>
+
             <div className="mt-auto pt-5">
               {footer ?? (
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -112,12 +128,19 @@ export function ProductCard({
           </>
         )}
 
-        <div className={cn(compact ? "mt-auto w-full pt-3" : "mt-4")}>
-          {action ?? (
-            <LinkButton href="/pricing" size="sm" className="w-full">
-              Buy now
-            </LinkButton>
+        <div
+          className={cn(
+            "relative z-30 pointer-events-auto",
+            compact ? "mt-auto w-full pt-3" : "mt-4",
           )}
+        >
+          {action === false || (href && action === undefined)
+            ? null
+            : (action ?? (
+                <LinkButton href="/pricing" size="sm" className="w-full">
+                  Buy now
+                </LinkButton>
+              ))}
         </div>
       </div>
     </ContentCardFrame>

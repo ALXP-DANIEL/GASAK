@@ -14,9 +14,9 @@ export async function listSquads() {
 }
 
 /** Admin-only: a squad's full roster. */
-export async function getSquad(id: string) {
+export async function getSquad(squadId: string) {
   return db.query.squads.findFirst({
-    where: eq(squads.id, id),
+    where: eq(squads.id, squadId),
     with: {
       members: {
         with: { user: { with: { profile: true } } },

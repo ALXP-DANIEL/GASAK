@@ -314,7 +314,7 @@ function OrdersOverviewPanel({
         ))}
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px] text-left text-sm">
+        <table className="w-full min-w-190 text-left text-sm">
           <thead className="border-b border-primary/15 text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
               <th className="py-3 font-medium">Order ID</th>

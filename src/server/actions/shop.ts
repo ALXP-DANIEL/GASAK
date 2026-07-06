@@ -141,6 +141,36 @@ export async function updateProduct(
   return { ok: true, message: "Product updated" };
 }
 
+export async function deleteProduct(productId: string): Promise<ActionResult> {
+  const actor = await actionUser("admin", "seller");
+  if (!actor) return { ok: false, error: "Unauthorized" };
+
+  let row: typeof products.$inferSelect | undefined;
+  try {
+    [row] = await db
+      .delete(products)
+      .where(eq(products.id, productId))
+      .returning();
+  } catch {
+    return {
+      ok: false,
+      error: "This product has orders. Hide it from the shop instead.",
+    };
+  }
+  if (!row) return { ok: false, error: "Product not found" };
+
+  await logActivity({
+    actor,
+    action: "delete",
+    entityType: "product",
+    entityId: row.id,
+    description: `Deleted product "${row.name}"`,
+  });
+
+  revalidateShop();
+  return { ok: true, message: "Product deleted" };
+}
+
 // Order status transitions the seller can trigger from each state.
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   pending: ["waiting_payment", "cancelled"],

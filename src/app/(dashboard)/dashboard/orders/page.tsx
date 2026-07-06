@@ -15,7 +15,9 @@ export const dynamic = "force-dynamic";
 
 export default async function OrdersPage({
   searchParams,
-}: PageProps<"/dashboard/orders">) {
+}: {
+  searchParams: Promise<{ q?: string | string[] }>;
+}) {
   await requireOrgRole("admin", "seller");
   const { q } = await searchParams;
   const query = typeof q === "string" ? q.trim().toLowerCase() : "";

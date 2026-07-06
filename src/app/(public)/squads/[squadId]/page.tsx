@@ -11,12 +11,12 @@ export const dynamic = "force-dynamic";
 export default async function SquadDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ squadId: string }>;
 }) {
-  const { slug } = await params;
+  const { squadId } = await params;
 
   const squad = await db.query.squads.findFirst({
-    where: eq(squads.slug, slug),
+    where: eq(squads.id, squadId),
     with: {
       members: {
         with: {

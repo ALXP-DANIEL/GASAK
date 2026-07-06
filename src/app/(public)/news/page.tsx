@@ -34,7 +34,12 @@ export default async function NewsPage() {
       ) : (
         <ContentCardGrid className="w-full">
           {items.map((item) => (
-            <NewsCard key={item.id} item={item} variant="default" />
+            <NewsCard
+              key={item.id}
+              item={item}
+              variant="default"
+              href={`/news/${item.id}`}
+            />
           ))}
         </ContentCardGrid>
       )}

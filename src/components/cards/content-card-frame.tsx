@@ -19,12 +19,12 @@ export function ContentCardGrid({
     <div
       className={cn(
         "flex flex-wrap justify-center gap-4 desktop:justify-start",
-        "[&>*]:w-full [&>*]:shrink-0",
-        density === "default" && "[&>*]:desktop:w-[20rem] [&>*]:xl:w-[22rem]",
+        "*:w-full *:shrink-0",
+        density === "default" && "*:desktop:w-[20rem] [&>*]:xl:w-[22rem]",
         density === "compact" &&
-          "[&>*]:w-[calc(50%-0.5rem)] [&>*]:desktop:w-[13.5rem] [&>*]:xl:w-[14.5rem]",
+          "*:w-[calc(50%-0.5rem)] *:desktop:w-[13.5rem] [&>*]:xl:w-[14.5rem]",
         density === "wide" &&
-          "[&>*]:desktop:w-[calc(50%-0.5rem)] [&>*]:xl:w-[34rem]",
+          "*:desktop:w-[calc(50%-0.5rem)] [&>*]:xl:w-[34rem]",
         className,
       )}
       {...props}

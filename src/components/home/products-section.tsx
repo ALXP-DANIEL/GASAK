@@ -1,4 +1,5 @@
 import { ContentCardGrid } from "@/components/cards";
+import { BuyButton } from "@/components/products/buy-button";
 import { ProductCard } from "@/components/products/product-card";
 import { LinkButton, SectionHeader } from "@/components/ui/brand";
 import type { Product } from "@/server/db/schema";
@@ -13,9 +14,15 @@ export function ProductsSection({ products }: { products: Product[] }) {
     >
       <SectionHeader eyebrow="Shop Now" title="Top products" />
 
-      <ContentCardGrid density="compact" className="mt-10">
+      <ContentCardGrid className="mt-10">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard
+            key={product.id}
+            product={product}
+            variant="compact"
+            href={`/pricing/${product.id}`}
+            action={<BuyButton product={product} />}
+          />
         ))}
       </ContentCardGrid>
 
