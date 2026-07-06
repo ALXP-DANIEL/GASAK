@@ -1,14 +1,14 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Icons } from "@/components/icons";
 import { ScrollTopButton } from "@/components/ui/scroll-top-button";
 import { siteConfig } from "@/config/site";
+import { Logo } from "./logo";
 
 const QUICK_LINKS = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
   { label: "Tournaments", href: "/tournaments" },
-  { label: "Squads", href: "/teams" },
+  { label: "Squads", href: "/squads" },
   { label: "Shop", href: "/pricing" },
   { label: "Contact", href: "/contact" },
 ];
@@ -47,26 +47,30 @@ const SOCIALS = [
 export function SiteFooter() {
   return (
     <footer id="contact" className="border-t border-primary/20 bg-background">
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-5 lg:px-8">
+      {/* Mobile: compact brand + social row. Full link columns move to desktop. */}
+      <div className="flex flex-col items-center gap-6 px-4 py-10 desktop:hidden">
+        <Logo href={null} size={56} wordmark="full" />
+        <ul className="flex items-center gap-5">
+          {SOCIALS.map(({ Icon, label, href }) => (
+            <li key={label}>
+              <a
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={label}
+                className="flex items-center justify-center text-primary transition-opacity hover:opacity-80"
+              >
+                <Icon size={22} />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mx-auto hidden w-full max-w-7xl gap-10 px-4 py-12 desktop:grid desktop:grid-cols-5 desktop:px-8">
         {/* Brand */}
-        <div className="sm:col-span-2 lg:col-span-1">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/images/gasak-logo.png"
-              alt="GASAK ESPORT logo"
-              width={44}
-              height={44}
-              className="size-11 object-contain"
-            />
-            <span className="flex flex-col leading-none">
-              <span className="font-heading text-lg font-bold uppercase tracking-widest text-primary">
-                Gasak
-              </span>
-              <span className="text-[9px] uppercase tracking-[0.4em] text-muted-foreground">
-                Esport
-              </span>
-            </span>
-          </div>
+        <div className="desktop:col-span-1">
+          <Logo href={null} size={44} wordmark="full" />
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
             United as one.
             <br />
@@ -171,9 +175,8 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-primary/15">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
-          <span aria-hidden className="size-8 shrink-0" />
-          <p className="flex-1 text-center text-[10px] text-muted-foreground">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4 desktop:px-8">
+          <p className="text-[10px] text-muted-foreground">
             © {new Date().getFullYear()} GASAK ESPORT. All Rights Reserved.
           </p>
           <ScrollTopButton />

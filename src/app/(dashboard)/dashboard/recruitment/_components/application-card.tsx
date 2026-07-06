@@ -60,7 +60,7 @@ export function ApplicationCard({
   const [leaderId, setLeaderId] = useState("");
   const [notes, setNotes] = useState(application.reviewNotes ?? "");
   const [squadId, setSquadId] = useState(squads[0]?.id ?? "");
-  const [squadRole, setSquadRole] = useState<SquadRole>("member");
+  const [squadRole, setSquadRole] = useState<SquadRole>("player");
   const [credentials, setCredentials] = useState<{
     email: string;
     tempPassword: string;

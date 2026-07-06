@@ -14,9 +14,9 @@ import { createScrim } from "@/server/actions/records";
 type MatchInput = z.infer<typeof matchSchema>;
 
 export function MatchForm({
-  teams,
+  squads,
 }: {
-  teams: { value: string; label: string }[];
+  squads: { value: string; label: string }[];
 }) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -24,7 +24,7 @@ export function MatchForm({
   const form = useForm<MatchInput>({
     resolver: zodResolver(matchSchema),
     defaultValues: {
-      squadId: teams[0]?.value ?? "",
+      squadId: squads[0]?.value ?? "",
       opponent: "",
       date: "",
       result: "",
@@ -55,7 +55,7 @@ export function MatchForm({
           control={form.control}
           name="squadId"
           label="Squad"
-          options={teams}
+          options={squads}
           placeholder="Pick a squad"
         />
         <FormField

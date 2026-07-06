@@ -1,7 +1,7 @@
 import { inArray, isNull, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getSession, userRole } from "@/lib/session";
-import { getLedSquadIds, getMemberSquadIds } from "@/server/authz";
+import { getManagedSquadIds, getMemberSquadIds } from "@/server/authz";
 import { db, events } from "@/server/db";
 
 export async function GET() {
@@ -25,7 +25,7 @@ export async function GET() {
     });
   }
 
-  const ledSquadIds = await getLedSquadIds(session.user.id);
+  const managedSquadIds = await getManagedSquadIds(session.user.id);
 
   return NextResponse.json(
     rows.map((event) => ({
@@ -40,7 +40,7 @@ export async function GET() {
         squadName: event.squad?.name ?? null,
         canManage:
           role === "admin" ||
-          (event.squadId !== null && ledSquadIds.includes(event.squadId)),
+          (event.squadId !== null && managedSquadIds.includes(event.squadId)),
       },
     })),
   );

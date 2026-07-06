@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
-import { listManagedTeamOptions } from "@/features/teams/queries";
+import { listManagedSquadOptions } from "@/features/squads/queries";
 import { TournamentForm } from "@/features/tournaments/components/tournament-form";
 import { getTournament } from "@/features/tournaments/queries";
 import { toDateTimeLocal } from "@/lib/format";
@@ -13,25 +13,20 @@ export default async function EditTournamentPage({
 }: {
   params: Promise<{ tournamentId: string }>;
 }) {
-  const { user, role } = await requireDashboardRole(
-    "admin",
-    "leader",
-    "member",
-    "seller",
-  );
+  const { user, role } = await requireDashboardRole();
   const { tournamentId } = await params;
-  const [tournament, teams] = await Promise.all([
+  const [tournament, squads] = await Promise.all([
     getTournament(tournamentId),
-    listManagedTeamOptions(role, user.id),
+    listManagedSquadOptions(role, user.id),
   ]);
   if (!tournament) notFound();
-  if (!teams.some((team) => team.value === tournament.squadId)) notFound();
+  if (!squads.some((squad) => squad.value === tournament.squadId)) notFound();
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Edit Tournament" description={tournament.name} />
       <TournamentForm
-        teams={teams}
+        squads={squads}
         tournamentId={tournament.id}
         defaultValues={{
           name: tournament.name,

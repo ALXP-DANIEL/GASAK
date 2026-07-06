@@ -4,20 +4,21 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
+import { logActivity } from "@/server/activity-log";
 import { actionUser } from "@/server/authz";
-import { ROLES } from "@/server/db/schema";
+import { ORG_ROLES } from "@/server/db/schema";
 import type { ActionResult } from "./public";
 
 const createUserSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.email("Enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.enum(ROLES),
+  role: z.enum(ORG_ROLES),
 });
 
 const setUserRoleSchema = z.object({
   userId: z.string().min(1, "User is required"),
-  role: z.enum(ROLES),
+  role: z.enum(ORG_ROLES),
 });
 
 function revalidateUsers() {
@@ -41,7 +42,7 @@ export async function createDashboardUser(
   }
 
   try {
-    await auth.api.createUser({
+    const created = await auth.api.createUser({
       headers: await headers(),
       body: {
         name: parsed.data.name,
@@ -49,6 +50,13 @@ export async function createDashboardUser(
         password: parsed.data.password,
         role: parsed.data.role as "admin",
       },
+    });
+    await logActivity({
+      actor,
+      action: "create",
+      entityType: "user",
+      entityId: created.user.id,
+      description: `Created ${parsed.data.role} user ${parsed.data.email}`,
     });
   } catch (error) {
     return { ok: false, error: actionError(error, "Failed to create user") };
@@ -80,6 +88,13 @@ export async function setDashboardUserRole(
         role: parsed.data.role as "admin",
       },
     });
+    await logActivity({
+      actor,
+      action: "update",
+      entityType: "user",
+      entityId: parsed.data.userId,
+      description: `Changed user role to ${parsed.data.role}`,
+    });
   } catch (error) {
     return { ok: false, error: actionError(error, "Failed to update role") };
   }
@@ -101,6 +116,13 @@ export async function removeDashboardUser(
     await auth.api.removeUser({
       headers: await headers(),
       body: { userId },
+    });
+    await logActivity({
+      actor,
+      action: "delete",
+      entityType: "user",
+      entityId: userId,
+      description: "Deleted dashboard user",
     });
   } catch (error) {
     return { ok: false, error: actionError(error, "Failed to delete user") };

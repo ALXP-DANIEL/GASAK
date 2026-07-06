@@ -30,7 +30,7 @@ export async function SquadHome({
   const squadIds = await getMemberSquadIds(userId);
   const now = new Date();
 
-  const [myTeams, upcoming, news, teamMatches, teamTournaments] =
+  const [mySquads, upcoming, news, squadMatches, squadTournaments] =
     await Promise.all([
       squadIds.length
         ? db.query.squads.findMany({
@@ -80,8 +80,8 @@ export async function SquadHome({
         : Promise.resolve([]),
     ]);
 
-  const memberCount = myTeams.reduce(
-    (total, team) => total + team.members.length,
+  const memberCount = mySquads.reduce(
+    (total, squad) => total + squad.members.length,
     0,
   );
 
@@ -101,9 +101,11 @@ export async function SquadHome({
       <StatGrid>
         <StatCard
           label="My Squads"
-          value={myTeams.length}
+          value={mySquads.length}
           icon={Icons.Stats.Squads}
-          hint={myTeams.map((team) => team.name).join(", ") || "No squad yet"}
+          hint={
+            mySquads.map((squad) => squad.name).join(", ") || "No squad yet"
+          }
         />
         <StatCard
           label="Teammates"
@@ -119,7 +121,7 @@ export async function SquadHome({
         />
         <StatCard
           label="Recent Matches"
-          value={teamMatches.length}
+          value={squadMatches.length}
           icon={Icons.Domain.Scrims}
           hint="Latest scrims and matches"
         />
@@ -151,10 +153,10 @@ export async function SquadHome({
           description="Latest scrim results"
           action={{ href: "/dashboard/matches", label: "View all" }}
         >
-          {teamMatches.length === 0 && (
+          {squadMatches.length === 0 && (
             <EmptyState message="No matches recorded yet." />
           )}
-          {teamMatches.map((match) => (
+          {squadMatches.map((match) => (
             <HomeListItem
               key={match.id}
               title={`vs ${match.opponent}`}
@@ -173,10 +175,10 @@ export async function SquadHome({
           description="Your squads' tournament runs"
           action={{ href: "/dashboard/tournaments", label: "View all" }}
         >
-          {teamTournaments.length === 0 && (
+          {squadTournaments.length === 0 && (
             <EmptyState message="No tournaments yet." />
           )}
-          {teamTournaments.map((tournament) => (
+          {squadTournaments.map((tournament) => (
             <HomeListItem
               key={tournament.id}
               href={`/dashboard/tournaments/${tournament.id}`}

@@ -123,7 +123,7 @@ export async function AdminHome() {
         <HomePanel
           title="Squads"
           description="Active rosters and member counts"
-          action={{ href: "/dashboard/teams", label: "View all" }}
+          action={{ href: "/dashboard/squads", label: "View all" }}
         >
           {teamOverview.length === 0 && (
             <EmptyState message="No active squads yet." />
@@ -131,7 +131,7 @@ export async function AdminHome() {
           {teamOverview.map(({ squad, memberCount }) => (
             <HomeListItem
               key={squad.id}
-              href={`/dashboard/teams/${squad.id}`}
+              href={`/dashboard/squads/${squad.id}`}
               title={squad.name}
               meta={`Created ${formatDate(squad.createdAt)}`}
               trailing={<Badge variant="outline">{memberCount} members</Badge>}

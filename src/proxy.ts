@@ -5,9 +5,11 @@ const publicPaths = [
   "/",
   "/about",
   "/tournaments",
-  "/teams",
+  "/squads",
   "/pricing",
   "/contact",
+  "/news",
+  "/recruitment",
 ] as const;
 
 const authPaths = ["/login", "/forgot-password", "/reset-password"] as const;

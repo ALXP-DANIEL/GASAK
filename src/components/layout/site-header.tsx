@@ -1,44 +1,56 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Icons } from "@/components/icons";
 import { cn } from "@/lib/utils";
+import { Logo } from "./logo";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
   { label: "Tournaments", href: "/tournaments" },
-  { label: "Squads", href: "/teams" },
+  { label: "Squads", href: "/squads" },
   { label: "Shop", href: "/pricing" },
   { label: "Contact", href: "/contact" },
 ];
 
-function Brand() {
-  return (
-    <Link href="/" className="flex items-center gap-2">
-      <Image
-        src="/images/gasak-logo.png"
-        alt="GASAK ESPORT logo"
-        width={40}
-        height={40}
-        className="size-10 rounded-full object-cover"
-      />
-      <span className="flex flex-col leading-none">
-        <span className="font-heading text-lg font-bold uppercase tracking-widest text-primary">
-          Gasak
-        </span>
-        <span className="text-[9px] uppercase tracking-[0.4em] text-muted-foreground">
-          Esport
-        </span>
-      </span>
+function AuthLink({
+  isLoggedIn,
+  className,
+  onClick,
+}: {
+  isLoggedIn: boolean;
+  className?: string;
+  onClick?: () => void;
+}) {
+  return isLoggedIn ? (
+    <Link
+      href="/dashboard"
+      onClick={onClick}
+      className={cn(
+        "rounded bg-primary px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary-foreground transition-opacity hover:opacity-90",
+        className,
+      )}
+    >
+      Dashboard
+    </Link>
+  ) : (
+    <Link
+      href="/login"
+      onClick={onClick}
+      className={cn(
+        "rounded border border-primary/50 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary transition-colors hover:bg-primary/10",
+        className,
+      )}
+    >
+      Login
     </Link>
   );
 }
 
-export function SiteHeader() {
+export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -52,12 +64,12 @@ export function SiteHeader() {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-primary/20 bg-background/95 backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 lg:px-8">
-        <Brand />
+    <header className="sticky top-0 z-50 bg-linear-to-b from-background/95 via-background/80 to-transparent backdrop-blur">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 desktop:px-8">
+        <Logo size={40} wordmark="full" />
 
         <nav
-          className="hidden items-center gap-5 lg:flex"
+          className="hidden items-center gap-5 desktop:flex"
           aria-label="Main navigation"
         >
           {NAV_LINKS.map(({ label, href }) => (
@@ -76,28 +88,12 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 lg:flex">
-          <Link
-            href="/login"
-            className="rounded border border-primary/50 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary transition-colors hover:bg-primary/10"
-          >
-            Login
-          </Link>
-          <Link
-            href="/dashboard"
-            className="rounded bg-primary px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary-foreground transition-opacity hover:opacity-90"
-          >
-            Dashboard
-          </Link>
+        <div className="hidden items-center gap-2 desktop:flex">
+          <AuthLink isLoggedIn={isLoggedIn} />
         </div>
 
-        <div className="flex items-center gap-3 lg:hidden">
-          <Link
-            href="/login"
-            className="rounded border border-primary/50 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary transition-colors hover:bg-primary/10"
-          >
-            Login
-          </Link>
+        <div className="flex items-center gap-3 desktop:hidden">
+          <AuthLink isLoggedIn={isLoggedIn} />
           <button
             type="button"
             className="text-primary"
@@ -113,9 +109,17 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {open && (
+      <div
+        className={cn(
+          "absolute inset-x-0 top-full grid bg-background opacity-0 shadow-lg transition-[grid-template-rows,opacity] duration-300 ease-in-out desktop:hidden",
+          open
+            ? "grid-rows-[1fr] opacity-100"
+            : "pointer-events-none grid-rows-[0fr] opacity-0",
+        )}
+        inert={!open}
+      >
         <nav
-          className="border-t border-primary/20 bg-background px-4 py-4 lg:hidden"
+          className="overflow-hidden border-t border-primary/20 px-4 py-4"
           aria-label="Mobile navigation"
         >
           <div className="flex flex-col gap-3">
@@ -132,16 +136,9 @@ export function SiteHeader() {
                 {label}
               </Link>
             ))}
-            <Link
-              href="/dashboard"
-              onClick={() => setOpen(false)}
-              className="mt-2 rounded bg-primary px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider text-primary-foreground"
-            >
-              Dashboard
-            </Link>
           </div>
         </nav>
-      )}
+      </div>
     </header>
   );
 }

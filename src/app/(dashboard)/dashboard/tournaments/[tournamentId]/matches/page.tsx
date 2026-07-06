@@ -24,7 +24,7 @@ export default async function TournamentMatchesPage({
 }: {
   params: Promise<{ tournamentId: string }>;
 }) {
-  await requireDashboardRole("admin", "leader", "member", "seller");
+  await requireDashboardRole();
   const { tournamentId } = await params;
   const tournament = await getTournament(tournamentId);
   if (!tournament) notFound();

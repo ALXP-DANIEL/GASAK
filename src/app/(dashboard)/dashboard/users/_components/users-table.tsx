@@ -1,8 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
+import { FormField, FormSelect } from "@/components/forms/form-field";
 import { Icons } from "@/components/icons";
 import { Badge } from "@/components/ui/shadcn/badge";
 import { Button } from "@/components/ui/shadcn/button";
@@ -14,8 +18,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/shadcn/dialog";
-import { Input } from "@/components/ui/shadcn/input";
-import { Label } from "@/components/ui/shadcn/label";
 import {
   Select,
   SelectContent,
@@ -31,13 +33,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/shadcn/table";
-import { ROLE_LABELS } from "@/lib/labels";
+import { ORG_ROLE_LABELS } from "@/lib/labels";
 import {
   createDashboardUser,
   removeDashboardUser,
   setDashboardUserRole,
 } from "@/server/actions/users";
-import { ROLES, type Role } from "@/server/db/schema";
+import { ORG_ROLES, type OrgRole } from "@/server/db/schema";
+
+const roleOptions = ORG_ROLES.map((item) => ({
+  value: item,
+  label: ORG_ROLE_LABELS[item],
+}));
+
+const createUserFormSchema = z.object({
+  name: z.string().min(2, "Name is required"),
+  email: z.email("Enter a valid email"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  role: z.enum(ORG_ROLES),
+});
+
+type CreateUserFormValues = z.infer<typeof createUserFormSchema>;
 
 type UserRow = {
   id: string;
@@ -51,20 +67,16 @@ type UserRow = {
 export function CreateUserDialog() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [role, setRole] = useState<Role>("member");
   const [pending, startTransition] = useTransition();
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+  const { control, handleSubmit } = useForm<CreateUserFormValues>({
+    resolver: zodResolver(createUserFormSchema),
+    defaultValues: { name: "", email: "", password: "", role: "user" },
+  });
 
+  function onSubmit(values: CreateUserFormValues) {
     startTransition(async () => {
-      const result = await createDashboardUser({
-        name: String(formData.get("name") ?? ""),
-        email: String(formData.get("email") ?? ""),
-        password: String(formData.get("password") ?? ""),
-        role,
-      });
+      const result = await createDashboardUser(values);
 
       if (!result.ok) {
         toast.error(result.error);
@@ -89,40 +101,29 @@ export function CreateUserDialog() {
         <DialogHeader>
           <DialogTitle>Create user</DialogTitle>
           <DialogDescription>
-            Accounts for accepted players, leaders, and sellers.
+            Accounts for admins, sellers, and regular users. Squad leaders are
+            assigned via squad membership, not here.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="new-name">Name</Label>
-            <Input id="new-name" name="name" required />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="new-email">Email</Label>
-            <Input id="new-email" name="email" type="email" required />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="new-password">Temporary password</Label>
-            <Input id="new-password" name="password" type="text" required />
-          </div>
-          <div className="grid gap-2">
-            <Label>Role</Label>
-            <Select
-              value={role}
-              onValueChange={(value) => setRole(value as Role)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ROLES.map((item) => (
-                  <SelectItem key={item} value={item}>
-                    {ROLE_LABELS[item]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+          <FormField control={control} name="name" label="Name" />
+          <FormField
+            control={control}
+            name="email"
+            label="Email"
+            type="email"
+          />
+          <FormField
+            control={control}
+            name="password"
+            label="Temporary password"
+          />
+          <FormSelect
+            control={control}
+            name="role"
+            label="Role"
+            options={roleOptions}
+          />
           <Button type="submit" disabled={pending}>
             {pending ? "Creating..." : "Create user"}
           </Button>
@@ -142,7 +143,7 @@ export function UsersTable({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
-  function setRole(userId: string, role: Role) {
+  function setRole(userId: string, role: OrgRole) {
     startTransition(async () => {
       const result = await setDashboardUserRole({
         userId,
@@ -212,16 +213,16 @@ export function UsersTable({
               <TableCell>
                 <Select
                   value={user.role}
-                  onValueChange={(value) => setRole(user.id, value as Role)}
+                  onValueChange={(value) => setRole(user.id, value as OrgRole)}
                   disabled={pending || user.id === currentUserId}
                 >
                   <SelectTrigger className="w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {ROLES.map((item) => (
+                    {ORG_ROLES.map((item) => (
                       <SelectItem key={item} value={item}>
-                        {ROLE_LABELS[item]}
+                        {ORG_ROLE_LABELS[item]}
                       </SelectItem>
                     ))}
                   </SelectContent>

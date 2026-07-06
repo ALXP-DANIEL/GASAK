@@ -1,8 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
+import { FormField, FormSelect } from "@/components/forms/form-field";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/shadcn/button";
 import {
@@ -13,17 +17,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/shadcn/dialog";
-import { Input } from "@/components/ui/shadcn/input";
-import { Label } from "@/components/ui/shadcn/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/shadcn/select";
-import { Textarea } from "@/components/ui/shadcn/textarea";
 import { createAnnouncement } from "@/server/actions/announcements";
+
+const GLOBAL = "global";
+
+const schema = z.object({
+  title: z.string().min(2, "Title is required"),
+  content: z.string().min(2, "Content is required"),
+  audience: z.string().min(1, "Pick an audience"),
+});
+
+type Values = z.infer<typeof schema>;
 
 export function AnnouncementFormDialog({
   squads,
@@ -34,20 +38,28 @@ export function AnnouncementFormDialog({
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [target, setTarget] = useState(
-    allowGlobal ? "global" : (squads[0]?.id ?? ""),
-  );
   const [pending, startTransition] = useTransition();
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+  const audienceOptions = [
+    ...(allowGlobal ? [{ value: GLOBAL, label: "Global" }] : []),
+    ...squads.map((squad) => ({ value: squad.id, label: squad.name })),
+  ];
 
+  const { control, handleSubmit } = useForm<Values>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      title: "",
+      content: "",
+      audience: allowGlobal ? GLOBAL : (squads[0]?.id ?? ""),
+    },
+  });
+
+  function onSubmit(values: Values) {
     startTransition(async () => {
       const result = await createAnnouncement({
-        title: String(formData.get("title") ?? ""),
-        content: String(formData.get("content") ?? ""),
-        squadId: target === "global" ? null : target,
+        title: values.title,
+        content: values.content,
+        squadId: values.audience === GLOBAL ? null : values.audience,
       });
 
       if (result.ok) {
@@ -78,32 +90,23 @@ export function AnnouncementFormDialog({
               : "Post to a squad you lead."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" required />
-          </div>
-          <div className="grid gap-2">
-            <Label>Audience</Label>
-            <Select value={target} onValueChange={setTarget}>
-              <SelectTrigger>
-                <SelectValue placeholder="Pick audience" />
-              </SelectTrigger>
-              <SelectContent>
-                {allowGlobal && <SelectItem value="global">Global</SelectItem>}
-                {squads.map((squad) => (
-                  <SelectItem key={squad.id} value={squad.id}>
-                    {squad.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="content">Content</Label>
-            <Textarea id="content" name="content" rows={5} required />
-          </div>
-          <Button type="submit" disabled={pending || !target}>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+          <FormField control={control} name="title" label="Title" />
+          <FormSelect
+            control={control}
+            name="audience"
+            label="Audience"
+            options={audienceOptions}
+            placeholder="Pick audience"
+          />
+          <FormField
+            control={control}
+            name="content"
+            label="Content"
+            as="textarea"
+            rows={5}
+          />
+          <Button type="submit" disabled={pending}>
             {pending ? "Posting..." : "Post announcement"}
           </Button>
         </form>

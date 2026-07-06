@@ -1,12 +1,19 @@
 import type { Icon } from "@phosphor-icons/react";
 import { Icons } from "@/components/icons";
-import type { Role } from "@/server/db/schema";
+import type { OrgRole } from "@/server/db/schema";
+
+/** Capability snapshot used to decide what a user can see in the dashboard. */
+export type DashboardAccess = {
+  orgRole: OrgRole;
+  hasSquad: boolean;
+  managesSquad: boolean;
+};
 
 export type DashboardNavItem = {
   href: string;
   label: string;
   icon: Icon;
-  roles: readonly Role[];
+  canAccess: (access: DashboardAccess) => boolean;
 };
 
 export type DashboardNavGroup = {
@@ -15,13 +22,16 @@ export type DashboardNavGroup = {
   items: DashboardNavItem[];
 };
 
-export const dashboardRoleGroups = {
-  all: ["admin", "leader", "member", "seller"],
-  squad: ["admin", "leader", "member", "seller"],
-  squadManagers: ["admin", "leader"],
-  commerce: ["admin", "seller"],
-  admin: ["admin"],
-} as const satisfies Record<string, readonly Role[]>;
+const everyone = () => true;
+const isAdmin = (a: DashboardAccess) => a.orgRole === "admin";
+const canUseCommerce = (a: DashboardAccess) =>
+  a.orgRole === "admin" || a.orgRole === "seller";
+const canViewSquadArea = (a: DashboardAccess) =>
+  a.orgRole === "admin" || a.hasSquad;
+const canManageSquadArea = (a: DashboardAccess) =>
+  a.orgRole === "admin" || a.managesSquad;
+const canViewReports = (a: DashboardAccess) =>
+  canUseCommerce(a) || a.managesSquad;
 
 export const dashboardSidebarGroups: DashboardNavGroup[] = [
   {
@@ -31,7 +41,7 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         href: "/dashboard",
         label: "Dashboard",
         icon: Icons.Layout.Navigation.Home,
-        roles: dashboardRoleGroups.all,
+        canAccess: everyone,
       },
     ],
   },
@@ -43,49 +53,49 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         href: "/dashboard/tournaments",
         label: "Tournaments",
         icon: Icons.Stats.Trophies,
-        roles: dashboardRoleGroups.squad,
+        canAccess: canViewSquadArea,
       },
       {
-        href: "/dashboard/teams",
+        href: "/dashboard/squads",
         label: "Squads",
         icon: Icons.Stats.Squads,
-        roles: dashboardRoleGroups.squad,
+        canAccess: isAdmin,
       },
       {
         href: "/dashboard/players",
         label: "Players",
         icon: Icons.Domain.Players,
-        roles: dashboardRoleGroups.squadManagers,
+        canAccess: isAdmin,
       },
       {
         href: "/dashboard/matches",
         label: "Matches",
         icon: Icons.Domain.Scrims,
-        roles: dashboardRoleGroups.squad,
+        canAccess: canViewSquadArea,
       },
       {
         href: "/dashboard/schedules",
         label: "Schedules",
         icon: Icons.Domain.Calendar,
-        roles: dashboardRoleGroups.squad,
+        canAccess: canViewSquadArea,
       },
       {
         href: "/dashboard/announcements",
         label: "Announcements",
         icon: Icons.Domain.Announcements,
-        roles: dashboardRoleGroups.squad,
+        canAccess: canViewSquadArea,
       },
       {
         href: "/dashboard/my-squad",
         label: "My Squad",
         icon: Icons.Domain.Members,
-        roles: dashboardRoleGroups.squad,
+        canAccess: (a) => a.hasSquad,
       },
       {
         href: "/dashboard/recruitment",
         label: "Recruitment",
         icon: Icons.Domain.Recruitment,
-        roles: dashboardRoleGroups.squadManagers,
+        canAccess: canManageSquadArea,
       },
     ],
   },
@@ -97,13 +107,13 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         href: "/dashboard/orders",
         label: "Orders",
         icon: Icons.Domain.Orders,
-        roles: dashboardRoleGroups.commerce,
+        canAccess: canUseCommerce,
       },
       {
         href: "/dashboard/products",
         label: "Products",
         icon: Icons.Domain.Products,
-        roles: dashboardRoleGroups.commerce,
+        canAccess: canUseCommerce,
       },
     ],
   },
@@ -115,19 +125,31 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         href: "/dashboard/users",
         label: "Users",
         icon: Icons.Domain.Members,
-        roles: dashboardRoleGroups.admin,
+        canAccess: isAdmin,
+      },
+      {
+        href: "/dashboard/auth-slides",
+        label: "Auth Slides",
+        icon: Icons.Domain.News,
+        canAccess: isAdmin,
+      },
+      {
+        href: "/dashboard/logs",
+        label: "Logs",
+        icon: Icons.Domain.Reports,
+        canAccess: isAdmin,
       },
       {
         href: "/dashboard/reports",
         label: "Reports",
         icon: Icons.Domain.Reports,
-        roles: dashboardRoleGroups.all,
+        canAccess: canViewReports,
       },
       {
         href: "/dashboard/settings",
         label: "Settings",
         icon: Icons.Actions.Settings,
-        roles: dashboardRoleGroups.all,
+        canAccess: everyone,
       },
     ],
   },
@@ -136,7 +158,7 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
 export const dashboardNavigation = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/dashboard/tournaments", label: "Tournaments" },
-  { href: "/dashboard/teams", label: "Squads" },
+  { href: "/dashboard/squads", label: "Squads" },
   { href: "/dashboard/players", label: "Players" },
   { href: "/dashboard/matches", label: "Matches" },
   { href: "/dashboard/schedules", label: "Schedules" },
@@ -150,12 +172,9 @@ export const dashboardNavigation = [
   { href: "/dashboard/settings", label: "Settings" },
 ] as const;
 
-export const dashboardRouteAccess = Object.fromEntries(
-  dashboardSidebarGroups.flatMap((group) =>
-    group.items.map((item) => [item.href, item.roles]),
-  ),
-) as Record<string, readonly Role[]>;
-
-export function canAccessDashboardItem(item: DashboardNavItem, role: Role) {
-  return item.roles.includes(role);
+export function canAccessDashboardItem(
+  item: DashboardNavItem,
+  access: DashboardAccess,
+) {
+  return item.canAccess(access);
 }

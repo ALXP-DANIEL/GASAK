@@ -2,8 +2,8 @@ import { inArray } from "drizzle-orm";
 import Image from "next/image";
 import { Badge } from "@/components/ui/shadcn/badge";
 import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@/lib/labels";
-import { requireRole } from "@/lib/session";
-import { getLedSquadIds, getMemberSquadIds } from "@/server/authz";
+import { requireUser } from "@/lib/session";
+import { getManagedSquadIds, getMemberSquadIds } from "@/server/authz";
 import { db, squads } from "@/server/db";
 import {
   DashboardPanel,
@@ -14,12 +14,12 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function MySquadPage() {
-  const user = await requireRole("admin", "leader", "member", "seller");
-  const [squadIds, ledSquadIds] = await Promise.all([
+  const user = await requireUser();
+  const [squadIds, managedSquadIds] = await Promise.all([
     getMemberSquadIds(user.id),
-    getLedSquadIds(user.id),
+    getManagedSquadIds(user.id),
   ]);
-  const isLeader = ledSquadIds.length > 0;
+  const isLeader = managedSquadIds.length > 0;
   const mySquads = squadIds.length
     ? await db.query.squads.findMany({
         where: inArray(squads.id, squadIds),
@@ -29,7 +29,7 @@ export default async function MySquadPage() {
       })
     : [];
 
-  const roleOrder = { leader: 0, coach: 1, member: 2, reserve: 3 } as const;
+  const roleOrder = { leader: 0, coach: 1, player: 2, reserve: 3 } as const;
 
   return (
     <main>

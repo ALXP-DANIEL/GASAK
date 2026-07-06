@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/shadcn/table";
-import { listManagedTeamOptions } from "@/features/teams/queries";
+import { listManagedSquadOptions } from "@/features/squads/queries";
 import { listTournaments } from "@/features/tournaments/queries";
 import { formatDate } from "@/lib/format";
 import { getMemberSquadIds } from "@/server/authz";
@@ -20,19 +20,14 @@ import { requireDashboardRole } from "../_components/dashboard-section";
 export const dynamic = "force-dynamic";
 
 export default async function TournamentsPage() {
-  const { user, role } = await requireDashboardRole(
-    "admin",
-    "leader",
-    "member",
-    "seller",
-  );
+  const { user, role } = await requireDashboardRole();
   const squadIds =
     role === "admin" ? undefined : await getMemberSquadIds(user.id);
-  const [rows, teams] = await Promise.all([
+  const [rows, squads] = await Promise.all([
     listTournaments(squadIds),
-    listManagedTeamOptions(role, user.id),
+    listManagedSquadOptions(role, user.id),
   ]);
-  const canManage = teams.length > 0;
+  const canManage = squads.length > 0;
 
   return (
     <div className="flex flex-col gap-6">

@@ -1,14 +1,21 @@
 import { desc, eq } from "drizzle-orm";
-import { requireRole, userRole } from "@/lib/session";
-import { applications, db, squads, user } from "@/server/db";
+import { forbidden } from "next/navigation";
+import { listSquadManagers } from "@/features/recruitment/queries";
+import { requireUser, userOrgRole } from "@/lib/session";
+import { getManagedSquadIds } from "@/server/authz";
+import { applications, db, squads } from "@/server/db";
 import { EmptyState, PageHeader } from "../_components/page-surface";
 import { ApplicationCard } from "./_components/application-card";
 
 export const dynamic = "force-dynamic";
 
 export default async function RecruitmentPage() {
-  const actor = await requireRole("admin", "leader");
-  const isAdmin = userRole(actor) === "admin";
+  const actor = await requireUser();
+  const isAdmin = userOrgRole(actor) === "admin";
+  if (!isAdmin) {
+    const managedSquadIds = await getManagedSquadIds(actor.id);
+    if (managedSquadIds.length === 0) forbidden();
+  }
 
   const [rows, leaders, activeSquads] = await Promise.all([
     db.query.applications.findMany({
@@ -16,13 +23,7 @@ export default async function RecruitmentPage() {
       orderBy: desc(applications.createdAt),
       with: { assignedLeader: true },
     }),
-    isAdmin
-      ? db
-          .select({ id: user.id, name: user.name })
-          .from(user)
-          .where(eq(user.role, "leader"))
-          .orderBy(user.name)
-      : Promise.resolve([]),
+    isAdmin ? listSquadManagers() : Promise.resolve([]),
     isAdmin
       ? db
           .select({ id: squads.id, name: squads.name })

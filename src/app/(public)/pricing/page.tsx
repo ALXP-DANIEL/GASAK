@@ -1,11 +1,76 @@
-import { PagePlaceholder } from "@/components/shared/page-placeholder";
+import { and, eq, gt } from "drizzle-orm";
+import { ContentCardGrid } from "@/components/cards";
+import { ProductCard } from "@/components/products/product-card";
+import { PageHero, SectionHeader } from "@/components/ui/brand";
+import { PRODUCT_CATEGORY_LABELS } from "@/lib/labels";
+import { createPageMetadata } from "@/lib/metadata";
+import {
+  db,
+  type ProductCategory,
+  productCategoryEnum,
+  products,
+} from "@/server/db";
+import { BuyButton } from "./buy-button";
+import { OrderLookup } from "./order-lookup";
 
-export default function PricingPage() {
+export const dynamic = "force-dynamic";
+
+export const metadata = createPageMetadata({
+  title: "Pricing",
+  description:
+    "MLBB diamonds, weekly passes, joki, and coaching from GASAK Esports.",
+  path: "/pricing",
+});
+
+export default async function PricingPage() {
+  const items = await db
+    .select()
+    .from(products)
+    .where(and(eq(products.active, true), gt(products.stock, 0)))
+    .orderBy(products.category, products.priceSen);
+
+  const byCategory = productCategoryEnum.enumValues
+    .map((category) => ({
+      category: category as ProductCategory,
+      items: items.filter((p) => p.category === category),
+    }))
+    .filter((group) => group.items.length > 0);
+
   return (
-    <PagePlaceholder
-      eyebrow="Public"
-      title="Pricing"
-      description="Plans and package information for tournament and team management."
-    />
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-10 desktop:px-8 desktop:py-14">
+      <div className="flex flex-col items-center gap-5 text-center">
+        <PageHero
+          eyebrow="GASAK Shop"
+          title="Gear up for the next push"
+          description="Diamonds, weekly passes, joki, and coaching with guest checkout by DuitNow QR, FPX, or card."
+        />
+        <OrderLookup />
+      </div>
+
+      {byCategory.map(({ category, items: group }) => (
+        <section key={category} className="flex flex-col gap-4">
+          <SectionHeader
+            align="left"
+            title={PRODUCT_CATEGORY_LABELS[category]}
+          />
+          <ContentCardGrid>
+            {group.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                variant="default"
+                action={<BuyButton product={product} />}
+              />
+            ))}
+          </ContentCardGrid>
+        </section>
+      ))}
+
+      {byCategory.length === 0 && (
+        <p className="text-muted-foreground">
+          The shop is being restocked — check back soon.
+        </p>
+      )}
+    </div>
   );
 }

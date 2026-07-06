@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { userRole } from "@/lib/session";
+import { logActivity } from "@/server/activity-log";
 import { actionUser, canManageSquad } from "@/server/authz";
 import { db, events, eventTypeEnum } from "@/server/db";
 import type { ActionResult } from "./public";
@@ -41,15 +42,25 @@ export async function createEvent(
     return { ok: false, error: "End time must be after the start time" };
   }
 
-  await db.insert(events).values({
-    title: parsed.data.title,
-    description: parsed.data.description || null,
-    type: parsed.data.type,
-    startsAt,
-    endsAt,
-    location: parsed.data.location || null,
-    squadId: parsed.data.squadId,
-    createdBy: actor.id,
+  const [row] = await db
+    .insert(events)
+    .values({
+      title: parsed.data.title,
+      description: parsed.data.description || null,
+      type: parsed.data.type,
+      startsAt,
+      endsAt,
+      location: parsed.data.location || null,
+      squadId: parsed.data.squadId,
+      createdBy: actor.id,
+    })
+    .returning();
+  await logActivity({
+    actor,
+    action: "create",
+    entityType: "event",
+    entityId: row.id,
+    description: `Created ${row.type} event "${row.title}"`,
   });
 
   revalidatePath("/dashboard/schedules");
@@ -71,6 +82,13 @@ export async function deleteEvent(eventId: string): Promise<ActionResult> {
   }
 
   await db.delete(events).where(eq(events.id, eventId));
+  await logActivity({
+    actor,
+    action: "delete",
+    entityType: "event",
+    entityId: event.id,
+    description: `Deleted event "${event.title}"`,
+  });
 
   revalidatePath("/dashboard/schedules");
   revalidatePath("/dashboard");

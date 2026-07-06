@@ -1,10 +1,11 @@
 import { desc, eq, inArray, isNull, or } from "drizzle-orm";
-import { requireRole, userRole } from "@/lib/session";
+import { ContentCardGrid } from "@/components/cards";
+import { requireUser, userOrgRole } from "@/lib/session";
 import {
   getUnreadAnnouncementIds,
   markAnnouncementsRead,
 } from "@/server/actions/announcements";
-import { getLedSquadIds, getMemberSquadIds } from "@/server/authz";
+import { getManagedSquadIds, getMemberSquadIds } from "@/server/authz";
 import { announcements, db, squads } from "@/server/db";
 import { EmptyState, PageHeader } from "../_components/page-surface";
 import { AnnouncementCard } from "./_components/announcement-card";
@@ -13,8 +14,8 @@ import { AnnouncementFormDialog } from "./_components/announcement-form";
 export const dynamic = "force-dynamic";
 
 export default async function AnnouncementsPage() {
-  const actor = await requireRole("admin", "leader", "member", "seller");
-  const role = userRole(actor);
+  const actor = await requireUser();
+  const role = userOrgRole(actor);
 
   let rows: Awaited<ReturnType<typeof queryAll>>;
   let postableSquads: { id: string; name: string }[] = [];
@@ -39,12 +40,12 @@ export default async function AnnouncementsPage() {
       with: { squad: true, author: true },
     });
 
-    const ledIds = await getLedSquadIds(actor.id);
-    postableSquads = ledIds.length
+    const managedIds = await getManagedSquadIds(actor.id);
+    postableSquads = managedIds.length
       ? await db
           .select({ id: squads.id, name: squads.name })
           .from(squads)
-          .where(inArray(squads.id, ledIds))
+          .where(inArray(squads.id, managedIds))
           .orderBy(squads.name)
       : [];
   }
@@ -70,7 +71,7 @@ export default async function AnnouncementsPage() {
       {rows.length === 0 ? (
         <EmptyState message="No announcements yet." />
       ) : (
-        <div className="grid max-w-3xl gap-4">
+        <ContentCardGrid>
           {rows.map((announcement) => (
             <AnnouncementCard
               key={announcement.id}
@@ -81,7 +82,7 @@ export default async function AnnouncementsPage() {
               isUnread={unreadIds.has(announcement.id)}
             />
           ))}
-        </div>
+        </ContentCardGrid>
       )}
     </main>
   );

@@ -1,12 +1,13 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { auth } from "../../lib/auth";
 import {
   announcements,
+  authSlides,
   db,
   events,
+  type OrgRole,
   playerProfiles,
   products,
-  type Role,
   scrims,
   squadMembers,
   squads,
@@ -18,7 +19,7 @@ async function createUser(
   name: string,
   email: string,
   password: string,
-  role: Role,
+  role: OrgRole,
 ) {
   const res = await auth.api.signUpEmail({
     body: { name, email, password },
@@ -30,10 +31,10 @@ async function createUser(
 async function syncDemoAccountRoles() {
   const rolesByEmail = [
     { email: "admin@gasak.gg", role: "admin" },
-    { email: "leader@gasak.gg", role: "leader" },
-    { email: "member@gasak.gg", role: "member" },
+    { email: "leader@gasak.gg", role: "user" },
+    { email: "member@gasak.gg", role: "user" },
     { email: "seller@gasak.gg", role: "seller" },
-  ] satisfies { email: string; role: Role }[];
+  ] satisfies { email: string; role: OrgRole }[];
 
   for (const account of rolesByEmail) {
     await db
@@ -41,6 +42,66 @@ async function syncDemoAccountRoles() {
       .set({ role: account.role })
       .where(eq(user.email, account.email));
   }
+
+  // Demonstrates the sidebar's Manage/Player focus toggle: give the seller a
+  // squad membership if they don't already have one.
+  const seller = await db.query.user.findFirst({
+    where: eq(user.email, "seller@gasak.gg"),
+  });
+  const academy = await db.query.squads.findFirst({
+    where: eq(squads.slug, "gasak-academy"),
+  });
+  if (seller && academy) {
+    const existingMembership = await db.query.squadMembers.findFirst({
+      where: and(
+        eq(squadMembers.userId, seller.id),
+        eq(squadMembers.squadId, academy.id),
+      ),
+    });
+    if (!existingMembership) {
+      await db.insert(squadMembers).values({
+        squadId: academy.id,
+        userId: seller.id,
+        squadRole: "coach",
+      });
+    }
+  }
+
+  await ensureAuthSlides();
+}
+
+async function ensureAuthSlides() {
+  const existing = await db.select().from(authSlides).limit(1);
+  if (existing.length > 0) return;
+
+  await db.insert(authSlides).values([
+    {
+      eyebrow: "GASAK Management",
+      title: "Run the squad from one command center",
+      description: "Track schedules, rosters, recruitment, and match activity.",
+      imageUrl: "/images/hero.png",
+      sortOrder: 0,
+      active: true,
+    },
+    {
+      eyebrow: "GASAK Management",
+      title: "Keep competitive squads aligned",
+      description:
+        "Leaders manage their own squad flow without losing oversight.",
+      imageUrl: "/images/squad-a.png",
+      sortOrder: 10,
+      active: true,
+    },
+    {
+      eyebrow: "GASAK Management",
+      title: "Built for the GASAK organization",
+      description:
+        "Admin, seller, leader, and player workflows stay separated.",
+      imageUrl: "/images/about-family.png",
+      sortOrder: 20,
+      active: true,
+    },
+  ]);
 }
 
 async function main() {
@@ -61,25 +122,25 @@ async function main() {
     "Aiman Faris",
     "leader@gasak.gg",
     "leader123",
-    "leader",
+    "user",
   );
   const member1 = await createUser(
     "Danish Iman",
     "member@gasak.gg",
     "member123",
-    "member",
+    "user",
   );
   const member2 = await createUser(
     "Hakim Zulkifli",
     "hakim@gasak.gg",
     "member123",
-    "member",
+    "user",
   );
   const member3 = await createUser(
     "Irfan Syahmi",
     "irfan@gasak.gg",
     "member123",
-    "member",
+    "user",
   );
   const seller = await createUser(
     "GASAK Store",
@@ -159,9 +220,12 @@ async function main() {
 
   await db.insert(squadMembers).values([
     { squadId: alpha.id, userId: leader.id, squadRole: "leader" },
-    { squadId: alpha.id, userId: member1.id, squadRole: "member" },
-    { squadId: alpha.id, userId: member2.id, squadRole: "member" },
+    { squadId: alpha.id, userId: member1.id, squadRole: "player" },
+    { squadId: alpha.id, userId: member2.id, squadRole: "player" },
     { squadId: alpha.id, userId: member3.id, squadRole: "reserve" },
+    // Seller also plays for Academy — demonstrates the sidebar's
+    // Manage/Player focus toggle for org roles that also have a squad.
+    { squadId: academy.id, userId: seller.id, squadRole: "coach" },
   ]);
 
   const inDays = (d: number, h = 20) => {
@@ -319,6 +383,8 @@ async function main() {
       createdBy: seller.id,
     },
   ]);
+
+  await ensureAuthSlides();
 
   console.log("Seed complete.");
   console.log(

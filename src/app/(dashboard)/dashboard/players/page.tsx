@@ -16,7 +16,7 @@ import { requireDashboardRole } from "../_components/dashboard-section";
 export const dynamic = "force-dynamic";
 
 export default async function PlayersPage() {
-  await requireDashboardRole("admin", "leader");
+  await requireDashboardRole("admin");
   const rows = await listPlayers();
 
   return (

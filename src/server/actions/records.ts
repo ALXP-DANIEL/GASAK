@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { userRole } from "@/lib/session";
 import { saveUpload } from "@/lib/uploads";
+import { logActivity } from "@/server/activity-log";
 import { actionUser, canManageSquad } from "@/server/authz";
 import { db, scrims, tournaments } from "@/server/db";
 import type { ActionResult } from "./public";
@@ -56,16 +57,26 @@ export async function createTournament(
     }
   }
 
-  await db.insert(tournaments).values({
-    name: parsed.data.name,
-    organizer: parsed.data.organizer ?? null,
-    date,
-    prize: parsed.data.prize ?? null,
-    opponent: parsed.data.opponent ?? null,
-    result: parsed.data.result ?? null,
-    mvp: parsed.data.mvp ?? null,
-    screenshotUrl,
-    squadId: parsed.data.squadId,
+  const [row] = await db
+    .insert(tournaments)
+    .values({
+      name: parsed.data.name,
+      organizer: parsed.data.organizer ?? null,
+      date,
+      prize: parsed.data.prize ?? null,
+      opponent: parsed.data.opponent ?? null,
+      result: parsed.data.result ?? null,
+      mvp: parsed.data.mvp ?? null,
+      screenshotUrl,
+      squadId: parsed.data.squadId,
+    })
+    .returning();
+  await logActivity({
+    actor,
+    action: "create",
+    entityType: "tournament",
+    entityId: row.id,
+    description: `Recorded tournament "${row.name}"`,
   });
 
   revalidatePath("/dashboard/tournaments");
@@ -85,6 +96,13 @@ export async function deleteTournament(id: string): Promise<ActionResult> {
   }
 
   await db.delete(tournaments).where(eq(tournaments.id, id));
+  await logActivity({
+    actor,
+    action: "delete",
+    entityType: "tournament",
+    entityId: row.id,
+    description: `Deleted tournament "${row.name}"`,
+  });
   revalidatePath("/dashboard/tournaments");
   return { ok: true, message: "Tournament deleted" };
 }
@@ -115,13 +133,23 @@ export async function createScrim(
   const date = new Date(parsed.data.date);
   if (Number.isNaN(date.getTime())) return { ok: false, error: "Invalid date" };
 
-  await db.insert(scrims).values({
-    squadId: parsed.data.squadId,
-    opponent: parsed.data.opponent,
-    date,
-    result: parsed.data.result || null,
-    notes: parsed.data.notes || null,
-    replayLink: parsed.data.replayLink || null,
+  const [row] = await db
+    .insert(scrims)
+    .values({
+      squadId: parsed.data.squadId,
+      opponent: parsed.data.opponent,
+      date,
+      result: parsed.data.result || null,
+      notes: parsed.data.notes || null,
+      replayLink: parsed.data.replayLink || null,
+    })
+    .returning();
+  await logActivity({
+    actor,
+    action: "create",
+    entityType: "scrim",
+    entityId: row.id,
+    description: `Recorded scrim vs ${row.opponent}`,
   });
 
   revalidatePath("/dashboard/matches");
@@ -139,6 +167,13 @@ export async function deleteScrim(id: string): Promise<ActionResult> {
   }
 
   await db.delete(scrims).where(eq(scrims.id, id));
+  await logActivity({
+    actor,
+    action: "delete",
+    entityType: "scrim",
+    entityId: row.id,
+    description: `Deleted scrim vs ${row.opponent}`,
+  });
   revalidatePath("/dashboard/matches");
   return { ok: true, message: "Scrim deleted" };
 }

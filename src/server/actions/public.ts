@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createBillplzBill, getBillplzBill } from "@/lib/billplz";
+import { logActivity } from "@/server/activity-log";
 import { applications, db, laneEnum, orders, products } from "@/server/db";
 import { markOrderPaid } from "./shop";
 
@@ -34,9 +35,18 @@ export async function submitApplication(
     return { ok: false, error: parsed.error.issues[0].message };
   }
 
-  await db.insert(applications).values({
-    ...parsed.data,
-    previousTeam: parsed.data.previousTeam || null,
+  const [row] = await db
+    .insert(applications)
+    .values({
+      ...parsed.data,
+      previousTeam: parsed.data.previousTeam || null,
+    })
+    .returning();
+  await logActivity({
+    action: "create",
+    entityType: "application",
+    entityId: row.id,
+    description: `New public recruitment application from ${row.fullName}`,
   });
 
   revalidatePath("/dashboard/recruitment");
@@ -80,16 +90,25 @@ export async function placeOrder(
   }
 
   const orderNo = generateOrderNo();
-  await db.insert(orders).values({
-    orderNo,
-    customerName: parsed.data.customerName,
-    customerPhone: parsed.data.customerPhone,
-    customerEmail: parsed.data.customerEmail,
-    productId: product.id,
-    quantity: parsed.data.quantity,
-    unitPriceSen: product.priceSen,
-    totalSen: product.priceSen * parsed.data.quantity,
-    status: "pending",
+  const [row] = await db
+    .insert(orders)
+    .values({
+      orderNo,
+      customerName: parsed.data.customerName,
+      customerPhone: parsed.data.customerPhone,
+      customerEmail: parsed.data.customerEmail,
+      productId: product.id,
+      quantity: parsed.data.quantity,
+      unitPriceSen: product.priceSen,
+      totalSen: product.priceSen * parsed.data.quantity,
+      status: "pending",
+    })
+    .returning();
+  await logActivity({
+    action: "create",
+    entityType: "order",
+    entityId: row.id,
+    description: `New public order ${row.orderNo} for ${product.name}`,
   });
 
   revalidatePath("/dashboard/orders");
@@ -132,6 +151,12 @@ export async function createBillplzPayment(
       updatedAt: new Date(),
     })
     .where(eq(orders.id, order.id));
+  await logActivity({
+    action: "update",
+    entityType: "order",
+    entityId: order.id,
+    description: `Created Billplz payment link for order ${order.orderNo}`,
+  });
 
   revalidatePath("/dashboard/orders");
   revalidatePath("/pricing");

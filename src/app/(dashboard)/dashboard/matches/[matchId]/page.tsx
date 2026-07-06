@@ -17,12 +17,7 @@ export default async function MatchDetailPage({
 }: {
   params: Promise<{ matchId: string }>;
 }) {
-  const { user, role } = await requireDashboardRole(
-    "admin",
-    "leader",
-    "member",
-    "seller",
-  );
+  const { user, role } = await requireDashboardRole();
   const { matchId } = await params;
   const match = await getMatch(matchId);
   if (!match) notFound();

@@ -3,18 +3,20 @@ import type {
   EventType,
   Lane,
   OrderStatus,
+  OrgRole,
   PaymentMethod,
   ProductCategory,
-  Role,
   SquadRole,
 } from "@/server/db/schema";
 
-export const ROLE_LABELS: Record<Role, string> = {
+export const ORG_ROLE_LABELS: Record<OrgRole, string> = {
   admin: "Admin",
-  leader: "Leader",
-  member: "Member",
   seller: "Seller",
+  user: "User",
 };
+
+// Temporary alias while call sites migrate to ORG_ROLE_LABELS
+export const ROLE_LABELS = ORG_ROLE_LABELS;
 
 export const LANE_LABELS: Record<Lane, string> = {
   exp: "EXP Lane",
@@ -27,7 +29,7 @@ export const LANE_LABELS: Record<Lane, string> = {
 export const SQUAD_ROLE_LABELS: Record<SquadRole, string> = {
   leader: "Leader",
   coach: "Coach",
-  member: "Member",
+  player: "Player",
   reserve: "Reserve",
 };
 

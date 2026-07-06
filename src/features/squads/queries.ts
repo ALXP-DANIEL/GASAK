@@ -1,9 +1,10 @@
 import { count, eq } from "drizzle-orm";
-import { getLedSquadIds } from "@/server/authz";
+import { getManagedSquadIds } from "@/server/authz";
 import { db, squadMembers, squads } from "@/server/db";
-import type { Role } from "@/server/db/schema";
+import type { OrgRole } from "@/server/db/schema";
 
-export async function listTeams() {
+/** Admin-only: every squad with its member count. */
+export async function listSquads() {
   return db
     .select({ squad: squads, memberCount: count(squadMembers.id) })
     .from(squads)
@@ -12,7 +13,8 @@ export async function listTeams() {
     .orderBy(squads.createdAt);
 }
 
-export async function getTeam(id: string) {
+/** Admin-only: a squad's full roster. */
+export async function getSquad(id: string) {
   return db.query.squads.findFirst({
     where: eq(squads.id, id),
     with: {
@@ -24,7 +26,7 @@ export async function getTeam(id: string) {
 }
 
 /** Squads the given user may manage records for, as select options. */
-export async function listManagedTeamOptions(role: Role, userId: string) {
+export async function listManagedSquadOptions(role: OrgRole, userId: string) {
   if (role === "admin") {
     const rows = await db.query.squads.findMany({
       where: eq(squads.archived, false),
@@ -33,13 +35,13 @@ export async function listManagedTeamOptions(role: Role, userId: string) {
     return rows.map((squad) => ({ value: squad.id, label: squad.name }));
   }
 
-  const ledIds = await getLedSquadIds(userId);
-  if (ledIds.length === 0) return [];
+  const managedIds = await getManagedSquadIds(userId);
+  if (managedIds.length === 0) return [];
   const rows = await db.query.squads.findMany({
     where: eq(squads.archived, false),
     orderBy: squads.name,
   });
   return rows
-    .filter((squad) => ledIds.includes(squad.id))
+    .filter((squad) => managedIds.includes(squad.id))
     .map((squad) => ({ value: squad.id, label: squad.name }));
 }

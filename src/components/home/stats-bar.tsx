@@ -1,0 +1,52 @@
+import { Icons } from "@/components/icons";
+
+export interface HomeStats {
+  squads: number;
+  tournaments: number;
+  players: number;
+}
+
+export function StatsBar({ stats }: { stats: HomeStats }) {
+  const items = [
+    {
+      Icon: Icons.Stats.Squads,
+      value: `${stats.squads}+`,
+      label: "Active Squads",
+    },
+    {
+      Icon: Icons.Stats.Trophies,
+      value: `${stats.tournaments}+`,
+      label: "Tournaments",
+    },
+    { Icon: Icons.Stats.Players, value: `${stats.players}+`, label: "Players" },
+    { Icon: Icons.Stats.Goal, value: "1 Goal", label: "To Be The Best" },
+  ];
+
+  return (
+    <section className="mx-auto w-full max-w-7xl px-4 desktop:px-8">
+      <div className="grid grid-cols-2 gap-0 desktop:grid-cols-4 desktop:divide-x desktop:divide-primary/25 desktop:rounded-xl desktop:border desktop:border-primary/30 desktop:bg-black/30 desktop:py-7">
+        {items.map(({ Icon, value, label }) => (
+          <div
+            key={label}
+            className="flex flex-col items-center justify-center gap-2 border border-primary/30 bg-black/30 px-3 py-5 text-center desktop:flex-row desktop:gap-3 desktop:border-none desktop:bg-transparent desktop:px-6 desktop:py-0 desktop:text-left"
+          >
+            <Icon
+              size={28}
+              weight="fill"
+              className="shrink-0 text-primary desktop:size-7.5"
+              aria-hidden="true"
+            />
+            <div>
+              <p className="font-heading text-xl font-bold text-primary desktop:text-2xl">
+                {value}
+              </p>
+              <p className="text-[9px] uppercase tracking-wider text-foreground/80 desktop:text-[10px]">
+                {label}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}

@@ -4,8 +4,8 @@ import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface
 import { Badge } from "@/components/ui/shadcn/badge";
 import { Card, CardContent } from "@/components/ui/shadcn/card";
 import { getPlayer } from "@/features/players/queries";
-import { LANE_LABELS, ROLE_LABELS, SQUAD_ROLE_LABELS } from "@/lib/labels";
-import { userRole } from "@/lib/session";
+import { LANE_LABELS, ORG_ROLE_LABELS, SQUAD_ROLE_LABELS } from "@/lib/labels";
+import { userOrgRole } from "@/lib/session";
 import { requireDashboardRole } from "../../_components/dashboard-section";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export default async function PlayerDetailPage({
 }: {
   params: Promise<{ playerId: string }>;
 }) {
-  await requireDashboardRole("admin", "leader");
+  await requireDashboardRole("admin");
   const { playerId } = await params;
   const player = await getPlayer(playerId);
   if (!player) notFound();
@@ -43,7 +43,9 @@ export default async function PlayerDetailPage({
         title={player.name}
         description="Player profile"
         actions={
-          <Badge variant="outline">{ROLE_LABELS[userRole(player)]}</Badge>
+          <Badge variant="outline">
+            {ORG_ROLE_LABELS[userOrgRole(player)]}
+          </Badge>
         }
       />
       <div className="grid gap-4 xl:grid-cols-2">
@@ -77,7 +79,7 @@ export default async function PlayerDetailPage({
                 className="flex items-center justify-between gap-3 rounded-md border px-3 py-2"
               >
                 <Link
-                  href={`/dashboard/teams/${membership.squadId}`}
+                  href={`/dashboard/squads/${membership.squadId}`}
                   className="text-sm font-medium hover:underline"
                 >
                   {membership.squad.name}

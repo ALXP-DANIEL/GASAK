@@ -5,8 +5,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/shadcn/sidebar";
-import { requireUser, userRole } from "@/lib/session";
 import { DashboardBreadcrumbs } from "./_components/dashboard-breadcrumbs";
+import { getDashboardContext } from "./_components/dashboard-context";
 import { AppSidebar } from "./_components/sidebar/app-sidebar";
 
 export const dynamic = "force-dynamic";
@@ -16,8 +16,10 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await requireUser();
-  const cookieStore = await cookies();
+  const [{ user, access, primarySquadRole }, cookieStore] = await Promise.all([
+    getDashboardContext(),
+    cookies(),
+  ]);
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
 
   return (
@@ -26,9 +28,11 @@ export default async function DashboardLayout({
         user={{
           name: user.name,
           email: user.email,
-          role: userRole(user),
+          role: access.orgRole,
           image: user.image,
         }}
+        access={access}
+        primarySquadRole={primarySquadRole}
       />
       <SidebarInset className="min-w-0 overflow-x-clip">
         <header className="flex h-12 shrink-0 items-center gap-2 border-b">

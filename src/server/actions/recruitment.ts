@@ -5,8 +5,9 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
-import { userRole } from "@/lib/session";
-import { actionUser } from "@/server/authz";
+import { userOrgRole } from "@/lib/session";
+import { logActivity } from "@/server/activity-log";
+import { actionOrgUser, getManagedSquadIds } from "@/server/authz";
 import {
   applicationStatusEnum,
   applications,
@@ -28,14 +29,16 @@ export async function assignApplication(
   applicationId: string,
   leaderId: string,
 ): Promise<ActionResult> {
-  const actor = await actionUser("admin");
+  const actor = await actionOrgUser("admin");
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   const leader = await db.query.user.findFirst({
     where: eq(user.id, leaderId),
   });
-  if (leader?.role !== "leader") {
-    return { ok: false, error: "Pick a valid squad leader" };
+  if (!leader) return { ok: false, error: "Pick a valid squad manager" };
+  const managedSquadIds = await getManagedSquadIds(leader.id);
+  if (managedSquadIds.length === 0) {
+    return { ok: false, error: "Pick a valid squad manager" };
   }
 
   const [row] = await db
@@ -48,6 +51,13 @@ export async function assignApplication(
     .where(eq(applications.id, applicationId))
     .returning();
   if (!row) return { ok: false, error: "Application not found" };
+  await logActivity({
+    actor,
+    action: "assign",
+    entityType: "application",
+    entityId: row.id,
+    description: `Assigned application from ${row.fullName} to ${leader.name}`,
+  });
 
   revalidateRecruitment();
   return { ok: true, message: `Assigned to ${leader.name}` };
@@ -62,7 +72,7 @@ const statusSchema = z.object({
 export async function updateApplicationStatus(
   input: z.infer<typeof statusSchema>,
 ): Promise<ActionResult> {
-  const actor = await actionUser("admin", "leader");
+  const actor = await actionOrgUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   const parsed = statusSchema.safeParse(input);
@@ -75,7 +85,7 @@ export async function updateApplicationStatus(
   if (!application) return { ok: false, error: "Application not found" };
 
   if (
-    userRole(actor) === "leader" &&
+    userOrgRole(actor) !== "admin" &&
     application.assignedLeaderId !== actor.id
   ) {
     return { ok: false, error: "This application is not assigned to you" };
@@ -89,6 +99,13 @@ export async function updateApplicationStatus(
       updatedAt: new Date(),
     })
     .where(eq(applications.id, application.id));
+  await logActivity({
+    actor,
+    action: "update",
+    entityType: "application",
+    entityId: application.id,
+    description: `Changed ${application.fullName} application status to ${parsed.data.status}`,
+  });
 
   revalidateRecruitment();
   return { ok: true, message: "Application updated" };
@@ -115,7 +132,7 @@ function generateTempPassword() {
 export async function onboardApplicant(
   input: z.infer<typeof onboardSchema>,
 ): Promise<ActionResult> {
-  const actor = await actionUser("admin");
+  const actor = await actionOrgUser("admin");
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   const parsed = onboardSchema.safeParse(input);
@@ -158,7 +175,7 @@ export async function onboardApplicant(
 
   await db
     .update(user)
-    .set({ role: "member" })
+    .set({ role: "user" })
     .where(eq(user.id, signup.user.id));
 
   await db.insert(playerProfiles).values({
@@ -177,11 +194,18 @@ export async function onboardApplicant(
     userId: signup.user.id,
     squadRole: parsed.data.squadRole,
   });
+  await logActivity({
+    actor,
+    action: "onboard",
+    entityType: "application",
+    entityId: application.id,
+    description: `Onboarded ${application.fullName} to ${squad.name}`,
+  });
 
   revalidateRecruitment();
-  revalidatePath("/dashboard/teams");
+  revalidatePath("/dashboard/squads");
   revalidatePath("/dashboard/users");
-  revalidatePath("/teams");
+  revalidatePath("/squads");
   return {
     ok: true,
     message: `${application.fullName} onboarded to ${squad.name}`,

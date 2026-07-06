@@ -252,7 +252,7 @@ export function ScheduleCalendar({
                   </DialogDescription>
                 </DialogHeader>
                 <EventForm
-                  teams={squads}
+                  squads={squads}
                   allowOrgWide={allowOrgWide}
                   onSuccess={() => setCreateOpen(false)}
                 />

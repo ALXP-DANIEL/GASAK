@@ -16,8 +16,8 @@ import {
 // Roles (stored as text on the Better Auth user table)
 // ---------------------------------------------------------------------------
 
-export const ROLES = ["admin", "leader", "member", "seller"] as const;
-export type Role = (typeof ROLES)[number];
+export const ORG_ROLES = ["admin", "seller", "user"] as const;
+export type OrgRole = (typeof ORG_ROLES)[number];
 
 // ---------------------------------------------------------------------------
 // Multi-project schema pattern (t3 stack): every GASAK-owned table is
@@ -123,7 +123,7 @@ export const laneEnum = pgEnum("lane", [
 export const squadRoleEnum = pgEnum("squad_role", [
   "leader",
   "coach",
-  "member",
+  "player",
   "reserve",
 ]);
 
@@ -212,7 +212,7 @@ export const squadMembers = createTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    squadRole: squadRoleEnum("squad_role").notNull().default("member"),
+    squadRole: squadRoleEnum("squad_role").notNull().default("player"),
     joinedAt: timestamp("joined_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -333,6 +333,47 @@ export const announcementReads = createTable(
       t.announcementId,
       t.userId,
     ),
+  ],
+);
+
+export const authSlides = createTable("auth_slides", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  eyebrow: text("eyebrow").notNull().default("GASAK Management"),
+  imageUrl: text("image_url").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const activityLogs = createTable(
+  "activity_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    actorId: text("actor_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    actorName: text("actor_name"),
+    actorEmail: text("actor_email"),
+    actorRole: text("actor_role"),
+    action: text("action").notNull(),
+    entityType: text("entity_type").notNull(),
+    entityId: text("entity_id"),
+    description: text("description").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("gasak_activity_logs_actor_idx").on(t.actorId),
+    index("gasak_activity_logs_entity_idx").on(t.entityType, t.entityId),
+    index("gasak_activity_logs_created_at_idx").on(t.createdAt),
   ],
 );
 
@@ -491,6 +532,10 @@ export const orderRelations = relations(orders, ({ one }) => ({
   }),
 }));
 
+export const activityLogRelations = relations(activityLogs, ({ one }) => ({
+  actor: one(user, { fields: [activityLogs.actorId], references: [user.id] }),
+}));
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -505,6 +550,8 @@ export type Tournament = typeof tournaments.$inferSelect;
 export type Scrim = typeof scrims.$inferSelect;
 export type Announcement = typeof announcements.$inferSelect;
 export type AnnouncementRead = typeof announcementReads.$inferSelect;
+export type AuthSlide = typeof authSlides.$inferSelect;
+export type ActivityLog = typeof activityLogs.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 

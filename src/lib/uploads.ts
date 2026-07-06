@@ -16,7 +16,7 @@ const ALLOWED_TYPES = new Set([
  */
 export async function saveUpload(
   file: File,
-  folder: "squads" | "avatars" | "products" | "tournaments",
+  folder: "squads" | "avatars" | "products" | "tournaments" | "auth-slides",
 ): Promise<string> {
   if (!ALLOWED_TYPES.has(file.type)) {
     throw new Error("Only JPEG, PNG, WebP or GIF images are allowed");

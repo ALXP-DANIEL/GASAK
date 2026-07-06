@@ -10,23 +10,23 @@ import { FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/shadcn/button";
 import { createSquad } from "@/server/actions/squads";
 
-const teamFormSchema = z.object({
+const squadFormSchema = z.object({
   name: z.string().min(2, "Squad name is required"),
   description: z.string().optional(),
 });
 
-type TeamFormInput = z.infer<typeof teamFormSchema>;
+type SquadFormInput = z.infer<typeof squadFormSchema>;
 
-export function TeamForm() {
+export function SquadForm() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
-  const form = useForm<TeamFormInput>({
-    resolver: zodResolver(teamFormSchema),
+  const form = useForm<SquadFormInput>({
+    resolver: zodResolver(squadFormSchema),
     defaultValues: { name: "", description: "" },
   });
 
-  async function onSubmit(values: TeamFormInput) {
+  async function onSubmit(values: SquadFormInput) {
     setSubmitting(true);
     const formData = new FormData();
     formData.set("name", values.name);

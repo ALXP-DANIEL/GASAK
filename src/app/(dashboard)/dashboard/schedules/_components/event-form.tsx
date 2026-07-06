@@ -27,20 +27,20 @@ const eventFormSchema = z.object({
 type EventFormInput = z.infer<typeof eventFormSchema>;
 
 export function EventForm({
-  teams,
+  squads,
   allowOrgWide,
   onSuccess,
 }: {
-  teams: { value: string; label: string }[];
+  squads: { value: string; label: string }[];
   allowOrgWide: boolean;
   onSuccess?: () => void;
 }) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
-  const teamOptions = allowOrgWide
-    ? [{ value: ORG_WIDE, label: "Organization-wide" }, ...teams]
-    : teams;
+  const squadOptions = allowOrgWide
+    ? [{ value: ORG_WIDE, label: "Organization-wide" }, ...squads]
+    : squads;
 
   const typeOptions = eventTypeEnum.enumValues.map((value) => ({
     value,
@@ -56,7 +56,7 @@ export function EventForm({
       startsAt: "",
       endsAt: "",
       location: "",
-      squadId: teamOptions[0]?.value ?? "",
+      squadId: squadOptions[0]?.value ?? "",
     },
   });
 
@@ -93,7 +93,7 @@ export function EventForm({
           control={form.control}
           name="squadId"
           label="Squad"
-          options={teamOptions}
+          options={squadOptions}
           placeholder="Pick a squad"
         />
       </div>

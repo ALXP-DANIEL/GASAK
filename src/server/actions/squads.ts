@@ -4,6 +4,7 @@ import { and, eq, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { saveUpload } from "@/lib/uploads";
+import { logActivity } from "@/server/activity-log";
 import { actionUser, isSquadLeader } from "@/server/authz";
 import { db, squadMembers, squadRoleEnum, squads } from "@/server/db";
 import type { ActionResult } from "./public";
@@ -17,9 +18,9 @@ function slugify(name: string) {
 }
 
 function revalidateSquads() {
-  revalidatePath("/dashboard/teams");
+  revalidatePath("/dashboard/squads");
   revalidatePath("/dashboard/my-squad");
-  revalidatePath("/teams");
+  revalidatePath("/squads");
   revalidatePath("/");
 }
 
@@ -65,13 +66,23 @@ export async function createSquad(formData: FormData): Promise<ActionResult> {
     return { ok: false, error: (err as Error).message };
   }
 
-  await db.insert(squads).values({
-    name: parsed.data.name,
-    slug,
-    description: parsed.data.description ?? null,
-    accentColor: parsed.data.accentColor ?? null,
-    logoUrl,
-    bannerUrl,
+  const [row] = await db
+    .insert(squads)
+    .values({
+      name: parsed.data.name,
+      slug,
+      description: parsed.data.description ?? null,
+      accentColor: parsed.data.accentColor ?? null,
+      logoUrl,
+      bannerUrl,
+    })
+    .returning();
+  await logActivity({
+    actor: user,
+    action: "create",
+    entityType: "squad",
+    entityId: row.id,
+    description: `Created squad "${row.name}"`,
   });
 
   revalidateSquads();
@@ -130,9 +141,16 @@ export async function updateSquad(
   }
 
   await db.update(squads).set(updates).where(eq(squads.id, squadId));
+  await logActivity({
+    actor: user,
+    action: "update",
+    entityType: "squad",
+    entityId: squad.id,
+    description: `Updated squad "${parsed.data.name}"`,
+  });
 
   revalidateSquads();
-  revalidatePath(`/dashboard/teams/${squadId}`);
+  revalidatePath(`/dashboard/squads/${squadId}`);
   return { ok: true, message: "Squad updated" };
 }
 
@@ -144,9 +162,16 @@ export async function setSquadArchived(
   if (!user) return { ok: false, error: "Unauthorized" };
 
   await db.update(squads).set({ archived }).where(eq(squads.id, squadId));
+  await logActivity({
+    actor: user,
+    action: archived ? "archive" : "restore",
+    entityType: "squad",
+    entityId: squadId,
+    description: archived ? "Archived squad" : "Restored squad",
+  });
 
   revalidateSquads();
-  revalidatePath(`/dashboard/teams/${squadId}`);
+  revalidatePath(`/dashboard/squads/${squadId}`);
   return { ok: true, message: archived ? "Squad archived" : "Squad restored" };
 }
 
@@ -176,10 +201,17 @@ export async function addSquadMember(
     return { ok: false, error: "That user is already in the squad" };
   }
 
-  await db.insert(squadMembers).values(parsed.data);
+  const [row] = await db.insert(squadMembers).values(parsed.data).returning();
+  await logActivity({
+    actor: user,
+    action: "create",
+    entityType: "squad_member",
+    entityId: row.id,
+    description: `Assigned user ${row.userId} to squad ${row.squadId} as ${row.squadRole}`,
+  });
 
   revalidateSquads();
-  revalidatePath(`/dashboard/teams/${parsed.data.squadId}`);
+  revalidatePath(`/dashboard/squads/${parsed.data.squadId}`);
   return { ok: true, message: "Member assigned" };
 }
 
@@ -196,9 +228,16 @@ export async function updateSquadMemberRole(
     .where(eq(squadMembers.id, memberId))
     .returning();
   if (!row) return { ok: false, error: "Member not found" };
+  await logActivity({
+    actor: user,
+    action: "update",
+    entityType: "squad_member",
+    entityId: row.id,
+    description: `Changed squad member ${row.userId} role to ${row.squadRole}`,
+  });
 
   revalidateSquads();
-  revalidatePath(`/dashboard/teams/${row.squadId}`);
+  revalidatePath(`/dashboard/squads/${row.squadId}`);
   return { ok: true, message: "Role updated" };
 }
 
@@ -213,8 +252,15 @@ export async function removeSquadMember(
     .where(eq(squadMembers.id, memberId))
     .returning();
   if (!row) return { ok: false, error: "Member not found" };
+  await logActivity({
+    actor: user,
+    action: "delete",
+    entityType: "squad_member",
+    entityId: row.id,
+    description: `Removed user ${row.userId} from squad ${row.squadId}`,
+  });
 
   revalidateSquads();
-  revalidatePath(`/dashboard/teams/${row.squadId}`);
+  revalidatePath(`/dashboard/squads/${row.squadId}`);
   return { ok: true, message: "Member removed" };
 }

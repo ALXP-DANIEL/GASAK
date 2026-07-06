@@ -16,21 +16,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/shadcn/table";
-import { TeamForm } from "@/features/teams/components/team-form";
-import { listTeams } from "@/features/teams/queries";
+import { SquadForm } from "@/features/squads/components/squad-form";
+import { listSquads } from "@/features/squads/queries";
 import { formatDate } from "@/lib/format";
 import { requireDashboardRole } from "../_components/dashboard-section";
 
 export const dynamic = "force-dynamic";
 
-export default async function TeamsPage() {
-  const { role } = await requireDashboardRole(
-    "admin",
-    "leader",
-    "member",
-    "seller",
-  );
-  const rows = await listTeams();
+export default async function SquadsPage() {
+  await requireDashboardRole("admin");
+  const rows = await listSquads();
 
   return (
     <div className="flex flex-col gap-6">
@@ -59,7 +54,7 @@ export default async function TeamsPage() {
                   <TableRow key={squad.id}>
                     <TableCell>
                       <Link
-                        href={`/dashboard/teams/${squad.id}`}
+                        href={`/dashboard/squads/${squad.id}`}
                         className="font-medium hover:underline"
                       >
                         {squad.name}
@@ -80,19 +75,17 @@ export default async function TeamsPage() {
         </CardContent>
       </Card>
 
-      {role === "admin" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Create Squad</CardTitle>
-            <CardDescription>
-              Add a new squad to the organization.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TeamForm />
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Create Squad</CardTitle>
+          <CardDescription>
+            Add a new squad to the organization.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SquadForm />
+        </CardContent>
+      </Card>
     </div>
   );
 }

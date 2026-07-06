@@ -6,7 +6,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/shadcn/tabs";
-import { requireRole } from "@/lib/session";
+import { requireOrgRole } from "@/lib/session";
 import { db, orders } from "@/server/db";
 import { EmptyState, PageHeader } from "../_components/page-surface";
 import { OrderCard } from "./_components/order-card";
@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 export default async function OrdersPage({
   searchParams,
 }: PageProps<"/dashboard/orders">) {
-  await requireRole("admin", "seller");
+  await requireOrgRole("admin", "seller");
   const { q } = await searchParams;
   const query = typeof q === "string" ? q.trim().toLowerCase() : "";
 

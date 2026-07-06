@@ -1,11 +1,19 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
+import {
+  FormCheckbox,
+  FormField,
+  FormFileInput,
+  FormSelect,
+} from "@/components/forms/form-field";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/shadcn/button";
-import { Checkbox } from "@/components/ui/shadcn/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -14,39 +22,58 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/shadcn/dialog";
-import { Input } from "@/components/ui/shadcn/input";
-import { Label } from "@/components/ui/shadcn/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/shadcn/select";
-import { Textarea } from "@/components/ui/shadcn/textarea";
 import { PRODUCT_CATEGORY_LABELS } from "@/lib/labels";
 import { createProduct, updateProduct } from "@/server/actions/shop";
-import {
-  type Product,
-  type ProductCategory,
-  productCategoryEnum,
-} from "@/server/db/schema";
+import { type Product, productCategoryEnum } from "@/server/db/schema";
+
+const categoryOptions = productCategoryEnum.enumValues.map((item) => ({
+  value: item,
+  label: PRODUCT_CATEGORY_LABELS[item],
+}));
+
+const schema = z.object({
+  name: z.string().min(2, "Product name is required"),
+  category: z.enum(productCategoryEnum.enumValues),
+  description: z.string().optional(),
+  price: z.number("Enter a price").positive("Enter a valid price in RM"),
+  stock: z
+    .number("Enter a stock count")
+    .int()
+    .min(0, "Enter a valid stock count"),
+  image: z.instanceof(File).nullable(),
+  active: z.boolean(),
+});
+
+type Values = z.infer<typeof schema>;
 
 export function ProductFormDialog({ product }: { product?: Product }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [category, setCategory] = useState<ProductCategory>(
-    product?.category ?? "diamonds",
-  );
-  const [active, setActive] = useState(product?.active ?? true);
   const [pending, startTransition] = useTransition();
   const isEdit = Boolean(product);
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    formData.set("category", category);
-    formData.set("active", active ? "on" : "off");
+  const { control, handleSubmit } = useForm<Values>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      name: product?.name ?? "",
+      category: product?.category ?? "diamonds",
+      description: product?.description ?? "",
+      price: product ? Number((product.priceSen / 100).toFixed(2)) : 0,
+      stock: product?.stock ?? 0,
+      image: null,
+      active: product?.active ?? true,
+    },
+  });
+
+  function onSubmit(values: Values) {
+    const formData = new FormData();
+    formData.set("name", values.name);
+    formData.set("category", values.category);
+    formData.set("description", values.description ?? "");
+    formData.set("price", String(values.price));
+    formData.set("stock", String(values.stock));
+    formData.set("active", values.active ? "on" : "off");
+    if (values.image) formData.set("image", values.image);
 
     startTransition(async () => {
       const result = product
@@ -87,84 +114,46 @@ export function ProductFormDialog({ product }: { product?: Product }) {
               : "Add a product to the GASAK shop."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              name="name"
-              required
-              defaultValue={product?.name}
-            />
-          </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+          <FormField control={control} name="name" label="Name" />
           <div className="grid gap-4 desktop:grid-cols-2">
-            <div className="grid gap-2">
-              <Label>Category</Label>
-              <Select
-                value={category}
-                onValueChange={(value) => setCategory(value as ProductCategory)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {productCategoryEnum.enumValues.map((item) => (
-                    <SelectItem key={item} value={item}>
-                      {PRODUCT_CATEGORY_LABELS[item]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="price">Price (RM)</Label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                step="0.01"
-                min="0.01"
-                required
-                defaultValue={
-                  product ? (product.priceSen / 100).toFixed(2) : undefined
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="stock">Stock</Label>
-              <Input
-                id="stock"
-                name="stock"
-                type="number"
-                min="0"
-                required
-                defaultValue={product?.stock}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="image">
-                Image {product?.imageUrl ? "(replace)" : ""}
-              </Label>
-              <Input id="image" name="image" type="file" accept="image/*" />
-            </div>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              name="description"
-              rows={3}
-              defaultValue={product?.description ?? ""}
+            <FormSelect
+              control={control}
+              name="category"
+              label="Category"
+              options={categoryOptions}
+            />
+            <FormField
+              control={control}
+              name="price"
+              label="Price (RM)"
+              type="number"
+            />
+            <FormField
+              control={control}
+              name="stock"
+              label="Stock"
+              type="number"
+            />
+            <FormFileInput
+              control={control}
+              name="image"
+              label={`Image ${product?.imageUrl ? "(replace)" : ""}`}
+              accept="image/*"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="active"
-              checked={active}
-              onCheckedChange={(checked) => setActive(checked === true)}
-            />
-            <Label htmlFor="active">Visible in the public shop</Label>
-          </div>
+          <FormField
+            control={control}
+            name="description"
+            label="Description"
+            as="textarea"
+            rows={3}
+          />
+          <FormCheckbox
+            control={control}
+            name="active"
+            label="Visible in the public shop"
+          />
           <Button type="submit" disabled={pending}>
             {pending ? "Saving..." : isEdit ? "Save changes" : "Create product"}
           </Button>

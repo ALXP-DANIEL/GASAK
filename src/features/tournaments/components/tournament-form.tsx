@@ -15,11 +15,11 @@ import { tournamentSchema } from "@/features/tournaments/schema";
 import type { TournamentInput } from "@/features/tournaments/types";
 
 export function TournamentForm({
-  teams,
+  squads,
   tournamentId,
   defaultValues,
 }: {
-  teams: { value: string; label: string }[];
+  squads: { value: string; label: string }[];
   tournamentId?: string;
   defaultValues?: Partial<TournamentInput>;
 }) {
@@ -37,7 +37,7 @@ export function TournamentForm({
       opponent: "",
       result: "",
       mvp: "",
-      squadId: teams[0]?.value ?? "",
+      squadId: squads[0]?.value ?? "",
       ...defaultValues,
     },
   });
@@ -70,7 +70,7 @@ export function TournamentForm({
           control={form.control}
           name="squadId"
           label="Squad"
-          options={teams}
+          options={squads}
           placeholder="Pick a squad"
         />
         <FormField

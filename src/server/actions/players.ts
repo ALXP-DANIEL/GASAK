@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { userRole } from "@/lib/session";
 import { saveUpload } from "@/lib/uploads";
+import { logActivity } from "@/server/activity-log";
 import { actionUser } from "@/server/authz";
 import { db, laneEnum, playerProfiles, user } from "@/server/db";
 import type { ActionResult } from "./public";
@@ -83,9 +84,19 @@ export async function updateProfile(
       target: playerProfiles.userId,
       set: { ...profile, updatedAt: new Date() },
     });
+  await logActivity({
+    actor,
+    action: "update",
+    entityType: "profile",
+    entityId: targetUserId,
+    description:
+      actor.id === targetUserId
+        ? "Updated own player profile"
+        : `Updated player profile for ${targetUserId}`,
+  });
 
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard/players");
-  revalidatePath("/teams");
+  revalidatePath("/squads");
   return { ok: true, message: "Profile saved" };
 }

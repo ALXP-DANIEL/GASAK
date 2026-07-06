@@ -1,13 +1,14 @@
 import { startOfMonth } from "date-fns";
 import { and, count, desc, eq, gte, inArray, sum } from "drizzle-orm";
+import { forbidden } from "next/navigation";
 import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
-import { TeamBarChart } from "@/components/charts/team-bar-chart";
+import { SquadBarChart } from "@/components/charts/squad-bar-chart";
 import { Icons } from "@/components/icons";
 import { Badge } from "@/components/ui/shadcn/badge";
 import { formatRM } from "@/lib/format";
 import { ORDER_STATUS_LABELS } from "@/lib/labels";
 import { db, orders, scrims, squads, tournaments } from "@/server/db";
-import { requireDashboardRole } from "../_components/dashboard-section";
+import { getDashboardContext } from "../_components/dashboard-context";
 import {
   EmptyState,
   HomeListItem,
@@ -19,17 +20,15 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function ReportsPage() {
-  const { role } = await requireDashboardRole(
-    "admin",
-    "leader",
-    "member",
-    "seller",
-  );
-  const showShop = role === "admin" || role === "seller";
-  const showCompetition = role !== "seller";
+  const { effectiveAccess } = await getDashboardContext();
+  const showShop =
+    effectiveAccess.orgRole === "admin" || effectiveAccess.orgRole === "seller";
+  const showCompetition =
+    effectiveAccess.orgRole === "admin" || effectiveAccess.managesSquad;
+  if (!showShop && !showCompetition) forbidden();
   const monthStart = startOfMonth(new Date());
 
-  const [matchesPerTeam, tournamentsPerTeam, orderStats, revenueAgg] =
+  const [matchesPerSquad, tournamentsPerSquad, orderStats, revenueAgg] =
     await Promise.all([
       showCompetition
         ? db
@@ -109,13 +108,13 @@ export default async function ReportsPage() {
               title="Matches per Squad"
               description="Total recorded scrims and matches"
             >
-              {matchesPerTeam.length === 0 ? (
+              {matchesPerSquad.length === 0 ? (
                 <EmptyState message="No data yet." />
               ) : (
-                <TeamBarChart
+                <SquadBarChart
                   label="Matches"
-                  data={matchesPerTeam.map(({ squad, value }) => ({
-                    team: squad.name,
+                  data={matchesPerSquad.map(({ squad, value }) => ({
+                    squad: squad.name,
                     value,
                   }))}
                 />
@@ -125,13 +124,13 @@ export default async function ReportsPage() {
               title="Tournaments per Squad"
               description="Total tournament entries"
             >
-              {tournamentsPerTeam.length === 0 && (
+              {tournamentsPerSquad.length === 0 && (
                 <EmptyState message="No data yet." />
               )}
-              {tournamentsPerTeam.map(({ squad, value }) => (
+              {tournamentsPerSquad.map(({ squad, value }) => (
                 <HomeListItem
                   key={squad.id}
-                  href={`/dashboard/teams/${squad.id}`}
+                  href={`/dashboard/squads/${squad.id}`}
                   title={squad.name}
                   trailing={<Badge variant="outline">{value}</Badge>}
                 />

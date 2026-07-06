@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/shadcn/table";
 import { MatchForm } from "@/features/matches/components/match-form";
 import { listMatches } from "@/features/matches/queries";
-import { listManagedTeamOptions } from "@/features/teams/queries";
+import { listManagedSquadOptions } from "@/features/squads/queries";
 import { formatDate } from "@/lib/format";
 import { getMemberSquadIds } from "@/server/authz";
 import { requireDashboardRole } from "../_components/dashboard-section";
@@ -26,19 +26,14 @@ import { requireDashboardRole } from "../_components/dashboard-section";
 export const dynamic = "force-dynamic";
 
 export default async function MatchesPage() {
-  const { user, role } = await requireDashboardRole(
-    "admin",
-    "leader",
-    "member",
-    "seller",
-  );
+  const { user, role } = await requireDashboardRole();
   const squadIds =
     role === "admin" ? undefined : await getMemberSquadIds(user.id);
-  const [rows, teams] = await Promise.all([
+  const [rows, squads] = await Promise.all([
     listMatches(squadIds),
-    listManagedTeamOptions(role, user.id),
+    listManagedSquadOptions(role, user.id),
   ]);
-  const canManage = teams.length > 0;
+  const canManage = squads.length > 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -90,7 +85,7 @@ export default async function MatchesPage() {
         </CardContent>
       </Card>
 
-      {canManage && teams.length > 0 && (
+      {canManage && squads.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Record Match</CardTitle>
@@ -99,7 +94,7 @@ export default async function MatchesPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <MatchForm teams={teams} />
+            <MatchForm squads={squads} />
           </CardContent>
         </Card>
       )}

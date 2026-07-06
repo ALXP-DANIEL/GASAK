@@ -4,6 +4,7 @@
 // chunks (e.g. "Failed to collect page data for /about"). The /ssr paths
 // export the same *Icon-suffixed names without that dependency.
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareOut";
+import { ArrowsLeftRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowsLeftRight";
 import { CalendarBlankIcon } from "@phosphor-icons/react/dist/ssr/CalendarBlank";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
 import { CaretUpIcon } from "@phosphor-icons/react/dist/ssr/CaretUp";
@@ -116,5 +117,6 @@ export const Icons = {
     SignOut: SignOutIcon,
     Settings: GearIcon,
     CaretUpDown: CaretUpDownIcon,
+    SwitchFocus: ArrowsLeftRightIcon,
   },
 } as const;

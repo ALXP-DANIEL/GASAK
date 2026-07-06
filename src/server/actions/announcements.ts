@@ -4,6 +4,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { userRole } from "@/lib/session";
+import { logActivity } from "@/server/activity-log";
 import { actionUser, canManageSquad } from "@/server/authz";
 import { announcementReads, announcements, db } from "@/server/db";
 import type { ActionResult } from "./public";
@@ -35,11 +36,22 @@ export async function createAnnouncement(
     }
   }
 
-  await db.insert(announcements).values({
-    title: parsed.data.title,
-    content: parsed.data.content,
-    squadId: parsed.data.squadId,
-    authorId: actor.id,
+  const [row] = await db
+    .insert(announcements)
+    .values({
+      title: parsed.data.title,
+      content: parsed.data.content,
+      squadId: parsed.data.squadId,
+      authorId: actor.id,
+    })
+    .returning();
+
+  await logActivity({
+    actor,
+    action: "create",
+    entityType: "announcement",
+    entityId: row.id,
+    description: `Posted announcement "${row.title}"`,
   });
 
   revalidatePath("/dashboard/announcements");
@@ -62,6 +74,13 @@ export async function deleteAnnouncement(id: string): Promise<ActionResult> {
   }
 
   await db.delete(announcements).where(eq(announcements.id, id));
+  await logActivity({
+    actor,
+    action: "delete",
+    entityType: "announcement",
+    entityId: row.id,
+    description: `Deleted announcement "${row.title}"`,
+  });
 
   revalidatePath("/dashboard/announcements");
   revalidatePath("/dashboard");

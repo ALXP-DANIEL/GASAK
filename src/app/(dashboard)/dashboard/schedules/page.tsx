@@ -1,6 +1,6 @@
 import { inArray, isNull, or } from "drizzle-orm";
 import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
-import { listManagedTeamOptions } from "@/features/teams/queries";
+import { listManagedSquadOptions } from "@/features/squads/queries";
 import { getMemberSquadIds } from "@/server/authz";
 import { db, events } from "@/server/db";
 import { requireDashboardRole } from "../_components/dashboard-section";
@@ -9,12 +9,7 @@ import { ScheduleCalendar } from "./_components/schedule-calendar";
 export const dynamic = "force-dynamic";
 
 export default async function SchedulesPage() {
-  const { user, role } = await requireDashboardRole(
-    "admin",
-    "leader",
-    "member",
-    "seller",
-  );
+  const { user, role } = await requireDashboardRole();
   const squadIds =
     role === "admin" ? undefined : await getMemberSquadIds(user.id);
   const scopeFilter = squadIds
@@ -29,7 +24,7 @@ export default async function SchedulesPage() {
       orderBy: events.startsAt,
       with: { squad: true },
     }),
-    listManagedTeamOptions(role, user.id),
+    listManagedSquadOptions(role, user.id),
   ]);
   const canManage = role === "admin" || squads.length > 0;
 

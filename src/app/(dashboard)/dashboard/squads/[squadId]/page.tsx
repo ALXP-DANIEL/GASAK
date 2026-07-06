@@ -10,35 +10,35 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/shadcn/table";
-import { getTeam } from "@/features/teams/queries";
+import { getSquad } from "@/features/squads/queries";
 import { formatDate } from "@/lib/format";
 import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@/lib/labels";
 import { requireDashboardRole } from "../../_components/dashboard-section";
 
 export const dynamic = "force-dynamic";
 
-export default async function TeamDetailPage({
+export default async function SquadDetailPage({
   params,
 }: {
-  params: Promise<{ teamId: string }>;
+  params: Promise<{ squadId: string }>;
 }) {
-  await requireDashboardRole("admin", "leader", "member", "seller");
-  const { teamId } = await params;
-  const team = await getTeam(teamId);
-  if (!team) notFound();
+  await requireDashboardRole("admin");
+  const { squadId } = await params;
+  const squad = await getSquad(squadId);
+  if (!squad) notFound();
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title={team.name}
-        description={team.description ?? "Squad roster and details."}
+        title={squad.name}
+        description={squad.description ?? "Squad roster and details."}
         actions={
-          team.archived ? <Badge variant="outline">Archived</Badge> : undefined
+          squad.archived ? <Badge variant="outline">Archived</Badge> : undefined
         }
       />
       <Card>
         <CardContent>
-          {team.members.length === 0 ? (
+          {squad.members.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
               No members in this squad yet.
             </p>
@@ -54,7 +54,7 @@ export default async function TeamDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {team.members.map((member) => (
+                {squad.members.map((member) => (
                   <TableRow key={member.id}>
                     <TableCell className="font-medium">
                       {member.user.name}

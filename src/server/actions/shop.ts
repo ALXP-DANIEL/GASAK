@@ -4,6 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { saveUpload } from "@/lib/uploads";
+import { logActivity } from "@/server/activity-log";
 import { actionUser } from "@/server/authz";
 import {
   db,
@@ -68,15 +69,25 @@ export async function createProduct(formData: FormData): Promise<ActionResult> {
     }
   }
 
-  await db.insert(products).values({
-    name: parsed.data.name,
-    category: parsed.data.category,
-    description: parsed.data.description ?? null,
-    priceSen: Math.round(Number(parsed.data.price) * 100),
-    stock: Number(parsed.data.stock),
-    imageUrl,
-    active: formData.get("active") === "on",
-    createdBy: actor.id,
+  const [row] = await db
+    .insert(products)
+    .values({
+      name: parsed.data.name,
+      category: parsed.data.category,
+      description: parsed.data.description ?? null,
+      priceSen: Math.round(Number(parsed.data.price) * 100),
+      stock: Number(parsed.data.stock),
+      imageUrl,
+      active: formData.get("active") === "on",
+      createdBy: actor.id,
+    })
+    .returning();
+  await logActivity({
+    actor,
+    action: "create",
+    entityType: "product",
+    entityId: row.id,
+    description: `Created product "${row.name}"`,
   });
 
   revalidateShop();
@@ -118,6 +129,13 @@ export async function updateProduct(
     .where(eq(products.id, productId))
     .returning();
   if (!row) return { ok: false, error: "Product not found" };
+  await logActivity({
+    actor,
+    action: "update",
+    entityType: "product",
+    entityId: row.id,
+    description: `Updated product "${row.name}"`,
+  });
 
   revalidateShop();
   return { ok: true, message: "Product updated" };
@@ -158,6 +176,14 @@ export async function markOrderPaid(
       updatedAt: new Date(),
     })
     .where(eq(orders.id, order.id));
+  if (!verifiedBy) {
+    await logActivity({
+      action: "update",
+      entityType: "order",
+      entityId: order.id,
+      description: `Automatically marked order ${order.orderNo} as paid`,
+    });
+  }
 
   revalidateShop();
 }
@@ -183,6 +209,13 @@ export async function updateOrderStatus(
 
   if (status === "paid") {
     await markOrderPaid(order, actor.id);
+    await logActivity({
+      actor,
+      action: "update",
+      entityType: "order",
+      entityId: order.id,
+      description: `Moved order ${order.orderNo} from ${order.status} to paid`,
+    });
     revalidateShop();
     return { ok: true, message: `Order ${order.orderNo} → paid` };
   }
@@ -202,6 +235,13 @@ export async function updateOrderStatus(
     .update(orders)
     .set({ status, updatedAt: new Date() })
     .where(eq(orders.id, orderId));
+  await logActivity({
+    actor,
+    action: "update",
+    entityType: "order",
+    entityId: order.id,
+    description: `Moved order ${order.orderNo} from ${order.status} to ${status}`,
+  });
 
   revalidateShop();
   return { ok: true, message: `Order ${order.orderNo} → ${status}` };

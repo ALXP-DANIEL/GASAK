@@ -23,13 +23,13 @@ import {
   useSidebar,
 } from "@/components/ui/shadcn/sidebar";
 import { authClient } from "@/lib/auth-client";
-import { ROLE_LABELS } from "@/lib/labels";
-import type { Role } from "@/server/db/schema";
+import { ORG_ROLE_LABELS } from "@/lib/labels";
+import type { OrgRole } from "@/server/db/schema";
 
 export type SidebarUser = {
   name: string;
   email: string;
-  role: Role;
+  role: OrgRole;
   image?: string | null;
 };
 
@@ -97,7 +97,7 @@ export function NavUser({ user }: { user: SidebarUser }) {
                   </span>
                 </div>
                 <Badge variant="outline" className="ml-auto">
-                  {ROLE_LABELS[user.role]}
+                  {ORG_ROLE_LABELS[user.role]}
                 </Badge>
               </div>
             </DropdownMenuLabel>

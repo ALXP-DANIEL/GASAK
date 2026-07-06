@@ -8,16 +8,16 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/shadcn/chart";
 
-export type TeamBarPoint = {
-  team: string;
+export type SquadBarPoint = {
+  squad: string;
   value: number;
 };
 
-export function TeamBarChart({
+export function SquadBarChart({
   data,
   label,
 }: {
-  data: TeamBarPoint[];
+  data: SquadBarPoint[];
   label: string;
 }) {
   const chartConfig = {
@@ -46,7 +46,7 @@ export function TeamBarChart({
           allowDecimals={false}
         />
         <YAxis
-          dataKey="team"
+          dataKey="squad"
           type="category"
           tickLine={false}
           axisLine={false}

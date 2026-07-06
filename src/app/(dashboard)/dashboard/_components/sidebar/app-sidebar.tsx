@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { Icons } from "@/components/icons";
+import { Logo } from "@/components/layout/logo";
 import {
   Sidebar,
   SidebarContent,
@@ -13,20 +12,33 @@ import {
 } from "@/components/ui/shadcn/sidebar";
 import {
   canAccessDashboardItem,
+  type DashboardAccess,
   dashboardSidebarGroups,
 } from "@/config/dashboard";
+import type { SquadRole } from "@/server/db";
 import { NavMain } from "./nav-main";
 import { NavUser, type SidebarUser } from "./nav-user";
+import { canToggleFocus, resolveDashboardAccess } from "./sidebar-focus";
+import { SidebarFocusToggle, useSidebarFocus } from "./sidebar-focus-toggle";
 
 export function AppSidebar({
   user,
+  access,
+  primarySquadRole,
   ...props
-}: React.ComponentProps<typeof Sidebar> & { user: SidebarUser }) {
+}: React.ComponentProps<typeof Sidebar> & {
+  user: SidebarUser;
+  access: DashboardAccess;
+  primarySquadRole: SquadRole | null;
+}) {
+  const [focus, setFocus] = useSidebarFocus();
+  const effectiveAccess = resolveDashboardAccess(access, focus);
+
   const groups = dashboardSidebarGroups
     .map((group) => ({
       ...group,
       items: group.items.filter((item) =>
-        canAccessDashboardItem(item, user.role),
+        canAccessDashboardItem(item, effectiveAccess),
       ),
     }))
     .filter((group) => group.items.length > 0);
@@ -36,18 +48,24 @@ export function AppSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/dashboard">
-                <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                  <Icons.Domain.Lightning size={14} weight="fill" />
-                </div>
-                <span className="font-heading text-base font-semibold">
-                  GASAK
-                </span>
-              </Link>
+            <SidebarMenuButton asChild className="h-auto">
+              <Logo
+                href="/dashboard"
+                size={24}
+                wordmark="full"
+                wordmarkClassName="group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:opacity-0"
+              />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        {canToggleFocus(access) && primarySquadRole && (
+          <SidebarFocusToggle
+            focus={focus}
+            onChange={setFocus}
+            orgRole={access.orgRole}
+            squadRole={primarySquadRole}
+          />
+        )}
       </SidebarHeader>
       <SidebarContent>
         <NavMain groups={groups} />
