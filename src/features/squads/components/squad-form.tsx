@@ -1,6 +1,6 @@
 "use client";
 
-import { FormField } from "@components/forms/form-field";
+import { FormField, FormSwitch } from "@components/forms/form-field";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createSquad } from "@server/actions/squads";
@@ -13,6 +13,7 @@ import { z } from "zod";
 const squadFormSchema = z.object({
   name: z.string().min(2, "Squad name is required"),
   description: z.string().optional(),
+  recruiting: z.boolean(),
 });
 
 type SquadFormInput = z.infer<typeof squadFormSchema>;
@@ -23,7 +24,7 @@ export function SquadForm() {
 
   const form = useForm<SquadFormInput>({
     resolver: zodResolver(squadFormSchema),
-    defaultValues: { name: "", description: "" },
+    defaultValues: { name: "", description: "", recruiting: false },
   });
 
   async function onSubmit(values: SquadFormInput) {
@@ -31,6 +32,7 @@ export function SquadForm() {
     const formData = new FormData();
     formData.set("name", values.name);
     if (values.description) formData.set("description", values.description);
+    formData.set("recruiting", String(values.recruiting));
     const result = await createSquad(formData);
     setSubmitting(false);
 
@@ -55,6 +57,12 @@ export function SquadForm() {
         name="description"
         label="Description"
         as="textarea"
+      />
+      <FormSwitch
+        control={form.control}
+        name="recruiting"
+        label="Open for recruitment"
+        description="Show this squad as an optional choice on the public recruitment form."
       />
       <Button type="submit" disabled={submitting} className="w-fit">
         {submitting ? "Creating..." : "Create Squad"}

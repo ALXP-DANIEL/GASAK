@@ -4,6 +4,7 @@ import {
   FormField,
   FormFileInput,
   FormSelect,
+  FormSwitch,
 } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { DeleteButton } from "@components/shared/delete-button";
@@ -65,6 +66,7 @@ type SquadDetail = {
   name: string;
   description: string | null;
   accentColor: string | null;
+  recruiting: boolean;
   archived: boolean;
   members: SquadMemberRow[];
 };
@@ -73,6 +75,7 @@ const squadFormSchema = z.object({
   name: z.string().min(2, "Squad name is required"),
   description: z.string().optional(),
   accentColor: z.string().optional(),
+  recruiting: z.boolean(),
   logo: z.instanceof(File).nullable(),
   banner: z.instanceof(File).nullable(),
 });
@@ -90,6 +93,7 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
       name: squad.name,
       description: squad.description ?? "",
       accentColor: squad.accentColor ?? "",
+      recruiting: squad.recruiting,
       logo: null,
       banner: null,
     },
@@ -101,6 +105,7 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
       formData.set("name", values.name);
       if (values.description) formData.set("description", values.description);
       if (values.accentColor) formData.set("accentColor", values.accentColor);
+      formData.set("recruiting", String(values.recruiting));
       if (values.logo) formData.set("logo", values.logo);
       if (values.banner) formData.set("banner", values.banner);
 
@@ -141,6 +146,12 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
             name="accentColor"
             label="Accent color"
             placeholder="#d97b16"
+          />
+          <FormSwitch
+            control={control}
+            name="recruiting"
+            label="Open for recruitment"
+            description="Show this squad as an optional choice on the public recruitment form."
           />
           <FormFileInput
             control={control}

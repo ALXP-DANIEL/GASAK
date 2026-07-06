@@ -24,6 +24,7 @@ const squadSchema = z.object({
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/, "Accent must be a hex color")
     .optional(),
+  recruiting: z.coerce.boolean().default(false),
 });
 
 export async function createSquad(formData: FormData): Promise<ActionResult> {
@@ -34,6 +35,7 @@ export async function createSquad(formData: FormData): Promise<ActionResult> {
     name: formData.get("name"),
     description: formData.get("description") || undefined,
     accentColor: formData.get("accentColor") || undefined,
+    recruiting: formData.get("recruiting") === "true",
   });
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
@@ -64,6 +66,7 @@ export async function createSquad(formData: FormData): Promise<ActionResult> {
       name: parsed.data.name,
       description: parsed.data.description ?? null,
       accentColor: parsed.data.accentColor ?? null,
+      recruiting: parsed.data.recruiting,
       logoUrl,
       bannerUrl,
     })
@@ -94,6 +97,7 @@ export async function updateSquad(
     name: formData.get("name"),
     description: formData.get("description") || undefined,
     accentColor: formData.get("accentColor") || undefined,
+    recruiting: formData.get("recruiting") === "true",
   });
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
@@ -107,6 +111,7 @@ export async function updateSquad(
     name: parsed.data.name,
     description: parsed.data.description ?? null,
     accentColor: parsed.data.accentColor ?? null,
+    recruiting: parsed.data.recruiting,
   };
 
   if (parsed.data.name !== squad.name) {

@@ -198,6 +198,7 @@ export const squads = createTable("squads", {
   bannerUrl: text("banner_url"),
   // Optional hex accent color (e.g. #d97b16); falls back to the app-wide gold
   accentColor: text("accent_color"),
+  recruiting: boolean("recruiting").notNull().default(false),
   archived: boolean("archived").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -241,6 +242,9 @@ export const applications = createTable("applications", {
   heroPool: text("hero_pool").notNull(),
   previousTeam: text("previous_team"),
   introduction: text("introduction").notNull(),
+  squadId: uuid("squad_id").references(() => squads.id, {
+    onDelete: "set null",
+  }),
   status: applicationStatusEnum("status").notNull().default("applied"),
   assignedLeaderId: text("assigned_leader_id").references(() => user.id, {
     onDelete: "set null",
@@ -586,6 +590,10 @@ export const applicationRelations = relations(applications, ({ one }) => ({
   assignedLeader: one(user, {
     fields: [applications.assignedLeaderId],
     references: [user.id],
+  }),
+  squad: one(squads, {
+    fields: [applications.squadId],
+    references: [squads.id],
   }),
 }));
 

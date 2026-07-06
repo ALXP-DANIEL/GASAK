@@ -64,6 +64,7 @@ type FormFieldProps<
   labelAddon?: React.ReactNode;
   as?: "input" | "textarea";
   type?: React.ComponentProps<"input">["type"];
+  inputMode?: React.ComponentProps<"input">["inputMode"];
   placeholder?: string;
   autoComplete?: string;
   rows?: number;
@@ -80,6 +81,7 @@ export function FormField<
   description,
   as = "input",
   type = "text",
+  inputMode,
   placeholder,
   autoComplete,
   disabled,
@@ -123,6 +125,7 @@ export function FormField<
               }
               id={field.name}
               type={type}
+              inputMode={inputMode}
               placeholder={placeholder}
               autoComplete={autoComplete}
               disabled={disabled}

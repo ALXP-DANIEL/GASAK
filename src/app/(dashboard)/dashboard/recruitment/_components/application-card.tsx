@@ -34,6 +34,7 @@ import {
 import {
   type Application,
   type ApplicationStatus,
+  type Squad,
   type SquadRole,
   squadRoleEnum,
 } from "@server/db/schema";
@@ -49,7 +50,7 @@ export function ApplicationCard({
   squads,
   isAdmin,
 }: {
-  application: Application;
+  application: Application & { squad?: Pick<Squad, "id" | "name"> | null };
   assignedLeaderName: string | null;
   leaders: { id: string; name: string }[];
   squads: { id: string; name: string }[];
@@ -162,6 +163,12 @@ export function ApplicationCard({
             {assignedLeaderName ?? "Unassigned"}
           </span>
         </p>
+        <p className="text-sm text-muted-foreground">
+          Preferred squad:{" "}
+          <span className="font-medium text-foreground">
+            {application.squad?.name ?? "No preference"}
+          </span>
+        </p>
 
         <div className="flex flex-wrap gap-2">
           <Dialog>
@@ -181,7 +188,11 @@ export function ApplicationCard({
                 <DetailRow label="IGN" value={application.ign} />
                 <DetailRow
                   label="MLBB ID"
-                  value={`${application.mlbbId} (${application.serverId})`}
+                  value={`${application.mlbbId} · Server ${application.serverId}`}
+                />
+                <DetailRow
+                  label="Preferred squad"
+                  value={application.squad?.name ?? "No preference"}
                 />
                 <DetailRow label="Email" value={application.email} />
                 <DetailRow label="Phone" value={application.phone} />

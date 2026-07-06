@@ -12,7 +12,7 @@ export function ProductsSection({ products }: { products: Product[] }) {
     >
       <SectionHeader eyebrow="Shop Now" title="Top products" />
 
-      <ContentCardGrid className="mt-10">
+      <ContentCardGrid density="compact" className="mt-10">
         {products.map((product) => (
           <ProductCard
             key={product.id}

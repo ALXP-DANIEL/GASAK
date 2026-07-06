@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Oswald } from "next/font/google";
-import { ViewTransition } from "react";
 import "@styles/globals.css";
 import SplashGate from "@components/layout/splash-gate";
 import { Toaster } from "@components/ui/shadcn/sonner";
@@ -88,9 +87,7 @@ export default async function RootLayout({
           <Maintenance />
         ) : (
           <SplashGate>
-            <ViewTransition default="page-fade">
-              <TooltipProvider>{children}</TooltipProvider>
-            </ViewTransition>
+            <TooltipProvider>{children}</TooltipProvider>
           </SplashGate>
         )}
         <Toaster richColors position="top-center" />

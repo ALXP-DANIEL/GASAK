@@ -63,9 +63,16 @@ export default async function SquadsPage() {
                     <TableCell>{memberCount}</TableCell>
                     <TableCell>{formatDate(squad.createdAt)}</TableCell>
                     <TableCell>
-                      <Badge variant={squad.archived ? "outline" : "secondary"}>
-                        {squad.archived ? "Archived" : "Active"}
-                      </Badge>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge
+                          variant={squad.archived ? "outline" : "secondary"}
+                        >
+                          {squad.archived ? "Archived" : "Active"}
+                        </Badge>
+                        {squad.recruiting && (
+                          <Badge variant="default">Recruiting</Badge>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

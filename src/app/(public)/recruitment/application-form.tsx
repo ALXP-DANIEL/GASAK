@@ -1,6 +1,7 @@
 "use client";
 
 import { FormField, FormSelect } from "@components/forms/form-field";
+import { MlbbIdFields } from "@components/forms/mlbb-id-fields";
 import { BrandCard } from "@components/ui/brand";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +20,7 @@ const schema = z.object({
   ign: z.string().min(1, "IGN is required"),
   mlbbId: z.string().min(4, "Enter a valid MLBB ID"),
   serverId: z.string().min(1, "Server ID is required"),
+  squadId: z.string().optional(),
   currentRank: z.string().min(1, "Select your current rank"),
   preferredLane: z.enum(laneEnum.enumValues, "Select your preferred lane"),
   heroPool: z.string().min(2, "List a few of your best heroes"),
@@ -28,13 +30,19 @@ const schema = z.object({
 
 type Values = z.infer<typeof schema>;
 
+const ANY_SQUAD_VALUE = "any";
+
 const rankOptions = MLBB_RANKS.map((rank) => ({ value: rank, label: rank }));
 const laneOptions = laneEnum.enumValues.map((lane) => ({
   value: lane,
   label: LANE_LABELS[lane],
 }));
 
-export function ApplicationForm() {
+export function ApplicationForm({
+  squads = [],
+}: {
+  squads?: { id: string; name: string }[];
+}) {
   const [pending, startTransition] = useTransition();
   const [submitted, setSubmitted] = useState(false);
 
@@ -47,6 +55,7 @@ export function ApplicationForm() {
       ign: "",
       mlbbId: "",
       serverId: "",
+      squadId: ANY_SQUAD_VALUE,
       currentRank: "",
       heroPool: "",
       previousTeam: "",
@@ -56,7 +65,13 @@ export function ApplicationForm() {
 
   function onSubmit(values: Values) {
     startTransition(async () => {
-      const result = await submitApplication(values);
+      const result = await submitApplication({
+        ...values,
+        squadId:
+          values.squadId && values.squadId !== ANY_SQUAD_VALUE
+            ? values.squadId
+            : undefined,
+      });
       if (result.ok) {
         setSubmitted(true);
       } else {
@@ -105,13 +120,11 @@ export function ApplicationForm() {
             placeholder="+60…"
           />
           <FormField control={control} name="ign" label="In-game name (IGN)" />
-          <FormField
+          <MlbbIdFields
             control={control}
-            name="mlbbId"
-            label="MLBB ID"
-            type="text"
+            mlbbIdName="mlbbId"
+            serverIdName="serverId"
           />
-          <FormField control={control} name="serverId" label="Server ID" />
           <FormSelect
             control={control}
             name="currentRank"
@@ -126,6 +139,22 @@ export function ApplicationForm() {
             options={laneOptions}
             placeholder="Select lane"
           />
+          {squads.length > 0 && (
+            <FormSelect
+              control={control}
+              name="squadId"
+              label="Preferred squad (optional)"
+              options={[
+                { value: ANY_SQUAD_VALUE, label: "No preference" },
+                ...squads.map((squad) => ({
+                  value: squad.id,
+                  label: squad.name,
+                })),
+              ]}
+              placeholder="No preference"
+              description="Only squads currently open for recruitment are listed."
+            />
+          )}
         </div>
         <FormField
           control={control}

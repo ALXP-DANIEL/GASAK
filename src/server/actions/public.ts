@@ -10,8 +10,9 @@ import {
   orders,
   products,
   productVariants,
+  squads,
 } from "@server/db";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { markOrderPaid } from "./shop";
@@ -27,6 +28,7 @@ const applicationSchema = z.object({
   ign: z.string().min(1, "IGN is required"),
   mlbbId: z.string().min(4, "Enter a valid MLBB ID"),
   serverId: z.string().min(1, "Server ID is required"),
+  squadId: z.uuid().optional(),
   currentRank: z.string().min(1, "Current rank is required"),
   preferredLane: z.enum(laneEnum.enumValues),
   heroPool: z.string().min(2, "List a few of your best heroes"),
@@ -42,10 +44,24 @@ export async function submitApplication(
     return { ok: false, error: parsed.error.issues[0].message };
   }
 
+  if (parsed.data.squadId) {
+    const squad = await db.query.squads.findFirst({
+      where: and(
+        eq(squads.id, parsed.data.squadId),
+        eq(squads.archived, false),
+        eq(squads.recruiting, true),
+      ),
+    });
+    if (!squad) {
+      return { ok: false, error: "Selected squad is not recruiting" };
+    }
+  }
+
   const [row] = await db
     .insert(applications)
     .values({
       ...parsed.data,
+      squadId: parsed.data.squadId ?? null,
       previousTeam: parsed.data.previousTeam || null,
     })
     .returning();
