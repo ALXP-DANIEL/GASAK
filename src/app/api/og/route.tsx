@@ -4,13 +4,12 @@ import type { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
-const BG = "#06080d";
-const PANEL = "#0d111a";
-const PANEL_2 = "#111827";
-const FG = "#f8fafc";
-const MUTED = "#94a3b8";
-const SOFT = "#1f2937";
-const BRAND_ACCENT = "#e0af3b";
+const BRAND_GOLD = "#e0af3b";
+const DARK = "#050506";
+const INK = "#0c0d10";
+const FG = "#fff7dd";
+const MUTED = "#c7c0aa";
+const RULE = "#3c3424";
 
 const HEX_PATTERN = /^#[0-9a-f]{6}$/i;
 const IMAGE_BACKED_TYPES = new Set(["Squad", "Product"]);
@@ -27,6 +26,13 @@ function safeDisplayLink(link: string) {
   } catch {
     return link;
   }
+}
+
+function titleFontSize(value: string, hasImage: boolean) {
+  if (value.length > 62) return hasImage ? 54 : 62;
+  if (value.length > 42) return hasImage ? 62 : 72;
+  if (value.length > 20) return hasImage ? 68 : 74;
+  return hasImage ? 72 : 86;
 }
 
 async function fetchImageBuffer(src: string | null, base: string) {
@@ -59,18 +65,20 @@ export async function GET(request: NextRequest) {
   const accentParam = searchParams.get("accent");
 
   const accent =
-    accentParam && HEX_PATTERN.test(accentParam) ? accentParam : BRAND_ACCENT;
+    accentParam && HEX_PATTERN.test(accentParam) ? accentParam : BRAND_GOLD;
 
-  const heading = truncate(title, 82);
-  const eyebrow = truncate(type.toUpperCase(), 28);
-  const displayLink = truncate(safeDisplayLink(link), 62);
+  const heading = truncate(title, 86);
+  const eyebrow = truncate(type.toUpperCase(), 30);
+  const displayLink = truncate(safeDisplayLink(link), 66);
 
-  const logoData = await fetchImageBuffer("/images/gasak-logo.png", origin);
-
-  const fetchedSubjectImage = await fetchImageBuffer(image, origin);
+  const [logoData, fetchedSubjectImage] = await Promise.all([
+    fetchImageBuffer("/images/gasak-logo.png", origin),
+    fetchImageBuffer(image, origin),
+  ]);
   const subjectImageData =
     fetchedSubjectImage ??
     (IMAGE_BACKED_TYPES.has(type) && logoData ? logoData : null);
+  const hasSubjectImage = Boolean(subjectImageData);
 
   return new ImageResponse(
     <div
@@ -80,60 +88,18 @@ export async function GET(request: NextRequest) {
         display: "flex",
         position: "relative",
         overflow: "hidden",
-        background: BG,
+        background: DARK,
         color: FG,
         fontFamily: "Arial, Helvetica, sans-serif",
       }}
     >
-      {/* Background glow */}
       <div
         style={{
           position: "absolute",
-          inset: 0,
-          display: "flex",
-          backgroundImage: `
-              radial-gradient(circle at 80% 18%, ${accent}38 0, transparent 34%),
-              radial-gradient(circle at 18% 88%, ${accent}20 0, transparent 30%),
-              linear-gradient(135deg, #070a10 0%, #080b12 42%, #101827 100%)
-            `,
-        }}
-      />
-
-      {/* Grid texture */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          opacity: 0.28,
-          backgroundImage: `
-              linear-gradient(${SOFT} 1px, transparent 1px),
-              linear-gradient(90deg, ${SOFT} 1px, transparent 1px)
-            `,
-          backgroundSize: "46px 46px",
-        }}
-      />
-
-      {/* Accent blocks */}
-      <div
-        style={{
-          position: "absolute",
-          right: "-120px",
-          top: "-90px",
-          width: "440px",
-          height: "440px",
-          display: "flex",
-          borderRadius: "9999px",
-          border: `34px solid ${accent}2f`,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          right: "66px",
-          bottom: "58px",
-          width: "250px",
-          height: "10px",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: "18px",
           display: "flex",
           background: accent,
         }}
@@ -141,308 +107,245 @@ export async function GET(request: NextRequest) {
       <div
         style={{
           position: "absolute",
-          right: "66px",
-          bottom: "82px",
-          width: "92px",
-          height: "10px",
+          left: "52px",
+          top: "42px",
+          right: "52px",
+          bottom: "42px",
           display: "flex",
-          background: `${accent}70`,
+          border: `1px solid ${accent}66`,
         }}
       />
 
-      {/* Main card */}
       <div
         style={{
           position: "absolute",
-          inset: "42px",
+          top: "72px",
+          left: "86px",
+          right: "86px",
           display: "flex",
-          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "space-between",
-          border: `1px solid ${accent}55`,
-          background: "#070b12cc",
         }}
       >
-        {/* Top header */}
-        <div
-          style={{
-            display: "flex",
-            width: "100%",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "34px 40px 0 40px",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
-            <div
-              style={{
-                display: "flex",
-                width: "64px",
-                height: "64px",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "18px",
-                background: PANEL,
-                border: `2px solid ${accent}`,
-                overflow: "hidden",
-              }}
-            >
-              {logoData ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={logoData as unknown as string}
-                  alt=""
-                  width={58}
-                  height={58}
-                  style={{
-                    objectFit: "cover",
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    color: accent,
-                    fontSize: "28px",
-                    fontWeight: 900,
-                  }}
-                >
-                  G
-                </div>
-              )}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "3px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  fontSize: "30px",
-                  fontWeight: 950,
-                  letterSpacing: "-0.04em",
-                }}
-              >
-                {siteConfig.name}
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  color: MUTED,
-                  fontSize: "14px",
-                  fontWeight: 800,
-                  letterSpacing: "0.28em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Esports Management
-              </div>
-            </div>
-          </div>
-
+        <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
           <div
             style={{
+              width: "62px",
+              height: "62px",
               display: "flex",
               alignItems: "center",
-              gap: "12px",
-              padding: "10px 18px",
-              border: `1px solid ${accent}80`,
-              background: `${accent}16`,
-              color: accent,
-              fontSize: "18px",
-              fontWeight: 900,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
+              justifyContent: "center",
+              overflow: "hidden",
+              background: INK,
+              border: `2px solid ${accent}`,
             }}
           >
-            <span>{eyebrow}</span>
-          </div>
-        </div>
-
-        {/* Middle content */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "48px",
-            padding: "0 40px",
-          }}
-        >
-          {subjectImageData ? (
-            <div
-              style={{
-                display: "flex",
-                width: "260px",
-                height: "260px",
-                flexShrink: 0,
-                padding: "10px",
-                background: PANEL,
-                border: `2px solid ${accent}`,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  width: "100%",
-                  height: "100%",
-                  overflow: "hidden",
-                  background: PANEL_2,
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={subjectImageData as unknown as string}
-                  alt=""
-                  width={240}
-                  height={240}
-                  style={{
-                    width: "240px",
-                    height: "240px",
-                    objectFit: "cover",
-                  }}
-                />
-              </div>
-            </div>
-          ) : null}
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              minWidth: 0,
-              gap: "22px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                width: subjectImageData ? "760px" : "980px",
-                fontSize: subjectImageData ? "62px" : "70px",
-                lineHeight: 0.95,
-                fontWeight: 950,
-                letterSpacing: "-0.055em",
-              }}
-            >
-              {heading}
-            </div>
-
-            {meta ? (
-              <div
-                style={{
-                  display: "flex",
-                  maxWidth: subjectImageData ? "720px" : "920px",
-                  color: MUTED,
-                  fontSize: "25px",
-                  lineHeight: 1.25,
-                  fontWeight: 700,
-                }}
-              >
-                {truncate(meta, 105)}
-              </div>
+            {logoData ? (
+              // biome-ignore lint/performance/noImgElement: ImageResponse renders fetched image buffers with plain img tags.
+              <img
+                src={logoData as unknown as string}
+                alt=""
+                width={58}
+                height={58}
+                style={{ objectFit: "cover" }}
+              />
             ) : (
               <div
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  gap: "14px",
-                  color: MUTED,
-                  fontSize: "22px",
-                  fontWeight: 700,
+                  color: accent,
+                  fontSize: "32px",
+                  fontWeight: 900,
                 }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    width: "54px",
-                    height: "6px",
-                    background: accent,
-                  }}
-                />
-                <span>Smarter squad operations. Faster match execution.</span>
+                G
               </div>
             )}
           </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            <div
+              style={{
+                display: "flex",
+                fontSize: "28px",
+                fontWeight: 900,
+                letterSpacing: 0,
+                textTransform: "uppercase",
+              }}
+            >
+              {siteConfig.name}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                color: MUTED,
+                fontSize: "14px",
+                fontWeight: 800,
+                letterSpacing: 0,
+                textTransform: "uppercase",
+              }}
+            >
+              Esports management
+            </div>
+          </div>
         </div>
 
-        {/* Footer */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "12px 18px",
+            background: "#070707d9",
+            border: `1px solid ${accent}`,
+            color: accent,
+            fontSize: "17px",
+            fontWeight: 900,
+            letterSpacing: 0,
+            textTransform: "uppercase",
+          }}
+        >
+          {eyebrow}
+        </div>
+      </div>
+
+      <div
+        style={{
+          position: "absolute",
+          left: "86px",
+          top: "178px",
+          width: hasSubjectImage ? "680px" : "700px",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <div
           style={{
             display: "flex",
             width: "100%",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "0 40px 34px 40px",
+            height: "8px",
+            marginBottom: "28px",
+            background: `linear-gradient(90deg, ${accent} 0%, ${accent} 38%, transparent 38%, transparent 100%)`,
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            color: FG,
+            fontSize: `${titleFontSize(heading, hasSubjectImage)}px`,
+            lineHeight: 0.96,
+            fontWeight: 950,
+            letterSpacing: 0,
+            textTransform: "uppercase",
+          }}
+        >
+          {heading}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            width: hasSubjectImage ? "620px" : "660px",
+            marginTop: "30px",
+            color: MUTED,
+            fontSize: "25px",
+            lineHeight: 1.25,
+            fontWeight: 750,
+          }}
+        >
+          {meta
+            ? truncate(meta, 108)
+            : "Smarter squad operations. Faster match execution. Built for teams that play to win."}
+        </div>
+      </div>
+
+      {subjectImageData ? (
+        <div
+          style={{
+            position: "absolute",
+            right: "94px",
+            top: "176px",
+            width: "300px",
+            height: "300px",
+            display: "flex",
+            padding: "12px",
+            background: "#060606d9",
+            border: `2px solid ${accent}`,
           }}
         >
           <div
             style={{
               display: "flex",
-              color: MUTED,
-              fontSize: "21px",
-              fontWeight: 700,
+              width: "100%",
+              height: "100%",
+              overflow: "hidden",
+              background: INK,
+              border: `1px solid ${RULE}`,
             }}
           >
-            {displayLink}
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}
-          >
-            <div
+            {/* biome-ignore lint/performance/noImgElement: ImageResponse renders fetched image buffers with plain img tags. */}
+            <img
+              src={subjectImageData as unknown as string}
+              alt=""
+              width={276}
+              height={276}
               style={{
-                display: "flex",
-                color: FG,
-                fontSize: "18px",
-                fontWeight: 900,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-              }}
-            >
-              GASAK
-            </div>
-            <div
-              style={{
-                display: "flex",
-                width: "9px",
-                height: "9px",
-                background: accent,
+                width: "276px",
+                height: "276px",
+                objectFit: "cover",
               }}
             />
-            <div
-              style={{
-                display: "flex",
-                color: accent,
-                fontSize: "18px",
-                fontWeight: 900,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-              }}
-            >
-              GG
-            </div>
           </div>
         </div>
-      </div>
+      ) : null}
 
-      {/* Left accent rail */}
       <div
         style={{
           position: "absolute",
-          left: "42px",
-          top: "42px",
-          bottom: "42px",
-          width: "8px",
+          left: "86px",
+          right: "86px",
+          bottom: "72px",
           display: "flex",
-          background: accent,
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
-      />
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+            color: MUTED,
+            fontSize: "20px",
+            fontWeight: 800,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              width: "78px",
+              height: "4px",
+              background: accent,
+            }}
+          />
+          {displayLink}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "14px",
+            color: FG,
+            fontSize: "19px",
+            fontWeight: 900,
+            letterSpacing: 0,
+            textTransform: "uppercase",
+          }}
+        >
+          <span>GASAK</span>
+          <span style={{ color: accent }}>GG</span>
+        </div>
+      </div>
     </div>,
     {
       width: 1200,
