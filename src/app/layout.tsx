@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Oswald } from "next/font/google";
 import { ViewTransition } from "react";
 import "@styles/globals.css";
-import { DebugLoginBar } from "@components/dev/debug-login-bar";
 import SplashGate from "@components/layout/splash-gate";
 import { Toaster } from "@components/ui/shadcn/sonner";
 import { TooltipProvider } from "@components/ui/shadcn/tooltip";
@@ -60,7 +59,6 @@ export const metadata: Metadata = {
 };
 
 const isMaintenance = env.IS_MAINTENANCE === "true";
-const showDebugLogin = env.NODE_ENV !== "production";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -91,10 +89,7 @@ export default async function RootLayout({
         ) : (
           <SplashGate>
             <ViewTransition default="page-fade">
-              <TooltipProvider>
-                {showDebugLogin ? <DebugLoginBar /> : null}
-                {children}
-              </TooltipProvider>
+              <TooltipProvider>{children}</TooltipProvider>
             </ViewTransition>
           </SplashGate>
         )}

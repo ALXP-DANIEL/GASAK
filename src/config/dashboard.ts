@@ -145,12 +145,6 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         icon: Icons.Domain.Reports,
         canAccess: canViewReports,
       },
-      {
-        href: "/dashboard/settings",
-        label: "Settings",
-        icon: Icons.Actions.Settings,
-        canAccess: everyone,
-      },
     ],
   },
 ];

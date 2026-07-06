@@ -1,3 +1,4 @@
+import { DebugLoginBar } from "@components/dev/debug-login-bar";
 import { Separator } from "@components/ui/shadcn/separator";
 import {
   SidebarInset,
@@ -5,11 +6,14 @@ import {
   SidebarTrigger,
 } from "@components/ui/shadcn/sidebar";
 import { cookies } from "next/headers";
+import { env } from "@/env";
 import { DashboardBreadcrumbs } from "./_components/dashboard-breadcrumbs";
 import { getDashboardContext } from "./_components/dashboard-context";
 import { AppSidebar } from "./_components/sidebar/app-sidebar";
 
 export const dynamic = "force-dynamic";
+
+const showDebugLogin = env.NODE_ENV !== "production";
 
 export default async function DashboardLayout({
   children,
@@ -24,6 +28,7 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
+      {showDebugLogin ? <DebugLoginBar /> : null}
       <AppSidebar
         user={{
           name: user.name,
