@@ -4,7 +4,7 @@ import {
   contentCardSize,
 } from "@components/cards/shared";
 import { Icons } from "@components/icons";
-import { BrandBadge, LinkButton } from "@components/ui/brand";
+import { LinkButton } from "@components/ui/brand";
 import { formatRM } from "@lib/format";
 import { cn } from "@lib/utils";
 import type { Product } from "@server/db/schema";
@@ -36,13 +36,7 @@ export function ProductCard({
 
   return (
     <ContentCardFrame
-      className={cn(
-        "relative",
-        contentCardSize[variant],
-        compact && "items-center p-5 text-center",
-        hasLink && "transition-colors hover:border-primary/60",
-        className,
-      )}
+      className={cn(contentCardSize[variant], className)}
       interactive={hasLink}
     >
       {href && (
@@ -58,22 +52,48 @@ export function ProductCard({
       <div
         className={cn(
           "pointer-events-none relative z-20 flex flex-1 flex-col",
-          compact ? "w-full items-center" : "p-5",
+          compact ? "items-center p-4 text-center" : "p-6",
         )}
       >
-        <ProductHeader product={product} compact={compact} />
+        <h3
+          className={cn(
+            "text-balance font-heading font-semibold uppercase tracking-wide",
+            compact
+              ? "line-clamp-2 text-sm leading-snug"
+              : "line-clamp-2 text-2xl leading-tight",
+          )}
+        >
+          {product.name}
+        </h3>
 
-        {meta && <div className="mt-3 flex flex-wrap gap-2">{meta}</div>}
+        <p
+          className={cn(
+            "mt-1.5 font-mono font-semibold text-primary",
+            compact ? "text-sm" : "text-lg",
+          )}
+        >
+          {formatRM(product.priceSen)}
+        </p>
+
+        {meta && (
+          <div
+            className={cn(
+              "mt-3 flex flex-wrap gap-2",
+              compact && "justify-center",
+            )}
+          >
+            {meta}
+          </div>
+        )}
 
         {!compact && (
           <>
-            <p className="mt-2 line-clamp-3 min-h-18 text-sm leading-6 text-muted-foreground">
+            <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
               {product.description}
             </p>
-
             <div className="mt-auto pt-5">
               {footer ?? (
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                   {product.stock} in stock
                 </p>
               )}
@@ -84,7 +104,7 @@ export function ProductCard({
         <div
           className={cn(
             "pointer-events-auto relative z-30",
-            compact ? "mt-auto w-full pt-3" : "mt-4",
+            compact ? "mt-auto w-full pt-4" : "mt-4",
           )}
         >
           {renderProductAction({ action, href })}
@@ -104,67 +124,27 @@ function ProductImage({
   return (
     <div
       className={cn(
-        "pointer-events-none relative z-20 flex items-center justify-center overflow-hidden",
-        compact ? "size-16 desktop:size-20" : "h-36 w-full",
+        "pointer-events-none relative z-20 w-full overflow-hidden bg-secondary",
+        compact ? "aspect-square" : "h-44",
       )}
     >
       {product.imageUrl ? (
-        compact ? (
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            width={80}
-            height={80}
-            className="size-full object-contain"
-            unoptimized
-          />
-        ) : (
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            className="object-cover"
-            unoptimized
-          />
-        )
+        <Image
+          src={product.imageUrl}
+          alt={product.name}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          unoptimized
+        />
       ) : (
-        <Icons.Domain.Shop size={40} className="text-primary/50" />
+        <div className="flex h-full items-center justify-center">
+          <Icons.Domain.Shop size={36} className="text-primary/50" />
+        </div>
       )}
-    </div>
-  );
-}
-
-function ProductHeader({
-  product,
-  compact,
-}: {
-  product: Product;
-  compact: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        compact ? "contents" : "flex items-center justify-between gap-2",
-      )}
-    >
-      <h3
-        className={cn(
-          "font-heading font-bold tracking-wide",
-          compact
-            ? "mt-3 line-clamp-2 min-h-10 text-xs leading-5 uppercase desktop:text-sm"
-            : "line-clamp-2 min-h-14 text-xl leading-7",
-        )}
-      >
-        {product.name}
-      </h3>
-
-      {compact ? (
-        <p className="mt-1 text-[11px] font-semibold text-primary desktop:text-xs">
-          {formatRM(product.priceSen)}
-        </p>
-      ) : (
-        <BrandBadge>{formatRM(product.priceSen)}</BrandBadge>
-      )}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-card to-transparent"
+      />
     </div>
   );
 }

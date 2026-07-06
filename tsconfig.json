@@ -45,6 +45,8 @@
     "backup",
     "backup/**",
     "reference",
-    "reference/**"
+    "reference/**",
+    "redesign-components-from-scratch",
+    "redesign-components-from-scratch/**"
   ]
 }

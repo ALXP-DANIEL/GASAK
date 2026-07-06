@@ -69,11 +69,15 @@ export function BuyButton({ product }: BuyButtonProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full">Buy now</Button>
+        <Button className="w-full font-semibold uppercase tracking-wider">
+          Buy now
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{product.name}</DialogTitle>
+          <DialogTitle className="font-heading text-xl font-semibold uppercase tracking-wide">
+            {product.name}
+          </DialogTitle>
           <DialogDescription>
             Guest checkout. We deliver via your MLBB ID or WhatsApp after
             payment.
@@ -99,10 +103,14 @@ export function BuyButton({ product }: BuyButtonProps) {
             label="Quantity"
             type="number"
           />
-          <Button type="submit" disabled={pending}>
+          <Button
+            type="submit"
+            disabled={pending}
+            className="font-semibold uppercase tracking-wider"
+          >
             {pending
               ? "Placing order..."
-              : `Place order - ${formatRM(product.priceSen * quantity)}`}
+              : `Place order — ${formatRM(product.priceSen * quantity)}`}
           </Button>
         </form>
       </DialogContent>

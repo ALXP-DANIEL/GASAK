@@ -4,7 +4,6 @@ import {
   contentCardSize,
 } from "@components/cards/shared";
 import { Icons } from "@components/icons";
-import { BrandBadge } from "@components/ui/brand";
 import { formatDate } from "@lib/format";
 import { cn } from "@lib/utils";
 import type { Announcement } from "@server/db/schema";
@@ -68,62 +67,52 @@ function NewsCardContent({
       className={cn(contentCardSize[variant], linked && "cursor-pointer")}
       interactive={linked}
     >
-      <div
-        className={cn(
-          "relative flex items-center justify-center border-b border-primary/20 bg-linear-to-br from-primary/25 via-primary/5 to-transparent",
-          compact ? "aspect-[16/10]" : "h-32",
-        )}
-      >
-        <Icons.Domain.News
-          size={compact ? 40 : 34}
-          className="text-primary/60"
-          weight={compact ? undefined : "fill"}
-        />
-        <BrandBadge
-          className={cn(
-            "absolute left-3 top-3",
-            compact && "border-primary bg-primary text-primary-foreground",
-          )}
-        >
-          Announcement
-        </BrandBadge>
-      </div>
+      <div className="flex flex-1 flex-col p-6">
+        <div className="flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
+            <Icons.Domain.Announcements size={13} aria-hidden />
+            Announcement
+          </span>
+          <time
+            dateTime={new Date(item.createdAt).toISOString()}
+            className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground"
+          >
+            {formatDate(item.createdAt)}
+          </time>
+        </div>
 
-      <div className="flex flex-1 flex-col p-5">
-        <p
-          className={cn(
-            "font-semibold uppercase tracking-wide text-primary",
-            compact ? "text-[10px]" : "text-xs",
-          )}
-        >
-          {formatDate(item.createdAt)}
-        </p>
         <h2
           className={cn(
-            "mt-1 font-heading font-bold tracking-wide",
-            compact ? "line-clamp-2 text-lg" : "text-xl",
+            "mt-4 text-balance font-heading font-semibold uppercase leading-tight tracking-wide transition-colors group-hover:text-primary",
+            compact ? "line-clamp-3 text-xl" : "line-clamp-2 text-2xl",
           )}
         >
           {item.title}
         </h2>
-        {meta && <div className="mt-2">{meta}</div>}
+
+        {meta && <div className="mt-3">{meta}</div>}
+
         <p
           className={cn(
-            "mt-2 leading-relaxed text-muted-foreground",
-            compact ? "line-clamp-2 text-xs" : "line-clamp-3 text-sm",
+            "mt-3 leading-relaxed text-muted-foreground",
+            compact ? "line-clamp-3 text-sm" : "line-clamp-4 text-sm",
           )}
         >
           {item.content}
         </p>
-        {action && <div className="mt-auto pt-4">{action}</div>}
-        {compact && !linked && (
-          <Link
-            href="/news"
-            className="mt-4 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-primary hover:underline"
-          >
-            Read more <Icons.Layout.Navigation.CaretRight size={12} />
-          </Link>
-        )}
+
+        <div className="mt-auto pt-6">
+          {action ?? (
+            <span className="inline-flex items-center gap-1.5 border-t border-border pt-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground/70 transition-colors group-hover:text-primary">
+              Read more
+              <Icons.Layout.Navigation.CaretRight
+                size={14}
+                aria-hidden
+                className="transition-transform group-hover:translate-x-0.5"
+              />
+            </span>
+          )}
+        </div>
       </div>
     </ContentCardFrame>
   );

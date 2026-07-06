@@ -37,16 +37,44 @@ export function ContentCardGrid({
 
 export type ContentCardFrameProps = ComponentProps<typeof BrandCard>;
 
+/**
+ * Base card chrome shared by news/product/squad cards — a top accent line
+ * that expands on hover and corner brackets, layered over BrandCard's gold
+ * border language.
+ */
 export function ContentCardFrame({
   className,
   interactive,
+  children,
   ...props
 }: ContentCardFrameProps) {
   return (
     <BrandCard
-      className={cn("flex h-full flex-col overflow-hidden", className)}
+      className={cn(
+        "group relative flex h-full flex-col overflow-hidden",
+        className,
+      )}
       interactive={interactive}
       {...props}
-    />
+    >
+      <span
+        aria-hidden
+        className={cn(
+          "absolute inset-x-0 top-0 z-30 h-0.5 origin-left bg-primary",
+          interactive
+            ? "scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+            : "scale-x-0",
+        )}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-0 top-0 z-30 size-3 border-l-2 border-t-2 border-primary/40"
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 right-0 z-30 size-3 border-b-2 border-r-2 border-primary/40"
+      />
+      {children}
+    </BrandCard>
   );
 }
