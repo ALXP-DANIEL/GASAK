@@ -10,6 +10,7 @@ export const metadata = createPageMetadata({
   title: "About",
   description: "The story and values of GASAK Esports.",
   path: "/about",
+  type: "About",
 });
 
 const VALUES = [

@@ -4,6 +4,7 @@ import { BrandBadge, BrandCard, LinkButton } from "@components/ui/brand";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatDate } from "@lib/format";
 import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
+import { createPageMetadata } from "@lib/metadata";
 import { db, scrims, squads, tournaments } from "@server/db";
 import type { SquadRole } from "@server/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -36,6 +37,28 @@ type SquadWithMembers = NonNullable<
   Awaited<ReturnType<typeof getSquadProfile>>
 >;
 type SquadMemberWithUser = SquadWithMembers["members"][number];
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ squadId: string }>;
+}) {
+  const { squadId } = await params;
+  const squad = await getSquadProfile(squadId);
+  if (!squad || squad.archived) return {};
+
+  return createPageMetadata({
+    title: squad.name,
+    description: squad.description ?? `The ${squad.name} squad of GASAK Esports.`,
+    path: `/squads/${squad.id}`,
+    type: "Squad",
+    image: squad.logoUrl,
+    accent: squad.accentColor,
+    meta: `${squad.members.length} member${squad.members.length === 1 ? "" : "s"}${
+      squad.recruiting ? " · Recruiting" : ""
+    }`,
+  });
+}
 
 export default async function SquadDetailPage({
   params,

@@ -18,6 +18,7 @@ export const metadata = createPageMetadata({
   description:
     "MLBB diamonds, weekly passes, joki, and coaching from GASAK Esports.",
   path: "/shop",
+  type: "Shop",
 });
 
 export default async function shopPage() {

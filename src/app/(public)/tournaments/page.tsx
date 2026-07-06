@@ -13,6 +13,7 @@ export const metadata = createPageMetadata({
   title: "Tournaments",
   description: "Tournament results and history for GASAK Esports squads.",
   path: "/tournaments",
+  type: "Tournaments",
 });
 
 export default async function TournamentsPage() {

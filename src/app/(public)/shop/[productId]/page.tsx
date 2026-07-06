@@ -34,6 +34,11 @@ export async function generateMetadata({
     title: product.name,
     description: product.description ?? "GASAK shop product.",
     path: `/shop/${product.id}`,
+    type: "Product",
+    image: product.imageUrl,
+    meta: product.hasVariants
+      ? `From ${formatRM(product.priceSen)} · ${PRODUCT_CATEGORY_LABELS[product.category]}`
+      : `${formatRM(product.priceSen)} · ${PRODUCT_CATEGORY_LABELS[product.category]}`,
   });
 }
 

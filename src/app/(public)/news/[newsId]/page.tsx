@@ -38,6 +38,7 @@ export async function generateMetadata({
     description: stripHtml(item.content).slice(0, 160),
     path: `/news/${item.id}`,
     type: "News",
+    meta: formatDate(item.createdAt),
   });
 }
 

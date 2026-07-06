@@ -9,6 +9,7 @@ export const metadata = createPageMetadata({
   title: "Recruitment",
   description: "Apply to join a GASAK Esports squad.",
   path: "/recruitment",
+  type: "Recruitment",
 });
 
 export default async function RecruitmentPage() {

@@ -7,6 +7,7 @@ export const metadata = createPageMetadata({
   title: "Contact",
   description: "Get in touch with GASAK Esports.",
   path: "/contact",
+  type: "Contact",
 });
 
 export default function ContactPage() {

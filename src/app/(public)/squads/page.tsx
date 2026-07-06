@@ -10,6 +10,7 @@ export const metadata = createPageMetadata({
   title: "Squads",
   description: "The competitive squads of GASAK Esports.",
   path: "/squads",
+  type: "Squads",
 });
 
 export default async function SquadsPage() {
