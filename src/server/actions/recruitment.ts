@@ -1,13 +1,10 @@
 "use server";
 
 import { randomInt } from "node:crypto";
-import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
-import { auth } from "@/lib/auth";
-import { userOrgRole } from "@/lib/session";
-import { logActivity } from "@/server/activity-log";
-import { actionOrgUser, getManagedSquadIds } from "@/server/authz";
+import { auth } from "@lib/auth";
+import { userOrgRole } from "@lib/session";
+import { logActivity } from "@server/activity-log";
+import { actionOrgUser, getManagedSquadIds } from "@server/authz";
 import {
   applicationStatusEnum,
   applications,
@@ -17,7 +14,10 @@ import {
   squadRoleEnum,
   squads,
   user,
-} from "@/server/db";
+} from "@server/db";
+import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import type { ActionResult } from "./public";
 
 function revalidateRecruitment() {

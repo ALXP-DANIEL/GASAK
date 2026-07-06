@@ -1,12 +1,12 @@
+import { BuyButton } from "@components/products/buy-button";
+import { ProductCard } from "@components/products/product-card";
+import { LinkButton, PageHero } from "@components/ui/brand";
+import { Badge } from "@components/ui/shadcn/badge";
+import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
+import { createPageMetadata } from "@lib/metadata";
+import { db, products } from "@server/db";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { BuyButton } from "@/components/products/buy-button";
-import { ProductCard } from "@/components/products/product-card";
-import { LinkButton, PageHero } from "@/components/ui/brand";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { PRODUCT_CATEGORY_LABELS } from "@/lib/labels";
-import { createPageMetadata } from "@/lib/metadata";
-import { db, products } from "@/server/db";
 
 export const dynamic = "force-dynamic";
 

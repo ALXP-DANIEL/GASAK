@@ -1,13 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Icons } from "@/components/icons";
+import { Icons } from "@components/icons";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/components/ui/shadcn/avatar";
-import { Badge } from "@/components/ui/shadcn/badge";
+} from "@components/ui/shadcn/avatar";
+import { Badge } from "@components/ui/shadcn/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,16 +14,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/shadcn/dropdown-menu";
+} from "@components/ui/shadcn/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/shadcn/sidebar";
-import { authClient } from "@/lib/auth-client";
-import { ORG_ROLE_LABELS } from "@/lib/labels";
-import type { OrgRole } from "@/server/db/schema";
+} from "@components/ui/shadcn/sidebar";
+import { authClient } from "@lib/auth-client";
+import { ORG_ROLE_LABELS } from "@lib/labels";
+import type { OrgRole } from "@server/db/schema";
+import { useRouter } from "next/navigation";
 
 export type SidebarUser = {
   name: string;

@@ -5,8 +5,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/shadcn/card";
-import { cn } from "@/lib/utils";
+} from "@components/ui/shadcn/card";
+import { cn } from "@lib/utils";
 
 export function PageHeader({
   title,

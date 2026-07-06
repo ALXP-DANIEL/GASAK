@@ -1,5 +1,5 @@
+import { db, user } from "@server/db";
 import { eq } from "drizzle-orm";
-import { db, user } from "@/server/db";
 
 /** Admin-only: every player profile. */
 export async function listPlayers() {

@@ -1,8 +1,8 @@
+import { BrandBadge, BrandCard, PageHero } from "@components/ui/brand";
+import { formatDate } from "@lib/format";
+import { createPageMetadata } from "@lib/metadata";
+import { db, squads, tournaments } from "@server/db";
 import { desc, eq } from "drizzle-orm";
-import { BrandBadge, BrandCard, PageHero } from "@/components/ui/brand";
-import { formatDate } from "@/lib/format";
-import { createPageMetadata } from "@/lib/metadata";
-import { db, squads, tournaments } from "@/server/db";
 
 export const dynamic = "force-dynamic";
 

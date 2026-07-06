@@ -1,7 +1,7 @@
+import { getManagedSquadIds } from "@server/authz";
+import { db, squadMembers, squads } from "@server/db";
+import type { OrgRole } from "@server/db/schema";
 import { count, eq } from "drizzle-orm";
-import { getManagedSquadIds } from "@/server/authz";
-import { db, squadMembers, squads } from "@/server/db";
-import type { OrgRole } from "@/server/db/schema";
 
 /** Admin-only: every squad with its member count. */
 export async function listSquads() {

@@ -1,24 +1,24 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Icons } from "@/components/icons";
+import { Icons } from "@components/icons";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/shadcn/sidebar";
+} from "@components/ui/shadcn/sidebar";
 import {
   ToggleGroup,
   ToggleGroupItem,
-} from "@/components/ui/shadcn/toggle-group";
+} from "@components/ui/shadcn/toggle-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/shadcn/tooltip";
-import { ORG_ROLE_LABELS, SQUAD_ROLE_LABELS } from "@/lib/labels";
-import type { OrgRole, SquadRole } from "@/server/db";
+} from "@components/ui/shadcn/tooltip";
+import { ORG_ROLE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
+import type { OrgRole, SquadRole } from "@server/db";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   parseSidebarFocus,
   SIDEBAR_FOCUS_COOKIE,

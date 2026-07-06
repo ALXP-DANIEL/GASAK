@@ -1,10 +1,10 @@
 "use server";
 
+import { userRole } from "@lib/session";
+import { actionUser, canManageSquad } from "@server/authz";
+import { db, tournaments } from "@server/db";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { userRole } from "@/lib/session";
-import { actionUser, canManageSquad } from "@/server/authz";
-import { db, tournaments } from "@/server/db";
 import { tournamentSchema } from "./schema";
 import type { TournamentActionResult, TournamentInput } from "./types";
 

@@ -1,11 +1,11 @@
 "use client";
 
+import { Icons } from "@components/icons";
+import { Button } from "@components/ui/shadcn/button";
+import { Label } from "@components/ui/shadcn/label";
+import { cn } from "@lib/utils";
 import { useEffect, useState } from "react";
 import { HexColorInput, HexColorPicker } from "react-colorful";
-import { Icons } from "@/components/icons";
-import { Button } from "@/components/ui/shadcn/button";
-import { Label } from "@/components/ui/shadcn/label";
-import { cn } from "@/lib/utils";
 
 export type ColorPreset = {
   name: string;

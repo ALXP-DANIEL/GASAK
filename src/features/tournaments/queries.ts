@@ -1,5 +1,5 @@
+import { db, tournaments } from "@server/db";
 import { desc, eq, inArray } from "drizzle-orm";
-import { db, tournaments } from "@/server/db";
 
 export async function listTournaments(squadIds?: string[]) {
   if (squadIds && squadIds.length === 0) return [];

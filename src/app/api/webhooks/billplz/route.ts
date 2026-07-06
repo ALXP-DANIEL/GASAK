@@ -1,8 +1,8 @@
+import { verifyBillplzWebhookSignature } from "@lib/billplz";
+import { markOrderPaid } from "@server/actions/shop";
+import { db, orders } from "@server/db";
 import { eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
-import { verifyBillplzWebhookSignature } from "@/lib/billplz";
-import { markOrderPaid } from "@/server/actions/shop";
-import { db, orders } from "@/server/db";
 
 export async function POST(request: NextRequest) {
   const form = await request.formData();

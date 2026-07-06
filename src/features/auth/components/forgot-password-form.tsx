@@ -1,15 +1,15 @@
 "use client";
 
+import { FormField } from "@components/forms/form-field";
+import { Button } from "@components/ui/shadcn/button";
+import { forgotPasswordSchema } from "@features/auth/schema";
+import type { ForgotPasswordInput } from "@features/auth/types";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { requestPasswordReset } from "@server/actions/auth";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { FormField } from "@/components/forms/form-field";
-import { Button } from "@/components/ui/shadcn/button";
-import { forgotPasswordSchema } from "@/features/auth/schema";
-import type { ForgotPasswordInput } from "@/features/auth/types";
-import { requestPasswordReset } from "@/server/actions/auth";
 
 export function ForgotPasswordForm() {
   const [submitting, setSubmitting] = useState(false);

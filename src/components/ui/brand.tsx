@@ -1,6 +1,6 @@
+import { Icons } from "@components/icons";
+import { cn } from "@lib/utils";
 import Link from "next/link";
-import { Icons } from "@/components/icons";
-import { cn } from "@/lib/utils";
 
 /**
  * GASAK brand primitives — the homepage design language, reusable everywhere.

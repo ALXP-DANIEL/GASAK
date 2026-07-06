@@ -1,12 +1,12 @@
 "use server";
 
+import { saveUpload } from "@lib/uploads";
+import { logActivity } from "@server/activity-log";
+import { actionUser } from "@server/authz";
+import { authSlides, db } from "@server/db";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { saveUpload } from "@/lib/uploads";
-import { logActivity } from "@/server/activity-log";
-import { actionUser } from "@/server/authz";
-import { authSlides, db } from "@/server/db";
 import type { ActionResult } from "./public";
 
 const slideSchema = z.object({

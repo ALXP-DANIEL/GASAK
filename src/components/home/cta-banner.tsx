@@ -1,6 +1,6 @@
+import { Icons } from "@components/icons";
+import { Logo } from "@components/layout/logo";
 import Link from "next/link";
-import { Icons } from "@/components/icons";
-import { Logo } from "@/components/layout/logo";
 
 export function CtaBanner() {
   return (

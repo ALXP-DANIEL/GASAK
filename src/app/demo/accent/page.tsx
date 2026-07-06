@@ -1,5 +1,5 @@
-import { LinkButton, PageHero } from "@/components/ui/brand";
-import { createPageMetadata } from "@/lib/metadata";
+import { LinkButton, PageHero } from "@components/ui/brand";
+import { createPageMetadata } from "@lib/metadata";
 import { AccentPlayground } from "./accent-playground";
 
 export const metadata = createPageMetadata({

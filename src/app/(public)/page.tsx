@@ -1,12 +1,11 @@
-import { count, desc, eq, isNull } from "drizzle-orm";
-import { AboutSection } from "@/components/home/about-section";
-import { CtaBanner } from "@/components/home/cta-banner";
-import { Hero } from "@/components/home/hero";
-import { NewsSection } from "@/components/home/news-section";
-import { ProductsSection } from "@/components/home/products-section";
-import { SquadsSection } from "@/components/home/squads-section";
-import { StatsBar } from "@/components/home/stats-bar";
-import { createPageMetadata } from "@/lib/metadata";
+import { AboutSection } from "@components/home/about-section";
+import { CtaBanner } from "@components/home/cta-banner";
+import { Hero } from "@components/home/hero";
+import { NewsSection } from "@components/home/news-section";
+import { ProductsSection } from "@components/home/products-section";
+import { SquadsSection } from "@components/home/squads-section";
+import { StatsBar } from "@components/home/stats-bar";
+import { createPageMetadata } from "@lib/metadata";
 import {
   announcements,
   db,
@@ -14,7 +13,8 @@ import {
   products,
   squads,
   tournaments,
-} from "@/server/db";
+} from "@server/db";
+import { count, desc, eq, isNull } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 

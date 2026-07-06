@@ -1,10 +1,10 @@
+import { Badge } from "@components/ui/shadcn/badge";
+import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
+import { requireUser } from "@lib/session";
+import { getManagedSquadIds, getMemberSquadIds } from "@server/authz";
+import { db, squads } from "@server/db";
 import { inArray } from "drizzle-orm";
 import Image from "next/image";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@/lib/labels";
-import { requireUser } from "@/lib/session";
-import { getManagedSquadIds, getMemberSquadIds } from "@/server/authz";
-import { db, squads } from "@/server/db";
 import {
   DashboardPanel,
   EmptyState,

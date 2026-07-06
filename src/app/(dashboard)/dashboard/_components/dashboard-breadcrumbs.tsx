@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,7 +7,9 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/shadcn/breadcrumb";
+} from "@components/ui/shadcn/breadcrumb";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 function formatSegment(segment: string) {
   return segment

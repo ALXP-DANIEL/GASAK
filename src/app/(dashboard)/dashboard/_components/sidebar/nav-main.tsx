@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -9,8 +7,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/shadcn/sidebar";
-import type { DashboardNavGroup } from "@/config/dashboard";
+} from "@components/ui/shadcn/sidebar";
+import type { DashboardNavGroup } from "@config/dashboard";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function NavMain({ groups }: { groups: DashboardNavGroup[] }) {
   const pathname = usePathname();

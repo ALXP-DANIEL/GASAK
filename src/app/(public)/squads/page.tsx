@@ -1,9 +1,9 @@
+import { ContentCardGrid } from "@components/cards";
+import { SquadCard } from "@components/squads/squad-card";
+import { BrandBadge, LinkButton, PageHero } from "@components/ui/brand";
+import { createPageMetadata } from "@lib/metadata";
+import { db, squadMembers, squads } from "@server/db";
 import { count, eq } from "drizzle-orm";
-import { ContentCardGrid } from "@/components/cards";
-import { SquadCard } from "@/components/squads/squad-card";
-import { BrandBadge, LinkButton, PageHero } from "@/components/ui/brand";
-import { createPageMetadata } from "@/lib/metadata";
-import { db, squadMembers, squads } from "@/server/db";
 
 export const dynamic = "force-dynamic";
 

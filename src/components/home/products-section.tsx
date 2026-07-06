@@ -1,8 +1,8 @@
-import { ContentCardGrid } from "@/components/cards";
-import { BuyButton } from "@/components/products/buy-button";
-import { ProductCard } from "@/components/products/product-card";
-import { LinkButton, SectionHeader } from "@/components/ui/brand";
-import type { Product } from "@/server/db/schema";
+import { ContentCardGrid } from "@components/cards";
+import { BuyButton } from "@components/products/buy-button";
+import { ProductCard } from "@components/products/product-card";
+import { LinkButton, SectionHeader } from "@components/ui/brand";
+import type { Product } from "@server/db/schema";
 
 export function ProductsSection({ products }: { products: Product[] }) {
   if (products.length === 0) return null;

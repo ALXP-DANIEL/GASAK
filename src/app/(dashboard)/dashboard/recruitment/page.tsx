@@ -1,9 +1,9 @@
+import { listSquadManagers } from "@features/recruitment/queries";
+import { requireUser, userOrgRole } from "@lib/session";
+import { getManagedSquadIds } from "@server/authz";
+import { applications, db, squads } from "@server/db";
 import { desc, eq } from "drizzle-orm";
 import { forbidden } from "next/navigation";
-import { listSquadManagers } from "@/features/recruitment/queries";
-import { requireUser, userOrgRole } from "@/lib/session";
-import { getManagedSquadIds } from "@/server/authz";
-import { applications, db, squads } from "@/server/db";
 import { EmptyState, PageHeader } from "../_components/page-surface";
 import { ApplicationCard } from "./_components/application-card";
 

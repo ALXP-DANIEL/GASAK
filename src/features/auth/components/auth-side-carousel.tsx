@@ -1,15 +1,15 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import type { CarouselApi } from "@/components/ui/shadcn/carousel";
+import type { CarouselApi } from "@components/ui/shadcn/carousel";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@/components/ui/shadcn/carousel";
-import type { AuthCarouselSlide } from "@/features/auth-slides/queries";
-import { cn } from "@/lib/utils";
+} from "@components/ui/shadcn/carousel";
+import type { AuthCarouselSlide } from "@features/auth-slides/queries";
+import { cn } from "@lib/utils";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 const fallbackSlides: AuthCarouselSlide[] = [
   {

@@ -1,10 +1,10 @@
-import { cookies } from "next/headers";
-import { Separator } from "@/components/ui/shadcn/separator";
+import { Separator } from "@components/ui/shadcn/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/shadcn/sidebar";
+} from "@components/ui/shadcn/sidebar";
+import { cookies } from "next/headers";
 import { DashboardBreadcrumbs } from "./_components/dashboard-breadcrumbs";
 import { getDashboardContext } from "./_components/dashboard-context";
 import { AppSidebar } from "./_components/sidebar/app-sidebar";

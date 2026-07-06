@@ -1,5 +1,5 @@
-import { BrandCard, LinkButton, PageHero } from "@/components/ui/brand";
-import { createPageMetadata } from "@/lib/metadata";
+import { BrandCard, LinkButton, PageHero } from "@components/ui/brand";
+import { createPageMetadata } from "@lib/metadata";
 
 export const metadata = createPageMetadata({
   title: "Demo Lab",

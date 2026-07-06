@@ -1,8 +1,8 @@
+import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { listManagedSquadOptions } from "@features/squads/queries";
+import { getMemberSquadIds } from "@server/authz";
+import { db, events } from "@server/db";
 import { inArray, isNull, or } from "drizzle-orm";
-import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
-import { listManagedSquadOptions } from "@/features/squads/queries";
-import { getMemberSquadIds } from "@/server/authz";
-import { db, events } from "@/server/db";
 import { requireDashboardRole } from "../_components/dashboard-section";
 import { ScheduleCalendar } from "./_components/schedule-calendar";
 

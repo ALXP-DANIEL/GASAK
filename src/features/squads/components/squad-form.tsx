@@ -1,14 +1,14 @@
 "use client";
 
+import { FormField } from "@components/forms/form-field";
+import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createSquad } from "@server/actions/squads";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormField } from "@/components/forms/form-field";
-import { Button } from "@/components/ui/shadcn/button";
-import { createSquad } from "@/server/actions/squads";
 
 const squadFormSchema = z.object({
   name: z.string().min(2, "Squad name is required"),

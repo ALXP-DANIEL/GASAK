@@ -1,3 +1,4 @@
+import { generateId } from "@lib/id";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -11,7 +12,6 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { generateId } from "@/lib/id";
 
 // ---------------------------------------------------------------------------
 // Roles (stored as text on the Better Auth user table)

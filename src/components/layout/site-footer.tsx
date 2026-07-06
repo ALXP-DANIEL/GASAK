@@ -1,7 +1,7 @@
+import { Icons } from "@components/icons";
+import { ScrollTopButton } from "@components/ui/scroll-top-button";
+import { siteConfig } from "@config/site";
 import Link from "next/link";
-import { Icons } from "@/components/icons";
-import { ScrollTopButton } from "@/components/ui/scroll-top-button";
-import { siteConfig } from "@/config/site";
 import { Logo } from "./logo";
 
 const QUICK_LINKS = [

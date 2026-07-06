@@ -1,10 +1,10 @@
+import { ContentCardGrid } from "@components/cards";
+import { ProductCard } from "@components/products/product-card";
+import { Badge } from "@components/ui/shadcn/badge";
+import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
+import { requireOrgRole } from "@lib/session";
+import { db, products } from "@server/db";
 import { desc } from "drizzle-orm";
-import { ContentCardGrid } from "@/components/cards";
-import { ProductCard } from "@/components/products/product-card";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { PRODUCT_CATEGORY_LABELS } from "@/lib/labels";
-import { requireOrgRole } from "@/lib/session";
-import { db, products } from "@/server/db";
 import { EmptyState, PageHeader } from "../_components/page-surface";
 import { ProductFormDialog } from "./_components/product-form";
 

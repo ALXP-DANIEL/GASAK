@@ -1,6 +1,6 @@
+import { Icons } from "@components/icons";
 import type { Icon } from "@phosphor-icons/react";
-import { Icons } from "@/components/icons";
-import type { OrgRole } from "@/server/db/schema";
+import type { OrgRole } from "@server/db/schema";
 
 /** Capability snapshot used to decide what a user can see in the dashboard. */
 export type DashboardAccess = {

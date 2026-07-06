@@ -1,14 +1,14 @@
-import { format, startOfMonth, subDays } from "date-fns";
-import { and, count, desc, eq, gte, inArray, sum } from "drizzle-orm";
 import {
   type RevenuePoint,
   RevenueTrendChart,
-} from "@/components/charts/revenue-trend-chart";
-import { Icons } from "@/components/icons";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { formatDateTime, formatRM } from "@/lib/format";
-import { ORDER_STATUS_LABELS } from "@/lib/labels";
-import { db, orders, products } from "@/server/db";
+} from "@components/charts/revenue-trend-chart";
+import { Icons } from "@components/icons";
+import { Badge } from "@components/ui/shadcn/badge";
+import { formatDateTime, formatRM } from "@lib/format";
+import { ORDER_STATUS_LABELS } from "@lib/labels";
+import { db, orders, products } from "@server/db";
+import { format, startOfMonth, subDays } from "date-fns";
+import { and, count, desc, eq, gte, inArray, sum } from "drizzle-orm";
 import {
   EmptyState,
   HomeListItem,

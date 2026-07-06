@@ -7,7 +7,7 @@ import type {
   PaymentMethod,
   ProductCategory,
   SquadRole,
-} from "@/server/db/schema";
+} from "@server/db/schema";
 
 export const ORG_ROLE_LABELS: Record<OrgRole, string> = {
   admin: "Admin",

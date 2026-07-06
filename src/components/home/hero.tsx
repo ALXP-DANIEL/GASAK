@@ -1,5 +1,5 @@
+import { Icons } from "@components/icons";
 import Link from "next/link";
-import { Icons } from "@/components/icons";
 
 export function Hero() {
   return (

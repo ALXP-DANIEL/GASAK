@@ -1,16 +1,16 @@
-import { desc } from "drizzle-orm";
-import Image from "next/image";
-import { DeleteButton } from "@/components/shared/delete-button";
-import { Badge } from "@/components/ui/shadcn/badge";
+import { DeleteButton } from "@components/shared/delete-button";
+import { Badge } from "@components/ui/shadcn/badge";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/shadcn/card";
-import { deleteAuthSlide } from "@/server/actions/auth-slides";
-import { authSlides, db } from "@/server/db";
+} from "@components/ui/shadcn/card";
+import { deleteAuthSlide } from "@server/actions/auth-slides";
+import { authSlides, db } from "@server/db";
+import { desc } from "drizzle-orm";
+import Image from "next/image";
 import { requireDashboardRole } from "../_components/dashboard-section";
 import { EmptyState, PageHeader } from "../_components/page-surface";
 import { AuthSlideFormDialog } from "./_components/auth-slide-form";

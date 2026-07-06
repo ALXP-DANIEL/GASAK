@@ -1,5 +1,5 @@
-import { BrandCard } from "@/components/ui/brand";
-import { cn } from "@/lib/utils";
+import { BrandCard } from "@components/ui/brand";
+import { cn } from "@lib/utils";
 
 export type ContentCardVariant = "compact" | "default";
 

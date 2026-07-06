@@ -1,19 +1,19 @@
-import { eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
-import { ContentCardGrid } from "@/components/cards";
-import { ProductCard } from "@/components/products/product-card";
-import { DeleteButton } from "@/components/shared/delete-button";
-import { Badge } from "@/components/ui/shadcn/badge";
+import { ContentCardGrid } from "@components/cards";
+import { ProductCard } from "@components/products/product-card";
+import { DeleteButton } from "@components/shared/delete-button";
+import { Badge } from "@components/ui/shadcn/badge";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/shadcn/card";
-import { formatRM } from "@/lib/format";
-import { PRODUCT_CATEGORY_LABELS } from "@/lib/labels";
-import { deleteProduct } from "@/server/actions/shop";
-import { db, products } from "@/server/db";
+} from "@components/ui/shadcn/card";
+import { formatRM } from "@lib/format";
+import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
+import { deleteProduct } from "@server/actions/shop";
+import { db, products } from "@server/db";
+import { eq } from "drizzle-orm";
+import { notFound } from "next/navigation";
 import { requireDashboardRole } from "../../_components/dashboard-section";
 import { DetailRow, PageHeader } from "../../_components/page-surface";
 import { ProductFormDialog } from "../_components/product-form";

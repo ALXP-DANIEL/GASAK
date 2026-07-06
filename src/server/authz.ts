@@ -1,6 +1,6 @@
+import { getSession, type SessionUser, userOrgRole } from "@lib/session";
+import { db, type OrgRole, type SquadRole, squadMembers } from "@server/db";
 import { and, eq, inArray } from "drizzle-orm";
-import { getSession, type SessionUser, userOrgRole } from "@/lib/session";
-import { db, type OrgRole, type SquadRole, squadMembers } from "@/server/db";
 
 /**
  * Session guard for server actions — returns null instead of redirecting so

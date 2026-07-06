@@ -1,12 +1,12 @@
-import { cookies } from "next/headers";
-import type { DashboardAccess } from "@/config/dashboard";
-import { requireUser, type SessionUser, userOrgRole } from "@/lib/session";
+import type { DashboardAccess } from "@config/dashboard";
+import { requireUser, type SessionUser, userOrgRole } from "@lib/session";
 import {
   getManagedSquadIds,
   getMemberSquadIds,
   getPrimarySquadRole,
-} from "@/server/authz";
-import type { SquadRole } from "@/server/db";
+} from "@server/authz";
+import type { SquadRole } from "@server/db";
+import { cookies } from "next/headers";
 import {
   parseSidebarFocus,
   resolveDashboardAccess,

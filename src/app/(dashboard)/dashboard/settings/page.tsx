@@ -1,15 +1,15 @@
-import { eq } from "drizzle-orm";
-import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
-import { Badge } from "@/components/ui/shadcn/badge";
+import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { Badge } from "@components/ui/shadcn/badge";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/shadcn/card";
-import { ROLE_LABELS } from "@/lib/labels";
-import { db, playerProfiles } from "@/server/db";
+} from "@components/ui/shadcn/card";
+import { ROLE_LABELS } from "@lib/labels";
+import { db, playerProfiles } from "@server/db";
+import { eq } from "drizzle-orm";
 import { requireDashboardRole } from "../_components/dashboard-section";
 import { ProfileForm } from "./_components/profile-form";
 

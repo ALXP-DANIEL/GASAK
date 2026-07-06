@@ -1,16 +1,16 @@
 "use client";
 
+import { FormField, FormSelect } from "@components/forms/form-field";
+import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { LANE_LABELS } from "@lib/labels";
+import { updateProfile } from "@server/actions/players";
+import { laneEnum } from "@server/db/schema";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormField, FormSelect } from "@/components/forms/form-field";
-import { Button } from "@/components/ui/shadcn/button";
-import { LANE_LABELS } from "@/lib/labels";
-import { updateProfile } from "@/server/actions/players";
-import { laneEnum } from "@/server/db/schema";
 
 const profileFormSchema = z.object({
   name: z.string().min(2, "Display name is required"),

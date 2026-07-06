@@ -1,6 +1,6 @@
+import { requireUser, userOrgRole } from "@lib/session";
+import type { OrgRole } from "@server/db";
 import { forbidden } from "next/navigation";
-import { requireUser, userOrgRole } from "@/lib/session";
-import type { OrgRole } from "@/server/db";
 
 /**
  * Page guard checking the organization role only. Call with no arguments to

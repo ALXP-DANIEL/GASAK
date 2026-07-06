@@ -1,9 +1,9 @@
 "use client";
 
+import { Accent } from "@components/ui/accent";
+import { BrandBadge, BrandCard, LinkButton } from "@components/ui/brand";
+import { ColorPicker } from "@components/ui/color-picker";
 import { useState } from "react";
-import { Accent } from "@/components/accent";
-import { BrandBadge, BrandCard, LinkButton } from "@/components/ui/brand";
-import { ColorPicker } from "@/components/ui/color-picker";
 
 const PRESETS = [
   { name: "Gold", color: "#d9a21b" },

@@ -1,18 +1,12 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
 import {
   FormCheckbox,
   FormField,
   FormFileInput,
-} from "@/components/forms/form-field";
-import { Icons } from "@/components/icons";
-import { Button } from "@/components/ui/shadcn/button";
+} from "@components/forms/form-field";
+import { Icons } from "@components/icons";
+import { Button } from "@components/ui/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -20,9 +14,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/shadcn/dialog";
-import { createAuthSlide, updateAuthSlide } from "@/server/actions/auth-slides";
-import type { AuthSlide } from "@/server/db/schema";
+} from "@components/ui/shadcn/dialog";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createAuthSlide, updateAuthSlide } from "@server/actions/auth-slides";
+import type { AuthSlide } from "@server/db/schema";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const schema = z.object({
   title: z.string().min(2, "Title is required"),

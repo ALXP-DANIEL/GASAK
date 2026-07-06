@@ -1,10 +1,10 @@
+import { Accent } from "@components/ui/accent";
+import { BrandBadge, BrandCard, SectionHeader } from "@components/ui/brand";
+import { formatDate } from "@lib/format";
+import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
+import { db, scrims, squads, tournaments } from "@server/db";
 import { desc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { Accent } from "@/components/accent";
-import { BrandBadge, BrandCard, SectionHeader } from "@/components/ui/brand";
-import { formatDate } from "@/lib/format";
-import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@/lib/labels";
-import { db, scrims, squads, tournaments } from "@/server/db";
 
 export const dynamic = "force-dynamic";
 

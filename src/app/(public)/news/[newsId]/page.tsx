@@ -1,10 +1,10 @@
+import { NewsCard } from "@components/news/news-card";
+import { LinkButton, PageHero } from "@components/ui/brand";
+import { formatDateTime } from "@lib/format";
+import { createPageMetadata } from "@lib/metadata";
+import { db } from "@server/db";
 import { eq, isNull } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { NewsCard } from "@/components/news/news-card";
-import { LinkButton, PageHero } from "@/components/ui/brand";
-import { formatDateTime } from "@/lib/format";
-import { createPageMetadata } from "@/lib/metadata";
-import { db } from "@/server/db";
 
 export const dynamic = "force-dynamic";
 

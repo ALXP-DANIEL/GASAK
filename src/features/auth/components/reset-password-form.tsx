@@ -1,16 +1,16 @@
 "use client";
 
+import { FormField } from "@components/forms/form-field";
+import { Button } from "@components/ui/shadcn/button";
+import { resetPasswordSchema } from "@features/auth/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { resetPassword } from "@server/actions/auth";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
-import { FormField } from "@/components/forms/form-field";
-import { Button } from "@/components/ui/shadcn/button";
-import { resetPasswordSchema } from "@/features/auth/schema";
-import { resetPassword } from "@/server/actions/auth";
 
 const resetPasswordFormSchema = resetPasswordSchema.omit({ token: true });
 

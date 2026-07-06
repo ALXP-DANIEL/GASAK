@@ -1,9 +1,9 @@
+import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { listManagedSquadOptions } from "@features/squads/queries";
+import { TournamentForm } from "@features/tournaments/components/tournament-form";
+import { getTournament } from "@features/tournaments/queries";
+import { toDateTimeLocal } from "@lib/format";
 import { notFound } from "next/navigation";
-import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
-import { listManagedSquadOptions } from "@/features/squads/queries";
-import { TournamentForm } from "@/features/tournaments/components/tournament-form";
-import { getTournament } from "@/features/tournaments/queries";
-import { toDateTimeLocal } from "@/lib/format";
 import { requireDashboardRole } from "../../../_components/dashboard-section";
 
 export const dynamic = "force-dynamic";

@@ -1,7 +1,7 @@
+import type { OrgRole } from "@server/db";
 import { headers } from "next/headers";
 import { forbidden, unauthorized } from "next/navigation";
 import { cache } from "react";
-import type { OrgRole } from "@/server/db";
 import { auth } from "./auth";
 
 export const getSession = cache(async () =>

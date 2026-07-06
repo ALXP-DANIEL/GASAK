@@ -1,15 +1,9 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
-import { FormField, FormSelect } from "@/components/forms/form-field";
-import { Icons } from "@/components/icons";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { Button } from "@/components/ui/shadcn/button";
+import { FormField, FormSelect } from "@components/forms/form-field";
+import { Icons } from "@components/icons";
+import { Badge } from "@components/ui/shadcn/badge";
+import { Button } from "@components/ui/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -17,14 +11,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/shadcn/dialog";
+} from "@components/ui/shadcn/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/shadcn/select";
+} from "@components/ui/shadcn/select";
 import {
   Table,
   TableBody,
@@ -32,14 +26,20 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/shadcn/table";
-import { ORG_ROLE_LABELS } from "@/lib/labels";
+} from "@components/ui/shadcn/table";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ORG_ROLE_LABELS } from "@lib/labels";
 import {
   createDashboardUser,
   removeDashboardUser,
   setDashboardUserRole,
-} from "@/server/actions/users";
-import { ORG_ROLES, type OrgRole } from "@/server/db/schema";
+} from "@server/actions/users";
+import { ORG_ROLES, type OrgRole } from "@server/db/schema";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const roleOptions = ORG_ROLES.map((item) => ({
   value: item,

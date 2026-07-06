@@ -1,10 +1,10 @@
 "use client";
 
+import { Button } from "@components/ui/shadcn/button";
+import { authClient } from "@lib/auth-client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/shadcn/button";
-import { authClient } from "@/lib/auth-client";
 
 const STORAGE_KEY = "gasak:debug-login-bar-open";
 

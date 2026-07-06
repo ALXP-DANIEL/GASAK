@@ -1,6 +1,5 @@
-import Link from "next/link";
-import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
-import { Card, CardContent } from "@/components/ui/shadcn/card";
+import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { Card, CardContent } from "@components/ui/shadcn/card";
 import {
   Table,
   TableBody,
@@ -8,9 +7,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/shadcn/table";
-import { listPlayers } from "@/features/players/queries";
-import { LANE_LABELS } from "@/lib/labels";
+} from "@components/ui/shadcn/table";
+import { listPlayers } from "@features/players/queries";
+import { LANE_LABELS } from "@lib/labels";
+import Link from "next/link";
 import { requireDashboardRole } from "../_components/dashboard-section";
 
 export const dynamic = "force-dynamic";

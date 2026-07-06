@@ -1,5 +1,4 @@
-import { desc } from "drizzle-orm";
-import { Badge } from "@/components/ui/shadcn/badge";
+import { Badge } from "@components/ui/shadcn/badge";
 import {
   Table,
   TableBody,
@@ -7,8 +6,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/shadcn/table";
-import { activityLogs, db } from "@/server/db";
+} from "@components/ui/shadcn/table";
+import { activityLogs, db } from "@server/db";
+import { desc } from "drizzle-orm";
 import { requireDashboardRole } from "../_components/dashboard-section";
 import { EmptyState, PageHeader } from "../_components/page-surface";
 

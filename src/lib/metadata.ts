@@ -1,5 +1,5 @@
+import { siteConfig } from "@config/site";
 import type { Metadata } from "next";
-import { siteConfig } from "@/config/site";
 
 type PageMetadataInput = {
   description?: string;

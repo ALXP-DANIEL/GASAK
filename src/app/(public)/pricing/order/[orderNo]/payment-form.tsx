@@ -1,9 +1,9 @@
 "use client";
 
+import { Button } from "@components/ui/shadcn/button";
+import { createBillplzPayment } from "@server/actions/public";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/shadcn/button";
-import { createBillplzPayment } from "@/server/actions/public";
 
 export function PaymentForm({ orderNo }: { orderNo: string }) {
   const [pending, startTransition] = useTransition();

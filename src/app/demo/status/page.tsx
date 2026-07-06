@@ -3,8 +3,8 @@ import {
   BrandCard,
   LinkButton,
   PageHero,
-} from "@/components/ui/brand";
-import { createPageMetadata } from "@/lib/metadata";
+} from "@components/ui/brand";
+import { createPageMetadata } from "@lib/metadata";
 
 export const metadata = createPageMetadata({
   title: "Status Page Demo",

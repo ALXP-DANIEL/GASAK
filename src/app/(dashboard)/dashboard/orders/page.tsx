@@ -1,13 +1,13 @@
-import { desc } from "drizzle-orm";
-import { Input } from "@/components/ui/shadcn/input";
+import { Input } from "@components/ui/shadcn/input";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/ui/shadcn/tabs";
-import { requireOrgRole } from "@/lib/session";
-import { db, orders } from "@/server/db";
+} from "@components/ui/shadcn/tabs";
+import { requireOrgRole } from "@lib/session";
+import { db, orders } from "@server/db";
+import { desc } from "drizzle-orm";
 import { EmptyState, PageHeader } from "../_components/page-surface";
 import { OrderCard } from "./_components/order-card";
 

@@ -1,16 +1,16 @@
-import { and, eq, gt } from "drizzle-orm";
-import { ContentCardGrid } from "@/components/cards";
-import { BuyButton } from "@/components/products/buy-button";
-import { ProductCard } from "@/components/products/product-card";
-import { PageHero, SectionHeader } from "@/components/ui/brand";
-import { PRODUCT_CATEGORY_LABELS } from "@/lib/labels";
-import { createPageMetadata } from "@/lib/metadata";
+import { ContentCardGrid } from "@components/cards";
+import { BuyButton } from "@components/products/buy-button";
+import { ProductCard } from "@components/products/product-card";
+import { PageHero, SectionHeader } from "@components/ui/brand";
+import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
+import { createPageMetadata } from "@lib/metadata";
 import {
   db,
   type ProductCategory,
   productCategoryEnum,
   products,
-} from "@/server/db";
+} from "@server/db";
+import { and, eq, gt } from "drizzle-orm";
 import { OrderLookup } from "./order-lookup";
 
 export const dynamic = "force-dynamic";

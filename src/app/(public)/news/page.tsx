@@ -1,9 +1,9 @@
+import { ContentCardGrid } from "@components/cards";
+import { NewsCard } from "@components/news/news-card";
+import { PageHero } from "@components/ui/brand";
+import { createPageMetadata } from "@lib/metadata";
+import { announcements, db } from "@server/db";
 import { desc, isNull } from "drizzle-orm";
-import { ContentCardGrid } from "@/components/cards";
-import { NewsCard } from "@/components/news/news-card";
-import { PageHero } from "@/components/ui/brand";
-import { createPageMetadata } from "@/lib/metadata";
-import { announcements, db } from "@/server/db";
 
 export const dynamic = "force-dynamic";
 

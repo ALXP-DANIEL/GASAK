@@ -1,6 +1,6 @@
-import { Logo } from "@/components/layout/logo";
-import { AuthSideCarousel } from "@/features/auth/components/auth-side-carousel";
-import { listActiveAuthSlides } from "@/features/auth-slides/queries";
+import { Logo } from "@components/layout/logo";
+import { AuthSideCarousel } from "@features/auth/components/auth-side-carousel";
+import { listActiveAuthSlides } from "@features/auth-slides/queries";
 
 export default async function AuthLayout({
   children,

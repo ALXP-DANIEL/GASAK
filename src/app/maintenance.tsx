@@ -1,4 +1,4 @@
-import StatusPage from "@/components/layout/status-page";
+import StatusPage from "@components/layout/status-page";
 
 export default function Maintenance() {
   return (

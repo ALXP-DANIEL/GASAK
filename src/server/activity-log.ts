@@ -1,6 +1,6 @@
+import { type SessionUser, userOrgRole } from "@lib/session";
+import { activityLogs, db } from "@server/db";
 import { revalidatePath } from "next/cache";
-import { type SessionUser, userOrgRole } from "@/lib/session";
-import { activityLogs, db } from "@/server/db";
 
 type ActivityInput = {
   actor?: SessionUser | null;

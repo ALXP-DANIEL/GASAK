@@ -1,8 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,8 +10,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/shadcn/alert-dialog";
-import { Button } from "@/components/ui/shadcn/button";
+} from "@components/ui/shadcn/alert-dialog";
+import { Button } from "@components/ui/shadcn/button";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 type DeleteResult = { ok: boolean; error?: string; message?: string };
 

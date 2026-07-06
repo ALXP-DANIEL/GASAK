@@ -1,7 +1,7 @@
-import { NewsCard } from "@/components/news/news-card";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { formatDateTime } from "@/lib/format";
-import type { Announcement } from "@/server/db/schema";
+import { NewsCard } from "@components/news/news-card";
+import { Badge } from "@components/ui/shadcn/badge";
+import { formatDateTime } from "@lib/format";
+import type { Announcement } from "@server/db/schema";
 
 export function AnnouncementCard({
   announcement,

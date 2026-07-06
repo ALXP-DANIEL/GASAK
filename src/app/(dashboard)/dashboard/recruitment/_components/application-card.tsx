@@ -1,10 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { Button } from "@/components/ui/shadcn/button";
+import { Badge } from "@components/ui/shadcn/badge";
+import { Button } from "@components/ui/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -12,34 +9,37 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/shadcn/dialog";
-import { Label } from "@/components/ui/shadcn/label";
+} from "@components/ui/shadcn/dialog";
+import { Label } from "@components/ui/shadcn/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/shadcn/select";
-import { Separator } from "@/components/ui/shadcn/separator";
-import { Textarea } from "@/components/ui/shadcn/textarea";
-import { formatDateTime } from "@/lib/format";
+} from "@components/ui/shadcn/select";
+import { Separator } from "@components/ui/shadcn/separator";
+import { Textarea } from "@components/ui/shadcn/textarea";
+import { formatDateTime } from "@lib/format";
 import {
   APPLICATION_STATUS_LABELS,
   LANE_LABELS,
   SQUAD_ROLE_LABELS,
-} from "@/lib/labels";
+} from "@lib/labels";
 import {
   assignApplication,
   onboardApplicant,
   updateApplicationStatus,
-} from "@/server/actions/recruitment";
+} from "@server/actions/recruitment";
 import {
   type Application,
   type ApplicationStatus,
   type SquadRole,
   squadRoleEnum,
-} from "@/server/db/schema";
+} from "@server/db/schema";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { DashboardPanel, DetailRow } from "../../_components/page-surface";
 
 export function ApplicationCard({

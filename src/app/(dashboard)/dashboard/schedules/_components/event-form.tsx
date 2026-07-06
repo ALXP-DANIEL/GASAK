@@ -1,16 +1,16 @@
 "use client";
 
+import { FormField, FormSelect } from "@components/forms/form-field";
+import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { EVENT_TYPE_LABELS } from "@lib/labels";
+import { createEvent } from "@server/actions/events";
+import { eventTypeEnum } from "@server/db/schema";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormField, FormSelect } from "@/components/forms/form-field";
-import { Button } from "@/components/ui/shadcn/button";
-import { EVENT_TYPE_LABELS } from "@/lib/labels";
-import { createEvent } from "@/server/actions/events";
-import { eventTypeEnum } from "@/server/db/schema";
 
 const ORG_WIDE = "org";
 

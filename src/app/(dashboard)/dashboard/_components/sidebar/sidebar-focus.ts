@@ -1,4 +1,4 @@
-import type { DashboardAccess } from "@/config/dashboard";
+import type { DashboardAccess } from "@config/dashboard";
 
 export type SidebarFocus = "manage" | "player";
 

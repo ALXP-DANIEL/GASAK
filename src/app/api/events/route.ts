@@ -1,8 +1,8 @@
+import { getSession, userRole } from "@lib/session";
+import { getManagedSquadIds, getMemberSquadIds } from "@server/authz";
+import { db, events } from "@server/db";
 import { inArray, isNull, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { getSession, userRole } from "@/lib/session";
-import { getManagedSquadIds, getMemberSquadIds } from "@/server/authz";
-import { db, events } from "@/server/db";
 
 export async function GET() {
   const session = await getSession();

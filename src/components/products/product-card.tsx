@@ -1,15 +1,15 @@
-import Image from "next/image";
-import Link from "next/link";
 import {
   ContentCardFrame,
   type ContentCardVariant,
   contentCardSize,
-} from "@/components/cards/content-card-frame";
-import { Icons } from "@/components/icons";
-import { BrandBadge, LinkButton } from "@/components/ui/brand";
-import { formatRM } from "@/lib/format";
-import { cn } from "@/lib/utils";
-import type { Product } from "@/server/db/schema";
+} from "@components/cards/content-card-frame";
+import { Icons } from "@components/icons";
+import { BrandBadge, LinkButton } from "@components/ui/brand";
+import { formatRM } from "@lib/format";
+import { cn } from "@lib/utils";
+import type { Product } from "@server/db/schema";
+import Image from "next/image";
+import Link from "next/link";
 
 export function ProductCard({
   product,

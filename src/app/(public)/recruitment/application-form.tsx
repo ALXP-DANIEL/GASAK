@@ -1,16 +1,16 @@
 "use client";
 
+import { FormField, FormSelect } from "@components/forms/form-field";
+import { BrandCard } from "@components/ui/brand";
+import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { LANE_LABELS, MLBB_RANKS } from "@lib/labels";
+import { submitApplication } from "@server/actions/public";
+import { laneEnum } from "@server/db/schema";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { FormField, FormSelect } from "@/components/forms/form-field";
-import { BrandCard } from "@/components/ui/brand";
-import { Button } from "@/components/ui/shadcn/button";
-import { LANE_LABELS, MLBB_RANKS } from "@/lib/labels";
-import { submitApplication } from "@/server/actions/public";
-import { laneEnum } from "@/server/db/schema";
 
 const schema = z.object({
   fullName: z.string().min(2, "Full name is required"),

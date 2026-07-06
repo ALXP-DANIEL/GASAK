@@ -1,12 +1,12 @@
 "use server";
 
+import { userRole } from "@lib/session";
+import { logActivity } from "@server/activity-log";
+import { actionUser, canManageSquad } from "@server/authz";
+import { db, events, eventTypeEnum } from "@server/db";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { userRole } from "@/lib/session";
-import { logActivity } from "@/server/activity-log";
-import { actionUser, canManageSquad } from "@/server/authz";
-import { db, events, eventTypeEnum } from "@/server/db";
 import type { ActionResult } from "./public";
 
 const eventSchema = z.object({

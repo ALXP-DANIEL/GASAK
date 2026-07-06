@@ -1,14 +1,14 @@
+import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { DeleteButton } from "@components/shared/delete-button";
+import { Badge } from "@components/ui/shadcn/badge";
+import { Button } from "@components/ui/shadcn/button";
+import { Card, CardContent } from "@components/ui/shadcn/card";
+import { deleteTournament } from "@features/tournaments/actions";
+import { getTournament } from "@features/tournaments/queries";
+import { formatDateTime } from "@lib/format";
+import { canManageSquad } from "@server/authz";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
-import { DeleteButton } from "@/components/shared/delete-button";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { Button } from "@/components/ui/shadcn/button";
-import { Card, CardContent } from "@/components/ui/shadcn/card";
-import { deleteTournament } from "@/features/tournaments/actions";
-import { getTournament } from "@/features/tournaments/queries";
-import { formatDateTime } from "@/lib/format";
-import { canManageSquad } from "@/server/authz";
 import { requireDashboardRole } from "../../_components/dashboard-section";
 
 export const dynamic = "force-dynamic";

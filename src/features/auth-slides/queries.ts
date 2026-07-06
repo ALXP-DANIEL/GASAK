@@ -1,5 +1,5 @@
+import { authSlides, db } from "@server/db";
 import { asc } from "drizzle-orm";
-import { authSlides, db } from "@/server/db";
 
 export type AuthCarouselSlide = {
   id: string;

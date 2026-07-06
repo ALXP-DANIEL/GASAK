@@ -1,9 +1,9 @@
 "use client";
 
+import { Button } from "@components/ui/shadcn/button";
+import { Input } from "@components/ui/shadcn/input";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/shadcn/button";
-import { Input } from "@/components/ui/shadcn/input";
 
 export function OrderLookup() {
   const router = useRouter();

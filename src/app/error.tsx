@@ -1,7 +1,7 @@
 "use client";
 
+import StatusPage from "@components/layout/status-page";
 import { useEffect } from "react";
-import StatusPage from "@/components/layout/status-page";
 
 export default function ErrorPage({
   error,

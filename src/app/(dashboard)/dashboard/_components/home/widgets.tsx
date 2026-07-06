@@ -1,13 +1,13 @@
-import type { Icon } from "@phosphor-icons/react";
-import Link from "next/link";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/shadcn/card";
-import { cn } from "@/lib/utils";
+} from "@components/ui/shadcn/card";
+import { cn } from "@lib/utils";
+import type { Icon } from "@phosphor-icons/react";
+import Link from "next/link";
 
 export function StatCard({
   label,

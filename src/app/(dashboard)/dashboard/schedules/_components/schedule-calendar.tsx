@@ -1,5 +1,24 @@
 "use client";
 
+import { EventCalendarViews } from "@components/calendar/event-calendar-views";
+import { Button } from "@components/ui/shadcn/button";
+import { ButtonGroup } from "@components/ui/shadcn/button-group";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@components/ui/shadcn/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@components/ui/shadcn/select";
 import {
   type DatesSetInfo,
   type EventInput,
@@ -10,38 +29,19 @@ import interactionPlugin from "@fullcalendar/react/interaction";
 import listPlugin from "@fullcalendar/react/list";
 import multiMonthPlugin from "@fullcalendar/react/multimonth";
 import timeGridPlugin from "@fullcalendar/react/timegrid";
+import { EVENT_TYPE_COLORS } from "@lib/labels";
+import { cn } from "@lib/utils";
 import { CalendarBlankIcon } from "@phosphor-icons/react/dist/ssr/CalendarBlank";
 import { CaretLeftIcon } from "@phosphor-icons/react/dist/ssr/CaretLeft";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
 import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { XIcon } from "@phosphor-icons/react/dist/ssr/X";
+import { deleteEvent } from "@server/actions/events";
+import type { EventType } from "@server/db/schema";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { EventCalendarViews } from "@/components/calendar/event-calendar-views";
-import { Button } from "@/components/ui/shadcn/button";
-import { ButtonGroup } from "@/components/ui/shadcn/button-group";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/shadcn/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/shadcn/select";
-import { EVENT_TYPE_COLORS } from "@/lib/labels";
-import { cn } from "@/lib/utils";
-import { deleteEvent } from "@/server/actions/events";
-import type { EventType } from "@/server/db/schema";
 import { EventForm } from "./event-form";
 
 type ScheduleEvent = {

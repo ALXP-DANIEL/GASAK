@@ -1,8 +1,7 @@
-import Link from "next/link";
-import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { Button } from "@/components/ui/shadcn/button";
-import { Card, CardContent } from "@/components/ui/shadcn/card";
+import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { Badge } from "@components/ui/shadcn/badge";
+import { Button } from "@components/ui/shadcn/button";
+import { Card, CardContent } from "@components/ui/shadcn/card";
 import {
   Table,
   TableBody,
@@ -10,11 +9,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/shadcn/table";
-import { listManagedSquadOptions } from "@/features/squads/queries";
-import { listTournaments } from "@/features/tournaments/queries";
-import { formatDate } from "@/lib/format";
-import { getMemberSquadIds } from "@/server/authz";
+} from "@components/ui/shadcn/table";
+import { listManagedSquadOptions } from "@features/squads/queries";
+import { listTournaments } from "@features/tournaments/queries";
+import { formatDate } from "@lib/format";
+import { getMemberSquadIds } from "@server/authz";
+import Link from "next/link";
 import { requireDashboardRole } from "../_components/dashboard-section";
 
 export const dynamic = "force-dynamic";

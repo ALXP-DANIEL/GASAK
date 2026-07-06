@@ -1,13 +1,13 @@
 "use server";
 
+import { userRole } from "@lib/session";
+import { saveUpload } from "@lib/uploads";
+import { logActivity } from "@server/activity-log";
+import { actionUser, canManageSquad } from "@server/authz";
+import { db, scrims, tournaments } from "@server/db";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { userRole } from "@/lib/session";
-import { saveUpload } from "@/lib/uploads";
-import { logActivity } from "@/server/activity-log";
-import { actionUser, canManageSquad } from "@/server/authz";
-import { db, scrims, tournaments } from "@/server/db";
 import type { ActionResult } from "./public";
 
 const tournamentSchema = z.object({

@@ -1,14 +1,14 @@
-import Link from "next/link";
 import {
   ContentCardFrame,
   type ContentCardVariant,
   contentCardSize,
-} from "@/components/cards/content-card-frame";
-import { Icons } from "@/components/icons";
-import { BrandBadge } from "@/components/ui/brand";
-import { formatDate } from "@/lib/format";
-import { cn } from "@/lib/utils";
-import type { Announcement } from "@/server/db/schema";
+} from "@components/cards/content-card-frame";
+import { Icons } from "@components/icons";
+import { BrandBadge } from "@components/ui/brand";
+import { formatDate } from "@lib/format";
+import { cn } from "@lib/utils";
+import type { Announcement } from "@server/db/schema";
+import Link from "next/link";
 
 export function NewsCard({
   item,

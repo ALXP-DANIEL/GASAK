@@ -1,7 +1,7 @@
-import { ContentCardGrid } from "@/components/cards";
-import { SquadCard } from "@/components/squads/squad-card";
-import { LinkButton, SectionHeader } from "@/components/ui/brand";
-import type { Squad } from "@/server/db/schema";
+import { ContentCardGrid } from "@components/cards";
+import { SquadCard } from "@components/squads/squad-card";
+import { LinkButton, SectionHeader } from "@components/ui/brand";
+import type { Squad } from "@server/db/schema";
 
 export function SquadsSection({ squads }: { squads: Squad[] }) {
   if (squads.length === 0) return null;

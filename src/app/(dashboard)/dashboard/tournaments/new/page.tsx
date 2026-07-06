@@ -1,6 +1,6 @@
-import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
-import { listManagedSquadOptions } from "@/features/squads/queries";
-import { TournamentForm } from "@/features/tournaments/components/tournament-form";
+import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { listManagedSquadOptions } from "@features/squads/queries";
+import { TournamentForm } from "@features/tournaments/components/tournament-form";
 import { requireDashboardRole } from "../../_components/dashboard-section";
 
 export const dynamic = "force-dynamic";

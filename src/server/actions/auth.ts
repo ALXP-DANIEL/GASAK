@@ -3,13 +3,13 @@
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
-} from "@/features/auth/schema";
+} from "@features/auth/schema";
 import type {
   AuthActionResult,
   ForgotPasswordInput,
   ResetPasswordInput,
-} from "@/features/auth/types";
-import { auth } from "@/lib/auth";
+} from "@features/auth/types";
+import { auth } from "@lib/auth";
 
 function authError(error: unknown) {
   return error instanceof Error ? error.message : "Authentication failed";

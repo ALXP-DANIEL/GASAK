@@ -1,5 +1,5 @@
-import StatusPage from "@/components/layout/status-page";
-import { createPageMetadata } from "@/lib/metadata";
+import StatusPage from "@components/layout/status-page";
+import { createPageMetadata } from "@lib/metadata";
 
 export const metadata = createPageMetadata({
   title: "Page Not Found",

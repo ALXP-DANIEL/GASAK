@@ -1,12 +1,12 @@
-import Image from "next/image";
-import Link from "next/link";
 import {
   ContentCardFrame,
   contentCardSize,
-} from "@/components/cards/content-card-frame";
-import { LinkButton } from "@/components/ui/brand";
-import { cn } from "@/lib/utils";
-import type { Squad } from "@/server/db/schema";
+} from "@components/cards/content-card-frame";
+import { LinkButton } from "@components/ui/brand";
+import { cn } from "@lib/utils";
+import type { Squad } from "@server/db/schema";
+import Image from "next/image";
+import Link from "next/link";
 
 export function isDevelopmentSquad(squad: Pick<Squad, "name" | "description">) {
   return /academy|development|junior/i.test(

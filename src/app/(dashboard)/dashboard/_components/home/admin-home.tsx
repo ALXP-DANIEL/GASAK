@@ -1,9 +1,7 @@
-import { startOfMonth } from "date-fns";
-import { count, eq, gte, inArray, or, sum } from "drizzle-orm";
-import { Icons } from "@/components/icons";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { formatDate, formatDateTime, formatRM } from "@/lib/format";
-import { EVENT_TYPE_LABELS } from "@/lib/labels";
+import { Icons } from "@components/icons";
+import { Badge } from "@components/ui/shadcn/badge";
+import { formatDate, formatDateTime, formatRM } from "@lib/format";
+import { EVENT_TYPE_LABELS } from "@lib/labels";
 import {
   applications,
   db,
@@ -13,7 +11,9 @@ import {
   squadMembers,
   squads,
   user as users,
-} from "@/server/db";
+} from "@server/db";
+import { startOfMonth } from "date-fns";
+import { count, eq, gte, inArray, or, sum } from "drizzle-orm";
 import {
   EmptyState,
   HomeListItem,

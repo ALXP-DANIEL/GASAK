@@ -1,18 +1,18 @@
 "use server";
 
-import { eq, sql } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
-import { saveUpload } from "@/lib/uploads";
-import { logActivity } from "@/server/activity-log";
-import { actionUser } from "@/server/authz";
+import { saveUpload } from "@lib/uploads";
+import { logActivity } from "@server/activity-log";
+import { actionUser } from "@server/authz";
 import {
   db,
   type OrderStatus,
   orders,
   productCategoryEnum,
   products,
-} from "@/server/db";
+} from "@server/db";
+import { eq, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import type { ActionResult } from "./public";
 
 function revalidateShop() {

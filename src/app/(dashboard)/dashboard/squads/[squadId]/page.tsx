@@ -1,7 +1,6 @@
-import { notFound } from "next/navigation";
-import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { Card, CardContent } from "@/components/ui/shadcn/card";
+import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { Badge } from "@components/ui/shadcn/badge";
+import { Card, CardContent } from "@components/ui/shadcn/card";
 import {
   Table,
   TableBody,
@@ -9,10 +8,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/shadcn/table";
-import { getSquad } from "@/features/squads/queries";
-import { formatDate } from "@/lib/format";
-import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@/lib/labels";
+} from "@components/ui/shadcn/table";
+import { getSquad } from "@features/squads/queries";
+import { formatDate } from "@lib/format";
+import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
+import { notFound } from "next/navigation";
 import { requireDashboardRole } from "../../_components/dashboard-section";
 
 export const dynamic = "force-dynamic";

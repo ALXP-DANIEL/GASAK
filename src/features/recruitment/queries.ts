@@ -1,5 +1,5 @@
+import { db, squadMembers, user } from "@server/db";
 import { eq, inArray } from "drizzle-orm";
-import { db, squadMembers, user } from "@/server/db";
 
 /**
  * Users who manage at least one squad (squadRole leader or coach) —

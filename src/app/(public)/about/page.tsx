@@ -1,6 +1,6 @@
-import { Icons } from "@/components/icons";
-import { BrandFeatureCard, PageHero } from "@/components/ui/brand";
-import { createPageMetadata } from "@/lib/metadata";
+import { Icons } from "@components/icons";
+import { BrandFeatureCard, PageHero } from "@components/ui/brand";
+import { createPageMetadata } from "@lib/metadata";
 
 export const metadata = createPageMetadata({
   title: "About",

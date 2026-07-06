@@ -1,6 +1,6 @@
 "use client";
 
-import { Icons } from "@/components/icons";
+import { Icons } from "@components/icons";
 
 export function ScrollTopButton() {
   return (

@@ -1,9 +1,6 @@
-import { desc, eq } from "drizzle-orm";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { PageHeader } from "@/app/(dashboard)/dashboard/_components/page-surface";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { Card, CardContent } from "@/components/ui/shadcn/card";
+import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { Badge } from "@components/ui/shadcn/badge";
+import { Card, CardContent } from "@components/ui/shadcn/card";
 import {
   Table,
   TableBody,
@@ -11,10 +8,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/shadcn/table";
-import { getTournament } from "@/features/tournaments/queries";
-import { formatDate } from "@/lib/format";
-import { db, scrims } from "@/server/db";
+} from "@components/ui/shadcn/table";
+import { getTournament } from "@features/tournaments/queries";
+import { formatDate } from "@lib/format";
+import { db, scrims } from "@server/db";
+import { desc, eq } from "drizzle-orm";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { requireDashboardRole } from "../../../_components/dashboard-section";
 
 export const dynamic = "force-dynamic";

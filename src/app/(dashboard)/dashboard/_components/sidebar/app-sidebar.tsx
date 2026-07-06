@@ -1,6 +1,6 @@
 "use client";
 
-import { Logo } from "@/components/layout/logo";
+import { Logo } from "@components/layout/logo";
 import {
   Sidebar,
   SidebarContent,
@@ -9,13 +9,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/shadcn/sidebar";
+} from "@components/ui/shadcn/sidebar";
 import {
   canAccessDashboardItem,
   type DashboardAccess,
   dashboardSidebarGroups,
-} from "@/config/dashboard";
-import type { SquadRole } from "@/server/db";
+} from "@config/dashboard";
+import type { SquadRole } from "@server/db";
 import { NavMain } from "./nav-main";
 import { NavUser, type SidebarUser } from "./nav-user";
 import { canToggleFocus, resolveDashboardAccess } from "./sidebar-focus";

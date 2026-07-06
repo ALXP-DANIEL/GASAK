@@ -1,22 +1,22 @@
 "use client";
 
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { Button } from "@/components/ui/shadcn/button";
+import { Badge } from "@components/ui/shadcn/badge";
+import { Button } from "@components/ui/shadcn/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/shadcn/dialog";
-import { formatDateTime, formatRM } from "@/lib/format";
-import { ORDER_STATUS_LABELS, PAYMENT_METHOD_LABELS } from "@/lib/labels";
-import { updateOrderStatus } from "@/server/actions/shop";
-import type { Order, OrderStatus, Product } from "@/server/db/schema";
+} from "@components/ui/shadcn/dialog";
+import { formatDateTime, formatRM } from "@lib/format";
+import { ORDER_STATUS_LABELS, PAYMENT_METHOD_LABELS } from "@lib/labels";
+import { updateOrderStatus } from "@server/actions/shop";
+import type { Order, OrderStatus, Product } from "@server/db/schema";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { toast } from "sonner";
 import { DashboardPanel } from "../../_components/page-surface";
 
 const NEXT_ACTIONS: Partial<

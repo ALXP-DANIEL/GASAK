@@ -1,9 +1,8 @@
-import { and, desc, gte, inArray, isNull, or } from "drizzle-orm";
-import { Icons } from "@/components/icons";
-import { Badge } from "@/components/ui/shadcn/badge";
-import { formatDate, formatDateTime } from "@/lib/format";
-import { EVENT_TYPE_LABELS } from "@/lib/labels";
-import { getMemberSquadIds } from "@/server/authz";
+import { Icons } from "@components/icons";
+import { Badge } from "@components/ui/shadcn/badge";
+import { formatDate, formatDateTime } from "@lib/format";
+import { EVENT_TYPE_LABELS } from "@lib/labels";
+import { getMemberSquadIds } from "@server/authz";
 import {
   announcements,
   db,
@@ -11,7 +10,8 @@ import {
   scrims,
   squads,
   tournaments,
-} from "@/server/db";
+} from "@server/db";
+import { and, desc, gte, inArray, isNull, or } from "drizzle-orm";
 import {
   EmptyState,
   HomeListItem,

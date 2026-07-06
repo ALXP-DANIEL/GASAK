@@ -1,5 +1,5 @@
-import { PageHero } from "@/components/ui/brand";
-import { createPageMetadata } from "@/lib/metadata";
+import { PageHero } from "@components/ui/brand";
+import { createPageMetadata } from "@lib/metadata";
 import { ApplicationForm } from "./application-form";
 
 export const metadata = createPageMetadata({
