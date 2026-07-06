@@ -160,7 +160,7 @@ function renderProductAction({
 
   return (
     action ?? (
-      <LinkButton href="/pricing" size="sm" className="w-full">
+      <LinkButton href="/shop" size="sm" className="w-full">
         Buy now
       </LinkButton>
     )

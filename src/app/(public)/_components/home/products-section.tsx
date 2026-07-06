@@ -18,14 +18,14 @@ export function ProductsSection({ products }: { products: Product[] }) {
             key={product.id}
             product={product}
             variant="compact"
-            href={`/pricing/${product.id}`}
+            href={`/shop/${product.id}`}
             action={<BuyButton product={product} />}
           />
         ))}
       </ContentCardGrid>
 
       <div className="mt-8 flex justify-center">
-        <LinkButton href="/pricing" caret>
+        <LinkButton href="/shop" caret>
           View all products
         </LinkButton>
       </div>

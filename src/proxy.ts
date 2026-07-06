@@ -6,7 +6,7 @@ const publicPaths = [
   "/about",
   "/tournaments",
   "/squads",
-  "/pricing",
+  "/shop",
   "/contact",
   "/news",
   "/recruitment",

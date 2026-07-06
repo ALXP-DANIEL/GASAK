@@ -112,7 +112,7 @@ export async function placeOrder(
   });
 
   revalidatePath("/dashboard/orders");
-  revalidatePath("/pricing");
+  revalidatePath("/shop");
   return { ok: true, data: { orderNo } };
 }
 
@@ -159,7 +159,7 @@ export async function createBillplzPayment(
   });
 
   revalidatePath("/dashboard/orders");
-  revalidatePath("/pricing");
+  revalidatePath("/shop");
   return { ok: true, data: { url: bill.url } };
 }
 

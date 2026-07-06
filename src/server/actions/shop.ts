@@ -19,7 +19,7 @@ function revalidateShop() {
   revalidatePath("/dashboard/products");
   revalidatePath("/dashboard/orders");
   revalidatePath("/dashboard");
-  revalidatePath("/pricing");
+  revalidatePath("/shop");
   revalidatePath("/");
 }
 

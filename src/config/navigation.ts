@@ -3,6 +3,6 @@ export const publicNavigation = [
   { href: "/about", label: "About" },
   { href: "/tournaments", label: "Tournaments" },
   { href: "/squads", label: "Squads" },
-  { href: "/pricing", label: "Pricing" },
+  { href: "/shop", label: "shop" },
   { href: "/contact", label: "Contact" },
 ] as const;

@@ -12,7 +12,7 @@ const NAV_LINKS = [
   { label: "About Us", href: "/about" },
   { label: "Tournaments", href: "/tournaments" },
   { label: "Squads", href: "/squads" },
-  { label: "Shop", href: "/pricing" },
+  { label: "Shop", href: "/shop" },
   { label: "Contact", href: "/contact" },
 ];
 

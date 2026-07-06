@@ -56,7 +56,7 @@ export function BuyButton({ product }: BuyButtonProps) {
 
       if (result.ok && result.data?.orderNo) {
         toast.success("Order placed! Complete your payment.");
-        router.push(`/pricing/order/${result.data.orderNo}`);
+        router.push(`/shop/order/${result.data.orderNo}`);
         return;
       }
 
