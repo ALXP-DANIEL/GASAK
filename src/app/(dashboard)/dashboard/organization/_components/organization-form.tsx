@@ -124,18 +124,13 @@ export function OrganizationPositionFormDialog({
         <DiawerHeader>
           <DiawerTitle>{isEdit ? "Edit position" : "New position"}</DiawerTitle>
           <DiawerDescription>
-            Manage the title, icon, order, and assigned user for this
+            Manage the title, order, assigned profile, and hierarchy for this
             organization position.
           </DiawerDescription>
         </DiawerHeader>
         <DiawerBody className="grid gap-4">
           <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="title" label="Title" />
-            <FormField
-              control={control}
-              name="icon"
-              label="Icon (emoji, optional)"
-            />
             <FormField
               control={control}
               name="sortOrder"

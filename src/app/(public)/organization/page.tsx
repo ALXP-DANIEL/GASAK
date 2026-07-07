@@ -1,5 +1,10 @@
 import { buildOrgTree, OrgChart } from "@components/org-chart/org-chart";
 import { PageHero } from "@components/ui/brand";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@components/ui/shadcn/avatar";
 import { createPageMetadata } from "@lib/metadata";
 import { db } from "@server/db";
 
@@ -11,6 +16,15 @@ export const metadata = createPageMetadata({
   path: "/organization",
   type: "Organization",
 });
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
 
 export default async function OrganizationPage() {
   const positions = await db.query.organizationPositions.findMany({
@@ -34,14 +48,24 @@ export default async function OrganizationPage() {
           <OrgChart
             nodes={tree}
             renderNode={(node) => (
-              <div className="flex flex-col items-center text-center">
-                <span className="flex items-center gap-1 font-semibold">
-                  {node.icon && <span>{node.icon}</span>}
-                  {node.title}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {node.user?.name ?? "Vacant"}
-                </span>
+              <div className="flex min-w-44 flex-col items-center gap-3 text-center">
+                <Avatar className="size-16 border-2 border-primary/30 shadow-md shadow-primary/10">
+                  <AvatarImage
+                    src={node.user?.image ?? undefined}
+                    alt={node.user?.name ?? node.title}
+                  />
+                  <AvatarFallback className="bg-primary/10 font-heading text-lg font-bold text-primary">
+                    {node.user ? initials(node.user.name) : "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid gap-1">
+                  <span className="font-heading text-base font-bold uppercase tracking-normal">
+                    {node.title}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {node.user?.name ?? "Vacant"}
+                  </span>
+                </div>
               </div>
             )}
           />

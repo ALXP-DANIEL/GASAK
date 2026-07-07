@@ -1,5 +1,10 @@
 import { buildOrgTree, OrgChart } from "@components/org-chart/org-chart";
 import { DeleteButton } from "@components/shared/delete-button";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@components/ui/shadcn/avatar";
 import { deleteOrganizationPosition } from "@server/actions/organization";
 import { db } from "@server/db";
 import { requireDashboardRole } from "../_components/dashboard-section";
@@ -7,6 +12,15 @@ import { EmptyState, PageHeader } from "../_components/page-surface";
 import { OrganizationPositionFormDialog } from "./_components/organization-form";
 
 export const dynamic = "force-dynamic";
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
 
 export default async function OrganizationPage() {
   await requireDashboardRole("admin");
@@ -48,15 +62,25 @@ export default async function OrganizationPage() {
           <OrgChart
             nodes={tree}
             renderNode={(node) => (
-              <div className="flex flex-col items-center gap-2 text-center">
-                <div className="flex items-center gap-1">
-                  {node.icon && <span>{node.icon}</span>}
-                  <span className="font-semibold">{node.title}</span>
+              <div className="flex min-w-44 flex-col items-center gap-3 text-center">
+                <Avatar className="size-16 border-2 border-primary/30 shadow-md shadow-primary/10">
+                  <AvatarImage
+                    src={node.user?.image ?? undefined}
+                    alt={node.user?.name ?? node.title}
+                  />
+                  <AvatarFallback className="bg-primary/10 font-heading text-lg font-bold text-primary">
+                    {node.user ? initials(node.user.name) : "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid gap-1">
+                  <span className="font-heading text-base font-bold uppercase tracking-normal">
+                    {node.title}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {node.user?.name ?? "Vacant"}
+                  </span>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  {node.user?.name ?? "Vacant"}
-                </span>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 border-t border-border/70 pt-2">
                   <OrganizationPositionFormDialog
                     position={node}
                     candidateUsers={candidateUsers}
