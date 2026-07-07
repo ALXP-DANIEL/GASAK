@@ -38,8 +38,13 @@ export default async function SquadDetailPage({
   if (!canManage) forbidden();
 
   const candidates = canManage
-    ? (await db.query.user.findMany({ orderBy: (t, { asc }) => asc(t.name) }))
-        .filter((u) => !squad.members.some((m) => m.userId === u.id))
+    ? (
+        await db.query.user.findMany({
+          orderBy: (t, { asc }) => asc(t.name),
+          with: { memberships: true },
+        })
+      )
+        .filter((u) => u.memberships.length === 0)
         .map((u) => ({ id: u.id, name: u.name, email: u.email }))
     : [];
 

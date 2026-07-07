@@ -214,13 +214,16 @@ export async function addSquadMember(
   }
 
   const existing = await db.query.squadMembers.findFirst({
-    where: and(
-      eq(squadMembers.squadId, parsed.data.squadId),
-      eq(squadMembers.userId, parsed.data.userId),
-    ),
+    where: eq(squadMembers.userId, parsed.data.userId),
   });
   if (existing) {
-    return { ok: false, error: "That user is already in the squad" };
+    return {
+      ok: false,
+      error:
+        existing.squadId === parsed.data.squadId
+          ? "That user is already in the squad"
+          : "That user is already in another squad",
+    };
   }
 
   const [row] = await db.insert(squadMembers).values(parsed.data).returning();
