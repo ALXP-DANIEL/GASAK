@@ -11,42 +11,13 @@ import { cn } from "@lib/utils";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-const fallbackSlides: AuthCarouselSlide[] = [
-  {
-    id: "hero",
-    eyebrow: "GASAK Management",
-    imageUrl: "/images/hero.png",
-    title: "Run the squad from one command center",
-    description: "Track schedules, rosters, recruitment, and match activity.",
-  },
-  {
-    id: "squad-a",
-    eyebrow: "GASAK Management",
-    imageUrl: "/images/squad-a.png",
-    title: "Keep competitive squads aligned",
-    description:
-      "Leaders manage their own squad flow without losing oversight.",
-  },
-  {
-    id: "family",
-    eyebrow: "GASAK Management",
-    imageUrl: "/images/about-family.png",
-    title: "Built for the GASAK organization",
-    description: "Admin, seller, leader, and player workflows stay separated.",
-  },
-];
-
-export function AuthSideCarousel({
-  slides: providedSlides,
-}: {
-  slides?: AuthCarouselSlide[];
-}) {
-  const slides = providedSlides?.length ? providedSlides : fallbackSlides;
+export function AuthSideCarousel({ slides }: { slides?: AuthCarouselSlide[] }) {
+  const activeSlides = slides ?? [];
   const [api, setApi] = useState<CarouselApi>();
   const [selected, setSelected] = useState(0);
 
   useEffect(() => {
-    if (!api) return;
+    if (!api || activeSlides.length === 0) return;
 
     const updateSelected = () => setSelected(api.selectedScrollSnap());
     updateSelected();
@@ -64,7 +35,9 @@ export function AuthSideCarousel({
       window.clearInterval(interval);
       api.off("select", updateSelected);
     };
-  }, [api]);
+  }, [api, activeSlides.length]);
+
+  if (activeSlides.length === 0) return null;
 
   return (
     <div className="relative h-full overflow-hidden rounded-xl border border-primary/20 bg-card">
@@ -75,7 +48,7 @@ export function AuthSideCarousel({
         aria-label="GASAK login highlights"
       >
         <CarouselContent className="h-full ml-0 *:data-[slot=carousel-item]:h-full">
-          {slides.map((slide, index) => (
+          {activeSlides.map((slide, index) => (
             <CarouselItem key={slide.id} className="h-full pl-0">
               <div className="relative h-full overflow-hidden">
                 <Image
@@ -94,7 +67,7 @@ export function AuthSideCarousel({
       </Carousel>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 min-h-56 p-8">
-        {slides.map((slide, index) => (
+        {activeSlides.map((slide, index) => (
           <div
             key={slide.id}
             className={cn(
@@ -119,7 +92,7 @@ export function AuthSideCarousel({
       </div>
 
       <div className="absolute right-8 bottom-8 flex gap-2">
-        {slides.map((slide, index) => (
+        {activeSlides.map((slide, index) => (
           <button
             key={slide.id}
             type="button"

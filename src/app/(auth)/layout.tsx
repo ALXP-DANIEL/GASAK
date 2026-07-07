@@ -1,6 +1,7 @@
 import { Logo } from "@components/layout/logo";
 import { AuthSideCarousel } from "@features/auth/components/auth-side-carousel";
 import { listActiveAuthSlides } from "@features/auth-slides/queries";
+import { cn } from "@lib/utils";
 
 export default async function AuthLayout({
   children,
@@ -10,7 +11,12 @@ export default async function AuthLayout({
   const slides = await listActiveAuthSlides();
 
   return (
-    <div className="grid min-h-svh bg-background text-foreground desktop:grid-cols-2">
+    <div
+      className={cn(
+        "grid min-h-svh bg-background text-foreground",
+        slides.length > 0 && "desktop:grid-cols-2",
+      )}
+    >
       <div className="flex flex-col gap-4 p-6 desktop:p-10">
         <div className="flex justify-center gap-2 desktop:justify-start">
           <Logo href="/" size={32} wordmark="compact" />
@@ -19,9 +25,11 @@ export default async function AuthLayout({
           <div className="w-full max-w-xs">{children}</div>
         </div>
       </div>
-      <div className="hidden desktop:block desktop:p-5">
-        <AuthSideCarousel slides={slides} />
-      </div>
+      {slides.length > 0 && (
+        <div className="hidden desktop:block desktop:p-5">
+          <AuthSideCarousel slides={slides} />
+        </div>
+      )}
     </div>
   );
 }
