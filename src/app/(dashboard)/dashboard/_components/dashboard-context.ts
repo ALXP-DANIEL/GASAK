@@ -7,6 +7,7 @@ import {
 import type { SquadRole } from "@server/db";
 import { requireUser, type SessionUser, userOrgRole } from "@server/session";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import {
   parseSidebarFocus,
   resolveDashboardAccess,
@@ -33,6 +34,7 @@ export type DashboardContext = {
  */
 export async function getDashboardContext(): Promise<DashboardContext> {
   const user = await requireUser();
+  if (user.mustChangePassword) redirect("/change-password");
   const orgRole = userOrgRole(user);
   const [cookieStore, memberSquadIds, managedSquadIds, primarySquadRole] =
     await Promise.all([

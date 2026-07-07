@@ -21,6 +21,15 @@ export const auth = betterAuth({
         }
       : undefined,
   database: drizzleAdapter(db, { provider: "pg" }),
+  user: {
+    additionalFields: {
+      mustChangePassword: {
+        type: "boolean",
+        defaultValue: false,
+        input: true,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     // No SMTP configured in V1 — the reset link is printed to the server

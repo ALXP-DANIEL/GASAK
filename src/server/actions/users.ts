@@ -57,6 +57,7 @@ export async function createDashboardUser(
         email: parsed.data.email,
         password: parsed.data.password,
         role: parsed.data.role as "admin",
+        data: { mustChangePassword: true },
       },
     });
     await logActivity({
