@@ -1,5 +1,6 @@
 "use client";
 
+import { EmailAliasField } from "@components/forms/email-alias-field";
 import { FormField, FormSelect } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { Badge } from "@components/ui/shadcn/badge";
@@ -47,9 +48,17 @@ const roleOptions = ORG_ROLES.map((item) => ({
   label: ORG_ROLE_LABELS[item],
 }));
 
+const EMAIL_DOMAIN = "gasak.com";
+
 const createUserFormSchema = z.object({
   name: z.string().min(2, "Name is required"),
-  email: z.email("Enter a valid email"),
+  emailAlias: z
+    .string()
+    .min(1, "Email is required")
+    .regex(
+      /^[a-zA-Z0-9._-]+$/,
+      "Only letters, numbers, dots, underscores, and hyphens",
+    ),
   password: z.string().min(8, "Password must be at least 8 characters"),
   role: z.enum(ORG_ROLES),
 });
@@ -72,12 +81,17 @@ export function CreateUserDialog() {
 
   const { control, handleSubmit } = useForm<CreateUserFormValues>({
     resolver: zodResolver(createUserFormSchema),
-    defaultValues: { name: "", email: "", password: "", role: "user" },
+    defaultValues: { name: "", emailAlias: "", password: "", role: "user" },
   });
 
   function onSubmit(values: CreateUserFormValues) {
     startTransition(async () => {
-      const result = await createDashboardUser(values);
+      const result = await createDashboardUser({
+        name: values.name,
+        email: `${values.emailAlias}@${EMAIL_DOMAIN}`,
+        password: values.password,
+        role: values.role,
+      });
 
       if (!result.ok) {
         toast.error(result.error);
@@ -108,16 +122,17 @@ export function CreateUserDialog() {
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <FormField control={control} name="name" label="Name" />
-          <FormField
+          <EmailAliasField
             control={control}
-            name="email"
+            name="emailAlias"
             label="Email"
-            type="email"
+            domain={EMAIL_DOMAIN}
           />
           <FormField
             control={control}
             name="password"
             label="Temporary password"
+            description="The user must set a new password the first time they log in."
           />
           <FormSelect
             control={control}
