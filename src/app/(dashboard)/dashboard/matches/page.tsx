@@ -1,27 +1,11 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
-import { Badge } from "@components/ui/shadcn/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@components/ui/shadcn/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@components/ui/shadcn/table";
-import { MatchForm } from "@features/matches/components/match-form";
+import { DataTable } from "@components/shared/data-table";
 import { listMatches } from "@features/matches/queries";
 import { listManagedSquadOptions } from "@features/squads/queries";
-import { formatDate } from "@lib/format";
 import { getMemberSquadIds } from "@server/authz";
-import Link from "next/link";
 import { requireDashboardRole } from "../_components/dashboard-section";
+import { columns } from "./_components/columns";
+import { MatchFormDialog } from "./_components/match-form-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -34,70 +18,27 @@ export default async function MatchesPage() {
     listManagedSquadOptions(role, user.id),
   ]);
   const canManage = squads.length > 0;
+  const squadFilterOptions = Array.from(
+    new Set(rows.map((row) => row.squad.name)),
+  ).map((value) => ({ value, label: value }));
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Matches"
         description="Scrim and match records for your squads."
+        actions={canManage ? <MatchFormDialog squads={squads} /> : undefined}
       />
-      <Card>
-        <CardContent>
-          {rows.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No matches recorded yet.
-            </p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Opponent</TableHead>
-                  <TableHead>Squad</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Result</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((match) => (
-                  <TableRow key={match.id}>
-                    <TableCell>
-                      <Link
-                        href={`/dashboard/matches/${match.id}`}
-                        className="font-medium hover:underline"
-                      >
-                        vs {match.opponent}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{match.squad.name}</TableCell>
-                    <TableCell>{formatDate(match.date)}</TableCell>
-                    <TableCell>
-                      {match.result ? (
-                        <Badge variant="secondary">{match.result}</Badge>
-                      ) : (
-                        "—"
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      {canManage && squads.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Record Match</CardTitle>
-            <CardDescription>
-              Log a scrim or match result for your squad.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <MatchForm squads={squads} />
-          </CardContent>
-        </Card>
-      )}
+      <DataTable
+        columns={columns}
+        data={rows}
+        emptyMessage="No matches recorded yet."
+        searchColumnId="opponent"
+        searchPlaceholder="Search opponent or squad..."
+        facetedFilters={[
+          { columnId: "squad", title: "Squad", options: squadFilterOptions },
+        ]}
+      />
     </div>
   );
 }

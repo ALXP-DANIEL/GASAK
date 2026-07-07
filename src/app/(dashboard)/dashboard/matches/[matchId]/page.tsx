@@ -1,7 +1,15 @@
-import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import {
+  DetailRow,
+  PageHeader,
+} from "@app/(dashboard)/dashboard/_components/page-surface";
 import { DeleteButton } from "@components/shared/delete-button";
 import { Badge } from "@components/ui/shadcn/badge";
-import { Card, CardContent } from "@components/ui/shadcn/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@components/ui/shadcn/card";
 import { getMatch } from "@features/matches/queries";
 import { formatDateTime } from "@lib/format";
 import { deleteScrim } from "@server/actions/scrims";
@@ -23,37 +31,6 @@ export default async function MatchDetailPage({
   if (!match) notFound();
 
   const canManage = await canManageSquad(user.id, role, match.squadId);
-  const details: Array<[string, React.ReactNode]> = [
-    ["Squad", match.squad.name],
-    ["Opponent", match.opponent],
-    ["Date", formatDateTime(match.date)],
-    [
-      "Result",
-      match.result ? (
-        <Badge key="result" variant="secondary">
-          {match.result}
-        </Badge>
-      ) : (
-        "—"
-      ),
-    ],
-    [
-      "Replay",
-      match.replayLink ? (
-        <Link
-          key="replay"
-          href={match.replayLink}
-          target="_blank"
-          rel="noreferrer"
-          className="text-sm underline underline-offset-4 hover:text-primary"
-        >
-          Watch replay
-        </Link>
-      ) : (
-        "—"
-      ),
-    ],
-  ];
 
   return (
     <div className="flex flex-col gap-6">
@@ -72,24 +49,45 @@ export default async function MatchDetailPage({
         }
       />
       <Card>
-        <CardContent className="flex flex-col gap-4">
-          <dl className="grid gap-4 desktop:grid-cols-2">
-            {details.map(([label, value]) => (
-              <div key={label} className="grid gap-1">
-                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {label}
-                </dt>
-                <dd className="text-sm">{value}</dd>
-              </div>
-            ))}
-          </dl>
+        <CardHeader>
+          <CardTitle>Match details</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <DetailRow label="Squad" value={match.squad.name} />
+          <DetailRow label="Opponent" value={match.opponent} />
+          <DetailRow label="Date" value={formatDateTime(match.date)} />
+          <DetailRow
+            label="Result"
+            value={
+              match.result ? (
+                <Badge variant="secondary">{match.result}</Badge>
+              ) : (
+                "—"
+              )
+            }
+          />
+          <DetailRow
+            label="Replay"
+            value={
+              match.replayLink ? (
+                <Link
+                  href={match.replayLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm underline underline-offset-4 hover:text-primary"
+                >
+                  Watch replay
+                </Link>
+              ) : (
+                "—"
+              )
+            }
+          />
           {match.notes && (
-            <div className="grid gap-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Notes
-              </p>
-              <p className="text-sm whitespace-pre-wrap">{match.notes}</p>
-            </div>
+            <DetailRow
+              label="Notes"
+              value={<span className="whitespace-pre-wrap">{match.notes}</span>}
+            />
           )}
         </CardContent>
       </Card>

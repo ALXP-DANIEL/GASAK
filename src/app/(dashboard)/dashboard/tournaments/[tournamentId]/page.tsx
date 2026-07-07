@@ -1,16 +1,24 @@
-import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import {
+  DetailRow,
+  PageHeader,
+} from "@app/(dashboard)/dashboard/_components/page-surface";
 import { DeleteButton } from "@components/shared/delete-button";
 import { Badge } from "@components/ui/shadcn/badge";
-import { Card, CardContent } from "@components/ui/shadcn/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@components/ui/shadcn/card";
 import { listManagedSquadOptions } from "@features/squads/queries";
 import { deleteTournament } from "@features/tournaments/actions";
-import { TournamentFormDialog } from "@features/tournaments/components/tournament-form-dialog";
 import { getTournament } from "@features/tournaments/queries";
 import { formatDateTime } from "@lib/format";
 import { canManageSquad } from "@server/authz";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { requireDashboardRole } from "../../_components/dashboard-section";
+import { TournamentFormDialog } from "../_components/tournament-form-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -29,24 +37,6 @@ export default async function TournamentDetailPage({
     canManageSquad(user.id, role, tournament.squadId),
     listManagedSquadOptions(role, user.id),
   ]);
-  const details: Array<[string, React.ReactNode]> = [
-    ["Squad", tournament.squad?.name ?? "Unassigned"],
-    ["Date", formatDateTime(tournament.date)],
-    ["Organizer", tournament.organizer ?? "—"],
-    ["Prize", tournament.prize ?? "—"],
-    ["Opponent", tournament.opponent ?? "—"],
-    [
-      "Result",
-      tournament.result ? (
-        <Badge key="result" variant="secondary">
-          {tournament.result}
-        </Badge>
-      ) : (
-        "—"
-      ),
-    ],
-    ["MVP", tournament.mvp ?? "—"],
-  ];
 
   return (
     <div className="flex flex-col gap-6">
@@ -68,17 +58,29 @@ export default async function TournamentDetailPage({
         }
       />
       <Card>
-        <CardContent>
-          <dl className="grid gap-4 desktop:grid-cols-2">
-            {details.map(([label, value]) => (
-              <div key={label} className="grid gap-1">
-                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {label}
-                </dt>
-                <dd className="text-sm">{value}</dd>
-              </div>
-            ))}
-          </dl>
+        <CardHeader>
+          <CardTitle>Tournament details</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <DetailRow
+            label="Squad"
+            value={tournament.squad?.name ?? "Unassigned"}
+          />
+          <DetailRow label="Date" value={formatDateTime(tournament.date)} />
+          <DetailRow label="Organizer" value={tournament.organizer ?? "—"} />
+          <DetailRow label="Prize" value={tournament.prize ?? "—"} />
+          <DetailRow label="Opponent" value={tournament.opponent ?? "—"} />
+          <DetailRow
+            label="Result"
+            value={
+              tournament.result ? (
+                <Badge variant="secondary">{tournament.result}</Badge>
+              ) : (
+                "—"
+              )
+            }
+          />
+          <DetailRow label="MVP" value={tournament.mvp ?? "—"} />
         </CardContent>
       </Card>
     </div>

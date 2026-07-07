@@ -1,12 +1,12 @@
-import { ContentCardGrid } from "@components/cards";
+import { DataTable } from "@components/shared/data-table";
 import { getUnreadNewsIds, markNewsRead } from "@server/actions/news";
 import { getManagedSquadIds, getMemberSquadIds } from "@server/authz";
 import { db, news, squads } from "@server/db";
 import { requireUser, userOrgRole } from "@server/session";
 import { desc, eq, inArray, isNull, or } from "drizzle-orm";
-import { EmptyState, PageHeader } from "../_components/page-surface";
+import { PageHeader } from "../_components/page-surface";
+import { columns } from "./_components/columns";
 import { NewsFormDialog } from "./_components/news-form";
-import { NewsListCard } from "./_components/news-list-card";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +48,15 @@ export default async function NewsPage() {
   const unreadIds = await getUnreadNewsIds(actor.id, ids);
   await markNewsRead(ids);
 
+  const data = rows.map((row) => ({
+    ...row,
+    isUnread: unreadIds.has(row.id),
+  }));
+
+  const audienceFilterOptions = Array.from(
+    new Set(data.map((row) => row.squad?.name ?? "Global")),
+  ).map((value) => ({ value, label: value }));
+
   return (
     <main>
       <PageHeader
@@ -61,22 +70,20 @@ export default async function NewsPage() {
           />
         )}
       </PageHeader>
-
-      {rows.length === 0 ? (
-        <EmptyState message="No news yet." />
-      ) : (
-        <ContentCardGrid>
-          {rows.map((item) => (
-            <NewsListCard
-              key={item.id}
-              news={item}
-              squadName={item.squad?.name ?? null}
-              authorName={item.author?.name ?? "Unknown"}
-              isUnread={unreadIds.has(item.id)}
-            />
-          ))}
-        </ContentCardGrid>
-      )}
+      <DataTable
+        columns={columns}
+        data={data}
+        emptyMessage="No news yet."
+        searchColumnId="title"
+        searchPlaceholder="Search news..."
+        facetedFilters={[
+          {
+            columnId: "squad",
+            title: "Audience",
+            options: audienceFilterOptions,
+          },
+        ]}
+      />
     </main>
   );
 }

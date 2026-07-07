@@ -1,7 +1,8 @@
 import { db } from "@server/db";
 import { requireOrgRole } from "@server/session";
 import { PageHeader } from "../_components/page-surface";
-import { CreateUserDialog, UsersTable } from "./_components/users-table";
+import { UsersDataTable } from "./_components/users-data-table";
+import { CreateUserDialog } from "./_components/users-table";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,15 @@ export default async function UsersPage() {
     with: { profile: true },
   });
 
+  const users = rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    role: row.role ?? "user",
+    ign: row.profile?.ign ?? null,
+    banned: row.banned ?? false,
+  }));
+
   return (
     <main>
       <PageHeader
@@ -22,17 +32,7 @@ export default async function UsersPage() {
         <CreateUserDialog />
       </PageHeader>
 
-      <UsersTable
-        currentUserId={actor.id}
-        users={rows.map((row) => ({
-          id: row.id,
-          name: row.name,
-          email: row.email,
-          role: row.role ?? "user",
-          ign: row.profile?.ign ?? null,
-          banned: row.banned ?? false,
-        }))}
-      />
+      <UsersDataTable users={users} currentUserId={actor.id} />
     </main>
   );
 }

@@ -1,21 +1,11 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
-import { Badge } from "@components/ui/shadcn/badge";
-import { Card, CardContent } from "@components/ui/shadcn/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@components/ui/shadcn/table";
+import { DataTable } from "@components/shared/data-table";
 import { listManagedSquadOptions } from "@features/squads/queries";
-import { TournamentFormDialog } from "@features/tournaments/components/tournament-form-dialog";
 import { listTournaments } from "@features/tournaments/queries";
-import { formatDate } from "@lib/format";
 import { getMemberSquadIds } from "@server/authz";
-import Link from "next/link";
 import { requireDashboardRole } from "../_components/dashboard-section";
+import { columns } from "./_components/columns";
+import { TournamentFormDialog } from "./_components/tournament-form-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +18,9 @@ export default async function TournamentsPage() {
     listManagedSquadOptions(role, user.id),
   ]);
   const canManage = squads.length > 0;
+  const squadFilterOptions = Array.from(
+    new Set(rows.map((row) => row.squad?.name ?? "Unassigned")),
+  ).map((value) => ({ value, label: value }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,51 +31,16 @@ export default async function TournamentsPage() {
           canManage ? <TournamentFormDialog squads={squads} /> : undefined
         }
       />
-      <Card>
-        <CardContent>
-          {rows.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No tournaments recorded yet.
-            </p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Squad</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Opponent</TableHead>
-                  <TableHead>Result</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((tournament) => (
-                  <TableRow key={tournament.id}>
-                    <TableCell>
-                      <Link
-                        href={`/dashboard/tournaments/${tournament.id}`}
-                        className="font-medium hover:underline"
-                      >
-                        {tournament.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{tournament.squad?.name ?? "—"}</TableCell>
-                    <TableCell>{formatDate(tournament.date)}</TableCell>
-                    <TableCell>{tournament.opponent ?? "—"}</TableCell>
-                    <TableCell>
-                      {tournament.result ? (
-                        <Badge variant="secondary">{tournament.result}</Badge>
-                      ) : (
-                        "—"
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      <DataTable
+        columns={columns}
+        data={rows}
+        emptyMessage="No tournaments recorded yet."
+        searchColumnId="name"
+        searchPlaceholder="Search tournaments..."
+        facetedFilters={[
+          { columnId: "squad", title: "Squad", options: squadFilterOptions },
+        ]}
+      />
     </div>
   );
 }

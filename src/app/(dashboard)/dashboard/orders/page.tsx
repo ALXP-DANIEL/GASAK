@@ -1,46 +1,33 @@
-import { Input } from "@components/ui/shadcn/input";
+import { DataTable } from "@components/shared/data-table";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@components/ui/shadcn/tabs";
+import { ORDER_STATUS_LABELS } from "@lib/labels";
 import { db, orders } from "@server/db";
 import { requireOrgRole } from "@server/session";
 import { desc } from "drizzle-orm";
-import { EmptyState, PageHeader } from "../_components/page-surface";
-import { OrderCard } from "./_components/order-card";
+import { PageHeader } from "../_components/page-surface";
+import { columns } from "./_components/columns";
+
+function statusFilterOptions(statuses: (keyof typeof ORDER_STATUS_LABELS)[]) {
+  return statuses.map((value) => ({
+    value,
+    label: ORDER_STATUS_LABELS[value],
+  }));
+}
 
 export const dynamic = "force-dynamic";
 
-export default async function OrdersPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string | string[] }>;
-}) {
+export default async function OrdersPage() {
   await requireOrgRole("admin", "seller");
-  const { q } = await searchParams;
-  const query = typeof q === "string" ? q.trim().toLowerCase() : "";
 
-  const allRows = await db.query.orders.findMany({
+  const rows = await db.query.orders.findMany({
     orderBy: desc(orders.createdAt),
     with: { product: true },
   });
-
-  const rows = query
-    ? allRows.filter((order) =>
-        [
-          order.orderNo,
-          order.customerName,
-          order.customerEmail,
-          order.customerPhone,
-          order.product.name,
-        ]
-          .join(" ")
-          .toLowerCase()
-          .includes(query),
-      )
-    : allRows;
 
   const needsAction = rows.filter(
     (order) => order.status === "pending" || order.status === "waiting_payment",
@@ -52,31 +39,12 @@ export default async function OrdersPage({
     (order) => order.status === "completed" || order.status === "cancelled",
   );
 
-  const renderList = (list: typeof rows, empty: string) =>
-    list.length === 0 ? (
-      <EmptyState message={empty} />
-    ) : (
-      <div className="grid gap-4 xl:grid-cols-2">
-        {list.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
-      </div>
-    );
-
   return (
     <main>
       <PageHeader
         title="Orders"
         description="Verify payments and move orders through fulfillment."
-      >
-        <form method="GET" className="w-full desktop:w-72">
-          <Input
-            name="q"
-            defaultValue={query}
-            placeholder="Search order no, customer..."
-          />
-        </form>
-      </PageHeader>
+      />
 
       <Tabs defaultValue="action">
         <TabsList>
@@ -89,13 +57,52 @@ export default async function OrdersPage({
           <TabsTrigger value="done">Done ({done.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="action" className="mt-4">
-          {renderList(needsAction, "No orders waiting on you.")}
+          <DataTable
+            columns={columns}
+            data={needsAction}
+            emptyMessage="No orders waiting on you."
+            searchColumnId="orderNo"
+            searchPlaceholder="Search order no, customer..."
+            facetedFilters={[
+              {
+                columnId: "status",
+                title: "Status",
+                options: statusFilterOptions(["pending", "waiting_payment"]),
+              },
+            ]}
+          />
         </TabsContent>
         <TabsContent value="progress" className="mt-4">
-          {renderList(inProgress, "Nothing in fulfillment right now.")}
+          <DataTable
+            columns={columns}
+            data={inProgress}
+            emptyMessage="Nothing in fulfillment right now."
+            searchColumnId="orderNo"
+            searchPlaceholder="Search order no, customer..."
+            facetedFilters={[
+              {
+                columnId: "status",
+                title: "Status",
+                options: statusFilterOptions(["paid", "processing"]),
+              },
+            ]}
+          />
         </TabsContent>
         <TabsContent value="done" className="mt-4">
-          {renderList(done, "No completed or cancelled orders yet.")}
+          <DataTable
+            columns={columns}
+            data={done}
+            emptyMessage="No completed or cancelled orders yet."
+            searchColumnId="orderNo"
+            searchPlaceholder="Search order no, customer..."
+            facetedFilters={[
+              {
+                columnId: "status",
+                title: "Status",
+                options: statusFilterOptions(["completed", "cancelled"]),
+              },
+            ]}
+          />
         </TabsContent>
       </Tabs>
     </main>

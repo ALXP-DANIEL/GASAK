@@ -1,6 +1,14 @@
-import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import {
+  DetailRow,
+  PageHeader,
+} from "@app/(dashboard)/dashboard/_components/page-surface";
 import { Badge } from "@components/ui/shadcn/badge";
-import { Card, CardContent } from "@components/ui/shadcn/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@components/ui/shadcn/card";
 import { getPlayer } from "@features/players/queries";
 import { LANE_LABELS, ORG_ROLE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
 import { userOrgRole } from "@server/session";
@@ -21,21 +29,6 @@ export default async function PlayerDetailPage({
   if (!player) notFound();
 
   const profile = player.profile;
-  const details: Array<[string, string]> = [
-    ["Full Name", profile?.fullName ?? "—"],
-    ["Nickname", profile?.nickname ?? "—"],
-    ["IGN", profile?.ign ?? "—"],
-    ["MLBB ID", profile?.mlbbId ?? "—"],
-    ["Server ID", profile?.serverId ?? "—"],
-    ["Phone", profile?.phone ?? "—"],
-    [
-      "Preferred Lane",
-      profile?.preferredLane ? LANE_LABELS[profile.preferredLane] : "—",
-    ],
-    ["Current Rank", profile?.currentRank ?? "—"],
-    ["Peak Rank", profile?.peakRank ?? "—"],
-    ["Email", player.email],
-  ];
 
   return (
     <div className="flex flex-col gap-6">
@@ -50,17 +43,30 @@ export default async function PlayerDetailPage({
       />
       <div className="grid gap-4 xl:grid-cols-2">
         <Card>
-          <CardContent>
-            <dl className="grid gap-4 desktop:grid-cols-2">
-              {details.map(([label, value]) => (
-                <div key={label} className="grid gap-1">
-                  <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {label}
-                  </dt>
-                  <dd className="text-sm">{value}</dd>
-                </div>
-              ))}
-            </dl>
+          <CardHeader>
+            <CardTitle>Player details</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <DetailRow label="Full Name" value={profile?.fullName ?? "—"} />
+            <DetailRow label="Nickname" value={profile?.nickname ?? "—"} />
+            <DetailRow label="IGN" value={profile?.ign ?? "—"} />
+            <DetailRow label="MLBB ID" value={profile?.mlbbId ?? "—"} />
+            <DetailRow label="Server ID" value={profile?.serverId ?? "—"} />
+            <DetailRow label="Phone" value={profile?.phone ?? "—"} />
+            <DetailRow
+              label="Preferred Lane"
+              value={
+                profile?.preferredLane
+                  ? LANE_LABELS[profile.preferredLane]
+                  : "—"
+              }
+            />
+            <DetailRow
+              label="Current Rank"
+              value={profile?.currentRank ?? "—"}
+            />
+            <DetailRow label="Peak Rank" value={profile?.peakRank ?? "—"} />
+            <DetailRow label="Email" value={player.email} />
           </CardContent>
         </Card>
         <Card>

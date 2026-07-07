@@ -13,35 +13,15 @@ import {
   DiawerTitle,
   DiawerTrigger,
 } from "@components/ui/diawer";
-import { Badge } from "@components/ui/shadcn/badge";
 import { Button } from "@components/ui/shadcn/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@components/ui/shadcn/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@components/ui/shadcn/table";
 import { ORG_ROLE_LABELS } from "@lib/labels";
 import {
   createDashboardUser,
-  removeDashboardUser,
-  setDashboardUserRole,
   updateDashboardUser,
 } from "@server/actions/users";
-import { ORG_ROLES, type OrgRole } from "@server/db/schema";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { toast } from "sonner";
+import { ORG_ROLES } from "@server/db/schema";
 import { z } from "zod";
+import type { UserRow } from "./user-row-actions";
 
 const roleOptions = ORG_ROLES.map((item) => ({
   value: item,
@@ -64,15 +44,6 @@ const createUserFormSchema = z.object({
 });
 
 type CreateUserFormValues = z.infer<typeof createUserFormSchema>;
-
-type UserRow = {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  ign: string | null;
-  banned: boolean;
-};
 
 export function CreateUserDialog() {
   const { open, setOpen, control, pending, handleSubmit } =
@@ -142,7 +113,7 @@ const editUserFormSchema = z.object({
 
 type EditUserFormValues = z.infer<typeof editUserFormSchema>;
 
-function EditUserDialog({ user }: { user: UserRow }) {
+export function EditUserDialog({ user }: { user: UserRow }) {
   const { open, setOpen, control, pending, handleSubmit } =
     useEntityDialog<EditUserFormValues>({
       schema: editUserFormSchema,
@@ -178,120 +149,5 @@ function EditUserDialog({ user }: { user: UserRow }) {
         </DiawerBody>
       </DiawerContent>
     </Diawer>
-  );
-}
-
-export function UsersTable({
-  users,
-  currentUserId,
-}: {
-  users: UserRow[];
-  currentUserId: string;
-}) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-
-  function setRole(userId: string, role: OrgRole) {
-    startTransition(async () => {
-      const result = await setDashboardUserRole({
-        userId,
-        role,
-      });
-
-      if (!result.ok) {
-        toast.error(result.error);
-        return;
-      }
-
-      toast.success(result.message);
-      router.refresh();
-    });
-  }
-
-  function removeUser(userId: string, name: string) {
-    if (!window.confirm(`Delete ${name}'s account? This cannot be undone.`)) {
-      return;
-    }
-
-    startTransition(async () => {
-      const result = await removeDashboardUser(userId);
-      if (!result.ok) {
-        toast.error(result.error);
-        return;
-      }
-
-      toast.success(result.message);
-      router.refresh();
-    });
-  }
-
-  return (
-    <div className="overflow-hidden rounded-none border bg-card">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>User</TableHead>
-            <TableHead className="hidden desktop:table-cell">IGN</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell>
-                <p className="font-medium">
-                  {user.name}
-                  {user.id === currentUserId && (
-                    <Badge variant="secondary" className="ml-2">
-                      You
-                    </Badge>
-                  )}
-                  {user.banned && (
-                    <Badge variant="destructive" className="ml-2">
-                      Banned
-                    </Badge>
-                  )}
-                </p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
-              </TableCell>
-              <TableCell className="hidden desktop:table-cell">
-                {user.ign ?? "-"}
-              </TableCell>
-              <TableCell>
-                <Select
-                  value={user.role}
-                  onValueChange={(value) => setRole(user.id, value as OrgRole)}
-                  disabled={pending || user.id === currentUserId}
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ORG_ROLES.map((item) => (
-                      <SelectItem key={item} value={item}>
-                        {ORG_ROLE_LABELS[item]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </TableCell>
-              <TableCell className="flex justify-end gap-1 text-right">
-                <EditUserDialog user={user} />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  disabled={pending || user.id === currentUserId}
-                  onClick={() => removeUser(user.id, user.name)}
-                  aria-label={`Delete ${user.name}`}
-                >
-                  <Icons.Actions.Delete className="text-destructive" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
   );
 }
