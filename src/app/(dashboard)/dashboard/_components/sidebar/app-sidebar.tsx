@@ -50,7 +50,7 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="h-auto">
               <Logo
-                href="/dashboard"
+                href="/"
                 size={24}
                 wordmark="full"
                 wordmarkClassName="group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:opacity-0"
