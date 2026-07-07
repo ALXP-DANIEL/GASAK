@@ -3,16 +3,18 @@
 import { EmailAliasField } from "@components/forms/email-alias-field";
 import { FormField, FormSelect } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
+import { useEntityDialog } from "@components/shared/use-entity-dialog";
+import {
+  Diawer,
+  DiawerBody,
+  DiawerContent,
+  DiawerDescription,
+  DiawerHeader,
+  DiawerTitle,
+  DiawerTrigger,
+} from "@components/ui/diawer";
 import { Badge } from "@components/ui/shadcn/badge";
 import { Button } from "@components/ui/shadcn/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@components/ui/shadcn/dialog";
 import {
   Select,
   SelectContent,
@@ -28,7 +30,6 @@ import {
   TableHeader,
   TableRow,
 } from "@components/ui/shadcn/table";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { ORG_ROLE_LABELS } from "@lib/labels";
 import {
   createDashboardUser,
@@ -38,8 +39,7 @@ import {
 } from "@server/actions/users";
 import { ORG_ROLES, type OrgRole } from "@server/db/schema";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useTransition } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -75,77 +75,63 @@ type UserRow = {
 };
 
 export function CreateUserDialog() {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
-
-  const { control, handleSubmit } = useForm<CreateUserFormValues>({
-    resolver: zodResolver(createUserFormSchema),
-    defaultValues: { name: "", emailAlias: "", password: "", role: "user" },
-  });
-
-  function onSubmit(values: CreateUserFormValues) {
-    startTransition(async () => {
-      const result = await createDashboardUser({
-        name: values.name,
-        email: `${values.emailAlias}@${EMAIL_DOMAIN}`,
-        password: values.password,
-        role: values.role,
-      });
-
-      if (!result.ok) {
-        toast.error(result.error);
-        return;
-      }
-
-      toast.success(result.message);
-      setOpen(false);
-      router.refresh();
+  const { open, setOpen, control, pending, handleSubmit } =
+    useEntityDialog<CreateUserFormValues>({
+      schema: createUserFormSchema,
+      defaultValues: { name: "", emailAlias: "", password: "", role: "user" },
+      action: (values) =>
+        createDashboardUser({
+          name: values.name,
+          email: `${values.emailAlias}@${EMAIL_DOMAIN}`,
+          password: values.password,
+          role: values.role,
+        }),
     });
-  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Diawer open={open} onOpenChange={setOpen}>
+      <DiawerTrigger asChild>
         <Button>
           <Icons.Actions.Add />
           New user
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create user</DialogTitle>
-          <DialogDescription>
+      </DiawerTrigger>
+      <DiawerContent>
+        <DiawerHeader>
+          <DiawerTitle>Create user</DiawerTitle>
+          <DiawerDescription>
             Accounts for admins, sellers, and regular users. Squad leaders are
             assigned via squad membership, not here.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-          <FormField control={control} name="name" label="Name" />
-          <EmailAliasField
-            control={control}
-            name="emailAlias"
-            label="Email"
-            domain={EMAIL_DOMAIN}
-          />
-          <FormField
-            control={control}
-            name="password"
-            label="Temporary password"
-            description="The user must set a new password the first time they log in."
-          />
-          <FormSelect
-            control={control}
-            name="role"
-            label="Role"
-            options={roleOptions}
-          />
-          <Button type="submit" disabled={pending}>
-            {pending ? "Creating..." : "Create user"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </DiawerDescription>
+        </DiawerHeader>
+        <DiawerBody className="grid gap-4">
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <FormField control={control} name="name" label="Name" />
+            <EmailAliasField
+              control={control}
+              name="emailAlias"
+              label="Email"
+              domain={EMAIL_DOMAIN}
+            />
+            <FormField
+              control={control}
+              name="password"
+              label="Temporary password"
+              description="The user must set a new password the first time they log in."
+            />
+            <FormSelect
+              control={control}
+              name="role"
+              label="Role"
+              options={roleOptions}
+            />
+            <Button type="submit" disabled={pending}>
+              {pending ? "Creating..." : "Create user"}
+            </Button>
+          </form>
+        </DiawerBody>
+      </DiawerContent>
+    </Diawer>
   );
 }
 
@@ -157,56 +143,41 @@ const editUserFormSchema = z.object({
 type EditUserFormValues = z.infer<typeof editUserFormSchema>;
 
 function EditUserDialog({ user }: { user: UserRow }) {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
-
-  const { control, handleSubmit } = useForm<EditUserFormValues>({
-    resolver: zodResolver(editUserFormSchema),
-    defaultValues: { name: user.name, email: user.email },
-  });
-
-  function onSubmit(values: EditUserFormValues) {
-    startTransition(async () => {
-      const result = await updateDashboardUser({ userId: user.id, ...values });
-
-      if (!result.ok) {
-        toast.error(result.error);
-        return;
-      }
-
-      toast.success(result.message);
-      setOpen(false);
-      router.refresh();
+  const { open, setOpen, control, pending, handleSubmit } =
+    useEntityDialog<EditUserFormValues>({
+      schema: editUserFormSchema,
+      defaultValues: { name: user.name, email: user.email },
+      action: (values) => updateDashboardUser({ userId: user.id, ...values }),
     });
-  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Diawer open={open} onOpenChange={setOpen}>
+      <DiawerTrigger asChild>
         <Button variant="ghost" size="icon" aria-label={`Edit ${user.name}`}>
           <Icons.Actions.Edit />
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit user</DialogTitle>
-          <DialogDescription>Update name and email.</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-          <FormField control={control} name="name" label="Name" />
-          <FormField
-            control={control}
-            name="email"
-            label="Email"
-            type="email"
-          />
-          <Button type="submit" disabled={pending}>
-            {pending ? "Saving..." : "Save changes"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+      </DiawerTrigger>
+      <DiawerContent>
+        <DiawerHeader>
+          <DiawerTitle>Edit user</DiawerTitle>
+          <DiawerDescription>Update name and email.</DiawerDescription>
+        </DiawerHeader>
+        <DiawerBody className="grid gap-4">
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <FormField control={control} name="name" label="Name" />
+            <FormField
+              control={control}
+              name="email"
+              label="Email"
+              type="email"
+            />
+            <Button type="submit" disabled={pending}>
+              {pending ? "Saving..." : "Save changes"}
+            </Button>
+          </form>
+        </DiawerBody>
+      </DiawerContent>
+    </Diawer>
   );
 }
 

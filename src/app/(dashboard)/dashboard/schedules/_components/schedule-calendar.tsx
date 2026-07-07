@@ -1,15 +1,15 @@
 "use client";
 
+import {
+  Diawer,
+  DiawerContent,
+  DiawerDescription,
+  DiawerHeader,
+  DiawerTitle,
+  DiawerTrigger,
+} from "@components/ui/diawer";
 import { Button } from "@components/ui/shadcn/button";
 import { ButtonGroup } from "@components/ui/shadcn/button-group";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@components/ui/shadcn/dialog";
 import {
   Select,
   SelectContent,
@@ -237,27 +237,27 @@ export function ScheduleCalendar({
           </Select>
 
           {canManage && (
-            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-              <DialogTrigger asChild>
+            <Diawer open={createOpen} onOpenChange={setCreateOpen}>
+              <DiawerTrigger asChild>
                 <Button>
                   <PlusIcon />
                   Add event
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="max-h-[85dvh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>New event</DialogTitle>
-                  <DialogDescription>
+              </DiawerTrigger>
+              <DiawerContent className="max-h-[85dvh] overflow-y-auto">
+                <DiawerHeader>
+                  <DiawerTitle>New event</DiawerTitle>
+                  <DiawerDescription>
                     Schedule practice, scrims, meetings, or tournaments.
-                  </DialogDescription>
-                </DialogHeader>
+                  </DiawerDescription>
+                </DiawerHeader>
                 <EventForm
                   squads={squads}
                   allowOrgWide={allowOrgWide}
                   onSuccess={() => setCreateOpen(false)}
                 />
-              </DialogContent>
-            </Dialog>
+              </DiawerContent>
+            </Diawer>
           )}
         </div>
       </div>

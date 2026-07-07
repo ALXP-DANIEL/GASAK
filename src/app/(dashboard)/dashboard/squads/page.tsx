@@ -1,12 +1,6 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { Badge } from "@components/ui/shadcn/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@components/ui/shadcn/card";
+import { Card, CardContent } from "@components/ui/shadcn/card";
 import {
   Table,
   TableBody,
@@ -15,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@components/ui/shadcn/table";
-import { SquadForm } from "@features/squads/components/squad-form";
+import { SquadFormDialog } from "@features/squads/components/squad-form";
 import { listSquads } from "@features/squads/queries";
 import { formatDate } from "@lib/format";
 import Link from "next/link";
@@ -29,10 +23,9 @@ export default async function SquadsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Squads"
-        description="Rosters across the organization."
-      />
+      <PageHeader title="Squads" description="Rosters across the organization.">
+        <SquadFormDialog />
+      </PageHeader>
       <Card>
         <CardContent>
           {rows.length === 0 ? (
@@ -79,18 +72,6 @@ export default async function SquadsPage() {
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Create Squad</CardTitle>
-          <CardDescription>
-            Add a new squad to the organization.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SquadForm />
         </CardContent>
       </Card>
     </div>

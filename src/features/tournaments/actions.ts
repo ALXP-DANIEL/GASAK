@@ -1,23 +1,26 @@
 "use server";
 
+import type { ActionResult } from "@server/actions/public";
 import { actionUser, canManageSquad } from "@server/authz";
 import { db, tournaments } from "@server/db";
 import { userOrgRole } from "@server/session";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { tournamentSchema } from "./schema";
-import type { TournamentActionResult, TournamentInput } from "./types";
+import type { TournamentInput } from "./types";
 
-function parseInput(input: TournamentInput) {
+function parseInput(
+  input: TournamentInput,
+): { error: string } | { data: TournamentInput; date: Date } {
   const parsed = tournamentSchema.safeParse(input);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0].message } as const;
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const date = new Date(parsed.data.date);
   if (Number.isNaN(date.getTime())) {
-    return { error: "Invalid date" } as const;
+    return { error: "Invalid date" };
   }
-  return { data: parsed.data, date } as const;
+  return { data: parsed.data, date };
 }
 
 function revalidateTournaments() {
@@ -27,7 +30,7 @@ function revalidateTournaments() {
 
 export async function createTournament(
   input: TournamentInput,
-): Promise<TournamentActionResult> {
+): Promise<ActionResult> {
   const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
@@ -58,7 +61,7 @@ export async function createTournament(
 export async function updateTournament(
   id: string,
   input: TournamentInput,
-): Promise<TournamentActionResult> {
+): Promise<ActionResult> {
   const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 
@@ -97,9 +100,7 @@ export async function updateTournament(
   return { ok: true, message: "Tournament updated" };
 }
 
-export async function deleteTournament(
-  id: string,
-): Promise<TournamentActionResult> {
+export async function deleteTournament(id: string): Promise<ActionResult> {
   const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };
 

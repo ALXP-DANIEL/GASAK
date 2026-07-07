@@ -2,17 +2,20 @@
 
 import { useScreen } from "@hooks/use-screen";
 import { cn } from "@lib/utils";
-import type { ReactNode } from "react";
+import { createContext, type ReactNode, useContext } from "react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "./shadcn/dialog";
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerFooter,
@@ -21,73 +24,120 @@ import {
   DrawerTrigger,
 } from "./shadcn/drawer";
 
-export type DiawerProps = {
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  trigger?: ReactNode;
-  title: ReactNode;
-  description?: ReactNode;
-  children: ReactNode;
-  footer?: ReactNode;
-  className?: string;
-  bodyClassName?: string;
-  dialogContentClassName?: string;
-  drawerContentClassName?: string;
-  drawerHeaderClassName?: string;
-  showDialogCloseButton?: boolean;
-};
+const DiawerContext = createContext<{ isDesktop: boolean } | null>(null);
+
+function useDiawerContext() {
+  const ctx = useContext(DiawerContext);
+  if (!ctx) {
+    throw new Error("Diawer subcomponents must be used within <Diawer>");
+  }
+  return ctx;
+}
 
 export function Diawer({
   open,
   onOpenChange,
-  trigger,
-  title,
-  description,
   children,
-  footer,
-  className,
-  bodyClassName,
-  dialogContentClassName,
-  drawerContentClassName,
-  drawerHeaderClassName,
-  showDialogCloseButton,
-}: DiawerProps) {
+}: {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  children: ReactNode;
+}) {
   const isDesktop = useScreen("desktop");
-
-  if (isDesktop) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        {trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
-        <DialogContent
-          showCloseButton={showDialogCloseButton}
-          className={cn(className, dialogContentClassName)}
-        >
-          <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
-            {description ? (
-              <DialogDescription>{description}</DialogDescription>
-            ) : null}
-          </DialogHeader>
-          <div className={bodyClassName}>{children}</div>
-          {footer}
-        </DialogContent>
-      </Dialog>
-    );
-  }
+  const Root = isDesktop ? Dialog : Drawer;
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      {trigger ? <DrawerTrigger asChild>{trigger}</DrawerTrigger> : null}
-      <DrawerContent className={cn(className, drawerContentClassName)}>
-        <DrawerHeader className={cn("text-left", drawerHeaderClassName)}>
-          <DrawerTitle>{title}</DrawerTitle>
-          {description ? (
-            <DrawerDescription>{description}</DrawerDescription>
-          ) : null}
-        </DrawerHeader>
-        <div className={cn("px-4", bodyClassName)}>{children}</div>
-        {footer ? <DrawerFooter className="pt-2">{footer}</DrawerFooter> : null}
-      </DrawerContent>
-    </Drawer>
+    <DiawerContext.Provider value={{ isDesktop }}>
+      <Root open={open} onOpenChange={onOpenChange}>
+        {children}
+      </Root>
+    </DiawerContext.Provider>
   );
+}
+
+export function DiawerTrigger({
+  asChild,
+  children,
+}: {
+  asChild?: boolean;
+  children: ReactNode;
+}) {
+  const { isDesktop } = useDiawerContext();
+  const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
+  return <Trigger asChild={asChild}>{children}</Trigger>;
+}
+
+export function DiawerContent({
+  className,
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
+  const { isDesktop } = useDiawerContext();
+  const Content = isDesktop ? DialogContent : DrawerContent;
+  return <Content className={className}>{children}</Content>;
+}
+
+export function DiawerHeader({
+  className,
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
+  const { isDesktop } = useDiawerContext();
+  const Header = isDesktop ? DialogHeader : DrawerHeader;
+  return (
+    <Header className={cn(!isDesktop && "text-left", className)}>
+      {children}
+    </Header>
+  );
+}
+
+export function DiawerTitle({ children }: { children: ReactNode }) {
+  const { isDesktop } = useDiawerContext();
+  const Title = isDesktop ? DialogTitle : DrawerTitle;
+  return <Title>{children}</Title>;
+}
+
+export function DiawerDescription({ children }: { children: ReactNode }) {
+  const { isDesktop } = useDiawerContext();
+  const Description = isDesktop ? DialogDescription : DrawerDescription;
+  return <Description>{children}</Description>;
+}
+
+export function DiawerBody({
+  className,
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
+  const { isDesktop } = useDiawerContext();
+  return <div className={cn(!isDesktop && "px-4", className)}>{children}</div>;
+}
+
+export function DiawerFooter({
+  className,
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
+  const { isDesktop } = useDiawerContext();
+  const Footer = isDesktop ? DialogFooter : DrawerFooter;
+  return <Footer className={className}>{children}</Footer>;
+}
+
+export function DiawerClose({
+  asChild,
+  children,
+}: {
+  asChild?: boolean;
+  children: ReactNode;
+}) {
+  const { isDesktop } = useDiawerContext();
+  const Close = isDesktop ? DialogClose : DrawerClose;
+  return <Close asChild={asChild}>{children}</Close>;
 }

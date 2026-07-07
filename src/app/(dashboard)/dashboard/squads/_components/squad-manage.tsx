@@ -8,16 +8,18 @@ import {
 } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { DeleteButton } from "@components/shared/delete-button";
+import { useEntityDialog } from "@components/shared/use-entity-dialog";
+import {
+  Diawer,
+  DiawerBody,
+  DiawerContent,
+  DiawerDescription,
+  DiawerHeader,
+  DiawerTitle,
+  DiawerTrigger,
+} from "@components/ui/diawer";
 import { Badge } from "@components/ui/shadcn/badge";
 import { Button } from "@components/ui/shadcn/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@components/ui/shadcn/dialog";
 import {
   Select,
   SelectContent,
@@ -33,7 +35,6 @@ import {
   TableHeader,
   TableRow,
 } from "@components/ui/shadcn/table";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
 import {
   addSquadMember,
@@ -45,8 +46,7 @@ import {
 } from "@server/actions/squads";
 import { squadRoleEnum } from "@server/db/schema";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useTransition } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -80,15 +80,9 @@ const squadFormSchema = z.object({
   banner: z.instanceof(File).nullable(),
 });
 
-type SquadFormValues = z.infer<typeof squadFormSchema>;
-
 export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
-
-  const { control, handleSubmit } = useForm<SquadFormValues>({
-    resolver: zodResolver(squadFormSchema),
+  const { open, setOpen, control, pending, handleSubmit } = useEntityDialog({
+    schema: squadFormSchema,
     defaultValues: {
       name: squad.name,
       description: squad.description ?? "",
@@ -97,10 +91,7 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
       logo: null,
       banner: null,
     },
-  });
-
-  function onSubmit(values: SquadFormValues) {
-    startTransition(async () => {
+    action: (values) => {
       const formData = new FormData();
       formData.set("name", values.name);
       if (values.description) formData.set("description", values.description);
@@ -108,69 +99,63 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
       formData.set("recruiting", String(values.recruiting));
       if (values.logo) formData.set("logo", values.logo);
       if (values.banner) formData.set("banner", values.banner);
-
-      const result = await updateSquad(squad.id, formData);
-      if (!result.ok) {
-        toast.error(result.error);
-        return;
-      }
-      toast.success(result.message);
-      setOpen(false);
-      router.refresh();
-    });
-  }
+      return updateSquad(squad.id, formData);
+    },
+  });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Diawer open={open} onOpenChange={setOpen}>
+      <DiawerTrigger asChild>
         <Button variant="outline" className="w-full">
           <Icons.Actions.Edit />
           Edit squad
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit squad</DialogTitle>
-          <DialogDescription>Update squad details.</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-          <FormField control={control} name="name" label="Squad name" />
-          <FormField
-            control={control}
-            name="description"
-            label="Description"
-            as="textarea"
-          />
-          <FormField
-            control={control}
-            name="accentColor"
-            label="Accent color"
-            placeholder="#d97b16"
-          />
-          <FormSwitch
-            control={control}
-            name="recruiting"
-            label="Open for recruitment"
-            description="Show this squad as an optional choice on the public recruitment form."
-          />
-          <FormFileInput
-            control={control}
-            name="logo"
-            label="Logo (replace)"
-            accept="image/*"
-          />
-          <FormFileInput
-            control={control}
-            name="banner"
-            label="Banner (replace)"
-            accept="image/*"
-          />
-          <Button type="submit" disabled={pending}>
-            {pending ? "Saving..." : "Save changes"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+      </DiawerTrigger>
+      <DiawerContent>
+        <DiawerHeader>
+          <DiawerTitle>Edit squad</DiawerTitle>
+          <DiawerDescription>Update squad details.</DiawerDescription>
+        </DiawerHeader>
+        <DiawerBody className="grid gap-4">
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <FormField control={control} name="name" label="Squad name" />
+            <FormField
+              control={control}
+              name="description"
+              label="Description"
+              as="textarea"
+            />
+            <FormField
+              control={control}
+              name="accentColor"
+              label="Accent color"
+              placeholder="#d97b16"
+            />
+            <FormSwitch
+              control={control}
+              name="recruiting"
+              label="Open for recruitment"
+              description="Show this squad as an optional choice on the public recruitment form."
+            />
+            <FormFileInput
+              control={control}
+              name="logo"
+              label="Logo (replace)"
+              accept="image/*"
+            />
+            <FormFileInput
+              control={control}
+              name="banner"
+              label="Banner (replace)"
+              accept="image/*"
+            />
+            <Button type="submit" disabled={pending}>
+              {pending ? "Saving..." : "Save changes"}
+            </Button>
+          </form>
+        </DiawerBody>
+      </DiawerContent>
+    </Diawer>
   );
 }
 
@@ -230,8 +215,6 @@ const addMemberSchema = z.object({
   squadRole: z.enum(squadRoleEnum.enumValues),
 });
 
-type AddMemberValues = z.infer<typeof addMemberSchema>;
-
 export function AddSquadMemberDialog({
   squadId,
   candidates,
@@ -239,70 +222,57 @@ export function AddSquadMemberDialog({
   squadId: string;
   candidates: { id: string; name: string; email: string }[];
 }) {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
-
-  const { control, handleSubmit, reset } = useForm<AddMemberValues>({
-    resolver: zodResolver(addMemberSchema),
+  const { open, setOpen, control, pending, handleSubmit } = useEntityDialog<
+    z.infer<typeof addMemberSchema>
+  >({
+    schema: addMemberSchema,
     defaultValues: { userId: "", squadRole: "player" },
+    action: (values) => addSquadMember({ squadId, ...values }),
   });
 
-  function onSubmit(values: AddMemberValues) {
-    startTransition(async () => {
-      const result = await addSquadMember({ squadId, ...values });
-      if (!result.ok) {
-        toast.error(result.error);
-        return;
-      }
-      toast.success(result.message);
-      setOpen(false);
-      reset();
-      router.refresh();
-    });
-  }
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Diawer open={open} onOpenChange={setOpen}>
+      <DiawerTrigger asChild>
         <Button>
           <Icons.Actions.Add />
           Add member
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add squad member</DialogTitle>
-          <DialogDescription>
+      </DiawerTrigger>
+      <DiawerContent>
+        <DiawerHeader>
+          <DiawerTitle>Add squad member</DiawerTitle>
+          <DiawerDescription>
             Assign an existing user to this squad's roster.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-          <FormSelect
-            control={control}
-            name="userId"
-            label="User"
-            placeholder="Pick a user"
-            options={candidates.map((c) => ({
-              value: c.id,
-              label: `${c.name} (${c.email})`,
-            }))}
-          />
-          <FormSelect
-            control={control}
-            name="squadRole"
-            label="Squad role"
-            options={squadRoleEnum.enumValues.map((role) => ({
-              value: role,
-              label: SQUAD_ROLE_LABELS[role],
-            }))}
-          />
-          <Button type="submit" disabled={pending}>
-            {pending ? "Adding..." : "Add to squad"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </DiawerDescription>
+        </DiawerHeader>
+        <DiawerBody className="grid gap-4">
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <FormSelect
+              control={control}
+              name="userId"
+              label="User"
+              placeholder="Pick a user"
+              options={candidates.map((c) => ({
+                value: c.id,
+                label: `${c.name} (${c.email})`,
+              }))}
+            />
+            <FormSelect
+              control={control}
+              name="squadRole"
+              label="Squad role"
+              options={squadRoleEnum.enumValues.map((role) => ({
+                value: role,
+                label: SQUAD_ROLE_LABELS[role],
+              }))}
+            />
+            <Button type="submit" disabled={pending}>
+              {pending ? "Adding..." : "Add to squad"}
+            </Button>
+          </form>
+        </DiawerBody>
+      </DiawerContent>
+    </Diawer>
   );
 }
 

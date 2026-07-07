@@ -1,14 +1,15 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { DeleteButton } from "@components/shared/delete-button";
 import { Badge } from "@components/ui/shadcn/badge";
-import { Button } from "@components/ui/shadcn/button";
 import { Card, CardContent } from "@components/ui/shadcn/card";
+import { listManagedSquadOptions } from "@features/squads/queries";
 import { deleteTournament } from "@features/tournaments/actions";
+import { TournamentFormDialog } from "@features/tournaments/components/tournament-form-dialog";
 import { getTournament } from "@features/tournaments/queries";
 import { formatDateTime } from "@lib/format";
 import { canManageSquad } from "@server/authz";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { z } from "zod";
 import { requireDashboardRole } from "../../_components/dashboard-section";
 
 export const dynamic = "force-dynamic";
@@ -20,10 +21,14 @@ export default async function TournamentDetailPage({
 }) {
   const { user, role } = await requireDashboardRole();
   const { tournamentId } = await params;
+  if (!z.uuid().safeParse(tournamentId).success) notFound();
   const tournament = await getTournament(tournamentId);
   if (!tournament) notFound();
 
-  const canManage = await canManageSquad(user.id, role, tournament.squadId);
+  const [canManage, squads] = await Promise.all([
+    canManageSquad(user.id, role, tournament.squadId),
+    listManagedSquadOptions(role, user.id),
+  ]);
   const details: Array<[string, React.ReactNode]> = [
     ["Squad", tournament.squad?.name ?? "Unassigned"],
     ["Date", formatDateTime(tournament.date)],
@@ -51,11 +56,7 @@ export default async function TournamentDetailPage({
         actions={
           canManage ? (
             <>
-              <Button asChild variant="outline">
-                <Link href={`/dashboard/tournaments/${tournament.id}/edit`}>
-                  Edit
-                </Link>
-              </Button>
+              <TournamentFormDialog squads={squads} tournament={tournament} />
               <DeleteButton
                 action={deleteTournament.bind(null, tournament.id)}
                 title="Delete tournament?"

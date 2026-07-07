@@ -3,21 +3,18 @@
 import { FormField, FormSelect } from "@components/forms/form-field";
 import { FormRichText } from "@components/forms/rich-text-editor";
 import { Icons } from "@components/icons";
-import { Button } from "@components/ui/shadcn/button";
+import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@components/ui/shadcn/dialog";
-import { zodResolver } from "@hookform/resolvers/zod";
+  Diawer,
+  DiawerBody,
+  DiawerContent,
+  DiawerDescription,
+  DiawerHeader,
+  DiawerTitle,
+  DiawerTrigger,
+} from "@components/ui/diawer";
+import { Button } from "@components/ui/shadcn/button";
 import { createNews } from "@server/actions/news";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const GLOBAL = "global";
@@ -37,76 +34,61 @@ export function NewsFormDialog({
   squads: { id: string; name: string }[];
   allowGlobal: boolean;
 }) {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
-
   const audienceOptions = [
     ...(allowGlobal ? [{ value: GLOBAL, label: "Global" }] : []),
     ...squads.map((squad) => ({ value: squad.id, label: squad.name })),
   ];
 
-  const { control, handleSubmit, reset } = useForm<Values>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      title: "",
-      content: "",
-      audience: allowGlobal ? GLOBAL : (squads[0]?.id ?? ""),
-    },
-  });
-
-  function onSubmit(values: Values) {
-    startTransition(async () => {
-      const result = await createNews({
-        title: values.title,
-        content: values.content,
-        squadId: values.audience === GLOBAL ? null : values.audience,
-      });
-
-      if (result.ok) {
-        toast.success(result.message);
-        setOpen(false);
-        reset();
-        router.refresh();
-        return;
-      }
-
-      toast.error(result.error);
+  const { open, setOpen, control, pending, handleSubmit } =
+    useEntityDialog<Values>({
+      schema,
+      defaultValues: {
+        title: "",
+        content: "",
+        audience: allowGlobal ? GLOBAL : (squads[0]?.id ?? ""),
+      },
+      action: (values) =>
+        createNews({
+          title: values.title,
+          content: values.content,
+          squadId: values.audience === GLOBAL ? null : values.audience,
+        }),
     });
-  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Diawer open={open} onOpenChange={setOpen}>
+      <DiawerTrigger asChild>
         <Button>
           <Icons.Actions.Add />
           New news post
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>New news post</DialogTitle>
-          <DialogDescription>
+      </DiawerTrigger>
+      <DiawerContent>
+        <DiawerHeader>
+          <DiawerTitle>New news post</DiawerTitle>
+          <DiawerDescription>
             {allowGlobal
               ? "Post globally or to a specific squad."
               : "Post to a squad you lead."}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-          <FormField control={control} name="title" label="Title" />
-          <FormSelect
-            control={control}
-            name="audience"
-            label="Audience"
-            options={audienceOptions}
-            placeholder="Pick audience"
-          />
-          <FormRichText control={control} name="content" label="Content" />
-          <Button type="submit" disabled={pending}>
-            {pending ? "Posting..." : "Post news"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </DiawerDescription>
+        </DiawerHeader>
+        <DiawerBody className="grid gap-4">
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <FormField control={control} name="title" label="Title" />
+            <FormSelect
+              control={control}
+              name="audience"
+              label="Audience"
+              options={audienceOptions}
+              placeholder="Pick audience"
+            />
+            <FormRichText control={control} name="content" label="Content" />
+            <Button type="submit" disabled={pending}>
+              {pending ? "Posting..." : "Post news"}
+            </Button>
+          </form>
+        </DiawerBody>
+      </DiawerContent>
+    </Diawer>
   );
 }

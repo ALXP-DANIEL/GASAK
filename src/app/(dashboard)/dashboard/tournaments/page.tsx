@@ -1,6 +1,5 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { Badge } from "@components/ui/shadcn/badge";
-import { Button } from "@components/ui/shadcn/button";
 import { Card, CardContent } from "@components/ui/shadcn/card";
 import {
   Table,
@@ -11,6 +10,7 @@ import {
   TableRow,
 } from "@components/ui/shadcn/table";
 import { listManagedSquadOptions } from "@features/squads/queries";
+import { TournamentFormDialog } from "@features/tournaments/components/tournament-form-dialog";
 import { listTournaments } from "@features/tournaments/queries";
 import { formatDate } from "@lib/format";
 import { getMemberSquadIds } from "@server/authz";
@@ -35,11 +35,7 @@ export default async function TournamentsPage() {
         title="Tournaments"
         description="Tournament records across your squads."
         actions={
-          canManage ? (
-            <Button asChild>
-              <Link href="/dashboard/tournaments/new">New Tournament</Link>
-            </Button>
-          ) : undefined
+          canManage ? <TournamentFormDialog squads={squads} /> : undefined
         }
       />
       <Card>

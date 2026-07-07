@@ -1,13 +1,19 @@
 "use client";
 
 import { FormField, FormSwitch } from "@components/forms/form-field";
+import { Icons } from "@components/icons";
+import { useEntityDialog } from "@components/shared/use-entity-dialog";
+import {
+  Diawer,
+  DiawerBody,
+  DiawerContent,
+  DiawerDescription,
+  DiawerHeader,
+  DiawerTitle,
+  DiawerTrigger,
+} from "@components/ui/diawer";
 import { Button } from "@components/ui/shadcn/button";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { createSquad } from "@server/actions/squads";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const squadFormSchema = z.object({
@@ -18,55 +24,57 @@ const squadFormSchema = z.object({
 
 type SquadFormInput = z.infer<typeof squadFormSchema>;
 
-export function SquadForm() {
-  const router = useRouter();
-  const [submitting, setSubmitting] = useState(false);
-
-  const form = useForm<SquadFormInput>({
-    resolver: zodResolver(squadFormSchema),
-    defaultValues: { name: "", description: "", recruiting: false },
-  });
-
-  async function onSubmit(values: SquadFormInput) {
-    setSubmitting(true);
-    const formData = new FormData();
-    formData.set("name", values.name);
-    if (values.description) formData.set("description", values.description);
-    formData.set("recruiting", String(values.recruiting));
-    const result = await createSquad(formData);
-    setSubmitting(false);
-
-    if (!result.ok) {
-      toast.error(result.error ?? "Something went wrong");
-      return;
-    }
-
-    toast.success("Squad created");
-    form.reset();
-    router.refresh();
-  }
+export function SquadFormDialog() {
+  const { open, setOpen, control, pending, handleSubmit } =
+    useEntityDialog<SquadFormInput>({
+      schema: squadFormSchema,
+      defaultValues: { name: "", description: "", recruiting: false },
+      action: (values) => {
+        const formData = new FormData();
+        formData.set("name", values.name);
+        if (values.description) formData.set("description", values.description);
+        formData.set("recruiting", String(values.recruiting));
+        return createSquad(formData);
+      },
+      successMessage: "Squad created",
+    });
 
   return (
-    <form
-      onSubmit={form.handleSubmit(onSubmit)}
-      className="grid max-w-xl gap-4"
-    >
-      <FormField control={form.control} name="name" label="Squad Name" />
-      <FormField
-        control={form.control}
-        name="description"
-        label="Description"
-        as="textarea"
-      />
-      <FormSwitch
-        control={form.control}
-        name="recruiting"
-        label="Open for recruitment"
-        description="Show this squad as an optional choice on the public recruitment form."
-      />
-      <Button type="submit" disabled={submitting} className="w-fit">
-        {submitting ? "Creating..." : "Create Squad"}
-      </Button>
-    </form>
+    <Diawer open={open} onOpenChange={setOpen}>
+      <DiawerTrigger asChild>
+        <Button>
+          <Icons.Actions.Add />
+          New squad
+        </Button>
+      </DiawerTrigger>
+      <DiawerContent>
+        <DiawerHeader>
+          <DiawerTitle>Create squad</DiawerTitle>
+          <DiawerDescription>
+            Add a new squad to the organization.
+          </DiawerDescription>
+        </DiawerHeader>
+        <DiawerBody className="grid gap-4">
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <FormField control={control} name="name" label="Squad Name" />
+            <FormField
+              control={control}
+              name="description"
+              label="Description"
+              as="textarea"
+            />
+            <FormSwitch
+              control={control}
+              name="recruiting"
+              label="Open for recruitment"
+              description="Show this squad as an optional choice on the public recruitment form."
+            />
+            <Button type="submit" disabled={pending}>
+              {pending ? "Creating..." : "Create Squad"}
+            </Button>
+          </form>
+        </DiawerBody>
+      </DiawerContent>
+    </Diawer>
   );
 }
