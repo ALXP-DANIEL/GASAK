@@ -76,7 +76,18 @@ export function DiawerContent({
 }) {
   const { isDesktop } = useDiawerContext();
   const Content = isDesktop ? DialogContent : DrawerContent;
-  return <Content className={className}>{children}</Content>;
+  return (
+    <Content
+      className={cn(
+        "flex flex-col overflow-hidden border-border/70 bg-card p-0 shadow-xl shadow-foreground/10",
+        isDesktop && "max-h-[88dvh] sm:max-w-2xl desktop:max-w-4xl",
+        !isDesktop && "h-[92dvh] max-h-[92dvh]",
+        className,
+      )}
+    >
+      {children}
+    </Content>
+  );
 }
 
 export function DiawerHeader({
@@ -89,7 +100,13 @@ export function DiawerHeader({
   const { isDesktop } = useDiawerContext();
   const Header = isDesktop ? DialogHeader : DrawerHeader;
   return (
-    <Header className={cn(!isDesktop && "text-left", className)}>
+    <Header
+      className={cn(
+        "shrink-0 border-b border-border/70 bg-muted/30 px-5 py-4",
+        !isDesktop && "text-left",
+        className,
+      )}
+    >
       {children}
     </Header>
   );
@@ -115,7 +132,17 @@ export function DiawerBody({
   children: ReactNode;
 }) {
   const { isDesktop } = useDiawerContext();
-  return <div className={cn(!isDesktop && "px-4", className)}>{children}</div>;
+  return (
+    <div
+      className={cn(
+        "min-h-0 flex-1 overflow-y-auto overscroll-contain p-4",
+        !isDesktop && "px-4 pb-[calc(env(safe-area-inset-bottom)+1.25rem)]",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
 }
 
 export function DiawerFooter({

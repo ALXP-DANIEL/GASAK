@@ -94,6 +94,7 @@ export function DataTable<TData, TValue>({
         <div className="flex flex-wrap items-center gap-2">
           {searchColumn && (
             <Input
+              aria-label={searchPlaceholder}
               placeholder={searchPlaceholder}
               value={(searchColumn.getFilterValue() as string) ?? ""}
               onChange={(event) =>
@@ -193,7 +194,7 @@ function DataTableFacetedFilter<TData>({
       </PopoverTrigger>
       <PopoverContent className="w-48 p-0" align="start">
         <Command>
-          <CommandInput placeholder={title} />
+          <CommandInput aria-label={`Search ${title}`} placeholder={title} />
           <CommandList>
             <CommandEmpty>No results.</CommandEmpty>
             <CommandGroup>

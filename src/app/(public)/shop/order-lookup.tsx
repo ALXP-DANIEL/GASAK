@@ -1,28 +1,40 @@
 "use client";
 
+import { FormField } from "@components/forms/form-field";
 import { Button } from "@components/ui/shadcn/button";
-import { Input } from "@components/ui/shadcn/input";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+
+type OrderLookupValues = {
+  orderNo: string;
+};
 
 export function OrderLookup() {
   const router = useRouter();
-  const [orderNo, setOrderNo] = useState("");
+  const { control, handleSubmit } = useForm<OrderLookupValues>({
+    defaultValues: {
+      orderNo: "",
+    },
+  });
+
+  function onSubmit({ orderNo }: OrderLookupValues) {
+    const normalizedOrderNo = orderNo.trim().toUpperCase();
+    if (normalizedOrderNo) {
+      router.push(`/shop/order/${normalizedOrderNo}`);
+    }
+  }
 
   return (
     <form
       className="flex w-full max-w-xs items-center gap-2"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (orderNo.trim()) {
-          router.push(`/shop/order/${orderNo.trim().toUpperCase()}`);
-        }
-      }}
+      onSubmit={handleSubmit(onSubmit)}
     >
-      <Input
+      <FormField
+        control={control}
+        name="orderNo"
+        label="Order number"
+        hideLabel
         placeholder="Track order e.g. GSK-A1B2C3"
-        value={orderNo}
-        onChange={(e) => setOrderNo(e.target.value)}
       />
       <Button type="submit" variant="outline">
         Track

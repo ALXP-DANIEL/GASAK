@@ -1,5 +1,6 @@
 "use client";
 
+import { DashboardForm } from "@components/forms/dashboard-form";
 import { FormField, FormSelect } from "@components/forms/form-field";
 import { FormRichText } from "@components/forms/rich-text-editor";
 import { Icons } from "@components/icons";
@@ -172,11 +173,7 @@ export function NewsInlineEditor({
         </CardHeader>
         <CardContent>
           {editing ? (
-            <form
-              id={FORM_ID}
-              onSubmit={handleSubmit(onSubmit)}
-              className="grid gap-4"
-            >
+            <DashboardForm id={FORM_ID} onSubmit={handleSubmit(onSubmit)}>
               <FormField control={control} name="title" label="Title" />
               <FormSelect
                 control={control}
@@ -186,7 +183,7 @@ export function NewsInlineEditor({
                 placeholder="Pick audience"
               />
               <FormRichText control={control} name="content" label="Content" />
-            </form>
+            </DashboardForm>
           ) : (
             <HtmlContent content={news.content} />
           )}

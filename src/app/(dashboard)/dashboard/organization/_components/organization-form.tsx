@@ -1,5 +1,6 @@
 "use client";
 
+import { DashboardForm } from "@components/forms/dashboard-form";
 import { FormField, FormSelect } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
@@ -128,7 +129,7 @@ export function OrganizationPositionFormDialog({
           </DiawerDescription>
         </DiawerHeader>
         <DiawerBody className="grid gap-4">
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="title" label="Title" />
             <FormField
               control={control}
@@ -172,7 +173,7 @@ export function OrganizationPositionFormDialog({
                   ? "Save changes"
                   : "Create position"}
             </Button>
-          </form>
+          </DashboardForm>
         </DiawerBody>
       </DiawerContent>
     </Diawer>

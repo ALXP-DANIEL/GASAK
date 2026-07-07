@@ -1,5 +1,6 @@
 "use client";
 
+import { DashboardForm } from "@components/forms/dashboard-form";
 import { EmailAliasField } from "@components/forms/email-alias-field";
 import { FormField, FormSelect } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
@@ -76,7 +77,7 @@ export function CreateUserDialog() {
           </DiawerDescription>
         </DiawerHeader>
         <DiawerBody className="grid gap-4">
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="name" label="Name" />
             <EmailAliasField
               control={control}
@@ -99,7 +100,7 @@ export function CreateUserDialog() {
             <Button type="submit" disabled={pending}>
               {pending ? "Creating..." : "Create user"}
             </Button>
-          </form>
+          </DashboardForm>
         </DiawerBody>
       </DiawerContent>
     </Diawer>
@@ -134,7 +135,7 @@ export function EditUserDialog({ user }: { user: UserRow }) {
           <DiawerDescription>Update name and email.</DiawerDescription>
         </DiawerHeader>
         <DiawerBody className="grid gap-4">
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="name" label="Name" />
             <FormField
               control={control}
@@ -145,7 +146,7 @@ export function EditUserDialog({ user }: { user: UserRow }) {
             <Button type="submit" disabled={pending}>
               {pending ? "Saving..." : "Save changes"}
             </Button>
-          </form>
+          </DashboardForm>
         </DiawerBody>
       </DiawerContent>
     </Diawer>

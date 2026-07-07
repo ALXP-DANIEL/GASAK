@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  DashboardForm,
+  DashboardFormGrid,
+} from "@components/forms/dashboard-form";
 import { FormField, FormSelect } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
@@ -55,8 +59,8 @@ export function MatchFormDialog({
           </DiawerDescription>
         </DiawerHeader>
         <DiawerBody className="grid gap-4">
-          <form onSubmit={handleSubmit} className="grid gap-4">
-            <div className="grid gap-4 desktop:grid-cols-2">
+          <DashboardForm onSubmit={handleSubmit}>
+            <DashboardFormGrid>
               <FormSelect
                 control={control}
                 name="squadId"
@@ -70,8 +74,8 @@ export function MatchFormDialog({
                 label="Date"
                 type="datetime-local"
               />
-            </div>
-            <div className="grid gap-4 desktop:grid-cols-2">
+            </DashboardFormGrid>
+            <DashboardFormGrid>
               <FormField control={control} name="opponent" label="Opponent" />
               <FormField
                 control={control}
@@ -79,7 +83,7 @@ export function MatchFormDialog({
                 label="Result"
                 placeholder="e.g. 2-1 Win"
               />
-            </div>
+            </DashboardFormGrid>
             <FormField
               control={control}
               name="replayLink"
@@ -96,7 +100,7 @@ export function MatchFormDialog({
             <Button type="submit" disabled={pending}>
               {pending ? "Saving..." : "Record Match"}
             </Button>
-          </form>
+          </DashboardForm>
         </DiawerBody>
       </DiawerContent>
     </Diawer>

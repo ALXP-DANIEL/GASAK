@@ -1,6 +1,10 @@
 "use client";
 
 import {
+  DashboardForm,
+  DashboardFormGrid,
+} from "@components/forms/dashboard-form";
+import {
   FormField,
   FormFileInput,
   FormSelect,
@@ -73,14 +77,11 @@ export function ProfileForm({
   }
 
   return (
-    <form
-      onSubmit={form.handleSubmit(onSubmit)}
-      className="grid max-w-2xl gap-4"
-    >
-      <div className="grid gap-4 desktop:grid-cols-2">
+    <DashboardForm onSubmit={form.handleSubmit(onSubmit)} className="max-w-3xl">
+      <DashboardFormGrid>
         <FormField control={form.control} name="name" label="Display Name" />
         <FormField control={form.control} name="fullName" label="Full Name" />
-      </div>
+      </DashboardFormGrid>
       <div className="grid gap-2">
         <FormFileInput
           control={form.control}
@@ -94,7 +95,7 @@ export function ProfileForm({
           </p>
         )}
       </div>
-      <div className="grid gap-4 desktop:grid-cols-2">
+      <DashboardFormGrid>
         <FormField control={form.control} name="nickname" label="Nickname" />
         <FormField
           control={form.control}
@@ -102,13 +103,13 @@ export function ProfileForm({
           label="Phone"
           type="tel"
         />
-      </div>
-      <div className="grid gap-4 desktop:grid-cols-3">
+      </DashboardFormGrid>
+      <DashboardFormGrid columns={3}>
         <FormField control={form.control} name="ign" label="IGN" />
         <FormField control={form.control} name="mlbbId" label="MLBB ID" />
         <FormField control={form.control} name="serverId" label="Server ID" />
-      </div>
-      <div className="grid gap-4 desktop:grid-cols-3">
+      </DashboardFormGrid>
+      <DashboardFormGrid columns={3}>
         <FormSelect
           control={form.control}
           name="preferredLane"
@@ -122,10 +123,10 @@ export function ProfileForm({
           label="Current Rank"
         />
         <FormField control={form.control} name="peakRank" label="Peak Rank" />
-      </div>
+      </DashboardFormGrid>
       <Button type="submit" disabled={submitting} className="w-fit">
         {submitting ? "Saving..." : "Save Profile"}
       </Button>
-    </form>
+    </DashboardForm>
   );
 }

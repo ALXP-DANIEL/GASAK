@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  DashboardForm,
+  DashboardFormGrid,
+} from "@components/forms/dashboard-form";
 import { FormField, FormSelect } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
@@ -72,9 +76,9 @@ export function TournamentFormDialog({
           </DiawerDescription>
         </DiawerHeader>
         <DiawerBody className="grid gap-4">
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="name" label="Tournament Name" />
-            <div className="grid gap-4 desktop:grid-cols-2">
+            <DashboardFormGrid>
               <FormSelect
                 control={control}
                 name="squadId"
@@ -88,12 +92,12 @@ export function TournamentFormDialog({
                 label="Date"
                 type="datetime-local"
               />
-            </div>
-            <div className="grid gap-4 desktop:grid-cols-2">
+            </DashboardFormGrid>
+            <DashboardFormGrid>
               <FormField control={control} name="organizer" label="Organizer" />
               <FormField control={control} name="prize" label="Prize" />
-            </div>
-            <div className="grid gap-4 desktop:grid-cols-2">
+            </DashboardFormGrid>
+            <DashboardFormGrid>
               <FormField control={control} name="opponent" label="Opponent" />
               <FormField
                 control={control}
@@ -101,7 +105,7 @@ export function TournamentFormDialog({
                 label="Result"
                 placeholder="e.g. Champion, 2-1 Win"
               />
-            </div>
+            </DashboardFormGrid>
             <FormField control={control} name="mvp" label="MVP" />
             <Button type="submit" disabled={pending}>
               {pending
@@ -110,7 +114,7 @@ export function TournamentFormDialog({
                   ? "Update Tournament"
                   : "Record Tournament"}
             </Button>
-          </form>
+          </DashboardForm>
         </DiawerBody>
       </DiawerContent>
     </Diawer>

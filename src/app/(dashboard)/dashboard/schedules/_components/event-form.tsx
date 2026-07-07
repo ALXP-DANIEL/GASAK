@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  DashboardForm,
+  DashboardFormGrid,
+} from "@components/forms/dashboard-form";
 import { FormField, FormSelect } from "@components/forms/form-field";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -80,9 +84,9 @@ export function EventForm({
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+    <DashboardForm onSubmit={form.handleSubmit(onSubmit)}>
       <FormField control={form.control} name="title" label="Title" />
-      <div className="grid gap-4 desktop:grid-cols-2">
+      <DashboardFormGrid>
         <FormSelect
           control={form.control}
           name="type"
@@ -96,8 +100,8 @@ export function EventForm({
           options={squadOptions}
           placeholder="Pick a squad"
         />
-      </div>
-      <div className="grid gap-4 desktop:grid-cols-2">
+      </DashboardFormGrid>
+      <DashboardFormGrid>
         <FormField
           control={form.control}
           name="startsAt"
@@ -110,7 +114,7 @@ export function EventForm({
           label="Ends"
           type="datetime-local"
         />
-      </div>
+      </DashboardFormGrid>
       <FormField control={form.control} name="location" label="Location" />
       <FormField
         control={form.control}
@@ -121,6 +125,6 @@ export function EventForm({
       <Button type="submit" disabled={submitting} className="w-fit">
         {submitting ? "Creating..." : "Create Event"}
       </Button>
-    </form>
+    </DashboardForm>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { formFieldStyles } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import {
   Field,
@@ -77,10 +78,13 @@ export function LaneRadioGroup<
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid}>
-          <FieldLabel>{label}</FieldLabel>
+        <Field
+          data-invalid={fieldState.invalid}
+          className={formFieldStyles.fieldShell}
+        >
+          <FieldLabel className={formFieldStyles.label}>{label}</FieldLabel>
           {description && <FieldDescription>{description}</FieldDescription>}
-          <div className="max-w-[27rem]">
+          <div className="max-w-136">
             <RadioGroup
               name={field.name}
               value={field.value ?? ""}
@@ -88,7 +92,7 @@ export function LaneRadioGroup<
               onBlur={field.onBlur}
               disabled={disabled}
               aria-invalid={fieldState.invalid}
-              className="grid grid-cols-5 gap-2"
+              className="grid grid-cols-2 gap-2 mobile:[&>*:last-child]:col-span-2 desktop:grid-cols-5"
             >
               {LANE_OPTIONS.map(({ value, label, shortLabel, Icon }) => (
                 <div key={value} className="min-w-0">
@@ -101,15 +105,17 @@ export function LaneRadioGroup<
                   <FieldLabel
                     htmlFor={`${field.name}-${value}`}
                     className={cn(
-                      "flex h-14 w-full cursor-pointer flex-col items-center justify-center gap-1 border border-border bg-background px-1 text-center transition-colors",
+                      "flex h-20 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-border/70 bg-background/80 px-2 text-center shadow-inner shadow-foreground/3 transition-colors",
                       "hover:border-primary/60 hover:bg-primary/10",
-                      "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/15 peer-data-[state=checked]:text-primary",
+                      "peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/15 peer-data-[state=checked]:text-primary peer-data-[state=checked]:ring-2 peer-data-[state=checked]:ring-primary/15 peer-data-[state=checked]:[&>span:first-child]:bg-primary peer-data-[state=checked]:[&>span:first-child]:text-primary-foreground",
                       disabled && "cursor-not-allowed opacity-60",
                     )}
                     aria-label={label}
                   >
-                    <Icon size={16} className="shrink-0" />
-                    <span className="max-w-full truncate text-[9px] font-semibold uppercase leading-none tracking-wider">
+                    <span className="flex size-8 items-center justify-center rounded-full bg-muted text-foreground transition-colors">
+                      <Icon size={16} className="shrink-0" />
+                    </span>
+                    <span className="max-w-full truncate text-[0.68rem] font-semibold uppercase leading-none">
                       {shortLabel}
                     </span>
                   </FieldLabel>

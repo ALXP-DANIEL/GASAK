@@ -255,7 +255,7 @@ export function ApplicationCard({
               {isAdmin && !decided && (
                 <div className="grid gap-2 border bg-background/60 p-3 desktop:grid-cols-[1fr_auto]">
                   <Select value={leaderId} onValueChange={setLeaderId}>
-                    <SelectTrigger>
+                    <SelectTrigger aria-label="Assign application to leader">
                       <SelectValue placeholder="Assign to leader..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -307,7 +307,7 @@ export function ApplicationCard({
                   </p>
                   <div className="grid gap-2 desktop:grid-cols-[1fr_140px_auto]">
                     <Select value={squadId} onValueChange={setSquadId}>
-                      <SelectTrigger>
+                      <SelectTrigger aria-label="Onboard to squad">
                         <SelectValue placeholder="Pick a squad" />
                       </SelectTrigger>
                       <SelectContent>
@@ -324,7 +324,7 @@ export function ApplicationCard({
                         setSquadRole(value as SquadRole)
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger aria-label="Onboard squad role">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

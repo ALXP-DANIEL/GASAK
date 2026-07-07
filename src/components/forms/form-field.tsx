@@ -42,8 +42,31 @@ type BaseFieldProps<
   control: Control<TFieldValues>;
   name: TName;
   label: string;
+  hideLabel?: boolean;
   description?: string;
   disabled?: boolean;
+};
+
+const fieldShellClass =
+  "group/form-field gap-2.5 rounded-md border border-border/70 bg-card/70 p-3.5 shadow-sm shadow-foreground/5 transition-colors focus-within:border-primary/60 focus-within:bg-background focus-within:ring-2 focus-within:ring-primary/15 data-[invalid=true]:border-destructive/60 data-[invalid=true]:bg-destructive/5 data-[invalid=true]:focus-within:ring-destructive/15";
+
+const labelClass = "text-[0.7rem] font-semibold uppercase text-foreground/80";
+
+const controlClass =
+  "h-10 rounded-md border-border/80 bg-background/80 px-3 text-sm shadow-inner shadow-foreground/[0.03] transition-all placeholder:text-muted-foreground/60 focus-visible:border-primary/70 focus-visible:ring-2 focus-visible:ring-primary/15 aria-invalid:border-destructive/70 aria-invalid:ring-destructive/15 md:text-sm";
+
+const textareaClass =
+  "min-h-28 rounded-md border-border/80 bg-background/80 px-3 py-2.5 text-sm leading-6 shadow-inner shadow-foreground/[0.03] transition-all placeholder:text-muted-foreground/60 focus-visible:border-primary/70 focus-visible:ring-2 focus-visible:ring-primary/15 aria-invalid:border-destructive/70 aria-invalid:ring-destructive/15 md:text-sm";
+
+const inlineChoiceShellClass =
+  "rounded-md border border-border/70 bg-card/70 p-3.5 shadow-sm shadow-foreground/5 transition-colors data-[invalid=true]:border-destructive/60 data-[invalid=true]:bg-destructive/5";
+
+export const formFieldStyles = {
+  fieldShell: fieldShellClass,
+  label: labelClass,
+  control: controlClass,
+  textarea: textareaClass,
+  inlineChoiceShell: inlineChoiceShellClass,
 };
 
 export type FormFieldOption = {
@@ -77,6 +100,7 @@ export function FormField<
   control,
   name,
   label,
+  hideLabel,
   labelAddon,
   description,
   as = "input",
@@ -92,14 +116,24 @@ export function FormField<
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid}>
+        <Field data-invalid={fieldState.invalid} className={fieldShellClass}>
           {labelAddon ? (
             <div className="flex items-center justify-between gap-3">
-              <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+              <FieldLabel
+                htmlFor={field.name}
+                className={hideLabel ? "sr-only" : labelClass}
+              >
+                {label}
+              </FieldLabel>
               {labelAddon}
             </div>
           ) : (
-            <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+            <FieldLabel
+              htmlFor={field.name}
+              className={hideLabel ? "sr-only" : labelClass}
+            >
+              {label}
+            </FieldLabel>
           )}
           {as === "textarea" ? (
             <Textarea
@@ -110,6 +144,7 @@ export function FormField<
               disabled={disabled}
               rows={rows}
               aria-invalid={fieldState.invalid}
+              className={textareaClass}
             />
           ) : (
             <Input
@@ -130,6 +165,7 @@ export function FormField<
               autoComplete={autoComplete}
               disabled={disabled}
               aria-invalid={fieldState.invalid}
+              className={controlClass}
             />
           )}
           {description && <FieldDescription>{description}</FieldDescription>}
@@ -159,6 +195,7 @@ export function FormSelect<
   control,
   name,
   label,
+  hideLabel,
   description,
   disabled,
   options,
@@ -169,8 +206,13 @@ export function FormSelect<
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid}>
-          <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+        <Field data-invalid={fieldState.invalid} className={fieldShellClass}>
+          <FieldLabel
+            htmlFor={field.name}
+            className={hideLabel ? "sr-only" : labelClass}
+          >
+            {label}
+          </FieldLabel>
           <Select
             name={field.name}
             value={field.value ?? ""}
@@ -181,7 +223,7 @@ export function FormSelect<
               id={field.name}
               onBlur={field.onBlur}
               aria-invalid={fieldState.invalid}
-              className="w-full"
+              className={`${controlClass} w-full`}
             >
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
@@ -221,6 +263,7 @@ export function FormCheckbox<
   control,
   name,
   label,
+  hideLabel,
   description,
   disabled,
 }: FormCheckboxProps<TFieldValues, TName>) {
@@ -229,7 +272,11 @@ export function FormCheckbox<
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <Field orientation="horizontal" data-invalid={fieldState.invalid}>
+        <Field
+          orientation="horizontal"
+          data-invalid={fieldState.invalid}
+          className={inlineChoiceShellClass}
+        >
           <Checkbox
             id={field.name}
             name={field.name}
@@ -240,7 +287,12 @@ export function FormCheckbox<
             aria-invalid={fieldState.invalid}
           />
           <FieldContent>
-            <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+            <FieldLabel
+              htmlFor={field.name}
+              className={hideLabel ? "sr-only" : labelClass}
+            >
+              {label}
+            </FieldLabel>
             {description && <FieldDescription>{description}</FieldDescription>}
             <FieldError errors={[fieldState.error]} />
           </FieldContent>
@@ -266,6 +318,7 @@ export function FormSwitch<
   control,
   name,
   label,
+  hideLabel,
   description,
   disabled,
 }: FormSwitchProps<TFieldValues, TName>) {
@@ -274,9 +327,18 @@ export function FormSwitch<
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <Field orientation="horizontal" data-invalid={fieldState.invalid}>
+        <Field
+          orientation="horizontal"
+          data-invalid={fieldState.invalid}
+          className={inlineChoiceShellClass}
+        >
           <FieldContent>
-            <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+            <FieldLabel
+              htmlFor={field.name}
+              className={hideLabel ? "sr-only" : labelClass}
+            >
+              {label}
+            </FieldLabel>
             {description && <FieldDescription>{description}</FieldDescription>}
             <FieldError errors={[fieldState.error]} />
           </FieldContent>
@@ -313,6 +375,7 @@ export function FormRadioGroup<
   control,
   name,
   label,
+  hideLabel,
   description,
   disabled,
   options,
@@ -322,8 +385,10 @@ export function FormRadioGroup<
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid}>
-          <FieldLabel>{label}</FieldLabel>
+        <Field data-invalid={fieldState.invalid} className={fieldShellClass}>
+          <FieldLabel className={hideLabel ? "sr-only" : labelClass}>
+            {label}
+          </FieldLabel>
           {description && <FieldDescription>{description}</FieldDescription>}
           <RadioGroup
             name={field.name}
@@ -332,19 +397,20 @@ export function FormRadioGroup<
             onBlur={field.onBlur}
             disabled={disabled}
             aria-invalid={fieldState.invalid}
+            className="grid gap-2"
           >
             {options.map((option) => (
-              <Field
-                key={option.value}
-                orientation="horizontal"
-                data-invalid={fieldState.invalid}
-              >
+              <Field key={option.value} orientation="horizontal">
                 <RadioGroupItem
                   id={`${field.name}-${option.value}`}
                   value={option.value}
                   disabled={option.disabled}
+                  className="mt-0.5"
                 />
-                <FieldLabel htmlFor={`${field.name}-${option.value}`}>
+                <FieldLabel
+                  htmlFor={`${field.name}-${option.value}`}
+                  className="min-h-10 flex-1 cursor-pointer rounded-md border border-border/70 bg-background/70 px-3 py-2 text-sm transition-colors hover:border-primary/50 hover:bg-primary/5 peer-data-checked:border-primary/60 peer-data-checked:bg-primary/10 peer-data-checked:text-primary"
+                >
                   {option.label}
                 </FieldLabel>
               </Field>
@@ -379,6 +445,7 @@ export function FormDatePicker<
   control,
   name,
   label,
+  hideLabel,
   description,
   disabled,
   placeholder = "Pick a date",
@@ -391,8 +458,13 @@ export function FormDatePicker<
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid}>
-          <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+        <Field data-invalid={fieldState.invalid} className={fieldShellClass}>
+          <FieldLabel
+            htmlFor={field.name}
+            className={hideLabel ? "sr-only" : labelClass}
+          >
+            {label}
+          </FieldLabel>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -402,7 +474,7 @@ export function FormDatePicker<
                 disabled={disabled}
                 onBlur={field.onBlur}
                 aria-invalid={fieldState.invalid}
-                className="w-full justify-start text-left font-normal data-[empty=true]:text-muted-foreground"
+                className={`${controlClass} w-full justify-start gap-2 text-left font-normal data-[empty=true]:text-muted-foreground`}
                 data-empty={!field.value}
               >
                 <Icons.Domain.Calendar className="size-4" />
@@ -449,6 +521,7 @@ export function FormFileInput<
   control,
   name,
   label,
+  hideLabel,
   description,
   disabled,
   accept,
@@ -459,8 +532,13 @@ export function FormFileInput<
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid}>
-          <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+        <Field data-invalid={fieldState.invalid} className={fieldShellClass}>
+          <FieldLabel
+            htmlFor={field.name}
+            className={hideLabel ? "sr-only" : labelClass}
+          >
+            {label}
+          </FieldLabel>
           <Input
             id={field.name}
             name={field.name}
@@ -477,6 +555,7 @@ export function FormFileInput<
               );
             }}
             aria-invalid={fieldState.invalid}
+            className={controlClass}
           />
           {description && <FieldDescription>{description}</FieldDescription>}
           <FieldError errors={[fieldState.error]} />

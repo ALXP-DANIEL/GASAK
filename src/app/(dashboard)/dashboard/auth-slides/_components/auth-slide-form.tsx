@@ -1,6 +1,10 @@
 "use client";
 
 import {
+  DashboardForm,
+  DashboardFormGrid,
+} from "@components/forms/dashboard-form";
+import {
   FormCheckbox,
   FormField,
   FormFileInput,
@@ -82,7 +86,7 @@ export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
           </DiawerDescription>
         </DiawerHeader>
         <DiawerBody className="grid gap-4">
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="eyebrow" label="Eyebrow" />
             <FormField control={control} name="title" label="Title" />
             <FormField
@@ -92,7 +96,7 @@ export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
               as="textarea"
               rows={3}
             />
-            <div className="grid gap-4 desktop:grid-cols-2">
+            <DashboardFormGrid>
               <FormField
                 control={control}
                 name="sortOrder"
@@ -105,7 +109,7 @@ export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
                 label={`Image ${slide?.imageUrl ? "(replace)" : ""}`}
                 accept="image/*"
               />
-            </div>
+            </DashboardFormGrid>
             <FormCheckbox
               control={control}
               name="active"
@@ -114,7 +118,7 @@ export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
             <Button type="submit" disabled={pending}>
               {pending ? "Saving..." : isEdit ? "Save changes" : "Create slide"}
             </Button>
-          </form>
+          </DashboardForm>
         </DiawerBody>
       </DiawerContent>
     </Diawer>

@@ -181,7 +181,10 @@ export function ScheduleCalendar({
 
         <div className="flex flex-wrap items-center gap-2">
           <Select value={selectedCalendar} onValueChange={setSelectedCalendar}>
-            <SelectTrigger className="w-full desktop:w-48">
+            <SelectTrigger
+              aria-label="Calendar filter"
+              className="w-full desktop:w-48"
+            >
               <CalendarBlankIcon />
               <SelectValue />
             </SelectTrigger>
@@ -222,7 +225,7 @@ export function ScheduleCalendar({
             value={view}
             onValueChange={(value) => changeView(value as typeof view)}
           >
-            <SelectTrigger className="w-28">
+            <SelectTrigger aria-label="Calendar view" className="w-28">
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="end">

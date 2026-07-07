@@ -19,7 +19,7 @@ export function MlbbIdFields<
   disabled?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3">
+    <div className="grid gap-3 desktop:grid-cols-[8rem_minmax(0,1fr)]">
       <FormField
         control={control}
         name={serverIdName}

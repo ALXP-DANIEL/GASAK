@@ -57,7 +57,7 @@ export function UserRoleSelect({
       onValueChange={(value) => setRole(value as OrgRole)}
       disabled={pending || isSelf}
     >
-      <SelectTrigger className="w-32">
+      <SelectTrigger aria-label={`Role for ${user.name}`} className="w-32">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

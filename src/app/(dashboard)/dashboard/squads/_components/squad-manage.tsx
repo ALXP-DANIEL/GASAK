@@ -1,5 +1,6 @@
 "use client";
 
+import { DashboardForm } from "@components/forms/dashboard-form";
 import {
   FormField,
   FormFileInput,
@@ -117,7 +118,7 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
           <DiawerDescription>Update squad details.</DiawerDescription>
         </DiawerHeader>
         <DiawerBody className="grid gap-4">
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="name" label="Squad name" />
             <FormField
               control={control}
@@ -152,7 +153,7 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
             <Button type="submit" disabled={pending}>
               {pending ? "Saving..." : "Save changes"}
             </Button>
-          </form>
+          </DashboardForm>
         </DiawerBody>
       </DiawerContent>
     </Diawer>
@@ -246,7 +247,7 @@ export function AddSquadMemberDialog({
           </DiawerDescription>
         </DiawerHeader>
         <DiawerBody className="grid gap-4">
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <DashboardForm onSubmit={handleSubmit}>
             <FormSelect
               control={control}
               name="userId"
@@ -269,7 +270,7 @@ export function AddSquadMemberDialog({
             <Button type="submit" disabled={pending}>
               {pending ? "Adding..." : "Add to squad"}
             </Button>
-          </form>
+          </DashboardForm>
         </DiawerBody>
       </DiawerContent>
     </Diawer>
@@ -352,7 +353,10 @@ export function SquadRosterTable({
                   }
                   disabled={pending}
                 >
-                  <SelectTrigger className="w-28">
+                  <SelectTrigger
+                    aria-label={`Role for ${member.user.name}`}
+                    className="w-28"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

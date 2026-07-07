@@ -1,6 +1,7 @@
 "use client";
 
-import { FormField } from "@components/forms/form-field";
+import { DashboardForm } from "@components/forms/dashboard-form";
+import { FormField, FormSwitch } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -13,7 +14,6 @@ import {
   DiawerTrigger,
 } from "@components/ui/diawer";
 import { Button } from "@components/ui/shadcn/button";
-import { Switch } from "@components/ui/shadcn/switch";
 import { formatRM } from "@lib/format";
 import { setProductVariants, uploadVariantImage } from "@server/actions/shop";
 import type {
@@ -25,7 +25,7 @@ import type {
 import Image from "next/image";
 import { useEffect, useRef, useTransition } from "react";
 import type { Control } from "react-hook-form";
-import { Controller, useFieldArray, useWatch } from "react-hook-form";
+import { useFieldArray, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -207,7 +207,7 @@ export function ProductVariantsDialog({
           </DiawerDescription>
         </DiawerHeader>
         <DiawerBody className="grid gap-4">
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <DashboardForm onSubmit={handleSubmit}>
             {optionFields.map((field, index) => (
               <div
                 key={field.id}
@@ -285,7 +285,7 @@ export function ProductVariantsDialog({
             <Button type="submit" disabled={pending}>
               {pending ? "Saving..." : "Save variants"}
             </Button>
-          </form>
+          </DashboardForm>
         </DiawerBody>
       </DiawerContent>
     </Diawer>
@@ -332,7 +332,8 @@ function VariantRow({
         <FormField
           control={control}
           name={`variants.${index}.price`}
-          label=""
+          label="Variant price"
+          hideLabel
           type="number"
           placeholder={formatRM(0)}
         />
@@ -341,7 +342,8 @@ function VariantRow({
         <FormField
           control={control}
           name={`variants.${index}.stock`}
-          label=""
+          label="Variant stock"
+          hideLabel
           type="number"
         />
       </td>
@@ -369,6 +371,7 @@ function VariantRow({
           <input
             ref={fileInputRef}
             type="file"
+            aria-label="Upload variant image"
             accept="image/jpeg,image/png,image/webp,image/gif"
             className="hidden"
             onChange={(e) => {
@@ -380,12 +383,11 @@ function VariantRow({
         </div>
       </td>
       <td className="p-2">
-        <Controller
+        <FormSwitch
           control={control}
           name={`variants.${index}.active`}
-          render={({ field }) => (
-            <Switch checked={field.value} onCheckedChange={field.onChange} />
-          )}
+          label="Variant active"
+          hideLabel
         />
       </td>
     </tr>

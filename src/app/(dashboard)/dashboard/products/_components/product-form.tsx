@@ -1,6 +1,10 @@
 "use client";
 
 import {
+  DashboardForm,
+  DashboardFormGrid,
+} from "@components/forms/dashboard-form";
+import {
   FormCheckbox,
   FormField,
   FormFileInput,
@@ -97,9 +101,9 @@ export function ProductFormDialog({ product }: { product?: Product }) {
           </DiawerDescription>
         </DiawerHeader>
         <DiawerBody className="grid gap-4">
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="name" label="Name" />
-            <div className="grid gap-4 desktop:grid-cols-2">
+            <DashboardFormGrid>
               <FormSelect
                 control={control}
                 name="category"
@@ -124,7 +128,7 @@ export function ProductFormDialog({ product }: { product?: Product }) {
                 label={`Image ${product?.imageUrl ? "(replace)" : ""}`}
                 accept="image/*"
               />
-            </div>
+            </DashboardFormGrid>
             <FormField
               control={control}
               name="description"
@@ -144,7 +148,7 @@ export function ProductFormDialog({ product }: { product?: Product }) {
                   ? "Save changes"
                   : "Create product"}
             </Button>
-          </form>
+          </DashboardForm>
         </DiawerBody>
       </DiawerContent>
     </Diawer>

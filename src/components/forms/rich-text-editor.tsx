@@ -1,5 +1,6 @@
 "use client";
 
+import { formFieldStyles } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { Button } from "@components/ui/shadcn/button";
 import {
@@ -44,8 +45,9 @@ function ToolbarButton({
       variant="outline"
       size="sm"
       className={cn(
-        "h-7 px-2",
-        active && "border-primary bg-primary/10 text-primary",
+        "size-8 rounded-md border-border/70 bg-background/80 p-0 shadow-inner shadow-foreground/3 hover:border-primary/50 hover:bg-primary/10",
+        active &&
+          "border-primary bg-primary/15 text-primary ring-2 ring-primary/15",
       )}
       disabled={disabled}
       aria-label={label}
@@ -77,7 +79,7 @@ function Toolbar({ editor }: { editor: Editor }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1 border-b border-input p-2">
+    <div className="flex flex-wrap items-center gap-1.5 border-b border-border/70 bg-muted/20 p-2">
       <ToolbarButton
         label="Bold"
         active={editor.isActive("bold")}
@@ -114,7 +116,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <Icons.Editor.Code size={14} />
       </ToolbarButton>
 
-      <div className="mx-1 h-5 w-px bg-border" />
+      <div className="mx-1 h-6 w-px bg-border/80" />
 
       <ToolbarButton
         label="Heading 1"
@@ -138,7 +140,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <Icons.Editor.H3 size={14} />
       </ToolbarButton>
 
-      <div className="mx-1 h-5 w-px bg-border" />
+      <div className="mx-1 h-6 w-px bg-border/80" />
 
       <ToolbarButton
         label="Blockquote"
@@ -168,7 +170,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <Icons.Editor.HorizontalRule size={14} />
       </ToolbarButton>
 
-      <div className="mx-1 h-5 w-px bg-border" />
+      <div className="mx-1 h-6 w-px bg-border/80" />
 
       <ToolbarButton
         label="Add link"
@@ -207,6 +209,7 @@ function Toolbar({ editor }: { editor: Editor }) {
       <input
         ref={fileInputRef}
         type="file"
+        aria-label="Upload editor image"
         accept="image/jpeg,image/png,image/webp,image/gif"
         className="hidden"
         onChange={(e) => {
@@ -216,7 +219,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         }}
       />
 
-      <div className="mx-1 h-5 w-px bg-border" />
+      <div className="mx-1 h-6 w-px bg-border/80" />
 
       <ToolbarButton
         label="Undo"
@@ -313,7 +316,7 @@ function RichTextField({
       attributes: {
         id: fieldName,
         class:
-          "prose prose-sm dark:prose-invert max-w-none min-h-40 px-3 py-2 focus:outline-none",
+          "prose prose-sm dark:prose-invert max-w-none min-h-52 px-4 py-3 focus:outline-none",
       },
     },
   });
@@ -328,9 +331,11 @@ function RichTextField({
   }, [value, editor]);
 
   return (
-    <Field data-invalid={invalid}>
-      <FieldLabel htmlFor={fieldName}>{label}</FieldLabel>
-      <div className="rounded-md border border-input">
+    <Field data-invalid={invalid} className={formFieldStyles.fieldShell}>
+      <FieldLabel htmlFor={fieldName} className={formFieldStyles.label}>
+        {label}
+      </FieldLabel>
+      <div className="overflow-hidden rounded-md border border-border/80 bg-background/80 shadow-inner shadow-foreground/3 transition-colors focus-within:border-primary/70 focus-within:ring-2 focus-within:ring-primary/15">
         {editor && <Toolbar editor={editor} />}
         <EditorContent editor={editor} />
       </div>

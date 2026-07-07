@@ -138,6 +138,7 @@ export function ColorPicker({
                   color={hex}
                   onChange={(next) => onChange(normalizeHex(next))}
                   prefixed={false}
+                  aria-label="Hex code"
                   className="h-11 w-full rounded-xl border border-input bg-background/60 px-3 py-1 pl-7 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/50"
                 />
               </div>

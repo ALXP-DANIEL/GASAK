@@ -1,5 +1,6 @@
 "use client";
 
+import { DashboardForm } from "@components/forms/dashboard-form";
 import { FormField, FormSwitch } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
@@ -55,7 +56,7 @@ export function SquadFormDialog() {
           </DiawerDescription>
         </DiawerHeader>
         <DiawerBody className="grid gap-4">
-          <form onSubmit={handleSubmit} className="grid gap-4">
+          <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="name" label="Squad Name" />
             <FormField
               control={control}
@@ -72,7 +73,7 @@ export function SquadFormDialog() {
             <Button type="submit" disabled={pending}>
               {pending ? "Creating..." : "Create Squad"}
             </Button>
-          </form>
+          </DashboardForm>
         </DiawerBody>
       </DiawerContent>
     </Diawer>
