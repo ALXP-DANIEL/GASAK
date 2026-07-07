@@ -2,6 +2,7 @@ import { generateId } from "@lib/id";
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  foreignKey,
   index,
   integer,
   pgEnum,
@@ -383,6 +384,36 @@ export const authSlides = createTable("auth_slides", {
     .defaultNow(),
 });
 
+export const organizationPositions = createTable(
+  "organization_positions",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    title: text("title").notNull(),
+    icon: text("icon"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    userId: text("user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    parentId: uuid("parent_id"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.parentId],
+      foreignColumns: [t.id],
+      name: "gasak_organization_positions_parent_fk",
+    }).onDelete("set null"),
+    uniqueIndex("gasak_organization_positions_user_idx").on(t.userId),
+  ],
+);
+
 export const activityLogs = createTable(
   "activity_logs",
   {
@@ -556,6 +587,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
     references: [playerProfiles.userId],
   }),
   memberships: many(squadMembers),
+  organizationPositions: many(organizationPositions),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -585,6 +617,24 @@ export const squadMemberRelations = relations(squadMembers, ({ one }) => ({
   }),
   user: one(user, { fields: [squadMembers.userId], references: [user.id] }),
 }));
+
+export const organizationPositionRelations = relations(
+  organizationPositions,
+  ({ one, many }) => ({
+    user: one(user, {
+      fields: [organizationPositions.userId],
+      references: [user.id],
+    }),
+    parent: one(organizationPositions, {
+      fields: [organizationPositions.parentId],
+      references: [organizationPositions.id],
+      relationName: "organizationPositionChildren",
+    }),
+    children: many(organizationPositions, {
+      relationName: "organizationPositionChildren",
+    }),
+  }),
+);
 
 export const applicationRelations = relations(applications, ({ one }) => ({
   assignedLeader: one(user, {
@@ -724,6 +774,7 @@ export type Scrim = typeof scrims.$inferSelect;
 export type News = typeof news.$inferSelect;
 export type NewsRead = typeof newsReads.$inferSelect;
 export type AuthSlide = typeof authSlides.$inferSelect;
+export type OrganizationPosition = typeof organizationPositions.$inferSelect;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type ProductOption = typeof productOptions.$inferSelect;

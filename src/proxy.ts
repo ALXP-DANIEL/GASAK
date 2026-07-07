@@ -10,6 +10,7 @@ const publicPaths = [
   "/contact",
   "/news",
   "/recruitment",
+  "/organization",
 ] as const;
 
 const authPaths = ["/login", "/forgot-password", "/reset-password"] as const;

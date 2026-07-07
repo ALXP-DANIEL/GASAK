@@ -8,6 +8,7 @@ import {
   news,
   type OrgRole,
   orders,
+  organizationPositions,
   playerProfiles,
   products,
   scrims,
@@ -106,10 +107,68 @@ async function ensureAuthSlides() {
   ]);
 }
 
+async function ensureOrganizationPositions(admin: {
+  id: string;
+  name: string;
+}) {
+  const existing = await db.select().from(organizationPositions).limit(1);
+  if (existing.length > 0) return;
+
+  const leader = await db.query.user.findFirst({
+    where: eq(user.email, "leader@gasak.gg"),
+  });
+  const seller = await db.query.user.findFirst({
+    where: eq(user.email, "seller@gasak.gg"),
+  });
+
+  const [founder] = await db
+    .insert(organizationPositions)
+    .values({
+      title: "Founder",
+      icon: "👑",
+      sortOrder: 0,
+      userId: admin.id,
+      parentId: null,
+    })
+    .returning();
+
+  const [coFounder] = await db
+    .insert(organizationPositions)
+    .values({
+      title: "Co-Founder",
+      icon: "⚡",
+      sortOrder: 10,
+      userId: leader?.id ?? null,
+      parentId: founder.id,
+    })
+    .returning();
+
+  await db.insert(organizationPositions).values([
+    {
+      title: "Advisor",
+      icon: "🧐",
+      sortOrder: 20,
+      userId: null,
+      parentId: founder.id,
+    },
+    {
+      title: "CEO",
+      icon: "🔱",
+      sortOrder: 30,
+      userId: seller?.id ?? null,
+      parentId: coFounder.id,
+    },
+  ]);
+}
+
 async function main() {
   const existing = await db.select().from(user).limit(1);
   if (existing.length > 0) {
     await syncDemoAccountRoles();
+    const admin = await db.query.user.findFirst({
+      where: eq(user.email, "admin@gasak.gg"),
+    });
+    if (admin) await ensureOrganizationPositions(admin);
     console.log("Database already seeded, skipping.");
     return;
   }
@@ -615,6 +674,7 @@ async function main() {
   );
 
   await ensureAuthSlides();
+  await ensureOrganizationPositions(admin);
 
   console.log("Seed complete.");
   console.log(
