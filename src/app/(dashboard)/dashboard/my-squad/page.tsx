@@ -1,3 +1,4 @@
+import { PlayerCard } from "@components/cards/player/player-card";
 import { Icons } from "@components/icons";
 import { Badge } from "@components/ui/shadcn/badge";
 import { Button } from "@components/ui/shadcn/button";
@@ -169,9 +170,13 @@ export default async function MySquadPage() {
                     <CardContent>
                       <div className="grid gap-3 desktop:grid-cols-2">
                         {members.map((member) => (
-                          <MemberCard
+                          <PlayerCard
                             key={member.id}
-                            member={member}
+                            name={member.user.name}
+                            email={member.user.email}
+                            image={member.user.image}
+                            profile={member.user.profile}
+                            squadRole={member.squadRole}
                             showContact={canSeeContacts}
                           />
                         ))}
@@ -279,68 +284,6 @@ function SquadStat({
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-function MemberCard({
-  member,
-  showContact,
-}: {
-  member: SquadMemberWithUser;
-  showContact: boolean;
-}) {
-  const profile = member.user.profile;
-  const displayName = profile?.ign ?? member.user.name;
-
-  return (
-    <div className="grid gap-4 rounded-none border p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{displayName}</p>
-          <p className="truncate text-xs text-muted-foreground">
-            {member.user.name}
-          </p>
-        </div>
-        <Badge variant={member.squadRole === "leader" ? "default" : "outline"}>
-          {SQUAD_ROLE_LABELS[member.squadRole]}
-        </Badge>
-      </div>
-
-      <div className="grid gap-2 text-xs">
-        <MemberDetail
-          label="Lane"
-          value={
-            profile?.preferredLane
-              ? LANE_LABELS[profile.preferredLane]
-              : "Not set"
-          }
-        />
-        <MemberDetail
-          label="Current rank"
-          value={profile?.currentRank ?? "—"}
-        />
-        <MemberDetail label="Peak rank" value={profile?.peakRank ?? "—"} />
-        {showContact && (
-          <MemberDetail
-            label="MLBB"
-            value={
-              profile?.mlbbId
-                ? `${profile.mlbbId}${profile.serverId ? ` (${profile.serverId})` : ""}`
-                : "—"
-            }
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function MemberDetail({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between gap-3">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium">{value}</span>
-    </div>
   );
 }
 

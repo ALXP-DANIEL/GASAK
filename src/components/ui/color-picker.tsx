@@ -48,23 +48,29 @@ export function ColorPicker({
         className,
       )}
     >
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
-        <div className="grid gap-1.5">
-          <h2 className="font-heading text-xl font-semibold tracking-wide">
-            {title}
-          </h2>
-          <p className="max-w-md text-sm leading-6 text-muted-foreground">
-            {description}
-          </p>
-        </div>
+      {(title || description) && (
+        <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+          <div className="grid gap-1.5">
+            {title && (
+              <h2 className="font-heading text-xl font-semibold tracking-wide">
+                {title}
+              </h2>
+            )}
+            {description && (
+              <p className="max-w-md text-sm leading-6 text-muted-foreground">
+                {description}
+              </p>
+            )}
+          </div>
 
-        <div
-          className="grid min-w-28 place-items-center rounded-xl border border-primary/25 px-4 py-3 text-sm font-semibold shadow-[0_0_32px_color-mix(in_oklab,var(--primary)_22%,transparent)]"
-          style={{ backgroundColor: hex, color: contrast }}
-        >
-          {hex.toUpperCase()}
+          <div
+            className="grid min-w-28 place-items-center rounded-xl border border-primary/25 px-4 py-3 text-sm font-semibold shadow-[0_0_32px_color-mix(in_oklab,var(--primary)_22%,transparent)]"
+            style={{ backgroundColor: hex, color: contrast }}
+          >
+            {hex.toUpperCase()}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid gap-6 desktop:grid-cols-[minmax(360px,520px)_minmax(220px,1fr)] desktop:items-end">
         <div

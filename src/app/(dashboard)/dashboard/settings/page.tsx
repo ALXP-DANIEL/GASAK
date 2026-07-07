@@ -1,4 +1,5 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { PlayerCard } from "@components/cards/player/player-card";
 import { Badge } from "@components/ui/shadcn/badge";
 import {
   Card,
@@ -28,33 +29,44 @@ export default async function SettingsPage() {
         description="Manage your account and player profile."
         actions={<Badge variant="outline">{ROLE_LABELS[role]}</Badge>}
       />
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Profile</CardTitle>
-          <CardDescription>
-            Your display name and player details. Email: {user.email}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ProfileForm
-            userId={user.id}
-            imageUrl={user.image}
-            defaultValues={{
-              name: user.name ?? "",
-              fullName: profile?.fullName ?? "",
-              nickname: profile?.nickname ?? "",
-              ign: profile?.ign ?? "",
-              mlbbId: profile?.mlbbId ?? "",
-              serverId: profile?.serverId ?? "",
-              phone: profile?.phone ?? "",
-              preferredLane: profile?.preferredLane ?? "",
-              currentRank: profile?.currentRank ?? "",
-              peakRank: profile?.peakRank ?? "",
-              avatar: null,
-            }}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Profile</CardTitle>
+            <CardDescription>
+              Your display name and player details. Email: {user.email}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ProfileForm
+              userId={user.id}
+              imageUrl={user.image}
+              defaultValues={{
+                name: user.name ?? "",
+                fullName: profile?.fullName ?? "",
+                nickname: profile?.nickname ?? "",
+                ign: profile?.ign ?? "",
+                mlbbId: profile?.mlbbId ?? "",
+                serverId: profile?.serverId ?? "",
+                phone: profile?.phone ?? "",
+                preferredLane: profile?.preferredLane ?? "",
+                currentRank: profile?.currentRank ?? "",
+                peakRank: profile?.peakRank ?? "",
+                avatar: null,
+              }}
+            />
+          </CardContent>
+        </Card>
+        <div className="grid h-fit gap-4">
+          <PlayerCard
+            name={user.name ?? "Player"}
+            email={user.email}
+            image={user.image}
+            profile={profile}
+            showContact
           />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { FormField } from "@components/forms/form-field";
+import { PhonePrefixField } from "@components/forms/phone-prefix-field";
 import { Button } from "@components/ui/shadcn/button";
 import {
   Dialog,
@@ -62,6 +63,7 @@ export function BuyButton({
     startTransition(async () => {
       const result = await placeOrder({
         ...values,
+        customerPhone: toMalaysiaPhone(values.customerPhone),
         productId: product.id,
         variantId,
       });
@@ -97,11 +99,10 @@ export function BuyButton({
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <FormField control={control} name="customerName" label="Name" />
-          <FormField
+          <PhonePrefixField
             control={control}
             name="customerPhone"
             label="Phone (WhatsApp)"
-            placeholder="+60..."
           />
           <FormField
             control={control}
@@ -128,4 +129,9 @@ export function BuyButton({
       </DialogContent>
     </Dialog>
   );
+}
+
+function toMalaysiaPhone(phone: string) {
+  const digits = phone.replace(/\D/g, "").replace(/^60/, "").replace(/^0/, "");
+  return `+60${digits}`;
 }

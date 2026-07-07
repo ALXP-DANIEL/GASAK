@@ -4,16 +4,13 @@ import {
   DashboardForm,
   DashboardFormGrid,
 } from "@components/forms/dashboard-form";
-import {
-  FormField,
-  FormFileInput,
-  FormSelect,
-} from "@components/forms/form-field";
+import { FormField, FormFileInput } from "@components/forms/form-field";
+import { LaneRadioGroup } from "@components/forms/lane-radio-group";
+import { MlbbIdFields } from "@components/forms/mlbb-id-fields";
+import { PhonePrefixField } from "@components/forms/phone-prefix-field";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LANE_LABELS } from "@lib/labels";
 import { updateProfile } from "@server/actions/players";
-import { laneEnum } from "@server/db/schema";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -48,11 +45,6 @@ export function ProfileForm({
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
-  const laneOptions = laneEnum.enumValues.map((value) => ({
-    value,
-    label: LANE_LABELS[value],
-  }));
-
   const form = useForm<ProfileFormInput>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: { ...defaultValues, avatar: null },
@@ -62,7 +54,13 @@ export function ProfileForm({
     setSubmitting(true);
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) {
-      if (value) formData.set(key, value);
+      if (!value) continue;
+      formData.set(
+        key,
+        key === "phone" && typeof value === "string"
+          ? toMalaysiaPhone(value)
+          : value,
+      );
     }
     const result = await updateProfile(userId, formData);
     setSubmitting(false);
@@ -97,26 +95,23 @@ export function ProfileForm({
       </div>
       <DashboardFormGrid>
         <FormField control={form.control} name="nickname" label="Nickname" />
-        <FormField
-          control={form.control}
-          name="phone"
-          label="Phone"
-          type="tel"
-        />
+        <PhonePrefixField control={form.control} name="phone" label="Phone" />
       </DashboardFormGrid>
-      <DashboardFormGrid columns={3}>
+      <DashboardFormGrid>
         <FormField control={form.control} name="ign" label="IGN" />
-        <FormField control={form.control} name="mlbbId" label="MLBB ID" />
-        <FormField control={form.control} name="serverId" label="Server ID" />
-      </DashboardFormGrid>
-      <DashboardFormGrid columns={3}>
-        <FormSelect
+        <MlbbIdFields
           control={form.control}
-          name="preferredLane"
-          label="Preferred Lane"
-          options={laneOptions}
-          placeholder="Pick a lane"
+          mlbbIdName="mlbbId"
+          serverIdName="serverId"
         />
+      </DashboardFormGrid>
+      <LaneRadioGroup
+        control={form.control}
+        name="preferredLane"
+        label="Preferred lane"
+        description="Choose the lane that best matches your current role."
+      />
+      <DashboardFormGrid>
         <FormField
           control={form.control}
           name="currentRank"
@@ -129,4 +124,9 @@ export function ProfileForm({
       </Button>
     </DashboardForm>
   );
+}
+
+function toMalaysiaPhone(phone: string) {
+  const digits = phone.replace(/\D/g, "").replace(/^60/, "").replace(/^0/, "");
+  return `+60${digits}`;
 }

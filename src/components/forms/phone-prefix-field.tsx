@@ -46,7 +46,7 @@ export function PhonePrefixField<
               disabled={disabled}
               aria-invalid={fieldState.invalid}
               className="h-10 min-w-0 border-0 bg-transparent shadow-none focus-visible:ring-0"
-              value={field.value ?? ""}
+              value={toNationalPhone(field.value ?? "")}
             />
           </div>
           <FieldError errors={[fieldState.error]} />
@@ -54,4 +54,8 @@ export function PhonePrefixField<
       )}
     />
   );
+}
+
+function toNationalPhone(value: string) {
+  return value.replace(/\D/g, "").replace(/^60/, "").replace(/^0/, "");
 }

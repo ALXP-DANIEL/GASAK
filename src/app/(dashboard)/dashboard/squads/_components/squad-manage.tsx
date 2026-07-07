@@ -1,5 +1,6 @@
 "use client";
 
+import { FormColorPicker } from "@components/forms/color-picker-field";
 import { DashboardForm } from "@components/forms/dashboard-form";
 import {
   FormField,
@@ -81,6 +82,15 @@ const squadFormSchema = z.object({
   banner: z.instanceof(File).nullable(),
 });
 
+const ACCENT_PRESETS = [
+  { name: "Gold", color: "#d9a21b" },
+  { name: "Blue", color: "#2f80ed" },
+  { name: "Purple", color: "#8b5cf6" },
+  { name: "Green", color: "#22c55e" },
+  { name: "Crimson", color: "#ef4444" },
+  { name: "Cyan", color: "#06b6d4" },
+];
+
 export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
   const { open, setOpen, control, pending, handleSubmit } = useEntityDialog({
     schema: squadFormSchema,
@@ -126,11 +136,12 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
               label="Description"
               as="textarea"
             />
-            <FormField
+            <FormColorPicker
               control={control}
               name="accentColor"
               label="Accent color"
-              placeholder="#d97b16"
+              description="Pick the squad accent used across public squad surfaces."
+              presets={ACCENT_PRESETS}
             />
             <FormSwitch
               control={control}

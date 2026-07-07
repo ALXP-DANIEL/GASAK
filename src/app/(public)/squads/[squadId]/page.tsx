@@ -1,9 +1,10 @@
+import { PlayerCard } from "@components/cards/player/player-card";
 import { Icons } from "@components/icons";
 import { Accent } from "@components/ui/accent";
 import { BrandBadge, BrandCard, LinkButton } from "@components/ui/brand";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatDate } from "@lib/format";
-import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
+import { LANE_LABELS } from "@lib/labels";
 import { createPageMetadata } from "@lib/metadata";
 import { db, scrims, squads, tournaments } from "@server/db";
 import type { SquadRole } from "@server/db/schema";
@@ -33,11 +34,6 @@ function getSquadProfile(squadId: string) {
   });
 }
 
-type SquadWithMembers = NonNullable<
-  Awaited<ReturnType<typeof getSquadProfile>>
->;
-type SquadMemberWithUser = SquadWithMembers["members"][number];
-
 export async function generateMetadata({
   params,
 }: {
@@ -49,7 +45,8 @@ export async function generateMetadata({
 
   return createPageMetadata({
     title: squad.name,
-    description: squad.description ?? `The ${squad.name} squad of GASAK Esports.`,
+    description:
+      squad.description ?? `The ${squad.name} squad of GASAK Esports.`,
     path: `/squads/${squad.id}`,
     type: "Squad",
     image: squad.logoUrl,
@@ -195,7 +192,14 @@ export default async function SquadDetailPage({
             ) : (
               <div className="mt-6 grid gap-3 desktop:grid-cols-2">
                 {roster.map((member) => (
-                  <RosterCard key={member.id} member={member} />
+                  <PlayerCard
+                    key={member.id}
+                    name={member.user.name}
+                    email={member.user.email}
+                    image={member.user.image}
+                    profile={member.user.profile}
+                    squadRole={member.squadRole}
+                  />
                 ))}
               </div>
             )}
@@ -334,47 +338,6 @@ function SquadStat({
         </div>
       </div>
     </BrandCard>
-  );
-}
-
-function RosterCard({ member }: { member: SquadMemberWithUser }) {
-  const profile = member.user.profile;
-  const displayName = profile?.ign ?? member.user.name;
-
-  return (
-    <div className="grid gap-4 rounded-none border border-border p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{displayName}</p>
-          <p className="truncate text-xs text-muted-foreground">
-            {member.user.name}
-          </p>
-        </div>
-        <Badge variant={member.squadRole === "leader" ? "default" : "outline"}>
-          {SQUAD_ROLE_LABELS[member.squadRole]}
-        </Badge>
-      </div>
-
-      <div className="grid gap-2 text-xs">
-        <RosterDetail
-          label="Lane"
-          value={
-            profile?.preferredLane ? LANE_LABELS[profile.preferredLane] : "Flex"
-          }
-        />
-        <RosterDetail label="Current" value={profile?.currentRank ?? "—"} />
-        <RosterDetail label="Peak" value={profile?.peakRank ?? "—"} />
-      </div>
-    </div>
-  );
-}
-
-function RosterDetail({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between gap-3">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium">{value}</span>
-    </div>
   );
 }
 
