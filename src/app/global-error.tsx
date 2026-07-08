@@ -41,7 +41,7 @@ export default function GlobalError({
                 Try again
               </button>
               <a
-                href="/old"
+                href="/"
                 className="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 Back home

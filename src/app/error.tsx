@@ -27,7 +27,7 @@ export default function ErrorPage({
           label: "Try again",
         },
         {
-          href: "/old",
+          href: "/",
           label: "Back home",
           variant: "ghost",
         },

@@ -17,8 +17,6 @@
       "!reference",
       "!public/*.svg",
       "!src/components/ui/shadcn",
-      "!src/app/old",
-      "!src/components/old"
     ]
   },
   "formatter": {

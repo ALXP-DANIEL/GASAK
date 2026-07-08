@@ -22,7 +22,7 @@ export default function Forbidden() {
           label: "Back to dashboard",
         },
         {
-          href: "/old",
+          href: "/",
           label: "Back home",
           variant: "ghost",
         },

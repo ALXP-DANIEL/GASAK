@@ -18,11 +18,11 @@ export default function Unauthorized() {
       description="This area needs a verified GASAK session before we can show squad, shop, or admin data."
       actions={[
         {
-          href: "/old/login",
+          href: "//login",
           label: "Sign in",
         },
         {
-          href: "/old",
+          href: "/",
           label: "Back home",
           variant: "ghost",
         },
