@@ -7,7 +7,8 @@ import { Button } from "../ui/shadcn/button";
 type StatusPageAction = {
   href: string;
   label: string;
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "ghost" | "danger";
+  onAction?: () => void | Promise<void>;
 };
 
 type StatusPageProps = {
@@ -17,7 +18,6 @@ type StatusPageProps = {
   description: string;
   actions?: StatusPageAction[];
   className?: string;
-  onAction?: (href: string) => void;
 };
 
 const actionClassNames: Record<
@@ -28,6 +28,7 @@ const actionClassNames: Record<
   secondary: "text-foreground hover:bg-[var(--glass-active)]",
   ghost:
     "text-muted-foreground shadow-none hover:bg-[var(--glass-active)] hover:text-foreground",
+  danger: "text-destructive shadow-none hover:bg-[var(--glass-active)] hover:text-destructive-foreground",
 };
 
 export default function StatusPage({
@@ -37,7 +38,6 @@ export default function StatusPage({
   description,
   actions = [],
   className,
-  onAction,
 }: StatusPageProps) {
   return (
     <div
@@ -48,41 +48,48 @@ export default function StatusPage({
     >
       <div className="grid w-full gap-8 lg:items-center">
         <div className="flex flex-col items-center text-center">
-          <span className="text-muted-foreground font-mono text-[11px] tracking-[0.22em] uppercase">
+          <span className="font-mono text-[11px] tracking-[0.22em] text-muted-foreground uppercase">
             {eyebrow}
           </span>
+
           <p className="mt-4 text-[4.5rem] leading-none font-semibold tracking-[-0.08em] text-primary sm:text-[5.5rem]">
             {code}
           </p>
+
           <h1 className="mt-4 max-w-xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             {title}
           </h1>
+
           <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
             {description}
           </p>
 
           {actions.length > 0 ? (
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              {actions.map(({ href, label, variant = "primary" }) => {
-                const className = cn(
+              {actions.map(({ href, label, variant = "primary", onAction }) => {
+                const buttonClassName = cn(
                   "glass rounded-full px-4",
                   actionClassNames[variant],
                 );
 
-                return onAction && href.startsWith("#") ? (
-                  <Button
-                    key={`${href}-${label}`}
-                    type="button"
-                    className={className}
-                    onClick={() => onAction(href)}
-                  >
-                    {label}
-                  </Button>
-                ) : (
+                if (onAction) {
+                  return (
+                    <Button
+                      key={`${href}-${label}`}
+                      type="button"
+                      className={buttonClassName}
+                      onClick={onAction}
+                    >
+                      {label}
+                    </Button>
+                  );
+                }
+
+                return (
                   <Button
                     key={`${href}-${label}`}
                     asChild
-                    className={className}
+                    className={buttonClassName}
                   >
                     <Link href={href}>{label}</Link>
                   </Button>

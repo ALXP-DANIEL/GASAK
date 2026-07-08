@@ -1,14 +1,19 @@
+"use client";
+
 import StatusPage from "@components/layout/status-page";
-import { createPageMetadata } from "@lib/metadata";
+import { authClient } from "@lib/auth-client";
+import { useRouter } from "next/navigation";
 
-export const metadata = createPageMetadata({
-  title: "Forbidden",
-  description: "Your current GASAK role cannot access this resource.",
-  path: "/403",
-  type: "Error 403",
-});
+export default function ForbiddenContent() {
+  const router = useRouter();
 
-export default function Forbidden() {
+  async function handleLogout() {
+    await authClient.signOut();
+
+    router.push("/login");
+    router.refresh();
+  }
+
   return (
     <StatusPage
       className="min-h-dvh"
@@ -22,9 +27,10 @@ export default function Forbidden() {
           label: "Back to dashboard",
         },
         {
-          href: "/",
-          label: "Back home",
-          variant: "ghost",
+          href: "#",
+          label: "Log out",
+          variant: "danger",
+          onAction: handleLogout,
         },
       ]}
     />
