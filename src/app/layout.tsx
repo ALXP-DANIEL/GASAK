@@ -7,7 +7,7 @@ import { TooltipProvider } from "@components/ui/shadcn/tooltip";
 import { siteConfig } from "@config/site";
 import { cn } from "@lib/utils";
 import { env } from "@/env";
-import Maintenance from "./(status)/maintenance";
+import Maintenance from "./maintenance";
 
 const inter = Inter({
   subsets: ["latin"],
