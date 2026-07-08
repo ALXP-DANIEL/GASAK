@@ -32,9 +32,6 @@ export default function ErrorPage({
           variant: "ghost",
         },
       ]}
-      onAction={(href) => {
-        if (href === "#retry") unstable_retry();
-      }}
     />
   );
 }
