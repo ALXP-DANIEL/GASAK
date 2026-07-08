@@ -5,10 +5,10 @@ import { useEffect } from "react";
 
 export default function ErrorPage({
   error,
-  unstable_retry,
+  reset,
 }: {
   error: Error & { digest?: string };
-  unstable_retry: () => void;
+  reset: () => void;
 }) {
   useEffect(() => {
     console.error(error);
@@ -23,8 +23,9 @@ export default function ErrorPage({
       description="The request reached GASAK, but the interface could not finish rendering. Retry the view, or return to the archived home screen if it keeps failing."
       actions={[
         {
-          href: "#retry",
+          href: "#",
           label: "Try again",
+          onAction: reset,
         },
         {
           href: "/",
