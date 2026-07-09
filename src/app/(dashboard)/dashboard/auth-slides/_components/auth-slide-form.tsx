@@ -12,14 +12,14 @@ import {
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
-  Diawer,
-  DiawerBody,
-  DiawerContent,
-  DiawerDescription,
-  DiawerHeader,
-  DiawerTitle,
-  DiawerTrigger,
-} from "@components/ui/diawer";
+  Credenza,
+  CredenzaBody,
+  CredenzaContent,
+  CredenzaDescription,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
 import { createAuthSlide, updateAuthSlide } from "@server/actions/auth-slides";
 import type { AuthSlide } from "@server/db/schema";
@@ -65,8 +65,8 @@ export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
     });
 
   return (
-    <Diawer open={open} onOpenChange={setOpen}>
-      <DiawerTrigger asChild>
+    <Credenza open={open} onOpenChange={setOpen}>
+      <CredenzaTrigger asChild>
         {isEdit ? (
           <Button variant="outline" size="sm">
             Edit
@@ -77,15 +77,15 @@ export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
             New slide
           </Button>
         )}
-      </DiawerTrigger>
-      <DiawerContent className="max-h-[85dvh] overflow-y-auto">
-        <DiawerHeader>
-          <DiawerTitle>{isEdit ? "Edit slide" : "New slide"}</DiawerTitle>
-          <DiawerDescription>
+      </CredenzaTrigger>
+      <CredenzaContent className="max-h-[85dvh] overflow-y-auto">
+        <CredenzaHeader>
+          <CredenzaTitle>{isEdit ? "Edit slide" : "New slide"}</CredenzaTitle>
+          <CredenzaDescription>
             Manage the image and copy shown beside auth pages.
-          </DiawerDescription>
-        </DiawerHeader>
-        <DiawerBody className="grid gap-4">
+          </CredenzaDescription>
+        </CredenzaHeader>
+        <CredenzaBody className="grid gap-4">
           <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="eyebrow" label="Eyebrow" />
             <FormField control={control} name="title" label="Title" />
@@ -119,8 +119,8 @@ export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
               {pending ? "Saving..." : isEdit ? "Save changes" : "Create slide"}
             </Button>
           </DashboardForm>
-        </DiawerBody>
-      </DiawerContent>
-    </Diawer>
+        </CredenzaBody>
+      </CredenzaContent>
+    </Credenza>
   );
 }

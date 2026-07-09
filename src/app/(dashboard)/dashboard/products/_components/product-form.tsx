@@ -13,14 +13,14 @@ import {
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
-  Diawer,
-  DiawerBody,
-  DiawerContent,
-  DiawerDescription,
-  DiawerHeader,
-  DiawerTitle,
-  DiawerTrigger,
-} from "@components/ui/diawer";
+  Credenza,
+  CredenzaBody,
+  CredenzaContent,
+  CredenzaDescription,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
 import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
 import { createProduct, updateProduct } from "@server/actions/shop";
@@ -78,8 +78,8 @@ export function ProductFormDialog({ product }: { product?: Product }) {
     });
 
   return (
-    <Diawer open={open} onOpenChange={setOpen}>
-      <DiawerTrigger asChild>
+    <Credenza open={open} onOpenChange={setOpen}>
+      <CredenzaTrigger asChild>
         {isEdit ? (
           <Button variant="outline" size="sm">
             Edit
@@ -90,17 +90,17 @@ export function ProductFormDialog({ product }: { product?: Product }) {
             New product
           </Button>
         )}
-      </DiawerTrigger>
-      <DiawerContent className="max-h-[85dvh] overflow-y-auto">
-        <DiawerHeader>
-          <DiawerTitle>{isEdit ? "Edit product" : "New product"}</DiawerTitle>
-          <DiawerDescription>
+      </CredenzaTrigger>
+      <CredenzaContent className="max-h-[85dvh] overflow-y-auto">
+        <CredenzaHeader>
+          <CredenzaTitle>{isEdit ? "Edit product" : "New product"}</CredenzaTitle>
+          <CredenzaDescription>
             {isEdit
               ? "Update details, price, stock, and visibility."
               : "Add a product to the GASAK shop."}
-          </DiawerDescription>
-        </DiawerHeader>
-        <DiawerBody className="grid gap-4">
+          </CredenzaDescription>
+        </CredenzaHeader>
+        <CredenzaBody className="grid gap-4">
           <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="name" label="Name" />
             <DashboardFormGrid>
@@ -149,8 +149,8 @@ export function ProductFormDialog({ product }: { product?: Product }) {
                   : "Create product"}
             </Button>
           </DashboardForm>
-        </DiawerBody>
-      </DiawerContent>
-    </Diawer>
+        </CredenzaBody>
+      </CredenzaContent>
+    </Credenza>
   );
 }

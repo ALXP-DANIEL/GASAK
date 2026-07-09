@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  Diawer,
-  DiawerContent,
-  DiawerDescription,
-  DiawerHeader,
-  DiawerTitle,
-  DiawerTrigger,
-} from "@components/ui/diawer";
+  Credenza,
+  CredenzaContent,
+  CredenzaDescription,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
 import { ButtonGroup } from "@components/ui/shadcn/button-group";
 import {
@@ -240,27 +240,27 @@ export function ScheduleCalendar({
           </Select>
 
           {canManage && (
-            <Diawer open={createOpen} onOpenChange={setCreateOpen}>
-              <DiawerTrigger asChild>
+            <Credenza open={createOpen} onOpenChange={setCreateOpen}>
+              <CredenzaTrigger asChild>
                 <Button>
                   <PlusIcon />
                   Add event
                 </Button>
-              </DiawerTrigger>
-              <DiawerContent className="max-h-[85dvh] overflow-y-auto">
-                <DiawerHeader>
-                  <DiawerTitle>New event</DiawerTitle>
-                  <DiawerDescription>
+              </CredenzaTrigger>
+              <CredenzaContent className="max-h-[85dvh] overflow-y-auto">
+                <CredenzaHeader>
+                  <CredenzaTitle>New event</CredenzaTitle>
+                  <CredenzaDescription>
                     Schedule practice, scrims, meetings, or tournaments.
-                  </DiawerDescription>
-                </DiawerHeader>
+                  </CredenzaDescription>
+                </CredenzaHeader>
                 <EventForm
                   squads={squads}
                   allowOrgWide={allowOrgWide}
                   onSuccess={() => setCreateOpen(false)}
                 />
-              </DiawerContent>
-            </Diawer>
+              </CredenzaContent>
+            </Credenza>
           )}
         </div>
       </div>

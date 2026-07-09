@@ -24,17 +24,17 @@ import {
   DrawerTrigger,
 } from "./shadcn/drawer";
 
-const DiawerContext = createContext<{ isDesktop: boolean } | null>(null);
+const CredenzaContext = createContext<{ isDesktop: boolean } | null>(null);
 
-function useDiawerContext() {
-  const ctx = useContext(DiawerContext);
+function useCredenzaContext() {
+  const ctx = useContext(CredenzaContext);
   if (!ctx) {
-    throw new Error("Diawer subcomponents must be used within <Diawer>");
+    throw new Error("Credenza subcomponents must be used within <Credenza>");
   }
   return ctx;
 }
 
-export function Diawer({
+export function Credenza({
   open,
   onOpenChange,
   children,
@@ -44,37 +44,46 @@ export function Diawer({
   children: ReactNode;
 }) {
   const isDesktop = useScreen("desktop");
-  const Root = isDesktop ? Dialog : Drawer;
 
   return (
-    <DiawerContext.Provider value={{ isDesktop }}>
-      <Root open={open} onOpenChange={onOpenChange}>
-        {children}
-      </Root>
-    </DiawerContext.Provider>
+    <CredenzaContext.Provider value={{ isDesktop }}>
+      {isDesktop ? (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          {children}
+        </Dialog>
+      ) : (
+        <Drawer
+          open={open}
+          onOpenChange={onOpenChange}
+          shouldScaleBackground={false}
+        >
+          {children}
+        </Drawer>
+      )}
+    </CredenzaContext.Provider>
   );
 }
 
-export function DiawerTrigger({
+export function CredenzaTrigger({
   asChild,
   children,
 }: {
   asChild?: boolean;
   children: ReactNode;
 }) {
-  const { isDesktop } = useDiawerContext();
+  const { isDesktop } = useCredenzaContext();
   const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
   return <Trigger asChild={asChild}>{children}</Trigger>;
 }
 
-export function DiawerContent({
+export function CredenzaContent({
   className,
   children,
 }: {
   className?: string;
   children: ReactNode;
 }) {
-  const { isDesktop } = useDiawerContext();
+  const { isDesktop } = useCredenzaContext();
   const Content = isDesktop ? DialogContent : DrawerContent;
   return (
     <Content
@@ -90,14 +99,14 @@ export function DiawerContent({
   );
 }
 
-export function DiawerHeader({
+export function CredenzaHeader({
   className,
   children,
 }: {
   className?: string;
   children: ReactNode;
 }) {
-  const { isDesktop } = useDiawerContext();
+  const { isDesktop } = useCredenzaContext();
   const Header = isDesktop ? DialogHeader : DrawerHeader;
   return (
     <Header
@@ -112,26 +121,26 @@ export function DiawerHeader({
   );
 }
 
-export function DiawerTitle({ children }: { children: ReactNode }) {
-  const { isDesktop } = useDiawerContext();
+export function CredenzaTitle({ children }: { children: ReactNode }) {
+  const { isDesktop } = useCredenzaContext();
   const Title = isDesktop ? DialogTitle : DrawerTitle;
   return <Title>{children}</Title>;
 }
 
-export function DiawerDescription({ children }: { children: ReactNode }) {
-  const { isDesktop } = useDiawerContext();
+export function CredenzaDescription({ children }: { children: ReactNode }) {
+  const { isDesktop } = useCredenzaContext();
   const Description = isDesktop ? DialogDescription : DrawerDescription;
   return <Description>{children}</Description>;
 }
 
-export function DiawerBody({
+export function CredenzaBody({
   className,
   children,
 }: {
   className?: string;
   children: ReactNode;
 }) {
-  const { isDesktop } = useDiawerContext();
+  const { isDesktop } = useCredenzaContext();
   return (
     <div
       className={cn(
@@ -145,26 +154,26 @@ export function DiawerBody({
   );
 }
 
-export function DiawerFooter({
+export function CredenzaFooter({
   className,
   children,
 }: {
   className?: string;
   children: ReactNode;
 }) {
-  const { isDesktop } = useDiawerContext();
+  const { isDesktop } = useCredenzaContext();
   const Footer = isDesktop ? DialogFooter : DrawerFooter;
   return <Footer className={className}>{children}</Footer>;
 }
 
-export function DiawerClose({
+export function CredenzaClose({
   asChild,
   children,
 }: {
   asChild?: boolean;
   children: ReactNode;
 }) {
-  const { isDesktop } = useDiawerContext();
+  const { isDesktop } = useCredenzaContext();
   const Close = isDesktop ? DialogClose : DrawerClose;
   return <Close asChild={asChild}>{children}</Close>;
 }

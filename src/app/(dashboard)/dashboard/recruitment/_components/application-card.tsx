@@ -1,14 +1,14 @@
 "use client";
 
 import {
-  Diawer,
-  DiawerBody,
-  DiawerContent,
-  DiawerDescription,
-  DiawerHeader,
-  DiawerTitle,
-  DiawerTrigger,
-} from "@components/ui/diawer";
+  Credenza,
+  CredenzaBody,
+  CredenzaContent,
+  CredenzaDescription,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@components/ui/credenza";
 import { Badge } from "@components/ui/shadcn/badge";
 import { Button } from "@components/ui/shadcn/button";
 import {
@@ -135,8 +135,8 @@ export function ApplicationCard({
 
   return (
     <>
-      <Diawer>
-        <DiawerTrigger asChild>
+      <Credenza>
+        <CredenzaTrigger asChild>
           <button
             type="button"
             className="group w-full border bg-background p-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/5"
@@ -175,15 +175,15 @@ export function ApplicationCard({
               <p>Applied {formatDateTime(application.createdAt)}</p>
             </div>
           </button>
-        </DiawerTrigger>
-        <DiawerContent className="max-h-[92dvh] desktop:max-h-[85dvh] desktop:max-w-3xl desktop:overflow-y-auto">
-          <DiawerHeader>
-            <DiawerTitle>{application.fullName}</DiawerTitle>
-            <DiawerDescription>
+        </CredenzaTrigger>
+        <CredenzaContent className="max-h-[92dvh] desktop:max-h-[85dvh] desktop:max-w-3xl desktop:overflow-y-auto">
+          <CredenzaHeader>
+            <CredenzaTitle>{application.fullName}</CredenzaTitle>
+            <CredenzaDescription>
               {`Application ${APPLICATION_STATUS_LABELS[application.status]}`}
-            </DiawerDescription>
-          </DiawerHeader>
-          <DiawerBody className="grid gap-5">
+            </CredenzaDescription>
+          </CredenzaHeader>
+          <CredenzaBody className="grid gap-5">
             <div className="grid gap-3 rounded-none border bg-muted/10 p-4">
               <DetailRow label="IGN" value={application.ign} />
               <DetailRow
@@ -346,9 +346,9 @@ export function ApplicationCard({
                 </div>
               )}
             </div>
-          </DiawerBody>
-        </DiawerContent>
-      </Diawer>
+          </CredenzaBody>
+        </CredenzaContent>
+      </Credenza>
 
       <Dialog
         open={credentials !== null}

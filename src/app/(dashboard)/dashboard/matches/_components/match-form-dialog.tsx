@@ -8,14 +8,14 @@ import { FormField, FormSelect } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
-  Diawer,
-  DiawerBody,
-  DiawerContent,
-  DiawerDescription,
-  DiawerHeader,
-  DiawerTitle,
-  DiawerTrigger,
-} from "@components/ui/diawer";
+  Credenza,
+  CredenzaBody,
+  CredenzaContent,
+  CredenzaDescription,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
 import { matchSchema } from "@features/matches/schema";
 import { createScrim } from "@server/actions/scrims";
@@ -44,21 +44,21 @@ export function MatchFormDialog({
     });
 
   return (
-    <Diawer open={open} onOpenChange={setOpen}>
-      <DiawerTrigger asChild>
+    <Credenza open={open} onOpenChange={setOpen}>
+      <CredenzaTrigger asChild>
         <Button>
           <Icons.Actions.Add />
           Record Match
         </Button>
-      </DiawerTrigger>
-      <DiawerContent>
-        <DiawerHeader>
-          <DiawerTitle>Record match</DiawerTitle>
-          <DiawerDescription>
+      </CredenzaTrigger>
+      <CredenzaContent>
+        <CredenzaHeader>
+          <CredenzaTitle>Record match</CredenzaTitle>
+          <CredenzaDescription>
             Log a scrim or match result for your squad.
-          </DiawerDescription>
-        </DiawerHeader>
-        <DiawerBody className="grid gap-4">
+          </CredenzaDescription>
+        </CredenzaHeader>
+        <CredenzaBody className="grid gap-4">
           <DashboardForm onSubmit={handleSubmit}>
             <DashboardFormGrid>
               <FormSelect
@@ -101,8 +101,8 @@ export function MatchFormDialog({
               {pending ? "Saving..." : "Record Match"}
             </Button>
           </DashboardForm>
-        </DiawerBody>
-      </DiawerContent>
-    </Diawer>
+        </CredenzaBody>
+      </CredenzaContent>
+    </Credenza>
   );
 }

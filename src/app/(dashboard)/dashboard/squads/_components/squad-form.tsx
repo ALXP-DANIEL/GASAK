@@ -5,14 +5,14 @@ import { FormField, FormSwitch } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
-  Diawer,
-  DiawerBody,
-  DiawerContent,
-  DiawerDescription,
-  DiawerHeader,
-  DiawerTitle,
-  DiawerTrigger,
-} from "@components/ui/diawer";
+  Credenza,
+  CredenzaBody,
+  CredenzaContent,
+  CredenzaDescription,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
 import { createSquad } from "@server/actions/squads";
 import { z } from "zod";
@@ -41,21 +41,21 @@ export function SquadFormDialog() {
     });
 
   return (
-    <Diawer open={open} onOpenChange={setOpen}>
-      <DiawerTrigger asChild>
+    <Credenza open={open} onOpenChange={setOpen}>
+      <CredenzaTrigger asChild>
         <Button>
           <Icons.Actions.Add />
           New squad
         </Button>
-      </DiawerTrigger>
-      <DiawerContent>
-        <DiawerHeader>
-          <DiawerTitle>Create squad</DiawerTitle>
-          <DiawerDescription>
+      </CredenzaTrigger>
+      <CredenzaContent>
+        <CredenzaHeader>
+          <CredenzaTitle>Create squad</CredenzaTitle>
+          <CredenzaDescription>
             Add a new squad to the organization.
-          </DiawerDescription>
-        </DiawerHeader>
-        <DiawerBody className="grid gap-4">
+          </CredenzaDescription>
+        </CredenzaHeader>
+        <CredenzaBody className="grid gap-4">
           <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="name" label="Squad Name" />
             <FormField
@@ -74,8 +74,8 @@ export function SquadFormDialog() {
               {pending ? "Creating..." : "Create Squad"}
             </Button>
           </DashboardForm>
-        </DiawerBody>
-      </DiawerContent>
-    </Diawer>
+        </CredenzaBody>
+      </CredenzaContent>
+    </Credenza>
   );
 }

@@ -6,14 +6,14 @@ import { FormField, FormSelect } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
-  Diawer,
-  DiawerBody,
-  DiawerContent,
-  DiawerDescription,
-  DiawerHeader,
-  DiawerTitle,
-  DiawerTrigger,
-} from "@components/ui/diawer";
+  Credenza,
+  CredenzaBody,
+  CredenzaContent,
+  CredenzaDescription,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
 import { ORG_ROLE_LABELS } from "@lib/labels";
 import {
@@ -61,22 +61,22 @@ export function CreateUserDialog() {
     });
 
   return (
-    <Diawer open={open} onOpenChange={setOpen}>
-      <DiawerTrigger asChild>
+    <Credenza open={open} onOpenChange={setOpen}>
+      <CredenzaTrigger asChild>
         <Button>
           <Icons.Actions.Add />
           New user
         </Button>
-      </DiawerTrigger>
-      <DiawerContent>
-        <DiawerHeader>
-          <DiawerTitle>Create user</DiawerTitle>
-          <DiawerDescription>
+      </CredenzaTrigger>
+      <CredenzaContent>
+        <CredenzaHeader>
+          <CredenzaTitle>Create user</CredenzaTitle>
+          <CredenzaDescription>
             Accounts for admins, sellers, and regular users. Squad leaders are
             assigned via squad membership, not here.
-          </DiawerDescription>
-        </DiawerHeader>
-        <DiawerBody className="grid gap-4">
+          </CredenzaDescription>
+        </CredenzaHeader>
+        <CredenzaBody className="grid gap-4">
           <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="name" label="Name" />
             <EmailAliasField
@@ -101,9 +101,9 @@ export function CreateUserDialog() {
               {pending ? "Creating..." : "Create user"}
             </Button>
           </DashboardForm>
-        </DiawerBody>
-      </DiawerContent>
-    </Diawer>
+        </CredenzaBody>
+      </CredenzaContent>
+    </Credenza>
   );
 }
 
@@ -123,18 +123,18 @@ export function EditUserDialog({ user }: { user: UserRow }) {
     });
 
   return (
-    <Diawer open={open} onOpenChange={setOpen}>
-      <DiawerTrigger asChild>
+    <Credenza open={open} onOpenChange={setOpen}>
+      <CredenzaTrigger asChild>
         <Button variant="ghost" size="icon" aria-label={`Edit ${user.name}`}>
           <Icons.Actions.Edit />
         </Button>
-      </DiawerTrigger>
-      <DiawerContent>
-        <DiawerHeader>
-          <DiawerTitle>Edit user</DiawerTitle>
-          <DiawerDescription>Update name and email.</DiawerDescription>
-        </DiawerHeader>
-        <DiawerBody className="grid gap-4">
+      </CredenzaTrigger>
+      <CredenzaContent>
+        <CredenzaHeader>
+          <CredenzaTitle>Edit user</CredenzaTitle>
+          <CredenzaDescription>Update name and email.</CredenzaDescription>
+        </CredenzaHeader>
+        <CredenzaBody className="grid gap-4">
           <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="name" label="Name" />
             <FormField
@@ -147,8 +147,8 @@ export function EditUserDialog({ user }: { user: UserRow }) {
               {pending ? "Saving..." : "Save changes"}
             </Button>
           </DashboardForm>
-        </DiawerBody>
-      </DiawerContent>
-    </Diawer>
+        </CredenzaBody>
+      </CredenzaContent>
+    </Credenza>
   );
 }

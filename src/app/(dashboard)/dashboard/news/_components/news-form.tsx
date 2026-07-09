@@ -6,14 +6,14 @@ import { FormRichText } from "@components/forms/rich-text-editor";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
-  Diawer,
-  DiawerBody,
-  DiawerContent,
-  DiawerDescription,
-  DiawerHeader,
-  DiawerTitle,
-  DiawerTrigger,
-} from "@components/ui/diawer";
+  Credenza,
+  CredenzaBody,
+  CredenzaContent,
+  CredenzaDescription,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
 import { createNews } from "@server/actions/news";
 import { z } from "zod";
@@ -57,23 +57,23 @@ export function NewsFormDialog({
     });
 
   return (
-    <Diawer open={open} onOpenChange={setOpen}>
-      <DiawerTrigger asChild>
+    <Credenza open={open} onOpenChange={setOpen}>
+      <CredenzaTrigger asChild>
         <Button>
           <Icons.Actions.Add />
           New news post
         </Button>
-      </DiawerTrigger>
-      <DiawerContent>
-        <DiawerHeader>
-          <DiawerTitle>New news post</DiawerTitle>
-          <DiawerDescription>
+      </CredenzaTrigger>
+      <CredenzaContent>
+        <CredenzaHeader>
+          <CredenzaTitle>New news post</CredenzaTitle>
+          <CredenzaDescription>
             {allowGlobal
               ? "Post globally or to a specific squad."
               : "Post to a squad you lead."}
-          </DiawerDescription>
-        </DiawerHeader>
-        <DiawerBody className="grid gap-4">
+          </CredenzaDescription>
+        </CredenzaHeader>
+        <CredenzaBody className="grid gap-4">
           <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="title" label="Title" />
             <FormSelect
@@ -88,8 +88,8 @@ export function NewsFormDialog({
               {pending ? "Posting..." : "Post news"}
             </Button>
           </DashboardForm>
-        </DiawerBody>
-      </DiawerContent>
-    </Diawer>
+        </CredenzaBody>
+      </CredenzaContent>
+    </Credenza>
   );
 }

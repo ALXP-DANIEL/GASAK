@@ -12,14 +12,14 @@ import { Icons } from "@components/icons";
 import { DeleteButton } from "@components/shared/delete-button";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
-  Diawer,
-  DiawerBody,
-  DiawerContent,
-  DiawerDescription,
-  DiawerHeader,
-  DiawerTitle,
-  DiawerTrigger,
-} from "@components/ui/diawer";
+  Credenza,
+  CredenzaBody,
+  CredenzaContent,
+  CredenzaDescription,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@components/ui/credenza";
 import { Badge } from "@components/ui/shadcn/badge";
 import { Button } from "@components/ui/shadcn/button";
 import {
@@ -115,19 +115,19 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
   });
 
   return (
-    <Diawer open={open} onOpenChange={setOpen}>
-      <DiawerTrigger asChild>
+    <Credenza open={open} onOpenChange={setOpen}>
+      <CredenzaTrigger asChild>
         <Button variant="outline" className="w-full">
           <Icons.Actions.Edit />
           Edit squad
         </Button>
-      </DiawerTrigger>
-      <DiawerContent>
-        <DiawerHeader>
-          <DiawerTitle>Edit squad</DiawerTitle>
-          <DiawerDescription>Update squad details.</DiawerDescription>
-        </DiawerHeader>
-        <DiawerBody className="grid gap-4">
+      </CredenzaTrigger>
+      <CredenzaContent>
+        <CredenzaHeader>
+          <CredenzaTitle>Edit squad</CredenzaTitle>
+          <CredenzaDescription>Update squad details.</CredenzaDescription>
+        </CredenzaHeader>
+        <CredenzaBody className="grid gap-4">
           <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="name" label="Squad name" />
             <FormField
@@ -165,9 +165,9 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
               {pending ? "Saving..." : "Save changes"}
             </Button>
           </DashboardForm>
-        </DiawerBody>
-      </DiawerContent>
-    </Diawer>
+        </CredenzaBody>
+      </CredenzaContent>
+    </Credenza>
   );
 }
 
@@ -243,21 +243,21 @@ export function AddSquadMemberDialog({
   });
 
   return (
-    <Diawer open={open} onOpenChange={setOpen}>
-      <DiawerTrigger asChild>
+    <Credenza open={open} onOpenChange={setOpen}>
+      <CredenzaTrigger asChild>
         <Button>
           <Icons.Actions.Add />
           Add member
         </Button>
-      </DiawerTrigger>
-      <DiawerContent>
-        <DiawerHeader>
-          <DiawerTitle>Add squad member</DiawerTitle>
-          <DiawerDescription>
+      </CredenzaTrigger>
+      <CredenzaContent>
+        <CredenzaHeader>
+          <CredenzaTitle>Add squad member</CredenzaTitle>
+          <CredenzaDescription>
             Assign an existing user to this squad's roster.
-          </DiawerDescription>
-        </DiawerHeader>
-        <DiawerBody className="grid gap-4">
+          </CredenzaDescription>
+        </CredenzaHeader>
+        <CredenzaBody className="grid gap-4">
           <DashboardForm onSubmit={handleSubmit}>
             <FormSelect
               control={control}
@@ -282,9 +282,9 @@ export function AddSquadMemberDialog({
               {pending ? "Adding..." : "Add to squad"}
             </Button>
           </DashboardForm>
-        </DiawerBody>
-      </DiawerContent>
-    </Diawer>
+        </CredenzaBody>
+      </CredenzaContent>
+    </Credenza>
   );
 }
 

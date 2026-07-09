@@ -8,14 +8,14 @@ import { FormField, FormSelect } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
-  Diawer,
-  DiawerBody,
-  DiawerContent,
-  DiawerDescription,
-  DiawerHeader,
-  DiawerTitle,
-  DiawerTrigger,
-} from "@components/ui/diawer";
+  Credenza,
+  CredenzaBody,
+  CredenzaContent,
+  CredenzaDescription,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
 import {
   createTournament,
@@ -55,8 +55,8 @@ export function TournamentFormDialog({
     });
 
   return (
-    <Diawer open={open} onOpenChange={setOpen}>
-      <DiawerTrigger asChild>
+    <Credenza open={open} onOpenChange={setOpen}>
+      <CredenzaTrigger asChild>
         {isEdit ? (
           <Button variant="outline">Edit</Button>
         ) : (
@@ -65,17 +65,17 @@ export function TournamentFormDialog({
             New Tournament
           </Button>
         )}
-      </DiawerTrigger>
-      <DiawerContent className="max-h-[85dvh] overflow-y-auto">
-        <DiawerHeader>
-          <DiawerTitle>
+      </CredenzaTrigger>
+      <CredenzaContent className="max-h-[85dvh] overflow-y-auto">
+        <CredenzaHeader>
+          <CredenzaTitle>
             {isEdit ? "Edit tournament" : "New tournament"}
-          </DiawerTitle>
-          <DiawerDescription>
+          </CredenzaTitle>
+          <CredenzaDescription>
             Record a tournament for one of your squads.
-          </DiawerDescription>
-        </DiawerHeader>
-        <DiawerBody className="grid gap-4">
+          </CredenzaDescription>
+        </CredenzaHeader>
+        <CredenzaBody className="grid gap-4">
           <DashboardForm onSubmit={handleSubmit}>
             <FormField control={control} name="name" label="Tournament Name" />
             <DashboardFormGrid>
@@ -115,8 +115,8 @@ export function TournamentFormDialog({
                   : "Record Tournament"}
             </Button>
           </DashboardForm>
-        </DiawerBody>
-      </DiawerContent>
-    </Diawer>
+        </CredenzaBody>
+      </CredenzaContent>
+    </Credenza>
   );
 }

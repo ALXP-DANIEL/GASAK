@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  Diawer,
-  DiawerContent,
-  DiawerHeader,
-  DiawerTitle,
-  DiawerTrigger,
-} from "@components/ui/diawer";
+  Credenza,
+  CredenzaContent,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
 import { updateOrderStatus } from "@server/actions/shop";
 import type { Order, OrderStatus, Product } from "@server/db/schema";
@@ -51,16 +51,16 @@ export function OrderRowActions({
   return (
     <div className="flex flex-wrap justify-end gap-2">
       {order.paymentProofUrl && (
-        <Diawer>
-          <DiawerTrigger asChild>
+        <Credenza>
+          <CredenzaTrigger asChild>
             <Button variant="outline" size="sm">
               View proof
             </Button>
-          </DiawerTrigger>
-          <DiawerContent>
-            <DiawerHeader>
-              <DiawerTitle>Payment proof — {order.orderNo}</DiawerTitle>
-            </DiawerHeader>
+          </CredenzaTrigger>
+          <CredenzaContent>
+            <CredenzaHeader>
+              <CredenzaTitle>Payment proof — {order.orderNo}</CredenzaTitle>
+            </CredenzaHeader>
             <div className="relative h-96 w-full overflow-hidden border">
               <Image
                 src={order.paymentProofUrl}
@@ -70,8 +70,8 @@ export function OrderRowActions({
                 unoptimized
               />
             </div>
-          </DiawerContent>
-        </Diawer>
+          </CredenzaContent>
+        </Credenza>
       )}
 
       {actions.map((action) => (

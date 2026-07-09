@@ -5,14 +5,14 @@ import { FormField, FormSwitch } from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
-  Diawer,
-  DiawerBody,
-  DiawerContent,
-  DiawerDescription,
-  DiawerHeader,
-  DiawerTitle,
-  DiawerTrigger,
-} from "@components/ui/diawer";
+  Credenza,
+  CredenzaBody,
+  CredenzaContent,
+  CredenzaDescription,
+  CredenzaHeader,
+  CredenzaTitle,
+  CredenzaTrigger,
+} from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
 import { formatRM } from "@lib/format";
 import { setProductVariants, uploadVariantImage } from "@server/actions/shop";
@@ -191,22 +191,22 @@ export function ProductVariantsDialog({
   }, [optionsWatch]);
 
   return (
-    <Diawer open={open} onOpenChange={setOpen}>
-      <DiawerTrigger asChild>
+    <Credenza open={open} onOpenChange={setOpen}>
+      <CredenzaTrigger asChild>
         <Button variant="outline" className="w-full">
           <Icons.Domain.Products />
           Manage variants
         </Button>
-      </DiawerTrigger>
-      <DiawerContent className="max-w-3xl">
-        <DiawerHeader>
-          <DiawerTitle>Product variants</DiawerTitle>
-          <DiawerDescription>
+      </CredenzaTrigger>
+      <CredenzaContent className="max-w-3xl">
+        <CredenzaHeader>
+          <CredenzaTitle>Product variants</CredenzaTitle>
+          <CredenzaDescription>
             Add up to 2 option types (e.g. Color, Size). Each combination
             becomes an orderable variant with its own price and stock.
-          </DiawerDescription>
-        </DiawerHeader>
-        <DiawerBody className="grid gap-4">
+          </CredenzaDescription>
+        </CredenzaHeader>
+        <CredenzaBody className="grid gap-4">
           <DashboardForm onSubmit={handleSubmit}>
             {optionFields.map((field, index) => (
               <div
@@ -286,9 +286,9 @@ export function ProductVariantsDialog({
               {pending ? "Saving..." : "Save variants"}
             </Button>
           </DashboardForm>
-        </DiawerBody>
-      </DiawerContent>
-    </Diawer>
+        </CredenzaBody>
+      </CredenzaContent>
+    </Credenza>
   );
 }
 
