@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  Credenza,
-  CredenzaContent,
-  CredenzaDescription,
-  CredenzaHeader,
-  CredenzaTitle,
-  CredenzaTrigger,
-} from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
 import { ButtonGroup } from "@components/ui/shadcn/button-group";
 import {
@@ -20,6 +12,7 @@ import {
 } from "@components/ui/shadcn/select";
 import {
   type DatesSetInfo,
+  type EventHoveringInfo,
   type EventInput,
   useCalendarController,
 } from "@fullcalendar/react";
@@ -28,21 +21,19 @@ import interactionPlugin from "@fullcalendar/react/interaction";
 import listPlugin from "@fullcalendar/react/list";
 import multiMonthPlugin from "@fullcalendar/react/multimonth";
 import timeGridPlugin from "@fullcalendar/react/timegrid";
-import { EVENT_TYPE_COLORS } from "@lib/labels";
+import { EVENT_TYPE_LABELS } from "@lib/labels";
 import { cn } from "@lib/utils";
 import { CalendarBlankIcon } from "@phosphor-icons/react/dist/ssr/CalendarBlank";
 import { CaretLeftIcon } from "@phosphor-icons/react/dist/ssr/CaretLeft";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
 import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { XIcon } from "@phosphor-icons/react/dist/ssr/X";
-import { deleteEvent } from "@server/actions/events";
 import type { EventType } from "@server/db/schema";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
-import { toast } from "sonner";
+import { useMemo, useState } from "react";
 import { EventCalendarViews } from "./event-calendar-views";
-import { EventForm } from "./event-form";
+import { EventFormDialog } from "./event-form-dialog";
 
 type ScheduleEvent = {
   id: string;
@@ -53,6 +44,13 @@ type ScheduleEvent = {
   location: string | null;
   squadId: string | null;
   squadName: string | null;
+  squadAccentColor: string | null;
+};
+
+type HoverState = {
+  top: number;
+  left: number;
+  event: ScheduleEvent;
 };
 
 type SquadOption = {
@@ -76,6 +74,9 @@ const plugins = [
 
 const allCalendarKey = "all";
 const orgCalendarKey = "org";
+
+/** App-wide gold accent, used when a squad has no custom accent color. */
+const DEFAULT_ACCENT_COLOR = "var(--primary)";
 
 function eventCountInRange(events: ScheduleEvent[], start: Date, end: Date) {
   return events.filter((event) => {
@@ -106,8 +107,12 @@ export function ScheduleCalendar({
     useState<(typeof views)[number]["key"]>("dayGridMonth");
   const [title, setTitle] = useState(format(new Date(), "MMMM yyyy"));
   const [visibleEventCount, setVisibleEventCount] = useState(events.length);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [hover, setHover] = useState<HoverState | null>(null);
+
+  const eventsById = useMemo(
+    () => new Map(events.map((event) => [event.id, event])),
+    [events],
+  );
 
   const calendars = useMemo(
     () => [
@@ -133,7 +138,7 @@ export function ScheduleCalendar({
         title: event.title,
         start: event.startsAt,
         end: event.endsAt ?? undefined,
-        color: EVENT_TYPE_COLORS[event.type],
+        color: event.squadAccentColor || DEFAULT_ACCENT_COLOR,
         extendedProps: {
           eventType: event.type,
           location: event.location,
@@ -155,17 +160,15 @@ export function ScheduleCalendar({
     controller.changeView(nextView);
   }
 
-  function removeEvent(eventId: string) {
-    startTransition(async () => {
-      const result = await deleteEvent(eventId);
-      if (!result.ok) {
-        toast.error(result.error ?? "Could not delete event");
-        return;
-      }
+  function handleEventMouseEnter(info: EventHoveringInfo) {
+    const event = eventsById.get(info.event.id);
+    if (!event) return;
+    const rect = info.el.getBoundingClientRect();
+    setHover({ top: rect.bottom + 8, left: rect.left, event });
+  }
 
-      toast.success(result.message ?? "Event deleted");
-      router.refresh();
-    });
+  function handleEventMouseLeave() {
+    setHover(null);
   }
 
   return (
@@ -240,32 +243,21 @@ export function ScheduleCalendar({
           </Select>
 
           {canManage && (
-            <Credenza open={createOpen} onOpenChange={setCreateOpen}>
-              <CredenzaTrigger asChild>
+            <EventFormDialog
+              squads={squads}
+              allowOrgWide={allowOrgWide}
+              trigger={
                 <Button>
                   <PlusIcon />
                   Add event
                 </Button>
-              </CredenzaTrigger>
-              <CredenzaContent className="max-h-[85dvh] overflow-y-auto">
-                <CredenzaHeader>
-                  <CredenzaTitle>New event</CredenzaTitle>
-                  <CredenzaDescription>
-                    Schedule practice, scrims, meetings, or tournaments.
-                  </CredenzaDescription>
-                </CredenzaHeader>
-                <EventForm
-                  squads={squads}
-                  allowOrgWide={allowOrgWide}
-                  onSuccess={() => setCreateOpen(false)}
-                />
-              </CredenzaContent>
-            </Credenza>
+              }
+            />
           )}
         </div>
       </div>
 
-      <div className="calendar-shell bg-background">
+      <div className="calendar-shell relative bg-background">
         <EventCalendarViews
           controller={controller}
           plugins={[...plugins]}
@@ -285,21 +277,42 @@ export function ScheduleCalendar({
           }}
           datesSet={handleDatesSet}
           eventClick={(info) => {
-            if (!canManage) return;
-            const ok = window.confirm(`Delete "${info.event.title}"?`);
-            if (ok) removeEvent(info.event.id);
+            setHover(null);
+            router.push(`/dashboard/schedules/${info.event.id}`);
           }}
+          eventMouseEnter={handleEventMouseEnter}
+          eventMouseLeave={handleEventMouseLeave}
           eventClass={(info) =>
             cn(
-              canManage && "cursor-pointer",
+              "cursor-pointer",
               info.isSelected
                 ? ["outline-3", info.isDragging && "shadow-lg"]
                 : "focus-visible:outline-3",
               "outline-ring/50",
-              isPending && "pointer-events-none opacity-70",
             )
           }
         />
+
+        {hover && (
+          <div
+            className="fixed z-50 w-64 rounded-md border bg-popover p-3 text-popover-foreground shadow-lg"
+            style={{ top: hover.top, left: hover.left }}
+          >
+            <span className="truncate font-medium text-sm">
+              {hover.event.title}
+            </span>
+            <div className="mt-1.5 grid gap-0.5 text-xs text-muted-foreground">
+              <span>{EVENT_TYPE_LABELS[hover.event.type]}</span>
+              <span>
+                {format(new Date(hover.event.startsAt), "MMM d, h:mm a")}
+                {hover.event.endsAt &&
+                  ` – ${format(new Date(hover.event.endsAt), "h:mm a")}`}
+              </span>
+              {hover.event.location && <span>{hover.event.location}</span>}
+              <span>{hover.event.squadName ?? "Organization-wide"}</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

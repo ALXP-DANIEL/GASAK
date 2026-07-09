@@ -70,6 +70,67 @@ export async function createEvent(
   return { ok: true, message: "Event created" };
 }
 
+export async function updateEvent(
+  eventId: string,
+  input: z.infer<typeof eventSchema>,
+): Promise<ActionResult> {
+  const actor = await actionUser();
+  if (!actor) return { ok: false, error: "Unauthorized" };
+
+  const existing = await db.query.events.findFirst({
+    where: eq(events.id, eventId),
+  });
+  if (!existing) return { ok: false, error: "Event not found" };
+  if (!(await canManageSquad(actor.id, userOrgRole(actor), existing.squadId))) {
+    return { ok: false, error: "You cannot edit this event" };
+  }
+
+  const parsed = eventSchema.safeParse(input);
+  if (!parsed.success)
+    return { ok: false, error: parsed.error.issues[0].message };
+
+  if (
+    !(await canManageSquad(actor.id, userOrgRole(actor), parsed.data.squadId))
+  ) {
+    return { ok: false, error: "You can only assign your own squad" };
+  }
+
+  const startsAt = new Date(parsed.data.startsAt);
+  const endsAt = parsed.data.endsAt ? new Date(parsed.data.endsAt) : null;
+  if (Number.isNaN(startsAt.getTime())) {
+    return { ok: false, error: "Invalid start time" };
+  }
+  if (endsAt && endsAt <= startsAt) {
+    return { ok: false, error: "End time must be after the start time" };
+  }
+
+  await db
+    .update(events)
+    .set({
+      title: parsed.data.title,
+      description: parsed.data.description || null,
+      type: parsed.data.type,
+      startsAt,
+      endsAt,
+      location: parsed.data.location || null,
+      squadId: parsed.data.squadId,
+    })
+    .where(eq(events.id, eventId));
+
+  await logActivity({
+    actor,
+    action: "update",
+    entityType: "event",
+    entityId: eventId,
+    description: `Updated ${parsed.data.type} event "${parsed.data.title}"`,
+  });
+
+  revalidatePath("/dashboard/schedules");
+  revalidatePath(`/dashboard/schedules/${eventId}`);
+  revalidatePath("/dashboard");
+  return { ok: true, message: "Event updated" };
+}
+
 export async function deleteEvent(eventId: string): Promise<ActionResult> {
   const actor = await actionUser();
   if (!actor) return { ok: false, error: "Unauthorized" };

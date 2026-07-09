@@ -26,23 +26,24 @@ const dayRowCommonClasses: CalendarOptions = {
 
   listItemEventClass: (info) =>
     cn(
-      "mb-px p-px rounded-sm",
+      "group mb-px flex flex-row items-center rounded-sm border-transparent bg-(--fc-event-color) hover:bg-[color-mix(in_oklab,var(--fc-event-color)_92%,var(--fc-event-contrast-color))]",
       info.isNarrow ? "mx-0.5" : "mx-1",
-      info.isSelected ? "bg-foreground/5" : "hover:bg-foreground/5",
+      info.isSelected &&
+        "bg-[color-mix(in_oklab,var(--fc-event-color)_85%,var(--fc-event-contrast-color))]",
     ),
   listItemEventInnerClass: (info) =>
     cn(
-      "flex flex-row items-center justify-between",
+      "flex min-w-0 flex-1 flex-row items-center justify-between text-(--fc-event-contrast-color)",
       info.isNarrow ? `py-px ${xxsTextClass}` : "py-0.5 text-xs",
     ),
   listItemEventTimeClass: (info) =>
     cn(
-      info.isNarrow ? "px-px" : "px-0.5",
+      info.isNarrow ? "px-1" : "px-1.5",
       "order-1 whitespace-nowrap overflow-hidden shrink-1",
     ),
   listItemEventTitleClass: (info) =>
     cn(
-      info.isNarrow ? "px-px" : "px-0.5",
+      info.isNarrow ? "px-1" : "px-1.5",
       "font-medium whitespace-nowrap overflow-hidden shrink-100",
       info.timeText && "text-ellipsis",
     ),

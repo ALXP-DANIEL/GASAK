@@ -48,13 +48,6 @@ export const EVENT_TYPE_LABELS: Record<EventType, string> = {
   scrim: "Scrim",
 };
 
-export const EVENT_TYPE_COLORS: Record<EventType, string> = {
-  practice: "var(--chart-1)",
-  tournament: "var(--chart-2)",
-  meeting: "var(--chart-3)",
-  scrim: "var(--chart-4)",
-};
-
 export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, string> = {
   diamonds: "Diamonds",
   weekly_pass: "Weekly Pass",

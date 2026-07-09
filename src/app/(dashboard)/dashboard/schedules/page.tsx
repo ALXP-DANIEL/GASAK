@@ -44,6 +44,7 @@ export default async function SchedulesPage() {
           location: event.location,
           squadId: event.squadId,
           squadName: event.squad?.name ?? null,
+          squadAccentColor: event.squad?.accentColor ?? null,
         }))}
         squads={squads}
         canManage={canManage}
