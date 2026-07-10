@@ -7,4 +7,5 @@ export const matchSchema = z.object({
   result: z.string().optional(),
   notes: z.string().optional(),
   replayLink: z.union([z.url("Enter a valid URL"), z.literal("")]).optional(),
+  eventId: z.uuid().nullable().optional(),
 });

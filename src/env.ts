@@ -14,6 +14,7 @@ export const env = createEnv({
     BILLPLZ_COLLECTION_ID: z.string().optional(),
     BILLPLZ_X_SIGNATURE_KEY: z.string().optional(),
     BILLPLZ_SANDBOX: z.enum(["true", "false"]).default("true"),
+    CHALLONGE_API_KEY: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_SITE_URL: z.url(),
@@ -28,6 +29,7 @@ export const env = createEnv({
     BILLPLZ_COLLECTION_ID: process.env.BILLPLZ_COLLECTION_ID,
     BILLPLZ_X_SIGNATURE_KEY: process.env.BILLPLZ_X_SIGNATURE_KEY,
     BILLPLZ_SANDBOX: process.env.BILLPLZ_SANDBOX,
+    CHALLONGE_API_KEY: process.env.CHALLONGE_API_KEY,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   },
   emptyStringAsUndefined: true,

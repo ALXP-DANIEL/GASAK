@@ -4,7 +4,11 @@ import {
   DashboardForm,
   DashboardFormGrid,
 } from "@components/forms/dashboard-form";
-import { FormField, FormSelect } from "@components/forms/form-field";
+import {
+  FormField,
+  FormSelect,
+  formFieldStyles,
+} from "@components/forms/form-field";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -17,6 +21,14 @@ import {
   CredenzaTrigger,
 } from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
+import { Field, FieldLabel } from "@components/ui/shadcn/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@components/ui/shadcn/select";
 import {
   createTournament,
   updateTournament,
@@ -24,7 +36,31 @@ import {
 import { tournamentSchema } from "@features/tournaments/schema";
 import type { TournamentInput } from "@features/tournaments/types";
 import { toDateTimeLocal } from "@lib/format";
-import type { Tournament } from "@server/db/schema";
+import {
+  TOURNAMENT_FORMAT_LABELS,
+  TOURNAMENT_STATUS_LABELS,
+} from "@lib/labels";
+import {
+  type Tournament,
+  tournamentFormatEnum,
+  tournamentStatusEnum,
+} from "@server/db/schema";
+import { useState } from "react";
+
+const trackingOptions = [
+  { value: "manual", label: "Manual — I'll log rounds myself" },
+  { value: "challonge", label: "Tracked by Challonge" },
+];
+
+const formatOptions = tournamentFormatEnum.enumValues.map((value) => ({
+  value,
+  label: TOURNAMENT_FORMAT_LABELS[value],
+}));
+
+const statusOptions = tournamentStatusEnum.enumValues.map((value) => ({
+  value,
+  label: TOURNAMENT_STATUS_LABELS[value],
+}));
 
 export function TournamentFormDialog({
   squads,
@@ -34,6 +70,7 @@ export function TournamentFormDialog({
   tournament?: Tournament;
 }) {
   const isEdit = Boolean(tournament);
+  const [tracking, setTracking] = useState<"manual" | "challonge">("manual");
 
   const { open, setOpen, control, pending, handleSubmit } =
     useEntityDialog<TournamentInput>({
@@ -43,15 +80,17 @@ export function TournamentFormDialog({
         organizer: tournament?.organizer ?? "",
         date: tournament ? toDateTimeLocal(tournament.date) : "",
         prize: tournament?.prize ?? "",
-        opponent: tournament?.opponent ?? "",
-        result: tournament?.result ?? "",
+        placement: tournament?.placement ?? "",
         mvp: tournament?.mvp ?? "",
+        format: tournament?.format ?? "single_elimination",
+        status: tournament?.status ?? "upcoming",
+        challongeUrl: tournament?.challongeUrl ?? "",
         squadId: tournament?.squadId ?? squads[0]?.value ?? "",
       },
       action: (values) =>
         tournament
           ? updateTournament(tournament.id, values)
-          : createTournament(values),
+          : createTournament({ ...values, tracking }),
     });
 
   return (
@@ -72,7 +111,7 @@ export function TournamentFormDialog({
             {isEdit ? "Edit tournament" : "New tournament"}
           </CredenzaTitle>
           <CredenzaDescription>
-            Record a tournament for one of your squads.
+            Track a tournament run for one of your squads.
           </CredenzaDescription>
         </CredenzaHeader>
         <CredenzaBody className="grid gap-4">
@@ -94,25 +133,76 @@ export function TournamentFormDialog({
               />
             </DashboardFormGrid>
             <DashboardFormGrid>
+              <FormSelect
+                control={control}
+                name="format"
+                label="Format"
+                options={formatOptions}
+              />
+              <FormSelect
+                control={control}
+                name="status"
+                label="Status"
+                options={statusOptions}
+              />
+            </DashboardFormGrid>
+            <DashboardFormGrid>
               <FormField control={control} name="organizer" label="Organizer" />
               <FormField control={control} name="prize" label="Prize" />
             </DashboardFormGrid>
             <DashboardFormGrid>
-              <FormField control={control} name="opponent" label="Opponent" />
               <FormField
                 control={control}
-                name="result"
-                label="Result"
-                placeholder="e.g. Champion, 2-1 Win"
+                name="placement"
+                label="Placement"
+                placeholder="e.g. Champion, Top 4"
               />
+              <FormField control={control} name="mvp" label="MVP" />
             </DashboardFormGrid>
-            <FormField control={control} name="mvp" label="MVP" />
+            {!isEdit && (
+              <>
+                <Field className={formFieldStyles.fieldShell}>
+                  <FieldLabel className={formFieldStyles.label}>
+                    Tracking
+                  </FieldLabel>
+                  <Select
+                    value={tracking}
+                    onValueChange={(value) =>
+                      setTracking(value as typeof tracking)
+                    }
+                  >
+                    <SelectTrigger
+                      className={`${formFieldStyles.control} w-full`}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {trackingOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                {tracking === "challonge" && (
+                  <FormField
+                    control={control}
+                    name="challongeUrl"
+                    label="Challonge URL"
+                    type="url"
+                    placeholder="https://challonge.com/..."
+                    description="You'll pick which participant is your squad and sync rounds after creating the tournament."
+                  />
+                )}
+              </>
+            )}
             <Button type="submit" disabled={pending}>
               {pending
                 ? "Saving..."
                 : isEdit
                   ? "Update Tournament"
-                  : "Record Tournament"}
+                  : "Create Tournament"}
             </Button>
           </DashboardForm>
         </CredenzaBody>

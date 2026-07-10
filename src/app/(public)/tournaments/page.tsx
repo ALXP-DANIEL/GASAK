@@ -2,6 +2,7 @@ import { Icons } from "@components/icons";
 import { BrandBadge, BrandCard, PageHero } from "@components/ui/brand";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatDate } from "@lib/format";
+import { TOURNAMENT_FORMAT_LABELS } from "@lib/labels";
 import { createPageMetadata } from "@lib/metadata";
 import { db, squads, tournaments } from "@server/db";
 import { desc, eq } from "drizzle-orm";
@@ -24,7 +25,9 @@ export default async function TournamentsPage() {
     .orderBy(desc(tournaments.date));
 
   const [featured, ...history] = rows;
-  const resultCount = rows.filter(({ tournament }) => tournament.result).length;
+  const resultCount = rows.filter(
+    ({ tournament }) => tournament.placement,
+  ).length;
   const squadCount = new Set(rows.map(({ squad }) => squad?.id).filter(Boolean))
     .size;
 
@@ -161,7 +164,7 @@ function FeaturedTournament({
             <p className="mt-3 text-sm text-muted-foreground desktop:text-base">
               {formatDate(tournament.date)}
               {squad ? ` · ${squad.name}` : ""}
-              {tournament.opponent ? ` · vs ${tournament.opponent}` : ""}
+              {` · ${TOURNAMENT_FORMAT_LABELS[tournament.format]}`}
             </p>
           </div>
         </div>
@@ -175,14 +178,17 @@ function FeaturedTournament({
           <Detail label="Squad" value={squad?.name ?? "Unassigned"} />
           <Detail label="Organizer" value={tournament.organizer ?? "—"} />
           <Detail label="Prize" value={tournament.prize ?? "—"} />
-          <Detail label="Opponent" value={tournament.opponent ?? "—"} />
+          <Detail
+            label="Format"
+            value={TOURNAMENT_FORMAT_LABELS[tournament.format]}
+          />
           <Detail label="MVP" value={tournament.mvp ?? "—"} />
           <div className="flex items-center justify-between gap-3 border-t pt-4">
             <span className="text-xs uppercase tracking-wider text-muted-foreground">
-              Result
+              Placement
             </span>
-            {tournament.result ? (
-              <Badge>{tournament.result}</Badge>
+            {tournament.placement ? (
+              <Badge>{tournament.placement}</Badge>
             ) : (
               <span className="text-sm text-muted-foreground">Pending</span>
             )}
@@ -217,15 +223,14 @@ function TournamentRow({
         </h3>
         <p className="mt-1 text-sm text-muted-foreground">
           {squad?.name ?? "Unassigned squad"}
-          {tournament.opponent ? ` · vs ${tournament.opponent}` : ""}
           {tournament.organizer ? ` · ${tournament.organizer}` : ""}
         </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 desktop:justify-end">
         {tournament.mvp && <BrandBadge>MVP {tournament.mvp}</BrandBadge>}
-        {tournament.result ? (
-          <Badge>{tournament.result}</Badge>
+        {tournament.placement ? (
+          <Badge>{tournament.placement}</Badge>
         ) : (
           <Badge variant="outline">Pending</Badge>
         )}

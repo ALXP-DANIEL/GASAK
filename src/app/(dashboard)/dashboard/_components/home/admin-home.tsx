@@ -8,12 +8,25 @@ import {
   events,
   orders,
   playerProfiles,
+  scrims,
   squadMembers,
   squads,
+  tournamentRounds,
   user as users,
 } from "@server/db";
 import { startOfMonth } from "date-fns";
-import { count, eq, gte, inArray, or, sum } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  inArray,
+  lt,
+  notExists,
+  or,
+  sum,
+} from "drizzle-orm";
 import {
   EmptyState,
   HomeListItem,
@@ -36,6 +49,7 @@ export async function AdminHome() {
     teamOverview,
     upcoming,
     recentTournaments,
+    needsResult,
   ] = await Promise.all([
     db
       .select({ value: count() })
@@ -80,6 +94,26 @@ export async function AdminHome() {
       limit: 4,
       with: { squad: true },
     }),
+    db
+      .select()
+      .from(events)
+      .where(
+        and(
+          lt(events.startsAt, now),
+          inArray(events.type, ["scrim", "tournament"]),
+          notExists(
+            db.select().from(scrims).where(eq(scrims.eventId, events.id)),
+          ),
+          notExists(
+            db
+              .select()
+              .from(tournamentRounds)
+              .where(eq(tournamentRounds.eventId, events.id)),
+          ),
+        ),
+      )
+      .orderBy(desc(events.startsAt))
+      .limit(4),
   ]);
 
   return (
@@ -174,9 +208,30 @@ export async function AdminHome() {
               title={tournament.name}
               meta={`${tournament.squad?.name ?? "Unassigned"} · ${formatDate(tournament.date)}`}
               trailing={
-                tournament.result ? (
-                  <Badge variant="secondary">{tournament.result}</Badge>
+                tournament.placement ? (
+                  <Badge variant="secondary">{tournament.placement}</Badge>
                 ) : undefined
+              }
+            />
+          ))}
+        </HomePanel>
+
+        <HomePanel
+          title="Needs a Result"
+          description="Past matches with nothing logged yet"
+          action={{ href: "/dashboard/schedules", label: "View all" }}
+        >
+          {needsResult.length === 0 && (
+            <EmptyState message="All caught up — every match has a result." />
+          )}
+          {needsResult.map((event) => (
+            <HomeListItem
+              key={event.id}
+              href={`/dashboard/schedules/${event.id}`}
+              title={event.title}
+              meta={formatDateTime(event.startsAt)}
+              trailing={
+                <Badge variant="outline">{EVENT_TYPE_LABELS[event.type]}</Badge>
               }
             />
           ))}

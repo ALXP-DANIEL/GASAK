@@ -258,8 +258,8 @@ export default async function SquadDetailPage({
               id: item.id,
               title: item.name,
               date: item.date,
-              meta: item.opponent ? `vs ${item.opponent}` : item.organizer,
-              badge: item.result,
+              meta: item.organizer,
+              badge: item.placement,
             }))}
           />
           <ActivityPanel

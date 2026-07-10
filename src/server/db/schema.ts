@@ -168,6 +168,35 @@ export const paymentMethodEnum = pgEnum("payment_method", [
   "billplz",
 ]);
 
+export const tournamentFormatEnum = pgEnum("tournament_format", [
+  "single_elimination",
+  "double_elimination",
+  "round_robin",
+  "swiss",
+  "other",
+]);
+
+export const tournamentStatusEnum = pgEnum("tournament_status", [
+  "upcoming",
+  "ongoing",
+  "completed",
+  "cancelled",
+]);
+
+export const matchOutcomeEnum = pgEnum("match_outcome", [
+  "win",
+  "loss",
+  "draw",
+  "pending",
+]);
+
+// Set once at creation and immutable afterward — determines whether the
+// tournament exposes the Challonge connect/sync panel at all.
+export const tournamentTrackingEnum = pgEnum("tournament_tracking", [
+  "manual",
+  "challonge",
+]);
+
 // ---------------------------------------------------------------------------
 // Domain tables
 // ---------------------------------------------------------------------------
@@ -296,10 +325,20 @@ export const tournaments = createTable(
     organizer: text("organizer"),
     date: timestamp("date", { withTimezone: true }).notNull(),
     prize: text("prize"),
-    opponent: text("opponent"),
-    result: text("result"),
+    // Final standing, freeform: "Champion", "Top 4", "Eliminated R2"
+    placement: text("placement"),
     mvp: text("mvp"),
     screenshotUrl: text("screenshot_url"),
+    format: tournamentFormatEnum("format")
+      .notNull()
+      .default("single_elimination"),
+    status: tournamentStatusEnum("status").notNull().default("upcoming"),
+    tracking: tournamentTrackingEnum("tracking").notNull().default("manual"),
+    challongeTournamentId: text("challonge_tournament_id"),
+    // Which Challonge participant is our squad (needed to filter matches)
+    challongeParticipantId: text("challonge_participant_id"),
+    challongeUrl: text("challonge_url"),
+    lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
     squadId: uuid("squad_id").references(() => squads.id, {
       onDelete: "cascade",
     }),
@@ -308,6 +347,39 @@ export const tournaments = createTable(
       .defaultNow(),
   },
   (t) => [index("gasak_tournaments_squad_idx").on(t.squadId)],
+);
+
+export const tournamentRounds = createTable(
+  "tournament_rounds",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    tournamentId: uuid("tournament_id")
+      .notNull()
+      .references(() => tournaments.id, { onDelete: "cascade" }),
+    // Freeform: "Round 1", "Winners Semifinal", "Grand Final"
+    roundLabel: text("round_label").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    opponent: text("opponent").notNull(),
+    scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
+    eventId: uuid("event_id").references(() => events.id, {
+      onDelete: "set null",
+    }),
+    outcome: matchOutcomeEnum("outcome").notNull().default("pending"),
+    score: text("score"),
+    notes: text("notes"),
+    replayLink: text("replay_link"),
+    // Set when synced from Challonge; used to upsert on re-sync
+    challongeMatchId: text("challonge_match_id"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("gasak_tournament_rounds_tournament_idx").on(t.tournamentId),
+    index("gasak_tournament_rounds_event_idx").on(t.eventId),
+  ],
 );
 
 export const scrims = createTable(
@@ -324,11 +396,17 @@ export const scrims = createTable(
     result: text("result"),
     notes: text("notes"),
     replayLink: text("replay_link"),
+    eventId: uuid("event_id").references(() => events.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
-  (t) => [index("gasak_scrims_squad_idx").on(t.squadId)],
+  (t) => [
+    index("gasak_scrims_squad_idx").on(t.squadId),
+    index("gasak_scrims_event_idx").on(t.eventId),
+  ],
 );
 
 export const news = createTable(
@@ -653,15 +731,31 @@ export const eventRelations = relations(events, ({ one }) => ({
   creator: one(user, { fields: [events.createdBy], references: [user.id] }),
 }));
 
-export const tournamentRelations = relations(tournaments, ({ one }) => ({
+export const tournamentRelations = relations(tournaments, ({ one, many }) => ({
   squad: one(squads, {
     fields: [tournaments.squadId],
     references: [squads.id],
   }),
+  rounds: many(tournamentRounds),
 }));
+
+export const tournamentRoundRelations = relations(
+  tournamentRounds,
+  ({ one }) => ({
+    tournament: one(tournaments, {
+      fields: [tournamentRounds.tournamentId],
+      references: [tournaments.id],
+    }),
+    event: one(events, {
+      fields: [tournamentRounds.eventId],
+      references: [events.id],
+    }),
+  }),
+);
 
 export const scrimRelations = relations(scrims, ({ one }) => ({
   squad: one(squads, { fields: [scrims.squadId], references: [squads.id] }),
+  event: one(events, { fields: [scrims.eventId], references: [events.id] }),
 }));
 
 export const newsRelations = relations(news, ({ one, many }) => ({
@@ -771,6 +865,7 @@ export type SquadMember = typeof squadMembers.$inferSelect;
 export type Application = typeof applications.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type Tournament = typeof tournaments.$inferSelect;
+export type TournamentRound = typeof tournamentRounds.$inferSelect;
 export type Scrim = typeof scrims.$inferSelect;
 export type News = typeof news.$inferSelect;
 export type NewsRead = typeof newsReads.$inferSelect;
@@ -788,6 +883,11 @@ export type SquadRole = (typeof squadRoleEnum.enumValues)[number];
 export type ApplicationStatus =
   (typeof applicationStatusEnum.enumValues)[number];
 export type EventType = (typeof eventTypeEnum.enumValues)[number];
+export type TournamentFormat = (typeof tournamentFormatEnum.enumValues)[number];
+export type TournamentStatus = (typeof tournamentStatusEnum.enumValues)[number];
+export type MatchOutcome = (typeof matchOutcomeEnum.enumValues)[number];
+export type TournamentTracking =
+  (typeof tournamentTrackingEnum.enumValues)[number];
 export type ProductCategory = (typeof productCategoryEnum.enumValues)[number];
 export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 export type PaymentMethod = (typeof paymentMethodEnum.enumValues)[number];

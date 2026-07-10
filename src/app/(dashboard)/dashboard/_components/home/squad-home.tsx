@@ -175,8 +175,8 @@ export async function SquadHome({
               title={tournament.name}
               meta={`${tournament.squad?.name ?? "Unassigned"} · ${formatDate(tournament.date)}`}
               trailing={
-                tournament.result ? (
-                  <Badge variant="secondary">{tournament.result}</Badge>
+                tournament.placement ? (
+                  <Badge variant="secondary">{tournament.placement}</Badge>
                 ) : undefined
               }
             />

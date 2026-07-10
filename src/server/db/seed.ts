@@ -14,6 +14,7 @@ import {
   scrims,
   squadMembers,
   squads,
+  tournamentRounds,
   tournaments,
   user,
 } from "./index";
@@ -362,6 +363,45 @@ async function main() {
     return date;
   };
 
+  // pastUnloggedScrimEvent is intentionally left unlinked to any scrim/round
+  // — it demonstrates the "Log result" flow and the dashboard's
+  // "Needs a Result" panel for a past match with nothing recorded yet.
+  const [pastFinalEvent, pastScrimEvent] = await db
+    .insert(events)
+    .values([
+      {
+        title: "Grand Final vs Team Nova",
+        description: "Community Cup grand final — best of 5.",
+        type: "tournament",
+        startsAt: inDays(-20, 19),
+        endsAt: inDays(-20, 21),
+        location: "Online lobby",
+        squadId: alpha.id,
+        createdBy: admin.id,
+      },
+      {
+        title: "Scrim vs Ravage GG",
+        description: "Scheduled scrim block.",
+        type: "scrim",
+        startsAt: inDays(-3, 21),
+        endsAt: inDays(-3, 23),
+        location: "In-game custom lobby",
+        squadId: alpha.id,
+        createdBy: admin.id,
+      },
+      {
+        title: "Scrim vs Nova Axis",
+        description: "Scheduled scrim block — result not logged yet.",
+        type: "scrim",
+        startsAt: inDays(-1, 21),
+        endsAt: inDays(-1, 23),
+        location: "In-game custom lobby",
+        squadId: alpha.id,
+        createdBy: admin.id,
+      },
+    ])
+    .returning();
+
   await db.insert(events).values([
     {
       title: "Weekly Practice",
@@ -424,49 +464,181 @@ async function main() {
     })),
   ]);
 
-  await db.insert(tournaments).values([
+  const [communityCup, pialaKL, roundRobinLeague] = await db
+    .insert(tournaments)
+    .values([
+      {
+        name: "MLBB Community Cup 2026",
+        organizer: "Moonton MY",
+        date: inDays(-20, 12),
+        prize: "RM 5,000",
+        placement: "Champion",
+        mvp: "GSK·Aiman",
+        format: "single_elimination" as const,
+        status: "completed" as const,
+        squadId: alpha.id,
+      },
+      {
+        name: "Piala Komuniti KL",
+        organizer: "KL Esports Hub",
+        date: inDays(-45, 14),
+        prize: "RM 2,000",
+        placement: "Semifinal",
+        mvp: "GSK·Danish",
+        format: "double_elimination" as const,
+        status: "completed" as const,
+        squadId: alpha.id,
+      },
+      {
+        name: "Klang Valley Round Robin",
+        organizer: "Community Hub",
+        date: inDays(-6, 18),
+        prize: "RM 1,500",
+        placement: null,
+        mvp: null,
+        format: "round_robin" as const,
+        status: "ongoing" as const,
+        squadId: academy.id,
+      },
+      {
+        name: "Challonge Demo Bracket",
+        organizer: "GASAK Internal",
+        date: inDays(-2, 20),
+        prize: null,
+        placement: null,
+        mvp: null,
+        format: "swiss" as const,
+        status: "ongoing" as const,
+        tracking: "challonge" as const,
+        // Demo values — Challonge sync will error without a real
+        // CHALLONGE_API_KEY/tournament, which is expected here.
+        challongeTournamentId: "demo-tournament",
+        challongeParticipantId: "demo-participant",
+        challongeUrl: "https://challonge.com/demo-tournament",
+        squadId: bravo.id,
+      },
+      {
+        name: "Merdeka Cup Qualifiers",
+        organizer: "Moonton MY",
+        date: inDays(15, 14),
+        prize: "RM 3,000",
+        placement: null,
+        mvp: null,
+        format: "single_elimination" as const,
+        status: "upcoming" as const,
+        squadId: charlie.id,
+      },
+      {
+        name: "Weekend Warriors Cup",
+        organizer: "Community Hub",
+        date: inDays(-30, 14),
+        prize: "RM 800",
+        placement: "Cancelled — organizer withdrew",
+        mvp: null,
+        format: "other" as const,
+        status: "cancelled" as const,
+        squadId: delta.id,
+      },
+      ...[
+        "Selangor Open Qualifier",
+        "Cyber Arena Invitational",
+        "Merdeka Mobile Cup",
+        "Weekend Warriors League",
+        "MY Esports Clash",
+        "Klang Valley Showdown",
+        "GASAK Internal Masters",
+        "Academy Rising Cup",
+        "Northern Circuit",
+        "Community Proving Grounds",
+      ].map((name, index) => ({
+        name,
+        organizer: index % 2 === 0 ? "Community Hub" : "Moonton MY",
+        date: inDays(-10 - index * 8, 14),
+        prize: `RM ${(index + 1) * 750}`,
+        placement:
+          index % 3 === 0 ? "Champion" : index % 3 === 1 ? "Top 8" : "Top 4",
+        mvp: ["GSK·Aiman", "GSK·Danish", "GSK·Nabil"][index % 3],
+        format: (
+          [
+            "single_elimination",
+            "double_elimination",
+            "round_robin",
+            "swiss",
+            "other",
+          ] as const
+        )[index % 5],
+        status: "completed" as const,
+        squadId: [alpha.id, academy.id, bravo.id, charlie.id][index % 4],
+      })),
+    ])
+    .returning();
+
+  await db.insert(tournamentRounds).values([
     {
-      name: "MLBB Community Cup 2026",
-      organizer: "Moonton MY",
-      date: inDays(-20, 12),
-      prize: "RM 5,000",
-      opponent: "Team Nova",
-      result: "Won 3-1 (Champion)",
-      mvp: "GSK·Aiman",
-      squadId: alpha.id,
+      tournamentId: communityCup.id,
+      roundLabel: "Round 1",
+      sortOrder: 0,
+      opponent: "Ravage GG",
+      scheduledAt: inDays(-20, 12),
+      outcome: "win" as const,
+      score: "2-0",
     },
     {
-      name: "Piala Komuniti KL",
-      organizer: "KL Esports Hub",
-      date: inDays(-45, 14),
-      prize: "RM 2,000",
+      tournamentId: communityCup.id,
+      roundLabel: "Semifinal",
+      sortOrder: 1,
       opponent: "Fenix MY",
-      result: "Lost 1-2 (Semifinal)",
-      mvp: "GSK·Danish",
-      squadId: alpha.id,
+      scheduledAt: inDays(-20, 15),
+      outcome: "win" as const,
+      score: "2-1",
     },
-    ...[
-      "Selangor Open Qualifier",
-      "Cyber Arena Invitational",
-      "Merdeka Mobile Cup",
-      "Weekend Warriors League",
-      "MY Esports Clash",
-      "Klang Valley Showdown",
-      "GASAK Internal Masters",
-      "Academy Rising Cup",
-      "Northern Circuit",
-      "Community Proving Grounds",
-    ].map((name, index) => ({
-      name,
-      organizer: index % 2 === 0 ? "Community Hub" : "Moonton MY",
-      date: inDays(-10 - index * 8, 14),
-      prize: `RM ${(index + 1) * 750}`,
-      opponent: ["Orion", "Ravage GG", "Titan Esports", "Fenix MY"][index % 4],
-      result:
-        index % 3 === 0 ? "Won 2-0" : index % 3 === 1 ? "Lost 1-2" : "Top 4",
-      mvp: ["GSK·Aiman", "GSK·Danish", "GSK·Nabil"][index % 3],
-      squadId: [alpha.id, academy.id, bravo.id, charlie.id][index % 4],
-    })),
+    {
+      tournamentId: communityCup.id,
+      roundLabel: "Grand Final",
+      sortOrder: 2,
+      opponent: "Team Nova",
+      scheduledAt: inDays(-20, 19),
+      outcome: "win" as const,
+      score: "3-1",
+      notes: "Reverse sweep threat in game 3; clutch Lord call sealed it.",
+      eventId: pastFinalEvent.id,
+    },
+    {
+      tournamentId: pialaKL.id,
+      roundLabel: "Round 1",
+      sortOrder: 0,
+      opponent: "Orion",
+      scheduledAt: inDays(-45, 14),
+      outcome: "win" as const,
+      score: "2-0",
+    },
+    {
+      tournamentId: pialaKL.id,
+      roundLabel: "Semifinal",
+      sortOrder: 1,
+      opponent: "Fenix MY",
+      scheduledAt: inDays(-45, 18),
+      outcome: "loss" as const,
+      score: "1-2",
+    },
+    {
+      tournamentId: roundRobinLeague.id,
+      roundLabel: "Matchday 1",
+      sortOrder: 0,
+      opponent: "Cyber Arena Academy",
+      scheduledAt: inDays(-6, 18),
+      outcome: "draw" as const,
+      score: "1-1",
+      notes: "Even series — rematch scheduled next cycle.",
+    },
+    {
+      tournamentId: roundRobinLeague.id,
+      roundLabel: "Matchday 2",
+      sortOrder: 1,
+      opponent: "Northern Circuit",
+      scheduledAt: inDays(2, 18),
+      outcome: "pending" as const,
+    },
   ]);
 
   await db.insert(scrims).values([
@@ -484,6 +656,7 @@ async function main() {
       date: inDays(-3, 21),
       result: "Lost 1-3",
       notes: "Draft gap on tank meta — practice Grock/Khufra pool.",
+      eventId: pastScrimEvent.id,
     },
     ...Array.from({ length: 10 }, (_, index) => ({
       squadId: [alpha.id, academy.id, bravo.id, charlie.id, delta.id][

@@ -2,11 +2,14 @@ import type {
   ApplicationStatus,
   EventType,
   Lane,
+  MatchOutcome,
   OrderStatus,
   OrgRole,
   PaymentMethod,
   ProductCategory,
   SquadRole,
+  TournamentFormat,
+  TournamentStatus,
 } from "@server/db/schema";
 
 export const ORG_ROLE_LABELS: Record<OrgRole, string> = {
@@ -46,6 +49,28 @@ export const EVENT_TYPE_LABELS: Record<EventType, string> = {
   tournament: "Tournament",
   meeting: "Meeting",
   scrim: "Scrim",
+};
+
+export const TOURNAMENT_FORMAT_LABELS: Record<TournamentFormat, string> = {
+  single_elimination: "Single Elimination",
+  double_elimination: "Double Elimination",
+  round_robin: "Round Robin",
+  swiss: "Swiss",
+  other: "Other",
+};
+
+export const TOURNAMENT_STATUS_LABELS: Record<TournamentStatus, string> = {
+  upcoming: "Upcoming",
+  ongoing: "Ongoing",
+  completed: "Completed",
+  cancelled: "Cancelled",
+};
+
+export const MATCH_OUTCOME_LABELS: Record<MatchOutcome, string> = {
+  win: "Win",
+  loss: "Loss",
+  draw: "Draw",
+  pending: "Pending",
 };
 
 export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, string> = {

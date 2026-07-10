@@ -16,6 +16,8 @@ const scrimSchema = z.object({
   result: z.string().optional(),
   notes: z.string().optional(),
   replayLink: z.union([z.url("Enter a valid URL"), z.literal("")]).optional(),
+  // Optional link back to the schedule event this scrim was played at
+  eventId: z.uuid().nullable().optional(),
 });
 
 export async function createScrim(
@@ -46,6 +48,7 @@ export async function createScrim(
       result: parsed.data.result || null,
       notes: parsed.data.notes || null,
       replayLink: parsed.data.replayLink || null,
+      eventId: parsed.data.eventId ?? null,
     })
     .returning();
   await logActivity({
@@ -57,6 +60,9 @@ export async function createScrim(
   });
 
   revalidatePath("/dashboard/matches");
+  if (row.eventId) {
+    revalidatePath(`/dashboard/schedules/${row.eventId}`);
+  }
   return { ok: true, message: "Scrim recorded" };
 }
 

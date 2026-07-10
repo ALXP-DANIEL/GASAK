@@ -11,14 +11,19 @@ import {
 } from "@components/ui/shadcn/card";
 import { getEvent } from "@features/events/queries";
 import { listManagedSquadOptions } from "@features/squads/queries";
+import { listTournaments } from "@features/tournaments/queries";
 import { formatDateTime } from "@lib/format";
-import { EVENT_TYPE_LABELS } from "@lib/labels";
+import { EVENT_TYPE_LABELS, MATCH_OUTCOME_LABELS } from "@lib/labels";
 import { deleteEvent } from "@server/actions/events";
-import { canManageSquad } from "@server/authz";
+import { canManageSquad, getManagedSquadIds } from "@server/authz";
+import { db, scrims, tournamentRounds } from "@server/db";
+import { eq } from "drizzle-orm";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { requireDashboardRole } from "../../_components/dashboard-section";
 import { EventFormDialog } from "../_components/event-form-dialog";
+import { LogResultDialog } from "../_components/log-result-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -33,10 +38,33 @@ export default async function EventDetailPage({
   const event = await getEvent(eventId);
   if (!event) notFound();
 
-  const [canManage, squads] = await Promise.all([
+  const [canManage, squads, linkedScrim, linkedRound] = await Promise.all([
     canManageSquad(user.id, role, event.squadId),
     listManagedSquadOptions(role, user.id),
+    db.query.scrims.findFirst({ where: eq(scrims.eventId, eventId) }),
+    db.query.tournamentRounds.findFirst({
+      where: eq(tournamentRounds.eventId, eventId),
+      with: { tournament: true },
+    }),
   ]);
+
+  const hasResult = Boolean(linkedScrim || linkedRound);
+  const isPast = (event.endsAt ?? event.startsAt) < new Date();
+  const isMatchType = event.type === "scrim" || event.type === "tournament";
+  const showLogResult = canManage && isPast && isMatchType && !hasResult;
+
+  let tournamentOptions: { value: string; label: string }[] = [];
+  if (showLogResult) {
+    const managedSquadIds =
+      role === "admin" ? undefined : await getManagedSquadIds(user.id);
+    const rows = await listTournaments(
+      event.squadId ? [event.squadId] : managedSquadIds,
+    );
+    tournamentOptions = rows.map((tournament) => ({
+      value: tournament.id,
+      label: tournament.name,
+    }));
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -46,6 +74,19 @@ export default async function EventDetailPage({
         actions={
           canManage ? (
             <>
+              {showLogResult && (
+                <LogResultDialog
+                  event={{
+                    id: event.id,
+                    title: event.title,
+                    type: event.type,
+                    startsAt: event.startsAt.toISOString(),
+                    squadId: event.squadId,
+                  }}
+                  squads={squads}
+                  tournaments={tournamentOptions}
+                />
+              )}
               <EventFormDialog
                 squads={squads}
                 allowOrgWide={role === "admin"}
@@ -82,6 +123,35 @@ export default async function EventDetailPage({
               label="Description"
               value={
                 <span className="whitespace-pre-wrap">{event.description}</span>
+              }
+            />
+          )}
+          {linkedScrim && (
+            <DetailRow
+              label="Result"
+              value={
+                <Link
+                  href={`/dashboard/matches/${linkedScrim.id}`}
+                  className="underline underline-offset-4 hover:text-primary"
+                >
+                  vs {linkedScrim.opponent}
+                  {linkedScrim.result ? ` — ${linkedScrim.result}` : ""}
+                </Link>
+              }
+            />
+          )}
+          {linkedRound && (
+            <DetailRow
+              label="Result"
+              value={
+                <Link
+                  href={`/dashboard/tournaments/${linkedRound.tournamentId}`}
+                  className="underline underline-offset-4 hover:text-primary"
+                >
+                  {linkedRound.tournament.name} · {linkedRound.roundLabel} vs{" "}
+                  {linkedRound.opponent} —{" "}
+                  {MATCH_OUTCOME_LABELS[linkedRound.outcome]}
+                </Link>
               }
             />
           )}
