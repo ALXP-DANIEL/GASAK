@@ -13,6 +13,7 @@ import {
 } from "@components/ui/shadcn/card";
 import { getPlayer } from "@features/players/queries";
 import { formatLanes, ORG_ROLE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
+import { formatRank } from "@lib/ranks";
 import { userOrgRole } from "@server/session";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -73,9 +74,12 @@ export default async function PlayerDetailPage({
             />
             <DetailRow
               label="Current Rank"
-              value={profile?.currentRank ?? "—"}
+              value={formatRank(profile?.currentRank)}
             />
-            <DetailRow label="Peak Rank" value={profile?.peakRank ?? "—"} />
+            <DetailRow
+              label="Peak Rank"
+              value={formatRank(profile?.peakRank)}
+            />
             <DetailRow label="Email" value={player.email} />
           </CardContent>
         </Card>

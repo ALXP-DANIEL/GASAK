@@ -6,6 +6,7 @@ import {
 import { Badge } from "@components/ui/shadcn/badge";
 import { initials } from "@lib/format";
 import { formatLanes, SQUAD_ROLE_LABELS } from "@lib/labels";
+import { formatRank, type MlbbRank } from "@lib/ranks";
 import { cn } from "@lib/utils";
 import type { Lane, SquadRole } from "@server/db/schema";
 
@@ -17,8 +18,8 @@ type PlayerProfile = {
   serverId?: string | null;
   phone?: string | null;
   preferredLanes?: Lane[] | null;
-  currentRank?: string | null;
-  peakRank?: string | null;
+  currentRank?: MlbbRank | null;
+  peakRank?: MlbbRank | null;
 };
 
 export type PlayerCardProps = {
@@ -72,8 +73,11 @@ export function PlayerCard({
 
       <div className="grid gap-2 text-xs">
         <PlayerDetail label="Lane" value={lane} />
-        <PlayerDetail label="Current" value={profile?.currentRank || "-"} />
-        <PlayerDetail label="Peak" value={profile?.peakRank || "-"} />
+        <PlayerDetail
+          label="Current"
+          value={formatRank(profile?.currentRank)}
+        />
+        <PlayerDetail label="Peak" value={formatRank(profile?.peakRank)} />
         {showContact && (
           <>
             <PlayerDetail

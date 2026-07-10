@@ -1,3 +1,4 @@
+import type { MlbbRank } from "@lib/ranks";
 import { and, eq } from "drizzle-orm";
 import { auth } from "../auth";
 import {
@@ -18,6 +19,13 @@ import {
   tournaments,
   user,
 } from "./index";
+
+/** Helper to build a structured MLBB rank for seed data. */
+const mkRank = (
+  tier: MlbbRank["tier"],
+  stars: number,
+  division: number | null = null,
+): MlbbRank => ({ tier, division, stars });
 
 async function createUser(
   name: string,
@@ -238,8 +246,8 @@ async function main() {
       serverId: "2001",
       phone: "+60123456789",
       preferredLanes: ["jungle"],
-      currentRank: "Mythical Glory",
-      peakRank: "Mythical Immortal",
+      currentRank: mkRank("Mythical Glory", 30),
+      peakRank: mkRank("Mythical Immortal", 120),
     },
     {
       userId: member1.id,
@@ -250,8 +258,8 @@ async function main() {
       serverId: "2001",
       phone: "+60123456780",
       preferredLanes: ["gold"],
-      currentRank: "Mythic",
-      peakRank: "Mythical Glory",
+      currentRank: mkRank("Mythic", 12),
+      peakRank: mkRank("Mythical Glory", 45),
     },
     {
       userId: member2.id,
@@ -262,8 +270,8 @@ async function main() {
       serverId: "2002",
       phone: "+60123456781",
       preferredLanes: ["mid", "exp"],
-      currentRank: "Mythical Honor",
-      peakRank: "Mythical Glory",
+      currentRank: mkRank("Mythical Honor", 30),
+      peakRank: mkRank("Mythical Glory", 60),
     },
     {
       userId: member3.id,
@@ -274,8 +282,8 @@ async function main() {
       serverId: "2001",
       phone: "+60123456782",
       preferredLanes: ["roam"],
-      currentRank: "Mythic",
-      peakRank: "Mythical Honor",
+      currentRank: mkRank("Mythic", 8),
+      peakRank: mkRank("Mythical Honor", 28),
     },
     ...extraPlayers.map((player, index) => ({
       userId: player.id,
@@ -286,8 +294,12 @@ async function main() {
       serverId: String(2003 + (index % 4)),
       phone: `+60123456${790 + index}`,
       preferredLanes: [extraPlayerSeeds[index][3]],
-      currentRank: index % 2 === 0 ? "Mythic" : "Mythical Honor",
-      peakRank: index % 3 === 0 ? "Mythical Glory" : "Mythical Honor",
+      currentRank:
+        index % 2 === 0 ? mkRank("Mythic", 5) : mkRank("Mythical Honor", 30),
+      peakRank:
+        index % 3 === 0
+          ? mkRank("Mythical Glory", 55)
+          : mkRank("Mythical Honor", 40),
     })),
   ]);
 
@@ -792,7 +804,7 @@ async function main() {
       ign: `Trial${index + 1}`,
       mlbbId: String(880_000_000 + index),
       serverId: String(3000 + (index % 5)),
-      currentRank: index % 2 === 0 ? "Mythic" : "Legend",
+      currentRank: mkRank(index % 2 === 0 ? "Mythic" : "Legend", 10),
       preferredLanes: [
         (["exp", "jungle", "mid", "gold", "roam"] as const)[index % 5],
       ],

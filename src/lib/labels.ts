@@ -167,16 +167,3 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   fpx: "FPX",
   billplz: "Billplz (online)",
 };
-
-export const MLBB_RANKS = [
-  "Warrior",
-  "Elite",
-  "Master",
-  "Grandmaster",
-  "Epic",
-  "Legend",
-  "Mythic",
-  "Mythical Honor",
-  "Mythical Glory",
-  "Mythical Immortal",
-] as const;

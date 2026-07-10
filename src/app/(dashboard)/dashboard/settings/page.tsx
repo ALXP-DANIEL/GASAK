@@ -61,8 +61,8 @@ export default async function SettingsPage() {
                 serverId: profile?.serverId ?? "",
                 phone: profile?.phone ?? "",
                 preferredLanes: profile?.preferredLanes ?? [],
-                currentRank: profile?.currentRank ?? "",
-                peakRank: profile?.peakRank ?? "",
+                currentRank: profile?.currentRank ?? undefined,
+                peakRank: profile?.peakRank ?? undefined,
                 avatar: null,
               }}
             />

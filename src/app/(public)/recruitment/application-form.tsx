@@ -4,10 +4,11 @@ import { FormField, FormSelect } from "@components/forms/form-field";
 import { LaneSelectGroup } from "@components/forms/lane-select-group";
 import { MlbbIdFields } from "@components/forms/mlbb-id-fields";
 import { PhonePrefixField } from "@components/forms/phone-prefix-field";
+import { RankSelect } from "@components/forms/rank-select";
 import { BrandCard } from "@components/ui/brand";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { MLBB_RANKS } from "@lib/labels";
+import { rankFieldSchema } from "@lib/ranks";
 import { submitApplication } from "@server/actions/public";
 import { laneEnum } from "@server/db/schema";
 import { useState, useTransition } from "react";
@@ -23,7 +24,7 @@ const schema = z.object({
   mlbbId: z.string().min(4, "Enter a valid MLBB ID"),
   serverId: z.string().min(1, "Server ID is required"),
   squadId: z.string().optional(),
-  currentRank: z.string().min(1, "Select your current rank"),
+  currentRank: rankFieldSchema,
   preferredLanes: z
     .array(z.enum(laneEnum.enumValues))
     .min(1, "Select at least one lane"),
@@ -35,8 +36,6 @@ const schema = z.object({
 type Values = z.infer<typeof schema>;
 
 const ANY_SQUAD_VALUE = "any";
-
-const rankOptions = MLBB_RANKS.map((rank) => ({ value: rank, label: rank }));
 
 export function ApplicationForm({
   squads = [],
@@ -56,7 +55,7 @@ export function ApplicationForm({
       mlbbId: "",
       serverId: "",
       squadId: ANY_SQUAD_VALUE,
-      currentRank: "",
+      currentRank: undefined,
       preferredLanes: [],
       heroPool: "",
       previousTeam: "",
@@ -151,12 +150,11 @@ export function ApplicationForm({
               mlbbIdName="mlbbId"
               serverIdName="serverId"
             />
-            <FormSelect
+            <RankSelect
               control={control}
               name="currentRank"
               label="Current rank"
-              options={rankOptions}
-              placeholder="Select rank"
+              description="Pick your tier, division, and stars (e.g. Legend V · 3★)."
             />
             <FormSelect
               control={control}

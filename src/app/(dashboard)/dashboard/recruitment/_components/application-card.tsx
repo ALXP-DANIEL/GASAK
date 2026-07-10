@@ -34,6 +34,7 @@ import {
   formatLanes,
   SQUAD_ROLE_LABELS,
 } from "@lib/labels";
+import { formatRank } from "@lib/ranks";
 import {
   assignApplication,
   onboardApplicant,
@@ -167,7 +168,7 @@ export function ApplicationCard({
             <div className="mt-3 grid gap-1.5 text-xs text-muted-foreground">
               <p>
                 {formatLanes(application.preferredLanes)} ·{" "}
-                {application.currentRank}
+                {formatRank(application.currentRank)}
               </p>
               <p className="truncate">
                 Squad: {application.squad?.name ?? "No preference"}
@@ -200,7 +201,10 @@ export function ApplicationCard({
                 label="Lane"
                 value={formatLanes(application.preferredLanes)}
               />
-              <DetailRow label="Rank" value={application.currentRank} />
+              <DetailRow
+                label="Rank"
+                value={formatRank(application.currentRank)}
+              />
               <DetailRow label="Hero pool" value={application.heroPool} />
               <DetailRow
                 label="Previous squad"
