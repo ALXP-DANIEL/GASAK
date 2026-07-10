@@ -20,6 +20,17 @@ import {
   CredenzaTitle,
   CredenzaTrigger,
 } from "@components/ui/credenza";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@components/ui/shadcn/alert-dialog";
 import { Badge } from "@components/ui/shadcn/badge";
 import { Button } from "@components/ui/shadcn/button";
 import {
@@ -310,8 +321,7 @@ export function SquadRosterTable({
     });
   }
 
-  function remove(memberId: string, name: string) {
-    if (!window.confirm(`Remove ${name} from this squad?`)) return;
+  function remove(memberId: string) {
     startTransition(async () => {
       const result = await removeSquadMember(memberId);
       if (!result.ok) {
@@ -386,15 +396,39 @@ export function SquadRosterTable({
             </TableCell>
             {canManage && (
               <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  disabled={pending}
-                  onClick={() => remove(member.id, member.user.name)}
-                  aria-label={`Remove ${member.user.name}`}
-                >
-                  <Icons.Actions.Delete className="text-destructive" />
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={pending}
+                      aria-label={`Remove ${member.user.name}`}
+                    >
+                      <Icons.Actions.Delete className="text-destructive" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Remove {member.user.name} from this squad?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        They will lose squad access but keep their account.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={pending}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => remove(member.id)}
+                        disabled={pending}
+                      >
+                        {pending ? "Removing..." : "Remove"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </TableCell>
             )}
           </TableRow>

@@ -3,8 +3,9 @@
 import { Badge } from "@components/ui/shadcn/badge";
 import type { activityLogs } from "@server/db";
 import type { ColumnDef } from "@tanstack/react-table";
+import { formatDistanceToNow } from "date-fns";
 
-type LogRow = typeof activityLogs.$inferSelect;
+export type LogRow = typeof activityLogs.$inferSelect;
 
 const dateFormatter = new Intl.DateTimeFormat("en-MY", {
   dateStyle: "medium",
@@ -16,8 +17,11 @@ export const columns: ColumnDef<LogRow>[] = [
     id: "time",
     header: "Time",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">
-        {dateFormatter.format(row.original.createdAt)}
+      <span
+        className="whitespace-nowrap text-muted-foreground"
+        title={dateFormatter.format(row.original.createdAt)}
+      >
+        {formatDistanceToNow(row.original.createdAt, { addSuffix: true })}
       </span>
     ),
   },

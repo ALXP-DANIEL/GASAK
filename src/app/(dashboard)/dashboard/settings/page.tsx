@@ -1,5 +1,6 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { PlayerCard } from "@components/cards/player/player-card";
+import { SplitView } from "@components/shared/split-view";
 import { Badge } from "@components/ui/shadcn/badge";
 import {
   Card,
@@ -29,7 +30,17 @@ export default async function SettingsPage() {
         description="Manage your account and player profile."
         actions={<Badge variant="outline">{ROLE_LABELS[role]}</Badge>}
       />
-      <div className="grid gap-6 desktop:grid-cols-[minmax(0,1fr)_22rem]">
+      <SplitView
+        aside={
+          <PlayerCard
+            name={user.name ?? "Player"}
+            email={user.email}
+            image={user.image}
+            profile={profile}
+            showContact
+          />
+        }
+      >
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Profile</CardTitle>
@@ -57,16 +68,7 @@ export default async function SettingsPage() {
             />
           </CardContent>
         </Card>
-        <div className="grid h-fit gap-4">
-          <PlayerCard
-            name={user.name ?? "Player"}
-            email={user.email}
-            image={user.image}
-            profile={profile}
-            showContact
-          />
-        </div>
-      </div>
+      </SplitView>
     </div>
   );
 }

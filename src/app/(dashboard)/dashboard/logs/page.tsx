@@ -1,9 +1,8 @@
-import { DataTable } from "@components/shared/data-table";
 import { activityLogs, db } from "@server/db";
 import { desc } from "drizzle-orm";
 import { requireDashboardRole } from "../_components/dashboard-section";
 import { PageHeader } from "../_components/page-surface";
-import { columns } from "./_components/columns";
+import { LogsTable } from "./_components/logs-table";
 
 export const dynamic = "force-dynamic";
 
@@ -29,20 +28,10 @@ export default async function LogsPage() {
         title="Logs"
         description="Audit trail for successful app operations across admin, seller, and squad users."
       />
-      <DataTable
-        columns={columns}
-        data={rows}
-        emptyMessage="No activity logged yet."
-        searchColumnId="actor"
-        searchPlaceholder="Search logs..."
-        facetedFilters={[
-          { columnId: "role", title: "Role", options: roleFilterOptions },
-          {
-            columnId: "action",
-            title: "Action",
-            options: actionFilterOptions,
-          },
-        ]}
+      <LogsTable
+        rows={rows}
+        roleFilterOptions={roleFilterOptions}
+        actionFilterOptions={actionFilterOptions}
       />
     </main>
   );

@@ -1,6 +1,17 @@
 "use client";
 
 import { Icons } from "@components/icons";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@components/ui/shadcn/alert-dialog";
 import { Button } from "@components/ui/shadcn/button";
 import {
   Select,
@@ -82,12 +93,6 @@ export function UserRowActions({
   const [pending, startTransition] = useTransition();
 
   function removeUser() {
-    if (
-      !window.confirm(`Delete ${user.name}'s account? This cannot be undone.`)
-    ) {
-      return;
-    }
-
     startTransition(async () => {
       const result = await removeDashboardUser(user.id);
       if (!result.ok) {
@@ -102,15 +107,32 @@ export function UserRowActions({
   return (
     <div className="flex justify-end gap-1">
       <EditUserDialog user={user} />
-      <Button
-        variant="ghost"
-        size="icon"
-        disabled={pending || isSelf}
-        onClick={removeUser}
-        aria-label={`Delete ${user.name}`}
-      >
-        <Icons.Actions.Delete className="text-destructive" />
-      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={pending || isSelf}
+            aria-label={`Delete ${user.name}`}
+          >
+            <Icons.Actions.Delete className="text-destructive" />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {user.name}'s account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the account and cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={removeUser} disabled={pending}>
+              {pending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
