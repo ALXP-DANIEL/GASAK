@@ -4,6 +4,7 @@ import {
   AvatarImage,
 } from "@components/ui/shadcn/avatar";
 import { Badge } from "@components/ui/shadcn/badge";
+import { initials } from "@lib/format";
 import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
 import { cn } from "@lib/utils";
 import type { Lane, SquadRole } from "@server/db/schema";
@@ -103,15 +104,6 @@ function PlayerDetail({ label, value }: { label: string; value: string }) {
       <span className="text-right font-medium">{value}</span>
     </div>
   );
-}
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
 }
 
 function isLane(value: string | null | undefined): value is Lane {

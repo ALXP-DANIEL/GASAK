@@ -53,10 +53,10 @@ const fieldShellClass =
 const labelClass = "text-[0.7rem] font-semibold uppercase text-foreground/80";
 
 const controlClass =
-  "h-10 rounded-md border-border/80 bg-background/80 px-3 text-sm shadow-inner shadow-foreground/[0.03] transition-all placeholder:text-muted-foreground/60 focus-visible:border-primary/70 focus-visible:ring-2 focus-visible:ring-primary/15 aria-invalid:border-destructive/70 aria-invalid:ring-destructive/15 md:text-sm";
+  "h-10 rounded-md border-border/80 bg-background/80 px-3 text-sm shadow-inner shadow-foreground/[0.03] transition-all placeholder:text-muted-foreground/60 focus-visible:border-primary/70 focus-visible:ring-2 focus-visible:ring-primary/15 aria-invalid:border-destructive/70 aria-invalid:ring-destructive/15";
 
 const textareaClass =
-  "min-h-28 rounded-md border-border/80 bg-background/80 px-3 py-2.5 text-sm leading-6 shadow-inner shadow-foreground/[0.03] transition-all placeholder:text-muted-foreground/60 focus-visible:border-primary/70 focus-visible:ring-2 focus-visible:ring-primary/15 aria-invalid:border-destructive/70 aria-invalid:ring-destructive/15 md:text-sm";
+  "min-h-28 rounded-md border-border/80 bg-background/80 px-3 py-2.5 text-sm leading-6 shadow-inner shadow-foreground/[0.03] transition-all placeholder:text-muted-foreground/60 focus-visible:border-primary/70 focus-visible:ring-2 focus-visible:ring-primary/15 aria-invalid:border-destructive/70 aria-invalid:ring-destructive/15";
 
 const inlineChoiceShellClass =
   "rounded-md border border-border/70 bg-card/70 p-3.5 shadow-sm shadow-foreground/5 transition-colors data-[invalid=true]:border-destructive/60 data-[invalid=true]:bg-destructive/5";

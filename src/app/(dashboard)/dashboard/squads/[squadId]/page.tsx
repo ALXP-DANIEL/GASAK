@@ -137,7 +137,7 @@ export default async function SquadDetailPage({
           />
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <section className="grid gap-6 desktop:grid-cols-[minmax(0,1fr)_22rem]">
           <BrandCard interactive={false} className="p-5 desktop:p-7">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>

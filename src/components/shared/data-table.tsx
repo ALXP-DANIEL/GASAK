@@ -29,6 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@components/ui/shadcn/table";
+import { cn } from "@lib/utils";
 import type {
   Column,
   ColumnDef,
@@ -39,6 +40,7 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -58,6 +60,8 @@ export function DataTable<TData, TValue>({
   searchPlaceholder = "Search...",
   facetedFilters,
   initialColumnVisibility,
+  pageSize = 20,
+  renderMobileCard,
 }: {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -68,6 +72,13 @@ export function DataTable<TData, TValue>({
   /** Dropdown checkbox filters, e.g. filter products by category. */
   facetedFilters?: FacetedFilterConfig[];
   initialColumnVisibility?: VisibilityState;
+  /** Rows per page. */
+  pageSize?: number;
+  /**
+   * When provided, viewports below `desktop:` render a stacked card list
+   * instead of the table (search/filters/pagination still apply).
+   */
+  renderMobileCard?: (row: TData) => React.ReactNode;
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
@@ -77,11 +88,13 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     state: { sorting, columnVisibility },
+    initialState: { pagination: { pageSize } },
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   const searchColumn = searchColumnId
@@ -123,48 +136,105 @@ export function DataTable<TData, TValue>({
           )}
         </div>
       )}
-      <Card>
-        <CardContent>
-          {data.length === 0 ? (
+      {data.length === 0 ? (
+        <Card>
+          <CardContent>
             <EmptyState message={emptyMessage} />
-          ) : table.getRowModel().rows.length === 0 ? (
+          </CardContent>
+        </Card>
+      ) : table.getRowModel().rows.length === 0 ? (
+        <Card>
+          <CardContent>
             <EmptyState message="No results match your search." />
-          ) : (
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {renderMobileCard && (
+            <div className="flex flex-col gap-2 desktop:hidden">
+              {table.getRowModel().rows.map((row) => (
+                <div key={row.id}>{renderMobileCard(row.original)}</div>
+              ))}
+            </div>
           )}
-        </CardContent>
-      </Card>
+          <Card className={cn(renderMobileCard && "mobile:hidden")}>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+          <DataTablePagination table={table} />
+        </>
+      )}
+    </div>
+  );
+}
+
+function DataTablePagination<TData>({
+  table,
+}: {
+  table: import("@tanstack/react-table").Table<TData>;
+}) {
+  const { pageIndex, pageSize } = table.getState().pagination;
+  const total = table.getFilteredRowModel().rows.length;
+  if (total <= pageSize) return null;
+
+  const from = pageIndex * pageSize + 1;
+  const to = Math.min((pageIndex + 1) * pageSize, total);
+
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <p className="text-sm text-muted-foreground tabular-nums">
+        {from}–{to} of {total}
+      </p>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 }

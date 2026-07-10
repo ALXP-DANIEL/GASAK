@@ -22,6 +22,7 @@ import {
   useSidebar,
 } from "@components/ui/shadcn/sidebar";
 import { authClient } from "@lib/auth-client";
+import { initials } from "@lib/format";
 import { ORG_ROLE_LABELS } from "@lib/labels";
 import type { OrgRole } from "@server/db/schema";
 import { useRouter } from "next/navigation";
@@ -32,15 +33,6 @@ export type SidebarUser = {
   role: OrgRole;
   image?: string | null;
 };
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
 
 export function NavUser({ user }: { user: SidebarUser }) {
   const { isMobile } = useSidebar();

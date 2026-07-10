@@ -93,7 +93,9 @@ export function ProductFormDialog({ product }: { product?: Product }) {
       </CredenzaTrigger>
       <CredenzaContent className="max-h-[85dvh] overflow-y-auto">
         <CredenzaHeader>
-          <CredenzaTitle>{isEdit ? "Edit product" : "New product"}</CredenzaTitle>
+          <CredenzaTitle>
+            {isEdit ? "Edit product" : "New product"}
+          </CredenzaTitle>
           <CredenzaDescription>
             {isEdit
               ? "Update details, price, stock, and visibility."

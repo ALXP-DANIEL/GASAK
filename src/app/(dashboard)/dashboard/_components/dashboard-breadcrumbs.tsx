@@ -11,7 +11,11 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function formatSegment(segment: string) {
+  if (UUID_PATTERN.test(segment)) return "Details";
   return segment
     .replace(/-/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
@@ -28,34 +32,43 @@ export function DashboardBreadcrumbs() {
     return <span className="text-sm font-medium">Dashboard</span>;
   }
 
-  return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <BreadcrumbLink asChild>
-            <Link href="/dashboard">Dashboard</Link>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        {segments.map((segment, index) => {
-          const href = `/dashboard/${segments.slice(0, index + 1).join("/")}`;
-          const isLast = index === segments.length - 1;
+  const current = formatSegment(segments[segments.length - 1]);
 
-          return (
-            <div key={href} className="contents">
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                {isLast ? (
-                  <BreadcrumbPage>{formatSegment(segment)}</BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink asChild>
-                    <Link href={href}>{formatSegment(segment)}</Link>
-                  </BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
-            </div>
-          );
-        })}
-      </BreadcrumbList>
-    </Breadcrumb>
+  return (
+    <>
+      {/* Mobile: current page only */}
+      <span className="truncate text-sm font-medium desktop:hidden">
+        {current}
+      </span>
+      {/* Desktop: full trail */}
+      <Breadcrumb className="mobile:hidden">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/dashboard">Dashboard</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          {segments.map((segment, index) => {
+            const href = `/dashboard/${segments.slice(0, index + 1).join("/")}`;
+            const isLast = index === segments.length - 1;
+
+            return (
+              <div key={href} className="contents">
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  {isLast ? (
+                    <BreadcrumbPage>{formatSegment(segment)}</BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink asChild>
+                      <Link href={href}>{formatSegment(segment)}</Link>
+                    </BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+              </div>
+            );
+          })}
+        </BreadcrumbList>
+      </Breadcrumb>
+    </>
   );
 }

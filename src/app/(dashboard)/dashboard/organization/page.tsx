@@ -5,6 +5,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@components/ui/shadcn/avatar";
+import { initials } from "@lib/format";
 import { deleteOrganizationPosition } from "@server/actions/organization";
 import { db } from "@server/db";
 import { requireDashboardRole } from "../_components/dashboard-section";
@@ -12,15 +13,6 @@ import { EmptyState, PageHeader } from "../_components/page-surface";
 import { OrganizationPositionFormDialog } from "./_components/organization-form";
 
 export const dynamic = "force-dynamic";
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
 
 export default async function OrganizationPage() {
   await requireDashboardRole("admin");

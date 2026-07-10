@@ -29,7 +29,7 @@ export default async function SettingsPage() {
         description="Manage your account and player profile."
         actions={<Badge variant="outline">{ROLE_LABELS[role]}</Badge>}
       />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-6 desktop:grid-cols-[minmax(0,1fr)_22rem]">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Profile</CardTitle>

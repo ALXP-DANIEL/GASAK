@@ -42,7 +42,7 @@ export default async function PlayerDetailPage({
           </Badge>
         }
       />
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-4 desktop:grid-cols-2">
         <PlayerCard
           name={player.name}
           email={player.email}

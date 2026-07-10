@@ -85,7 +85,7 @@ export default async function ReportsPage() {
       />
 
       {showShop && (
-        <StatGrid className="xl:grid-cols-2">
+        <StatGrid className="desktop:grid-cols-2">
           <StatCard
             label="Total Revenue"
             value={formatRM(Number(revenueAgg[0]?.total ?? 0))}
@@ -101,7 +101,7 @@ export default async function ReportsPage() {
         </StatGrid>
       )}
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-4 desktop:grid-cols-2">
         {showCompetition && (
           <>
             <HomePanel

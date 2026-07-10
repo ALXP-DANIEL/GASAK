@@ -122,7 +122,9 @@ export function OrganizationPositionFormDialog({
       </CredenzaTrigger>
       <CredenzaContent className="max-h-[85dvh] overflow-y-auto">
         <CredenzaHeader>
-          <CredenzaTitle>{isEdit ? "Edit position" : "New position"}</CredenzaTitle>
+          <CredenzaTitle>
+            {isEdit ? "Edit position" : "New position"}
+          </CredenzaTitle>
           <CredenzaDescription>
             Manage the title, order, assigned profile, and hierarchy for this
             organization position.

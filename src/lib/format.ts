@@ -24,6 +24,16 @@ export function toDateTimeLocal(date: Date | string) {
   return format(new Date(date), "yyyy-MM-dd'T'HH:mm");
 }
 
+/** First letters of the first two words, uppercased — avatar fallbacks. */
+export function initials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
+
 /** Strips HTML tags for plain-text excerpts (card previews, meta tags). */
 export function stripHtml(source: string) {
   return source

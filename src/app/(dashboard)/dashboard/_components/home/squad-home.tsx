@@ -117,7 +117,7 @@ export async function SquadHome({
         />
       </StatGrid>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 desktop:grid-cols-3">
         <HomePanel
           title="Upcoming Schedule"
           description="Org-wide and squad events"

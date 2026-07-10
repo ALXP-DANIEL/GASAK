@@ -49,10 +49,7 @@ export function StatGrid({
 }) {
   return (
     <div
-      className={cn(
-        "grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4",
-        className,
-      )}
+      className={cn("grid grid-cols-2 gap-4 desktop:grid-cols-4", className)}
     >
       {children}
     </div>
@@ -133,10 +130,4 @@ export function HomeListItem({
   return <div className={itemClass}>{content}</div>;
 }
 
-export function EmptyState({ message }: { message: string }) {
-  return (
-    <p className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
-      {message}
-    </p>
-  );
-}
+export { EmptyState } from "../page-surface";

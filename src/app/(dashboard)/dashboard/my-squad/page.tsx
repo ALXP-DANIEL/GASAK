@@ -162,7 +162,7 @@ export default async function MySquadPage() {
                   />
                 </div>
 
-                <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
+                <div className="grid gap-5 desktop:grid-cols-[minmax(0,1fr)_22rem]">
                   <Card className="shadow-xs">
                     <CardHeader>
                       <CardTitle>Roster</CardTitle>

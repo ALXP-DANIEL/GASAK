@@ -153,7 +153,7 @@ export async function AdminHome() {
         />
       </StatGrid>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 desktop:grid-cols-3">
         <HomePanel
           title="Squads"
           description="Active rosters and member counts"

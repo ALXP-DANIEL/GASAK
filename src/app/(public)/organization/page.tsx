@@ -5,6 +5,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@components/ui/shadcn/avatar";
+import { initials } from "@lib/format";
 import { createPageMetadata } from "@lib/metadata";
 import { db } from "@server/db";
 
@@ -16,15 +17,6 @@ export const metadata = createPageMetadata({
   path: "/organization",
   type: "Organization",
 });
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
 
 export default async function OrganizationPage() {
   const positions = await db.query.organizationPositions.findMany({
