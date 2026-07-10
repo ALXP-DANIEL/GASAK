@@ -11,7 +11,6 @@ import { CommandPalette } from "./_components/command-palette";
 import { DashboardBreadcrumbs } from "./_components/dashboard-breadcrumbs";
 import { getDashboardContext } from "./_components/dashboard-context";
 import { AppSidebar } from "./_components/sidebar/app-sidebar";
-import { MobileTabBar } from "./_components/sidebar/mobile-tab-bar";
 
 export const dynamic = "force-dynamic";
 
@@ -53,10 +52,9 @@ export default async function DashboardLayout({
             <CommandPalette access={access} />
           </div>
         </header>
-        <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden p-4 mobile:pb-[calc(env(safe-area-inset-bottom)+4.5rem)] desktop:p-6">
+        <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden p-4 mobile:pb-[calc(env(safe-area-inset-bottom)+1rem)] desktop:p-6">
           {children}
         </div>
-        <MobileTabBar access={access} />
       </SidebarInset>
     </SidebarProvider>
   );

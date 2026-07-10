@@ -7,6 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@components/ui/shadcn/sidebar";
 import type { DashboardNavGroup } from "@config/dashboard";
 import Link from "next/link";
@@ -14,9 +15,16 @@ import { usePathname } from "next/navigation";
 
 export function NavMain({ groups }: { groups: DashboardNavGroup[] }) {
   const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   const isActive = (href: string) =>
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
+
+  const handleNavigate = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <>
@@ -36,7 +44,7 @@ export function NavMain({ groups }: { groups: DashboardNavGroup[] }) {
                     tooltip={item.label}
                     isActive={isActive(item.href)}
                   >
-                    <Link href={item.href}>
+                    <Link href={item.href} onClick={handleNavigate}>
                       <item.icon
                         weight={isActive(item.href) ? "fill" : "regular"}
                       />
