@@ -1,11 +1,10 @@
-import { DataTable } from "@components/shared/data-table";
 import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
 import { db, productCategoryEnum, products } from "@server/db";
 import { requireOrgRole } from "@server/session";
 import { desc } from "drizzle-orm";
 import { PageHeader } from "../_components/page-surface";
-import { columns } from "./_components/columns";
 import { ProductFormDialog } from "./_components/product-form";
+import { ProductsTable } from "./_components/products-table";
 
 const categoryFilterOptions = productCategoryEnum.enumValues.map((value) => ({
   value,
@@ -30,19 +29,9 @@ export default async function ProductsPage() {
       >
         <ProductFormDialog />
       </PageHeader>
-      <DataTable
-        columns={columns}
-        data={rows}
-        emptyMessage="No products yet. Add your first product."
-        searchColumnId="name"
-        searchPlaceholder="Search products..."
-        facetedFilters={[
-          {
-            columnId: "category",
-            title: "Category",
-            options: categoryFilterOptions,
-          },
-        ]}
+      <ProductsTable
+        rows={rows}
+        categoryFilterOptions={categoryFilterOptions}
       />
     </main>
   );

@@ -1,11 +1,15 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import {
+  type RevenuePoint,
+  RevenueTrendChart,
+} from "@components/charts/revenue-trend-chart";
 import { SquadBarChart } from "@components/charts/squad-bar-chart";
-import { Icons } from "@components/icons";
+import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatRM } from "@lib/format";
 import { ORDER_STATUS_LABELS } from "@lib/labels";
 import { db, orders, scrims, squads, tournaments } from "@server/db";
-import { startOfMonth } from "date-fns";
+import { format, startOfMonth, subDays } from "date-fns";
 import { and, count, desc, eq, gte, inArray, sum } from "drizzle-orm";
 import { forbidden } from "next/navigation";
 import { getDashboardContext } from "../_components/dashboard-context";
@@ -13,8 +17,6 @@ import {
   EmptyState,
   HomeListItem,
   HomePanel,
-  StatCard,
-  StatGrid,
 } from "../_components/home/widgets";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +28,9 @@ export default async function ReportsPage() {
   const showCompetition =
     effectiveAccess.orgRole === "admin" || effectiveAccess.managesSquad;
   if (!showShop && !showCompetition) forbidden();
-  const monthStart = startOfMonth(new Date());
+  const now = new Date();
+  const monthStart = startOfMonth(now);
+  const trendStart = subDays(now, 29);
 
   const [matchesPerSquad, tournamentsPerSquad, orderStats, revenueAgg] =
     await Promise.all([
@@ -56,26 +60,51 @@ export default async function ReportsPage() {
         : Promise.resolve([]),
       showShop
         ? db
-            .select({
-              total: sum(orders.totalSen),
-              monthly: sum(orders.totalSen),
-            })
+            .select({ total: sum(orders.totalSen), orders: count() })
             .from(orders)
             .where(inArray(orders.status, ["paid", "processing", "completed"]))
         : Promise.resolve([]),
     ]);
 
-  const [monthlyRevenue] = showShop
-    ? await db
-        .select({ value: sum(orders.totalSen) })
-        .from(orders)
-        .where(
-          and(
-            inArray(orders.status, ["paid", "processing", "completed"]),
-            gte(orders.createdAt, monthStart),
+  const [[monthlyRevenue], paidOrders] = showShop
+    ? await Promise.all([
+        db
+          .select({ value: sum(orders.totalSen) })
+          .from(orders)
+          .where(
+            and(
+              inArray(orders.status, ["paid", "processing", "completed"]),
+              gte(orders.createdAt, monthStart),
+            ),
           ),
-        )
-    : [{ value: null }];
+        db
+          .select({ totalSen: orders.totalSen, updatedAt: orders.updatedAt })
+          .from(orders)
+          .where(
+            and(
+              inArray(orders.status, ["paid", "processing", "completed"]),
+              gte(orders.updatedAt, trendStart),
+            ),
+          ),
+      ])
+    : [[{ value: null }], []];
+
+  const revenueTrend: RevenuePoint[] = Array.from({ length: 30 }, (_, i) => {
+    const day = subDays(now, 29 - i);
+    return { key: format(day, "yyyy-MM-dd"), label: format(day, "d MMM") };
+  }).map(({ key, label }) => ({
+    label,
+    revenue:
+      paidOrders
+        .filter((order) => format(order.updatedAt, "yyyy-MM-dd") === key)
+        .reduce((total, order) => total + order.totalSen, 0) / 100,
+  }));
+
+  const totalMatches = matchesPerSquad.reduce((sum_, r) => sum_ + r.value, 0);
+  const totalTournaments = tournamentsPerSquad.reduce(
+    (sum_, r) => sum_ + r.value,
+    0,
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -84,21 +113,44 @@ export default async function ReportsPage() {
         description="Activity summaries across the organization."
       />
 
+      <StatStrip>
+        {showShop && (
+          <>
+            <StatItem
+              label="Total Revenue"
+              value={formatRM(Number(revenueAgg[0]?.total ?? 0))}
+              hint="Paid and completed orders"
+            />
+            <StatItem
+              label="This Month"
+              value={formatRM(Number(monthlyRevenue?.value ?? 0))}
+              hint="Since the start of the month"
+            />
+          </>
+        )}
+        {showCompetition && (
+          <>
+            <StatItem
+              label="Matches"
+              value={totalMatches}
+              hint="Recorded across all squads"
+            />
+            <StatItem
+              label="Tournaments"
+              value={totalTournaments}
+              hint="Entries across all squads"
+            />
+          </>
+        )}
+      </StatStrip>
+
       {showShop && (
-        <StatGrid className="desktop:grid-cols-2">
-          <StatCard
-            label="Total Revenue"
-            value={formatRM(Number(revenueAgg[0]?.total ?? 0))}
-            icon={Icons.Domain.Revenue}
-            hint="Paid, processing, and completed orders"
-          />
-          <StatCard
-            label="Revenue This Month"
-            value={formatRM(Number(monthlyRevenue?.value ?? 0))}
-            icon={Icons.Domain.Orders}
-            hint="Since the start of the month"
-          />
-        </StatGrid>
+        <HomePanel
+          title="Revenue Trend"
+          description="Daily paid revenue, last 30 days"
+        >
+          <RevenueTrendChart data={revenueTrend} />
+        </HomePanel>
       )}
 
       <div className="grid gap-4 desktop:grid-cols-2">

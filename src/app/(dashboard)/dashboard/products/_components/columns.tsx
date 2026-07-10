@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@components/ui/shadcn/badge";
+import { formatRM } from "@lib/format";
 import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
 import type { Product } from "@server/db/schema";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -31,6 +32,14 @@ export const columns: ColumnDef<Product>[] = [
         {PRODUCT_CATEGORY_LABELS[row.original.category]}
       </Badge>
     ),
+  },
+  {
+    id: "price",
+    header: "Price",
+    cell: ({ row }) =>
+      row.original.hasVariants
+        ? `from ${formatRM(row.original.priceSen)}`
+        : formatRM(row.original.priceSen),
   },
   {
     id: "stock",
