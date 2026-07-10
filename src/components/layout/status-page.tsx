@@ -28,7 +28,8 @@ const actionClassNames: Record<
   secondary: "text-foreground hover:bg-[var(--glass-active)]",
   ghost:
     "text-muted-foreground shadow-none hover:bg-[var(--glass-active)] hover:text-foreground",
-  danger: "text-destructive shadow-none hover:bg-[var(--glass-active)] hover:text-destructive-foreground",
+  danger:
+    "text-destructive shadow-none hover:bg-[var(--glass-active)] hover:text-destructive-foreground",
 };
 
 export default function StatusPage({
@@ -42,17 +43,17 @@ export default function StatusPage({
   return (
     <div
       className={cn(
-        "flex min-h-full flex-1 items-center justify-center px-4 py-10 sm:px-6 lg:px-8",
+        "flex min-h-full flex-1 items-center justify-center px-4 py-10 desktop:px-8",
         className,
       )}
     >
-      <div className="grid w-full gap-8 lg:items-center">
+      <div className="grid w-full gap-8 desktop:items-center">
         <div className="flex flex-col items-center text-center">
           <span className="font-mono text-[11px] tracking-[0.22em] text-muted-foreground uppercase">
             {eyebrow}
           </span>
 
-          <p className="mt-4 text-[4.5rem] leading-none font-semibold tracking-[-0.08em] text-primary sm:text-[5.5rem]">
+          <p className="mt-4 text-[4.5rem] leading-none font-semibold tracking-[-0.08em] text-primary desktop:text-[5.5rem]">
             {code}
           </p>
 
@@ -60,7 +61,7 @@ export default function StatusPage({
             {title}
           </h1>
 
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground desktop:text-base">
             {description}
           </p>
 
