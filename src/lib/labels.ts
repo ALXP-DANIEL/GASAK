@@ -73,6 +73,13 @@ export const MATCH_OUTCOME_LABELS: Record<MatchOutcome, string> = {
   pending: "Pending",
 };
 
+/** Badge variant for a freeform scrim result string ("Won 3-2", "Lost 1-3"). */
+export function resultBadgeVariant(result: string) {
+  if (/^won?\b/i.test(result)) return "default" as const;
+  if (/^lost?\b/i.test(result)) return "destructive" as const;
+  return "secondary" as const;
+}
+
 export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, string> = {
   diamonds: "Diamonds",
   weekly_pass: "Weekly Pass",

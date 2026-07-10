@@ -1,12 +1,11 @@
-import { DataTable } from "@components/shared/data-table";
 import { getUnreadNewsIds, markNewsRead } from "@server/actions/news";
 import { getManagedSquadIds, getMemberSquadIds } from "@server/authz";
 import { db, news, squads } from "@server/db";
 import { requireUser, userOrgRole } from "@server/session";
 import { desc, eq, inArray, isNull, or } from "drizzle-orm";
 import { PageHeader } from "../_components/page-surface";
-import { columns } from "./_components/columns";
 import { NewsFormDialog } from "./_components/news-form";
+import { NewsList } from "./_components/news-list";
 
 export const dynamic = "force-dynamic";
 
@@ -70,20 +69,7 @@ export default async function NewsPage() {
           />
         )}
       </PageHeader>
-      <DataTable
-        columns={columns}
-        data={data}
-        emptyMessage="No news yet."
-        searchColumnId="title"
-        searchPlaceholder="Search news..."
-        facetedFilters={[
-          {
-            columnId: "squad",
-            title: "Audience",
-            options: audienceFilterOptions,
-          },
-        ]}
-      />
+      <NewsList rows={data} audienceOptions={audienceFilterOptions} />
     </main>
   );
 }

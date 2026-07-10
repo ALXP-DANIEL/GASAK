@@ -1,5 +1,6 @@
 import { PlayerCard } from "@components/cards/player/player-card";
 import { Icons } from "@components/icons";
+import { SplitView } from "@components/shared/split-view";
 import { Badge } from "@components/ui/shadcn/badge";
 import { Button } from "@components/ui/shadcn/button";
 import {
@@ -8,11 +9,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@components/ui/shadcn/card";
-import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
-import { cn } from "@lib/utils";
+import {
+  LaneSpread,
+  rosterBreakdown,
+  SquadLogo,
+  SquadStat,
+  sortRoster,
+} from "@features/squads/components/squad-shared";
+import { SQUAD_ROLE_LABELS } from "@lib/labels";
 import { getManagedSquadIds, getMemberSquadIds } from "@server/authz";
 import { db, squads } from "@server/db";
-import type { SquadRole } from "@server/db/schema";
 import { requireUser } from "@server/session";
 import { inArray } from "drizzle-orm";
 import Image from "next/image";
@@ -20,13 +26,6 @@ import Link from "next/link";
 import { EmptyState, PageHeader } from "../_components/page-surface";
 
 export const dynamic = "force-dynamic";
-
-const roleOrder: Record<SquadRole, number> = {
-  leader: 0,
-  coach: 1,
-  player: 2,
-  reserve: 3,
-};
 
 async function getMySquads(squadIds: string[]) {
   if (squadIds.length === 0) return [];
@@ -69,18 +68,9 @@ export default async function MySquadPage() {
       ) : (
         <div className="grid gap-8">
           {mySquads.map((squad) => {
-            const members = [...squad.members].sort(
-              (a, b) => roleOrder[a.squadRole] - roleOrder[b.squadRole],
-            );
-            const leaders = members.filter((member) =>
-              ["leader", "coach"].includes(member.squadRole),
-            );
-            const activePlayers = members.filter(
-              (member) => member.squadRole === "player",
-            );
-            const reserves = members.filter(
-              (member) => member.squadRole === "reserve",
-            );
+            const members = sortRoster(squad.members);
+            const { leaders, players, reserves, filledLanes } =
+              rosterBreakdown(members);
             const isManaged = managedSquadIds.includes(squad.id);
 
             return (
@@ -133,7 +123,7 @@ export default async function MySquadPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 desktop:grid-cols-4">
+                <div className="grid grid-cols-2 gap-4 desktop:grid-cols-4">
                   <SquadStat
                     label="Leadership"
                     value={leaders.length}
@@ -141,7 +131,7 @@ export default async function MySquadPage() {
                   />
                   <SquadStat
                     label="Players"
-                    value={activePlayers.length}
+                    value={players.length}
                     icon={<Icons.Domain.Players size={18} />}
                   />
                   <SquadStat
@@ -151,18 +141,39 @@ export default async function MySquadPage() {
                   />
                   <SquadStat
                     label="Filled lanes"
-                    value={
-                      new Set(
-                        members
-                          .map((member) => member.user.profile?.preferredLane)
-                          .filter(Boolean),
-                      ).size
-                    }
+                    value={filledLanes}
                     icon={<Icons.Domain.Scrims size={18} />}
                   />
                 </div>
 
-                <div className="grid gap-5 desktop:grid-cols-[minmax(0,1fr)_22rem]">
+                <SplitView
+                  className="gap-5"
+                  aside={
+                    <>
+                      <Card className="shadow-xs">
+                        <CardHeader>
+                          <CardTitle>Lane spread</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <LaneSpread members={members} />
+                        </CardContent>
+                      </Card>
+
+                      {canSeeContacts && (
+                        <Card className="shadow-xs">
+                          <CardHeader>
+                            <CardTitle>Leader contacts</CardTitle>
+                          </CardHeader>
+                          <CardContent className="grid gap-3">
+                            {members.map((member) => (
+                              <ContactRow key={member.id} member={member} />
+                            ))}
+                          </CardContent>
+                        </Card>
+                      )}
+                    </>
+                  }
+                >
                   <Card className="shadow-xs">
                     <CardHeader>
                       <CardTitle>Roster</CardTitle>
@@ -183,107 +194,13 @@ export default async function MySquadPage() {
                       </div>
                     </CardContent>
                   </Card>
-
-                  <div className="grid h-fit gap-5">
-                    <Card className="shadow-xs">
-                      <CardHeader>
-                        <CardTitle>Lane spread</CardTitle>
-                      </CardHeader>
-                      <CardContent className="grid gap-2">
-                        {Object.entries(LANE_LABELS).map(([lane, label]) => {
-                          const count = members.filter(
-                            (member) =>
-                              member.user.profile?.preferredLane === lane,
-                          ).length;
-                          return (
-                            <div
-                              key={lane}
-                              className="flex items-center justify-between gap-3 border-b py-2 text-sm last:border-b-0"
-                            >
-                              <span className="text-muted-foreground">
-                                {label}
-                              </span>
-                              <span className="font-medium">{count}</span>
-                            </div>
-                          );
-                        })}
-                      </CardContent>
-                    </Card>
-
-                    {canSeeContacts && (
-                      <Card className="shadow-xs">
-                        <CardHeader>
-                          <CardTitle>Leader contacts</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid gap-3">
-                          {members.map((member) => (
-                            <ContactRow key={member.id} member={member} />
-                          ))}
-                        </CardContent>
-                      </Card>
-                    )}
-                  </div>
-                </div>
+                </SplitView>
               </section>
             );
           })}
         </div>
       )}
     </main>
-  );
-}
-
-function SquadLogo({
-  src,
-  name,
-  className,
-}: {
-  src: string | null;
-  name: string;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "grid shrink-0 place-items-center overflow-hidden rounded-none border bg-background",
-        className,
-      )}
-    >
-      <Image
-        src={src ?? "/images/gasak-logo.png"}
-        alt={`${name} logo`}
-        width={80}
-        height={80}
-        className="size-full object-cover"
-        unoptimized={Boolean(src)}
-      />
-    </div>
-  );
-}
-
-function SquadStat({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: number;
-  icon: React.ReactNode;
-}) {
-  return (
-    <Card className="shadow-xs">
-      <CardContent className="flex items-center gap-3 p-4">
-        <span className="grid size-9 place-items-center rounded-none border text-primary">
-          {icon}
-        </span>
-        <div>
-          <p className="font-heading text-2xl font-bold">{value}</p>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            {label}
-          </p>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 

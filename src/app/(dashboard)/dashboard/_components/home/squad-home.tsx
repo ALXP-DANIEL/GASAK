@@ -1,18 +1,12 @@
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatDate, formatDateTime } from "@lib/format";
-import { EVENT_TYPE_LABELS } from "@lib/labels";
+import { EVENT_TYPE_LABELS, resultBadgeVariant } from "@lib/labels";
 import { getMemberSquadIds } from "@server/authz";
 import { db, events, news, scrims, squads, tournaments } from "@server/db";
 import { and, desc, gte, inArray, isNull, or } from "drizzle-orm";
 import { PageHeader } from "../page-surface";
 import { EmptyState, HomeListItem, HomePanel } from "./widgets";
-
-function resultVariant(result: string) {
-  if (/^won?\b/i.test(result)) return "default" as const;
-  if (/^lost?\b/i.test(result)) return "destructive" as const;
-  return "secondary" as const;
-}
 
 export async function SquadHome({
   userId,
@@ -154,7 +148,7 @@ export async function SquadHome({
               meta={`${match.squad.name} · ${formatDate(match.date)}`}
               trailing={
                 match.result ? (
-                  <Badge variant={resultVariant(match.result)}>
+                  <Badge variant={resultBadgeVariant(match.result)}>
                     {match.result}
                   </Badge>
                 ) : (

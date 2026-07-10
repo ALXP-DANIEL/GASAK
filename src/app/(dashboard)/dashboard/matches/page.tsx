@@ -1,11 +1,11 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
-import { DataTable } from "@components/shared/data-table";
+import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { listMatches } from "@features/matches/queries";
 import { listManagedSquadOptions } from "@features/squads/queries";
 import { getMemberSquadIds } from "@server/authz";
 import { requireDashboardRole } from "../_components/dashboard-section";
-import { columns } from "./_components/columns";
 import { MatchFormDialog } from "./_components/match-form-dialog";
+import { MatchesTable } from "./_components/matches-table";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +22,15 @@ export default async function MatchesPage() {
     new Set(rows.map((row) => row.squad.name)),
   ).map((value) => ({ value, label: value }));
 
+  const wins = rows.filter(
+    (row) => row.result && /^won?\b/i.test(row.result),
+  ).length;
+  const losses = rows.filter(
+    (row) => row.result && /^lost?\b/i.test(row.result),
+  ).length;
+  const decided = wins + losses;
+  const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -29,16 +38,19 @@ export default async function MatchesPage() {
         description="Scrim and match records for your squads."
         actions={canManage ? <MatchFormDialog squads={squads} /> : undefined}
       />
-      <DataTable
-        columns={columns}
-        data={rows}
-        emptyMessage="No matches recorded yet."
-        searchColumnId="opponent"
-        searchPlaceholder="Search opponent or squad..."
-        facetedFilters={[
-          { columnId: "squad", title: "Squad", options: squadFilterOptions },
-        ]}
-      />
+
+      <StatStrip>
+        <StatItem label="Played" value={rows.length} hint="All records" />
+        <StatItem label="Wins" value={wins} hint="Recorded wins" />
+        <StatItem label="Losses" value={losses} hint="Recorded losses" />
+        <StatItem
+          label="Win Rate"
+          value={winRate === null ? "—" : `${winRate}%`}
+          hint={decided > 0 ? `${decided} decided matches` : "No results yet"}
+        />
+      </StatStrip>
+
+      <MatchesTable rows={rows} squadFilterOptions={squadFilterOptions} />
     </div>
   );
 }

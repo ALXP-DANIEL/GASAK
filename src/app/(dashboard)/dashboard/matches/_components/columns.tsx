@@ -3,6 +3,7 @@
 import { Badge } from "@components/ui/shadcn/badge";
 import type { listMatches } from "@features/matches/queries";
 import { formatDate } from "@lib/format";
+import { resultBadgeVariant } from "@lib/labels";
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 
@@ -39,9 +40,11 @@ export const columns: ColumnDef<MatchRow>[] = [
     header: "Result",
     cell: ({ row }) =>
       row.original.result ? (
-        <Badge variant="secondary">{row.original.result}</Badge>
+        <Badge variant={resultBadgeVariant(row.original.result)}>
+          {row.original.result}
+        </Badge>
       ) : (
-        "—"
+        <Badge variant="outline">No result</Badge>
       ),
   },
 ];

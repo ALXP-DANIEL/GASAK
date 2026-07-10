@@ -1,3 +1,10 @@
+import { StatItem, StatStrip } from "@components/shared/stat-strip";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@components/ui/shadcn/tabs";
 import { listSquadManagers } from "@features/recruitment/queries";
 import { APPLICATION_STATUS_LABELS } from "@lib/labels";
 import { getManagedSquadIds } from "@server/authz";
@@ -91,28 +98,47 @@ export default async function RecruitmentPage() {
       {rows.length === 0 ? (
         <EmptyState message="No applications yet." />
       ) : (
-        <div className="-mx-4 overflow-x-auto px-4 pb-3 desktop:mx-0 desktop:px-0">
-          <div className="grid min-w-[92rem] grid-cols-5 gap-4">
+        <div className="grid gap-6">
+          <StatStrip>
             {board.map((column) => (
-              <section
+              <StatItem
                 key={column.status}
-                className="flex min-h-[34rem] flex-col rounded-none border bg-card/60"
-              >
-                <div className={`border-b p-4 ${column.tone}`}>
-                  <div className="flex items-center justify-between gap-3">
-                    <h2 className="font-heading text-lg font-bold uppercase tracking-wide">
-                      {APPLICATION_STATUS_LABELS[column.status]}
-                    </h2>
-                    <span className="grid size-7 place-items-center border border-border bg-background text-xs font-semibold">
-                      {column.applications.length}
-                    </span>
-                  </div>
-                  <p className="mt-2 min-h-10 text-xs leading-5 text-muted-foreground">
-                    {column.description}
-                  </p>
-                </div>
+                label={APPLICATION_STATUS_LABELS[column.status]}
+                value={column.applications.length}
+              />
+            ))}
+          </StatStrip>
 
-                <div className="grid flex-1 content-start gap-3 p-3">
+          {/* Mobile: one status at a time via tabs */}
+          <Tabs
+            defaultValue={
+              board.find((column) => column.applications.length > 0)?.status ??
+              "applied"
+            }
+            className="desktop:hidden"
+          >
+            <TabsList className="w-full overflow-x-auto">
+              {board.map((column) => (
+                <TabsTrigger
+                  key={column.status}
+                  value={column.status}
+                  className="flex-1"
+                >
+                  {APPLICATION_STATUS_LABELS[column.status]} (
+                  {column.applications.length})
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            {board.map((column) => (
+              <TabsContent
+                key={column.status}
+                value={column.status}
+                className="mt-4"
+              >
+                <p className="mb-3 text-xs leading-5 text-muted-foreground">
+                  {column.description}
+                </p>
+                <div className="grid gap-3">
                   {column.applications.length === 0 ? (
                     <div className="rounded-none border border-dashed px-3 py-8 text-center text-xs text-muted-foreground">
                       No applications
@@ -132,8 +158,55 @@ export default async function RecruitmentPage() {
                     ))
                   )}
                 </div>
-              </section>
+              </TabsContent>
             ))}
+          </Tabs>
+
+          {/* Desktop: full kanban board */}
+          <div className="overflow-x-auto pb-3 mobile:hidden">
+            <div className="grid min-w-[92rem] grid-cols-5 gap-4">
+              {board.map((column) => (
+                <section
+                  key={column.status}
+                  className="flex min-h-[34rem] flex-col rounded-none border bg-card/60"
+                >
+                  <div className={`border-b p-4 ${column.tone}`}>
+                    <div className="flex items-center justify-between gap-3">
+                      <h2 className="font-heading text-lg font-bold uppercase tracking-wide">
+                        {APPLICATION_STATUS_LABELS[column.status]}
+                      </h2>
+                      <span className="grid size-7 place-items-center border border-border bg-background text-xs font-semibold">
+                        {column.applications.length}
+                      </span>
+                    </div>
+                    <p className="mt-2 min-h-10 text-xs leading-5 text-muted-foreground">
+                      {column.description}
+                    </p>
+                  </div>
+
+                  <div className="grid flex-1 content-start gap-3 p-3">
+                    {column.applications.length === 0 ? (
+                      <div className="rounded-none border border-dashed px-3 py-8 text-center text-xs text-muted-foreground">
+                        No applications
+                      </div>
+                    ) : (
+                      column.applications.map((application) => (
+                        <ApplicationCard
+                          key={application.id}
+                          application={application}
+                          assignedLeaderName={
+                            application.assignedLeader?.name ?? null
+                          }
+                          leaders={leaders}
+                          squads={activeSquads}
+                          isAdmin={isAdmin}
+                        />
+                      ))
+                    )}
+                  </div>
+                </section>
+              ))}
+            </div>
           </div>
         </div>
       )}

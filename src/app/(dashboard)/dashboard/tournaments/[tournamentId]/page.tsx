@@ -184,51 +184,49 @@ export default async function TournamentDetailPage({
                 : "."}
             </p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Round</TableHead>
-                  <TableHead>Opponent</TableHead>
-                  <TableHead>Played At</TableHead>
-                  <TableHead>Outcome</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead>Event</TableHead>
-                  {canManage && <TableHead className="w-0" />}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tournament.rounds.map((round) => (
-                  <TableRow key={round.id}>
-                    <TableCell className="font-medium">
-                      {round.roundLabel}
-                    </TableCell>
-                    <TableCell>vs {round.opponent}</TableCell>
-                    <TableCell>
-                      {round.scheduledAt
-                        ? formatDateTime(round.scheduledAt)
-                        : "—"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={outcomeVariant[round.outcome]}>
-                        {MATCH_OUTCOME_LABELS[round.outcome]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{round.score ?? "—"}</TableCell>
-                    <TableCell>
-                      {round.event ? (
-                        <Link
-                          href={`/dashboard/schedules/${round.event.id}`}
-                          className="underline underline-offset-4 hover:text-primary"
-                        >
-                          {round.event.title}
-                        </Link>
-                      ) : (
-                        "—"
+            <>
+              {/* Mobile: vertical bracket-path timeline */}
+              <ol className="flex flex-col desktop:hidden">
+                {tournament.rounds.map((round, index) => (
+                  <li key={round.id} className="relative flex gap-3 pb-5">
+                    {index < tournament.rounds.length - 1 && (
+                      <span
+                        aria-hidden
+                        className="absolute top-4 left-[5px] h-full w-px bg-border"
+                      />
+                    )}
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "z-10 mt-1.5 size-[11px] shrink-0 rounded-full border-2 border-background",
+                        round.outcome === "win" && "bg-primary",
+                        round.outcome === "loss" && "bg-destructive",
+                        round.outcome === "draw" && "bg-muted-foreground",
+                        round.outcome === "pending" && "bg-border",
                       )}
-                    </TableCell>
-                    {canManage && (
-                      <TableCell>
-                        <div className="flex items-center justify-end gap-2">
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          {round.roundLabel}
+                        </p>
+                        <Badge variant={outcomeVariant[round.outcome]}>
+                          {round.score
+                            ? `${MATCH_OUTCOME_LABELS[round.outcome]} ${round.score}`
+                            : MATCH_OUTCOME_LABELS[round.outcome]}
+                        </Badge>
+                      </div>
+                      <p className="mt-0.5 truncate font-medium">
+                        vs {round.opponent}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {round.scheduledAt
+                          ? formatDateTime(round.scheduledAt)
+                          : "Time TBD"}
+                        {round.event ? ` · ${round.event.title}` : ""}
+                      </p>
+                      {canManage && (
+                        <div className="mt-2 flex items-center gap-2">
                           <RoundFormDialog
                             tournamentId={tournament.id}
                             round={round}
@@ -240,12 +238,79 @@ export default async function TournamentDetailPage({
                             description={`This will remove "${round.roundLabel}" vs ${round.opponent}.`}
                           />
                         </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
+                      )}
+                    </div>
+                  </li>
                 ))}
-              </TableBody>
-            </Table>
+              </ol>
+
+              {/* Desktop: full table */}
+              <Table className="mobile:hidden">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Round</TableHead>
+                    <TableHead>Opponent</TableHead>
+                    <TableHead>Played At</TableHead>
+                    <TableHead>Outcome</TableHead>
+                    <TableHead>Score</TableHead>
+                    <TableHead>Event</TableHead>
+                    {canManage && <TableHead className="w-0" />}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tournament.rounds.map((round) => (
+                    <TableRow key={round.id}>
+                      <TableCell className="font-medium">
+                        {round.roundLabel}
+                      </TableCell>
+                      <TableCell>vs {round.opponent}</TableCell>
+                      <TableCell>
+                        {round.scheduledAt
+                          ? formatDateTime(round.scheduledAt)
+                          : "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={outcomeVariant[round.outcome]}>
+                          {MATCH_OUTCOME_LABELS[round.outcome]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{round.score ?? "—"}</TableCell>
+                      <TableCell>
+                        {round.event ? (
+                          <Link
+                            href={`/dashboard/schedules/${round.event.id}`}
+                            className="underline underline-offset-4 hover:text-primary"
+                          >
+                            {round.event.title}
+                          </Link>
+                        ) : (
+                          "—"
+                        )}
+                      </TableCell>
+                      {canManage && (
+                        <TableCell>
+                          <div className="flex items-center justify-end gap-2">
+                            <RoundFormDialog
+                              tournamentId={tournament.id}
+                              round={round}
+                              events={eventOptions}
+                            />
+                            <DeleteButton
+                              action={deleteTournamentRound.bind(
+                                null,
+                                round.id,
+                              )}
+                              title="Delete round?"
+                              description={`This will remove "${round.roundLabel}" vs ${round.opponent}.`}
+                            />
+                          </div>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </>
           )}
         </CardContent>
       </Card>

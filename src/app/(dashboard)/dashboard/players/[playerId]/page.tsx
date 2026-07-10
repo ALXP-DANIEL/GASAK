@@ -3,6 +3,7 @@ import {
   PageHeader,
 } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { PlayerCard } from "@components/cards/player/player-card";
+import { SplitView } from "@components/shared/split-view";
 import { Badge } from "@components/ui/shadcn/badge";
 import {
   Card,
@@ -42,15 +43,19 @@ export default async function PlayerDetailPage({
           </Badge>
         }
       />
-      <div className="grid gap-4 desktop:grid-cols-2">
-        <PlayerCard
-          name={player.name}
-          email={player.email}
-          image={player.image}
-          profile={profile}
-          showContact
-          className="h-fit"
-        />
+      <SplitView
+        className="gap-4"
+        aside={
+          <PlayerCard
+            name={player.name}
+            email={player.email}
+            image={player.image}
+            profile={profile}
+            showContact
+            className="h-fit"
+          />
+        }
+      >
         <Card>
           <CardHeader>
             <CardTitle>Player details</CardTitle>
@@ -106,7 +111,7 @@ export default async function PlayerDetailPage({
             ))}
           </CardContent>
         </Card>
-      </div>
+      </SplitView>
     </div>
   );
 }

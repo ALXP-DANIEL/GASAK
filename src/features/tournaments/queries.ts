@@ -6,7 +6,10 @@ export async function listTournaments(squadIds?: string[]) {
   return db.query.tournaments.findMany({
     where: squadIds ? inArray(tournaments.squadId, squadIds) : undefined,
     orderBy: desc(tournaments.date),
-    with: { squad: true },
+    with: {
+      squad: true,
+      rounds: { columns: { outcome: true } },
+    },
   });
 }
 

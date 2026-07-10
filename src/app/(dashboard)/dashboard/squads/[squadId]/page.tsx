@@ -1,13 +1,19 @@
 import { PlayerCard } from "@components/cards/player/player-card";
 import { Icons } from "@components/icons";
+import { SplitView } from "@components/shared/split-view";
 import { Accent } from "@components/ui/accent";
 import { BrandBadge, BrandCard } from "@components/ui/brand";
 import { Badge } from "@components/ui/shadcn/badge";
+import {
+  LaneSpread,
+  rosterBreakdown,
+  SquadLogo,
+  SquadStat,
+  sortRoster,
+} from "@features/squads/components/squad-shared";
 import { getSquad } from "@features/squads/queries";
-import { LANE_LABELS } from "@lib/labels";
 import { canManageSquad } from "@server/authz";
 import { db } from "@server/db";
-import type { SquadRole } from "@server/db/schema";
 import { requireUser, userOrgRole } from "@server/session";
 import Image from "next/image";
 import { forbidden, notFound } from "next/navigation";
@@ -20,13 +26,6 @@ import {
 } from "../_components/squad-manage";
 
 export const dynamic = "force-dynamic";
-
-const roleOrder: Record<SquadRole, number> = {
-  leader: 0,
-  coach: 1,
-  player: 2,
-  reserve: 3,
-};
 
 export default async function SquadDetailPage({
   params,
@@ -55,17 +54,8 @@ export default async function SquadDetailPage({
         .map((u) => ({ id: u.id, name: u.name, email: u.email }))
     : [];
 
-  const roster = [...squad.members].sort(
-    (a, b) => roleOrder[a.squadRole] - roleOrder[b.squadRole],
-  );
-  const leaders = roster.filter((member) =>
-    ["leader", "coach"].includes(member.squadRole),
-  );
-  const players = roster.filter((member) => member.squadRole === "player");
-  const reserves = roster.filter((member) => member.squadRole === "reserve");
-  const filledLanes = new Set(
-    roster.map((member) => member.user.profile?.preferredLane).filter(Boolean),
-  ).size;
+  const roster = sortRoster(squad.members);
+  const { leaders, players, reserves, filledLanes } = rosterBreakdown(roster);
 
   return (
     <Accent color={squad.accentColor}>
@@ -114,7 +104,7 @@ export default async function SquadDetailPage({
           </div>
         </section>
 
-        <section className="grid gap-4 desktop:grid-cols-4">
+        <section className="grid grid-cols-2 gap-4 desktop:grid-cols-4">
           <SquadStat
             label="Leadership"
             value={leaders.length}
@@ -137,7 +127,52 @@ export default async function SquadDetailPage({
           />
         </section>
 
-        <section className="grid gap-6 desktop:grid-cols-[minmax(0,1fr)_22rem]">
+        <SplitView
+          aside={
+            <>
+              <BrandCard interactive={false} className="p-5">
+                <h2 className="font-heading text-sm font-bold uppercase tracking-wider">
+                  Lane spread
+                </h2>
+                <div className="mt-4">
+                  <LaneSpread members={roster} />
+                </div>
+              </BrandCard>
+
+              <BrandCard interactive={false} className="p-5">
+                <h2 className="font-heading text-sm font-bold uppercase tracking-wider">
+                  Manage squad
+                </h2>
+                <div className="mt-4 grid gap-3">
+                  <SquadEditDialog squad={squad} />
+                  {isAdmin && (
+                    <>
+                      <SquadArchiveButton
+                        squadId={squad.id}
+                        archived={squad.archived}
+                      />
+                      <SquadDeleteButton
+                        squadId={squad.id}
+                        squadName={squad.name}
+                      />
+                    </>
+                  )}
+                </div>
+              </BrandCard>
+
+              {canManage && roster.length > 0 && (
+                <BrandCard interactive={false} className="p-5">
+                  <h2 className="font-heading text-sm font-bold uppercase tracking-wider">
+                    Role controls
+                  </h2>
+                  <div className="mt-4 overflow-x-auto">
+                    <SquadRosterTable members={squad.members} canManage />
+                  </div>
+                </BrandCard>
+              )}
+            </>
+          }
+        >
           <BrandCard interactive={false} className="p-5 desktop:p-7">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
@@ -176,90 +211,9 @@ export default async function SquadDetailPage({
               </div>
             )}
           </BrandCard>
-
-          <div className="grid h-fit gap-6">
-            <BrandCard interactive={false} className="p-5">
-              <h2 className="font-heading text-sm font-bold uppercase tracking-wider">
-                Lane spread
-              </h2>
-              <div className="mt-4 grid gap-2">
-                {Object.entries(LANE_LABELS).map(([lane, label]) => {
-                  const count = roster.filter(
-                    (member) => member.user.profile?.preferredLane === lane,
-                  ).length;
-                  return (
-                    <div
-                      key={lane}
-                      className="flex items-center justify-between gap-3 border-b border-border py-2 text-sm last:border-b-0"
-                    >
-                      <span className="text-muted-foreground">{label}</span>
-                      <span className="font-medium">{count}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </BrandCard>
-
-            <BrandCard interactive={false} className="p-5">
-              <h2 className="font-heading text-sm font-bold uppercase tracking-wider">
-                Manage squad
-              </h2>
-              <div className="mt-4 grid gap-3">
-                <SquadEditDialog squad={squad} />
-                {isAdmin && (
-                  <>
-                    <SquadArchiveButton
-                      squadId={squad.id}
-                      archived={squad.archived}
-                    />
-                    <SquadDeleteButton
-                      squadId={squad.id}
-                      squadName={squad.name}
-                    />
-                  </>
-                )}
-              </div>
-            </BrandCard>
-
-            {canManage && roster.length > 0 && (
-              <BrandCard interactive={false} className="p-5">
-                <h2 className="font-heading text-sm font-bold uppercase tracking-wider">
-                  Role controls
-                </h2>
-                <div className="mt-4 overflow-x-auto">
-                  <SquadRosterTable members={squad.members} canManage />
-                </div>
-              </BrandCard>
-            )}
-          </div>
-        </section>
+        </SplitView>
       </div>
     </Accent>
-  );
-}
-
-function SquadLogo({
-  src,
-  name,
-  className,
-}: {
-  src: string | null;
-  name: string;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`grid shrink-0 place-items-center overflow-hidden rounded-md border-2 border-primary/40 bg-background ${className ?? ""}`}
-    >
-      <Image
-        src={src ?? "/images/gasak-logo.png"}
-        alt={`${name} logo`}
-        width={128}
-        height={128}
-        className="size-full object-cover"
-        unoptimized={Boolean(src)}
-      />
-    </div>
   );
 }
 
@@ -271,31 +225,5 @@ function HeroMetric({ label, value }: { label: string; value: number }) {
         {label}
       </p>
     </div>
-  );
-}
-
-function SquadStat({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: number;
-  icon: React.ReactNode;
-}) {
-  return (
-    <BrandCard interactive={false} className="p-4">
-      <div className="flex items-center gap-3">
-        <span className="grid size-9 place-items-center rounded-none border text-primary">
-          {icon}
-        </span>
-        <div>
-          <p className="font-heading text-2xl font-bold">{value}</p>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            {label}
-          </p>
-        </div>
-      </div>
-    </BrandCard>
   );
 }

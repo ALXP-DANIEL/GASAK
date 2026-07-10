@@ -21,6 +21,7 @@ import interactionPlugin from "@fullcalendar/react/interaction";
 import listPlugin from "@fullcalendar/react/list";
 import multiMonthPlugin from "@fullcalendar/react/multimonth";
 import timeGridPlugin from "@fullcalendar/react/timegrid";
+import { useScreen } from "@hooks/use-screen";
 import { EVENT_TYPE_LABELS } from "@lib/labels";
 import { cn } from "@lib/utils";
 import { CalendarBlankIcon } from "@phosphor-icons/react/dist/ssr/CalendarBlank";
@@ -31,7 +32,7 @@ import { XIcon } from "@phosphor-icons/react/dist/ssr/X";
 import type { EventType } from "@server/db/schema";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { EventCalendarViews } from "./event-calendar-views";
 import { EventFormDialog } from "./event-form-dialog";
 
@@ -62,6 +63,7 @@ const views = [
   { key: "dayGridMonth", label: "Month" },
   { key: "timeGridWeek", label: "Week" },
   { key: "timeGridDay", label: "Day" },
+  { key: "listMonth", label: "Agenda" },
 ] as const;
 
 const plugins = [
@@ -102,12 +104,23 @@ export function ScheduleCalendar({
 }) {
   const controller = useCalendarController();
   const router = useRouter();
+  const isMobile = useScreen("mobile");
   const [selectedCalendar, setSelectedCalendar] = useState(allCalendarKey);
   const [view, setView] =
     useState<(typeof views)[number]["key"]>("dayGridMonth");
   const [title, setTitle] = useState(format(new Date(), "MMMM yyyy"));
   const [visibleEventCount, setVisibleEventCount] = useState(events.length);
   const [hover, setHover] = useState<HoverState | null>(null);
+  const userPickedView = useRef(false);
+
+  // A month grid is unreadable on a phone — default to the agenda list
+  // once we know the viewport, unless the user already chose a view.
+  useEffect(() => {
+    if (isMobile && !userPickedView.current && view === "dayGridMonth") {
+      setView("listMonth");
+      controller.changeView("listMonth");
+    }
+  }, [isMobile, view, controller]);
 
   const eventsById = useMemo(
     () => new Map(events.map((event) => [event.id, event])),
@@ -156,6 +169,7 @@ export function ScheduleCalendar({
   }
 
   function changeView(nextView: (typeof views)[number]["key"]) {
+    userPickedView.current = true;
     setView(nextView);
     controller.changeView(nextView);
   }
