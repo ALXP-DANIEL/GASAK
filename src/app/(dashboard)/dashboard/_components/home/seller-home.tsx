@@ -2,20 +2,15 @@ import {
   type RevenuePoint,
   RevenueTrendChart,
 } from "@components/charts/revenue-trend-chart";
-import { Icons } from "@components/icons";
+import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatDateTime, formatRM } from "@lib/format";
 import { ORDER_STATUS_LABELS } from "@lib/labels";
 import { db, orders, products } from "@server/db";
 import { format, startOfMonth, subDays } from "date-fns";
 import { and, count, desc, eq, gte, inArray, sum } from "drizzle-orm";
-import {
-  EmptyState,
-  HomeListItem,
-  HomePanel,
-  StatCard,
-  StatGrid,
-} from "./widgets";
+import { PageHeader } from "../page-surface";
+import { EmptyState, HomeListItem, HomePanel } from "./widgets";
 
 export async function SellerHome() {
   const now = new Date();
@@ -28,6 +23,7 @@ export async function SellerHome() {
     [outOfStock],
     [pendingCount],
     [ordersThisMonth],
+    fulfillmentQueue,
     recentOrders,
     paidOrders,
   ] = await Promise.all([
@@ -51,6 +47,12 @@ export async function SellerHome() {
       .select({ value: count() })
       .from(orders)
       .where(gte(orders.createdAt, monthStart)),
+    db.query.orders.findMany({
+      where: inArray(orders.status, ["pending", "waiting_payment", "paid"]),
+      orderBy: desc(orders.createdAt),
+      limit: 6,
+      with: { product: true },
+    }),
     db.query.orders.findMany({
       orderBy: desc(orders.createdAt),
       limit: 6,
@@ -80,48 +82,72 @@ export async function SellerHome() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-heading text-2xl font-bold">Seller Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
-          Store overview for orders, products, revenue, and fulfillment.
-        </p>
-      </div>
+      <PageHeader
+        title="Seller Dashboard"
+        description="Store overview for orders, products, revenue, and fulfillment."
+      />
 
-      <StatGrid>
-        <StatCard
+      <StatStrip>
+        <StatItem
           label="Revenue"
           value={formatRM(Number(paidAgg.revenue ?? 0))}
-          icon={Icons.Domain.Revenue}
           hint={`${paidAgg.orderCount} paid orders`}
         />
-        <StatCard
+        <StatItem
           label="Orders This Month"
           value={ordersThisMonth.value}
-          icon={Icons.Domain.Orders}
           hint={`${pendingCount.value} awaiting payment`}
         />
-        <StatCard
+        <StatItem
           label="Active Products"
           value={productCount.value}
-          icon={Icons.Domain.Products}
           hint={`${outOfStock.value} out of stock`}
         />
-        <StatCard
-          label="Pending Orders"
+        <StatItem
+          label="Needs Fulfillment"
           value={pendingCount.value}
-          icon={Icons.Status.Pending}
-          hint="Needs fulfillment"
+          hint="Pending or waiting payment"
         />
-      </StatGrid>
+      </StatStrip>
+
+      <div className="grid grid-cols-1 gap-4 desktop:grid-cols-3">
+        <HomePanel
+          title="Revenue — Last 30 Days"
+          description="Daily revenue from paid orders"
+          className="desktop:col-span-2"
+        >
+          <RevenueTrendChart data={revenueTrend} />
+        </HomePanel>
+
+        <HomePanel
+          title="Fulfillment Queue"
+          description="Orders that need a next step"
+          action={{ href: "/dashboard/orders", label: "View all" }}
+        >
+          {fulfillmentQueue.length === 0 && (
+            <EmptyState message="Queue is clear." />
+          )}
+          {fulfillmentQueue.map((order) => (
+            <HomeListItem
+              key={order.id}
+              href="/dashboard/orders"
+              title={`${order.product?.name ?? "Unknown product"} × ${order.quantity}`}
+              meta={order.customerName}
+              trailing={
+                <Badge variant="outline">
+                  {ORDER_STATUS_LABELS[order.status]}
+                </Badge>
+              }
+            />
+          ))}
+        </HomePanel>
+      </div>
 
       <HomePanel
-        title="Revenue — Last 30 Days"
-        description="Daily revenue from paid orders"
+        title="Recent Orders"
+        description="Latest store activity"
+        action={{ href: "/dashboard/orders", label: "View all" }}
       >
-        <RevenueTrendChart data={revenueTrend} />
-      </HomePanel>
-
-      <HomePanel title="Recent Orders" description="Latest store activity">
         {recentOrders.length === 0 && <EmptyState message="No orders yet." />}
         {recentOrders.map((order) => (
           <HomeListItem

@@ -1,17 +1,18 @@
-import { Icons } from "@components/icons";
+import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatDate, formatDateTime } from "@lib/format";
 import { EVENT_TYPE_LABELS } from "@lib/labels";
 import { getMemberSquadIds } from "@server/authz";
 import { db, events, news, scrims, squads, tournaments } from "@server/db";
 import { and, desc, gte, inArray, isNull, or } from "drizzle-orm";
-import {
-  EmptyState,
-  HomeListItem,
-  HomePanel,
-  StatCard,
-  StatGrid,
-} from "./widgets";
+import { PageHeader } from "../page-surface";
+import { EmptyState, HomeListItem, HomePanel } from "./widgets";
+
+function resultVariant(result: string) {
+  if (/^won?\b/i.test(result)) return "default" as const;
+  if (/^lost?\b/i.test(result)) return "destructive" as const;
+  return "secondary" as const;
+}
 
 export async function SquadHome({
   userId,
@@ -43,13 +44,13 @@ export async function SquadHome({
           ),
         )
         .orderBy(events.startsAt)
-        .limit(4),
+        .limit(6),
       db.query.news.findMany({
         where: squadIds.length
           ? or(isNull(news.squadId), inArray(news.squadId, squadIds))
           : isNull(news.squadId),
         orderBy: desc(news.createdAt),
-        limit: 3,
+        limit: 4,
         with: { squad: true },
       }),
       squadIds.length
@@ -64,7 +65,7 @@ export async function SquadHome({
         ? db.query.tournaments.findMany({
             where: inArray(tournaments.squadId, squadIds),
             orderBy: desc(tournaments.date),
-            limit: 5,
+            limit: 4,
             with: { squad: true },
           })
         : Promise.resolve([]),
@@ -74,54 +75,52 @@ export async function SquadHome({
     (total, squad) => total + squad.members.length,
     0,
   );
+  const recentWins = squadMatches.filter(
+    (match) => match.result && /^won?\b/i.test(match.result),
+  ).length;
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-heading text-2xl font-bold">
-          {isLeader ? "Leader Dashboard" : "Member Dashboard"}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {isLeader
+      <PageHeader
+        title={isLeader ? "Leader Dashboard" : "Member Dashboard"}
+        description={
+          isLeader
             ? "Squad overview for roster, schedules, matches, and tournaments."
-            : "Player overview for squad updates, schedules, and match activity."}
-        </p>
-      </div>
+            : "Player overview for squad updates, schedules, and match activity."
+        }
+      />
 
-      <StatGrid>
-        <StatCard
+      <StatStrip>
+        <StatItem
           label="My Squads"
           value={mySquads.length}
-          icon={Icons.Stats.Squads}
           hint={
             mySquads.map((squad) => squad.name).join(", ") || "No squad yet"
           }
         />
-        <StatCard
+        <StatItem
           label="Teammates"
           value={memberCount}
-          icon={Icons.Domain.Members}
           hint="Across your squads"
         />
-        <StatCard
+        <StatItem
           label="Upcoming Events"
           value={upcoming.length}
-          icon={Icons.Domain.Calendar}
           hint="Next on the schedule"
         />
-        <StatCard
-          label="Recent Matches"
-          value={squadMatches.length}
-          icon={Icons.Domain.Scrims}
-          hint="Latest scrims and matches"
+        <StatItem
+          label="Recent Form"
+          value={`${recentWins}W–${squadMatches.length - recentWins}L`}
+          hint={`Last ${squadMatches.length} matches`}
         />
-      </StatGrid>
+      </StatStrip>
 
       <div className="grid grid-cols-1 gap-4 desktop:grid-cols-3">
         <HomePanel
-          title="Upcoming Schedule"
-          description="Org-wide and squad events"
-          action={{ href: "/dashboard/schedules", label: "View all" }}
+          title="This Week"
+          description="Org-wide and squad events, soonest first"
+          action={{ href: "/dashboard/schedules", label: "Full schedule" }}
+          className="desktop:col-span-2"
         >
           {upcoming.length === 0 && (
             <EmptyState message="No upcoming events." />
@@ -129,8 +128,9 @@ export async function SquadHome({
           {upcoming.map((event) => (
             <HomeListItem
               key={event.id}
+              href={`/dashboard/schedules/${event.id}`}
               title={event.title}
-              meta={formatDateTime(event.startsAt)}
+              meta={`${formatDateTime(event.startsAt)}${event.location ? ` · ${event.location}` : ""}`}
               trailing={
                 <Badge variant="outline">{EVENT_TYPE_LABELS[event.type]}</Badge>
               }
@@ -139,8 +139,8 @@ export async function SquadHome({
         </HomePanel>
 
         <HomePanel
-          title="Recent Matches"
-          description="Latest scrim results"
+          title="Recent Results"
+          description="Latest scrims and matches"
           action={{ href: "/dashboard/matches", label: "View all" }}
         >
           {squadMatches.length === 0 && (
@@ -149,17 +149,24 @@ export async function SquadHome({
           {squadMatches.map((match) => (
             <HomeListItem
               key={match.id}
+              href={`/dashboard/matches/${match.id}`}
               title={`vs ${match.opponent}`}
               meta={`${match.squad.name} · ${formatDate(match.date)}`}
               trailing={
                 match.result ? (
-                  <Badge variant="secondary">{match.result}</Badge>
-                ) : undefined
+                  <Badge variant={resultVariant(match.result)}>
+                    {match.result}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline">No result</Badge>
+                )
               }
             />
           ))}
         </HomePanel>
+      </div>
 
+      <div className="grid grid-cols-1 gap-4 desktop:grid-cols-2">
         <HomePanel
           title="Tournaments"
           description="Your squads' tournament runs"
@@ -182,19 +189,23 @@ export async function SquadHome({
             />
           ))}
         </HomePanel>
-      </div>
 
-      {newsItems.length > 0 && (
-        <HomePanel title="News" description="Latest updates for your squads">
+        <HomePanel
+          title="News"
+          description="Latest updates for your squads"
+          action={{ href: "/dashboard/news", label: "View all" }}
+        >
+          {newsItems.length === 0 && <EmptyState message="No news yet." />}
           {newsItems.map((item) => (
             <HomeListItem
               key={item.id}
+              href={`/dashboard/news/${item.id}`}
               title={item.title}
               meta={`${item.squad?.name ?? "Organization"} · ${formatDate(item.createdAt)}`}
             />
           ))}
         </HomePanel>
-      )}
+      </div>
     </div>
   );
 }
