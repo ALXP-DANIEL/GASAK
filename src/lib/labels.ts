@@ -22,10 +22,10 @@ export const ORG_ROLE_LABELS: Record<OrgRole, string> = {
 export const ROLE_LABELS = ORG_ROLE_LABELS;
 
 export const LANE_LABELS: Record<Lane, string> = {
-  exp: "EXP Lane",
+  exp: "EXP",
   jungle: "Jungle",
-  mid: "Mid Lane",
-  gold: "Gold Lane",
+  mid: "Mid",
+  gold: "Gold",
   roam: "Roam",
   flex: "Flex",
 };
@@ -76,7 +76,7 @@ export function canonicalizeLanes(
   return normalized;
 }
 
-/** Format a player's preferred lanes as a readable label (e.g. "EXP Lane, Mid Lane"). */
+/** Format a player's preferred lanes as a readable label (e.g. "EXP, Mid"). */
 export function formatLanes(
   lanes: readonly (string | null | undefined)[] | null | undefined,
   fallback = "—",
