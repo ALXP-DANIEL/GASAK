@@ -8,8 +8,10 @@ import { FormField, FormFileInput } from "@components/forms/form-field";
 import { LaneSelectGroup } from "@components/forms/lane-select-group";
 import { MlbbIdFields } from "@components/forms/mlbb-id-fields";
 import { PhonePrefixField } from "@components/forms/phone-prefix-field";
+import { RankSelect } from "@components/forms/rank-select";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { rankFieldSchema, rankOrder } from "@lib/ranks";
 import { updateProfile } from "@server/actions/players";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -17,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const profileFormSchema = z.object({
+const profileFormObject = z.object({
   name: z.string().min(2, "Display name is required"),
   fullName: z.string().optional(),
   nickname: z.string().optional(),
@@ -26,10 +28,23 @@ const profileFormSchema = z.object({
   serverId: z.string().optional(),
   phone: z.string().optional(),
   preferredLanes: z.array(z.string()).optional(),
-  currentRank: z.string().optional(),
-  peakRank: z.string().optional(),
+  currentRank: rankFieldSchema.optional(),
+  peakRank: rankFieldSchema.optional(),
   avatar: z.instanceof(File).nullable(),
 });
+
+const profileFormSchema = profileFormObject.refine(
+  (data) => {
+    const current = data.currentRank;
+    const peak = data.peakRank;
+    if (!current || !peak) return true;
+    return rankOrder(current) <= rankOrder(peak);
+  },
+  {
+    message: "Current rank can't be higher than your peak rank.",
+    path: ["currentRank"],
+  },
+);
 
 type ProfileFormInput = z.infer<typeof profileFormSchema>;
 
@@ -50,6 +65,8 @@ export function ProfileForm({
     defaultValues: { ...defaultValues, avatar: null },
   });
 
+  const peakRank = form.watch("peakRank");
+
   async function onSubmit(values: ProfileFormInput) {
     setSubmitting(true);
     const formData = new FormData();
@@ -62,6 +79,9 @@ export function ProfileForm({
       }
       if (typeof value === "string") {
         formData.set(key, key === "phone" ? toMalaysiaPhone(value) : value);
+      } else if (typeof value === "object" && !(value instanceof File)) {
+        // Structured values (ranks) are sent as JSON so they can be cleared.
+        formData.set(key, JSON.stringify(value));
       }
     }
     // Multi-select lanes are sent as a JSON array (always sent so it can be cleared).
@@ -115,14 +135,21 @@ export function ProfileForm({
         label="Preferred lanes"
         description="Pick the lanes you play, or choose Flex if you can fill any role."
       />
-      <DashboardFormGrid>
-        <FormField
+      <div className="grid gap-3">
+        <RankSelect
           control={form.control}
           name="currentRank"
           label="Current Rank"
+          description="Pick your tier, division, and stars."
+          maxRank={peakRank}
         />
-        <FormField control={form.control} name="peakRank" label="Peak Rank" />
-      </DashboardFormGrid>
+        <RankSelect
+          control={form.control}
+          name="peakRank"
+          label="Peak Rank"
+          description="Your highest achieved rank."
+        />
+      </div>
       <Button type="submit" disabled={submitting} className="w-fit">
         {submitting ? "Saving..." : "Save Profile"}
       </Button>

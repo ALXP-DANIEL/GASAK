@@ -2,6 +2,7 @@
 
 import type { listPlayers } from "@features/players/queries";
 import { formatLanes } from "@lib/labels";
+import { formatRank } from "@lib/ranks";
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 
@@ -36,6 +37,6 @@ export const columns: ColumnDef<PlayerRow>[] = [
   {
     id: "rank",
     header: "Rank",
-    cell: ({ row }) => row.original.currentRank ?? "—",
+    cell: ({ row }) => formatRank(row.original.currentRank),
   },
 ];

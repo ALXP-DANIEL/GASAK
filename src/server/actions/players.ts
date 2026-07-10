@@ -1,6 +1,7 @@
 "use server";
 
 import { canonicalizeLanes } from "@lib/labels";
+import { rankFieldSchema } from "@lib/ranks";
 import { logActivity } from "@server/activity-log";
 import { actionUser } from "@server/authz";
 import { db, laneEnum, playerProfiles, user } from "@server/db";
@@ -23,8 +24,8 @@ const profileSchema = z.object({
     .array(z.enum(laneEnum.enumValues))
     .transform(canonicalizeLanes)
     .optional(),
-  currentRank: z.string().optional(),
-  peakRank: z.string().optional(),
+  currentRank: rankFieldSchema.optional(),
+  peakRank: rankFieldSchema.optional(),
 });
 
 export async function updateProfile(
@@ -39,7 +40,7 @@ export async function updateProfile(
     return { ok: false, error: "You can only edit your own profile" };
   }
 
-  const raw = Object.fromEntries(
+  const raw: Record<string, unknown> = Object.fromEntries(
     [
       "name",
       "fullName",
@@ -58,6 +59,19 @@ export async function updateProfile(
       ];
     }),
   );
+
+  // currentRank / peakRank are sent as JSON-encoded MlbbRank objects.
+  for (const key of ["currentRank", "peakRank"]) {
+    const value = formData.get(key);
+    if (typeof value === "string" && value !== "") {
+      try {
+        const parsed = JSON.parse(value);
+        if (parsed && typeof parsed === "object") raw[key] = parsed;
+      } catch {
+        // ignore malformed payloads; validation below will surface the issue
+      }
+    }
+  }
 
   // preferredLanes is sent as a JSON-encoded array (multi-select field).
   const lanesRaw = formData.get("preferredLanes");

@@ -2,6 +2,7 @@
 
 import { randomInt } from "node:crypto";
 import { canonicalizeLanes } from "@lib/labels";
+import { rankFieldSchema } from "@lib/ranks";
 import { logActivity } from "@server/activity-log";
 import { createBillplzBill, getBillplzBill } from "@server/billplz";
 import {
@@ -30,7 +31,7 @@ const applicationSchema = z.object({
   mlbbId: z.string().min(4, "Enter a valid MLBB ID"),
   serverId: z.string().min(1, "Server ID is required"),
   squadId: z.uuid().optional(),
-  currentRank: z.string().min(1, "Current rank is required"),
+  currentRank: rankFieldSchema,
   preferredLanes: z
     .array(z.enum(laneEnum.enumValues))
     .min(1, "Select at least one lane")

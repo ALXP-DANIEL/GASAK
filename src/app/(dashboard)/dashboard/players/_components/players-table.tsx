@@ -11,6 +11,7 @@ import { Badge } from "@components/ui/shadcn/badge";
 import type { listPlayers } from "@features/players/queries";
 import { initials } from "@lib/format";
 import { formatLanes } from "@lib/labels";
+import { formatRank } from "@lib/ranks";
 import { columns } from "./columns";
 
 type PlayerRow = Awaited<ReturnType<typeof listPlayers>>[number];
@@ -55,7 +56,9 @@ export function PlayersTable({
           }
           trailing={
             player.currentRank ? (
-              <Badge variant="secondary">{player.currentRank}</Badge>
+              <Badge variant="secondary">
+                {formatRank(player.currentRank)}
+              </Badge>
             ) : undefined
           }
         />
