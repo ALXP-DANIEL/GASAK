@@ -185,7 +185,7 @@ export async function onboardApplicant(
     mlbbId: application.mlbbId,
     serverId: application.serverId,
     phone: application.phone,
-    preferredLane: application.preferredLane,
+    preferredLanes: application.preferredLanes,
     currentRank: application.currentRank,
   });
 

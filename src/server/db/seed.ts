@@ -237,7 +237,7 @@ async function main() {
       mlbbId: "123456789",
       serverId: "2001",
       phone: "+60123456789",
-      preferredLane: "jungle",
+      preferredLanes: ["jungle"],
       currentRank: "Mythical Glory",
       peakRank: "Mythical Immortal",
     },
@@ -249,7 +249,7 @@ async function main() {
       mlbbId: "234567890",
       serverId: "2001",
       phone: "+60123456780",
-      preferredLane: "gold",
+      preferredLanes: ["gold"],
       currentRank: "Mythic",
       peakRank: "Mythical Glory",
     },
@@ -261,7 +261,7 @@ async function main() {
       mlbbId: "345678901",
       serverId: "2002",
       phone: "+60123456781",
-      preferredLane: "mid",
+      preferredLanes: ["mid", "exp"],
       currentRank: "Mythical Honor",
       peakRank: "Mythical Glory",
     },
@@ -273,7 +273,7 @@ async function main() {
       mlbbId: "456789012",
       serverId: "2001",
       phone: "+60123456782",
-      preferredLane: "roam",
+      preferredLanes: ["roam"],
       currentRank: "Mythic",
       peakRank: "Mythical Honor",
     },
@@ -285,7 +285,7 @@ async function main() {
       mlbbId: String(567_000_000 + index),
       serverId: String(2003 + (index % 4)),
       phone: `+60123456${790 + index}`,
-      preferredLane: extraPlayerSeeds[index][3],
+      preferredLanes: [extraPlayerSeeds[index][3]],
       currentRank: index % 2 === 0 ? "Mythic" : "Mythical Honor",
       peakRank: index % 3 === 0 ? "Mythical Glory" : "Mythical Honor",
     })),
@@ -793,12 +793,9 @@ async function main() {
       mlbbId: String(880_000_000 + index),
       serverId: String(3000 + (index % 5)),
       currentRank: index % 2 === 0 ? "Mythic" : "Legend",
-      preferredLane: ["exp", "jungle", "mid", "gold", "roam"][index % 5] as
-        | "exp"
-        | "jungle"
-        | "mid"
-        | "gold"
-        | "roam",
+      preferredLanes: [
+        (["exp", "jungle", "mid", "gold", "roam"] as const)[index % 5],
+      ],
       heroPool: "Chou, Valentina, Claude, Fredrinn",
       previousTeam: index % 3 === 0 ? "Local Stack" : null,
       introduction: "Seeded recruitment application for dashboard testing.",

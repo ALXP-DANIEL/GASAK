@@ -1,7 +1,7 @@
 "use client";
 
 import type { listPlayers } from "@features/players/queries";
-import { LANE_LABELS } from "@lib/labels";
+import { formatLanes } from "@lib/labels";
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 
@@ -28,13 +28,10 @@ export const columns: ColumnDef<PlayerRow>[] = [
   },
   {
     id: "lane",
-    accessorFn: (row) => row.preferredLane ?? "",
+    accessorFn: (row) => row.preferredLanes ?? [],
     filterFn: "arrIncludesSome",
     header: "Lane",
-    cell: ({ row }) =>
-      row.original.preferredLane
-        ? LANE_LABELS[row.original.preferredLane]
-        : "—",
+    cell: ({ row }) => formatLanes(row.original.preferredLanes),
   },
   {
     id: "rank",

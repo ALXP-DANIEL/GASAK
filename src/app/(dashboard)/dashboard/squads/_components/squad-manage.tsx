@@ -48,7 +48,7 @@ import {
   TableHeader,
   TableRow,
 } from "@components/ui/shadcn/table";
-import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
+import { formatLanes, SQUAD_ROLE_LABELS } from "@lib/labels";
 import {
   addSquadMember,
   deleteSquad,
@@ -57,7 +57,7 @@ import {
   updateSquad,
   updateSquadMemberRole,
 } from "@server/actions/squads";
-import { squadRoleEnum } from "@server/db/schema";
+import { type Lane, squadRoleEnum } from "@server/db/schema";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
@@ -70,7 +70,7 @@ type SquadMemberRow = {
   joinedAt: Date;
   user: {
     name: string;
-    profile: { ign: string | null; preferredLane: string | null } | null;
+    profile: { ign: string | null; preferredLanes: Lane[] | null } | null;
   };
 };
 
@@ -358,12 +358,7 @@ export function SquadRosterTable({
             <TableCell className="font-medium">{member.user.name}</TableCell>
             <TableCell>{member.user.profile?.ign ?? "—"}</TableCell>
             <TableCell>
-              {member.user.profile?.preferredLane
-                ? LANE_LABELS[
-                    member.user.profile
-                      .preferredLane as keyof typeof LANE_LABELS
-                  ]
-                : "—"}
+              {formatLanes(member.user.profile?.preferredLanes)}
             </TableCell>
             <TableCell>
               {canManage ? (

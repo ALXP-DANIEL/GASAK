@@ -1,6 +1,7 @@
 "use server";
 
 import { randomInt } from "node:crypto";
+import { canonicalizeLanes } from "@lib/labels";
 import { logActivity } from "@server/activity-log";
 import { createBillplzBill, getBillplzBill } from "@server/billplz";
 import {
@@ -30,7 +31,10 @@ const applicationSchema = z.object({
   serverId: z.string().min(1, "Server ID is required"),
   squadId: z.uuid().optional(),
   currentRank: z.string().min(1, "Current rank is required"),
-  preferredLane: z.enum(laneEnum.enumValues),
+  preferredLanes: z
+    .array(z.enum(laneEnum.enumValues))
+    .min(1, "Select at least one lane")
+    .transform(canonicalizeLanes),
   heroPool: z.string().min(2, "List a few of your best heroes"),
   previousTeam: z.string().optional(),
   introduction: z.string().min(10, "Tell us a bit about yourself"),

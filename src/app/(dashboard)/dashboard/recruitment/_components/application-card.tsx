@@ -31,7 +31,7 @@ import { Textarea } from "@components/ui/shadcn/textarea";
 import { formatDateTime } from "@lib/format";
 import {
   APPLICATION_STATUS_LABELS,
-  LANE_LABELS,
+  formatLanes,
   SQUAD_ROLE_LABELS,
 } from "@lib/labels";
 import {
@@ -166,7 +166,7 @@ export function ApplicationCard({
 
             <div className="mt-3 grid gap-1.5 text-xs text-muted-foreground">
               <p>
-                {LANE_LABELS[application.preferredLane]} ·{" "}
+                {formatLanes(application.preferredLanes)} ·{" "}
                 {application.currentRank}
               </p>
               <p className="truncate">
@@ -198,7 +198,7 @@ export function ApplicationCard({
               <DetailRow label="Phone" value={application.phone} />
               <DetailRow
                 label="Lane"
-                value={LANE_LABELS[application.preferredLane]}
+                value={formatLanes(application.preferredLanes)}
               />
               <DetailRow label="Rank" value={application.currentRank} />
               <DetailRow label="Hero pool" value={application.heroPool} />

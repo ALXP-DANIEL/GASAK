@@ -5,7 +5,7 @@ import {
 } from "@components/ui/shadcn/avatar";
 import { Badge } from "@components/ui/shadcn/badge";
 import { initials } from "@lib/format";
-import { LANE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
+import { formatLanes, SQUAD_ROLE_LABELS } from "@lib/labels";
 import { cn } from "@lib/utils";
 import type { Lane, SquadRole } from "@server/db/schema";
 
@@ -16,7 +16,7 @@ type PlayerProfile = {
   mlbbId?: string | null;
   serverId?: string | null;
   phone?: string | null;
-  preferredLane?: string | null;
+  preferredLanes?: Lane[] | null;
   currentRank?: string | null;
   peakRank?: string | null;
 };
@@ -41,9 +41,7 @@ export function PlayerCard({
   className,
 }: PlayerCardProps) {
   const displayName = profile?.ign || profile?.nickname || name;
-  const lane = isLane(profile?.preferredLane)
-    ? LANE_LABELS[profile.preferredLane]
-    : "Flex";
+  const lane = formatLanes(profile?.preferredLanes);
 
   return (
     <article
@@ -104,8 +102,4 @@ function PlayerDetail({ label, value }: { label: string; value: string }) {
       <span className="text-right font-medium">{value}</span>
     </div>
   );
-}
-
-function isLane(value: string | null | undefined): value is Lane {
-  return Boolean(value && value in LANE_LABELS);
 }

@@ -121,6 +121,7 @@ export const laneEnum = pgEnum("lane", [
   "mid",
   "gold",
   "roam",
+  "flex",
 ]);
 
 export const squadRoleEnum = pgEnum("squad_role", [
@@ -211,7 +212,7 @@ export const playerProfiles = createTable("player_profiles", {
   mlbbId: text("mlbb_id"),
   serverId: text("server_id"),
   phone: text("phone"),
-  preferredLane: laneEnum("preferred_lane"),
+  preferredLanes: laneEnum("preferred_lanes").array(),
   currentRank: text("current_rank"),
   peakRank: text("peak_rank"),
   updatedAt: timestamp("updated_at", { withTimezone: true })
@@ -269,7 +270,7 @@ export const applications = createTable("applications", {
   mlbbId: text("mlbb_id").notNull(),
   serverId: text("server_id").notNull(),
   currentRank: text("current_rank").notNull(),
-  preferredLane: laneEnum("preferred_lane").notNull(),
+  preferredLanes: laneEnum("preferred_lanes").array().notNull(),
   heroPool: text("hero_pool").notNull(),
   previousTeam: text("previous_team"),
   introduction: text("introduction").notNull(),

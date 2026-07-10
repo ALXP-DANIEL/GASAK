@@ -60,7 +60,7 @@ export default async function SettingsPage() {
                 mlbbId: profile?.mlbbId ?? "",
                 serverId: profile?.serverId ?? "",
                 phone: profile?.phone ?? "",
-                preferredLane: profile?.preferredLane ?? "",
+                preferredLanes: profile?.preferredLanes ?? [],
                 currentRank: profile?.currentRank ?? "",
                 peakRank: profile?.peakRank ?? "",
                 avatar: null,

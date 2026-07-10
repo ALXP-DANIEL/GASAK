@@ -1,5 +1,6 @@
 "use server";
 
+import { canonicalizeLanes } from "@lib/labels";
 import { logActivity } from "@server/activity-log";
 import { actionUser } from "@server/authz";
 import { db, laneEnum, playerProfiles, user } from "@server/db";
@@ -18,7 +19,10 @@ const profileSchema = z.object({
   mlbbId: z.string().optional(),
   serverId: z.string().optional(),
   phone: z.string().optional(),
-  preferredLane: z.enum(laneEnum.enumValues).optional(),
+  preferredLanes: z
+    .array(z.enum(laneEnum.enumValues))
+    .transform(canonicalizeLanes)
+    .optional(),
   currentRank: z.string().optional(),
   peakRank: z.string().optional(),
 });
@@ -44,7 +48,6 @@ export async function updateProfile(
       "mlbbId",
       "serverId",
       "phone",
-      "preferredLane",
       "currentRank",
       "peakRank",
     ].map((key) => {
@@ -56,7 +59,19 @@ export async function updateProfile(
     }),
   );
 
-  const parsed = profileSchema.safeParse(raw);
+  // preferredLanes is sent as a JSON-encoded array (multi-select field).
+  const lanesRaw = formData.get("preferredLanes");
+  let preferredLanes: unknown;
+  if (typeof lanesRaw === "string" && lanesRaw !== "") {
+    try {
+      const parsedLanes = JSON.parse(lanesRaw);
+      if (Array.isArray(parsedLanes)) preferredLanes = parsedLanes;
+    } catch {
+      // ignore malformed payloads; validation below will surface the issue
+    }
+  }
+
+  const parsed = profileSchema.safeParse({ ...raw, preferredLanes });
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0].message };
   }

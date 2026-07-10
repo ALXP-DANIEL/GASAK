@@ -4,7 +4,7 @@ import { Accent } from "@components/ui/accent";
 import { BrandBadge, BrandCard, LinkButton } from "@components/ui/brand";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatDate } from "@lib/format";
-import { LANE_LABELS } from "@lib/labels";
+import { LANE_LABELS, LANE_ORDER, normalizeLanes } from "@lib/labels";
 import { createPageMetadata } from "@lib/metadata";
 import { db, scrims, squads, tournaments } from "@server/db";
 import type { SquadRole } from "@server/db/schema";
@@ -92,7 +92,11 @@ export default async function SquadDetailPage({
   const players = roster.filter((member) => member.squadRole === "player");
   const reserves = roster.filter((member) => member.squadRole === "reserve");
   const filledLanes = new Set(
-    roster.map((member) => member.user.profile?.preferredLane).filter(Boolean),
+    roster.flatMap((member) =>
+      normalizeLanes(member.user.profile?.preferredLanes).filter(
+        (lane) => lane !== "flex",
+      ),
+    ),
   ).size;
 
   return (
@@ -211,16 +215,20 @@ export default async function SquadDetailPage({
                 Lane spread
               </h2>
               <div className="mt-4 grid gap-2">
-                {Object.entries(LANE_LABELS).map(([lane, label]) => {
-                  const count = roster.filter(
-                    (member) => member.user.profile?.preferredLane === lane,
+                {LANE_ORDER.map((lane) => {
+                  const count = roster.filter((member) =>
+                    normalizeLanes(
+                      member.user.profile?.preferredLanes,
+                    ).includes(lane),
                   ).length;
                   return (
                     <div
                       key={lane}
                       className="flex items-center justify-between gap-3 border-b border-border py-2 text-sm last:border-b-0"
                     >
-                      <span className="text-muted-foreground">{label}</span>
+                      <span className="text-muted-foreground">
+                        {LANE_LABELS[lane]}
+                      </span>
                       <span className="font-medium">{count}</span>
                     </div>
                   );

@@ -5,7 +5,7 @@ import {
   DashboardFormGrid,
 } from "@components/forms/dashboard-form";
 import { FormField, FormFileInput } from "@components/forms/form-field";
-import { LaneRadioGroup } from "@components/forms/lane-radio-group";
+import { LaneSelectGroup } from "@components/forms/lane-select-group";
 import { MlbbIdFields } from "@components/forms/mlbb-id-fields";
 import { PhonePrefixField } from "@components/forms/phone-prefix-field";
 import { Button } from "@components/ui/shadcn/button";
@@ -25,7 +25,7 @@ const profileFormSchema = z.object({
   mlbbId: z.string().optional(),
   serverId: z.string().optional(),
   phone: z.string().optional(),
-  preferredLane: z.string().optional(),
+  preferredLanes: z.array(z.string()).optional(),
   currentRank: z.string().optional(),
   peakRank: z.string().optional(),
   avatar: z.instanceof(File).nullable(),
@@ -54,14 +54,18 @@ export function ProfileForm({
     setSubmitting(true);
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) {
-      if (!value) continue;
-      formData.set(
-        key,
-        key === "phone" && typeof value === "string"
-          ? toMalaysiaPhone(value)
-          : value,
-      );
+      if (key === "preferredLanes") continue;
+      if (value == null || value === "") continue;
+      if (value instanceof File) {
+        formData.set(key, value);
+        continue;
+      }
+      if (typeof value === "string") {
+        formData.set(key, key === "phone" ? toMalaysiaPhone(value) : value);
+      }
     }
+    // Multi-select lanes are sent as a JSON array (always sent so it can be cleared).
+    formData.set("preferredLanes", JSON.stringify(values.preferredLanes ?? []));
     const result = await updateProfile(userId, formData);
     setSubmitting(false);
 
@@ -105,11 +109,11 @@ export function ProfileForm({
           serverIdName="serverId"
         />
       </DashboardFormGrid>
-      <LaneRadioGroup
+      <LaneSelectGroup
         control={form.control}
-        name="preferredLane"
-        label="Preferred lane"
-        description="Choose the lane that best matches your current role."
+        name="preferredLanes"
+        label="Preferred lanes"
+        description="Pick the lanes you play, or choose Flex if you can fill any role."
       />
       <DashboardFormGrid>
         <FormField

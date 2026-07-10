@@ -1,7 +1,7 @@
 "use client";
 
 import { FormField, FormSelect } from "@components/forms/form-field";
-import { LaneRadioGroup } from "@components/forms/lane-radio-group";
+import { LaneSelectGroup } from "@components/forms/lane-select-group";
 import { MlbbIdFields } from "@components/forms/mlbb-id-fields";
 import { PhonePrefixField } from "@components/forms/phone-prefix-field";
 import { BrandCard } from "@components/ui/brand";
@@ -24,7 +24,9 @@ const schema = z.object({
   serverId: z.string().min(1, "Server ID is required"),
   squadId: z.string().optional(),
   currentRank: z.string().min(1, "Select your current rank"),
-  preferredLane: z.enum(laneEnum.enumValues, "Select your preferred lane"),
+  preferredLanes: z
+    .array(z.enum(laneEnum.enumValues))
+    .min(1, "Select at least one lane"),
   heroPool: z.string().min(2, "List a few of your best heroes"),
   previousTeam: z.string().optional(),
   introduction: z.string().min(10, "Tell us a bit about yourself"),
@@ -55,6 +57,7 @@ export function ApplicationForm({
       serverId: "",
       squadId: ANY_SQUAD_VALUE,
       currentRank: "",
+      preferredLanes: [],
       heroPool: "",
       previousTeam: "",
       introduction: "",
@@ -182,14 +185,14 @@ export function ApplicationForm({
         <FormSection
           index="03"
           title="Trial role"
-          description="The lane and heroes you want recruiters to evaluate."
+          description="The lanes and heroes you want recruiters to evaluate."
         >
           <div className="grid gap-5">
-            <LaneRadioGroup
+            <LaneSelectGroup
               control={control}
-              name="preferredLane"
-              label="Preferred lane"
-              description="Pick the lane you want to trial for."
+              name="preferredLanes"
+              label="Preferred lanes"
+              description="Pick the lanes you want to trial for, or Flex for any role."
             />
             <FormField
               control={control}

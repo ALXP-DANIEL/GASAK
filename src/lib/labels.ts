@@ -27,7 +27,64 @@ export const LANE_LABELS: Record<Lane, string> = {
   mid: "Mid Lane",
   gold: "Gold Lane",
   roam: "Roam",
+  flex: "Flex",
 };
+
+/** Canonical display order for lanes (specific roles first, Flex last). */
+export const LANE_ORDER: Lane[] = [
+  "exp",
+  "jungle",
+  "mid",
+  "gold",
+  "roam",
+  "flex",
+];
+
+/** The five specific MLBB lanes (everything except the flexible "Flex" role). */
+export const SPECIFIC_LANES: Lane[] = ["exp", "jungle", "mid", "gold", "roam"];
+
+/** The flexible role: a player who can fill any/multiple lanes. */
+export const FLEX_LANE = "flex" satisfies Lane;
+
+export function isLane(value: string | null | undefined): value is Lane {
+  return Boolean(value && value in LANE_LABELS);
+}
+
+/** Normalize an arbitrary lane list into ordered, de-duplicated valid lanes. */
+export function normalizeLanes(
+  lanes: readonly (string | null | undefined)[] | null | undefined,
+): Lane[] {
+  const valid = new Set((lanes ?? []).filter(isLane));
+  return LANE_ORDER.filter((lane) => valid.has(lane));
+}
+
+/**
+ * Apply the Flex selection rules so stored lane data is always canonical,
+ * regardless of the input source (form, API, seed):
+ * - de-duplicated and ordered (via {@link normalizeLanes});
+ * - Flex is exclusive: if present, it collapses to just `["flex"]`;
+ * - selecting all five specific lanes is equivalent to Flex.
+ */
+export function canonicalizeLanes(
+  lanes: readonly (string | null | undefined)[] | null | undefined,
+): Lane[] {
+  const normalized = normalizeLanes(lanes);
+  if (normalized.includes(FLEX_LANE)) return [FLEX_LANE];
+  if (SPECIFIC_LANES.every((lane) => normalized.includes(lane))) {
+    return [FLEX_LANE];
+  }
+  return normalized;
+}
+
+/** Format a player's preferred lanes as a readable label (e.g. "EXP Lane, Mid Lane"). */
+export function formatLanes(
+  lanes: readonly (string | null | undefined)[] | null | undefined,
+  fallback = "—",
+): string {
+  const normalized = normalizeLanes(lanes);
+  if (normalized.length === 0) return fallback;
+  return normalized.map((lane) => LANE_LABELS[lane]).join(", ");
+}
 
 export const SQUAD_ROLE_LABELS: Record<SquadRole, string> = {
   leader: "Leader",

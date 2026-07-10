@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@components/ui/shadcn/card";
-import { LANE_LABELS } from "@lib/labels";
+import { LANE_LABELS, LANE_ORDER, normalizeLanes } from "@lib/labels";
 import { cn } from "@lib/utils";
-import type { SquadRole } from "@server/db/schema";
+import type { Lane, SquadRole } from "@server/db/schema";
 import Image from "next/image";
 
 export const roleOrder: Record<SquadRole, number> = {
@@ -13,7 +13,7 @@ export const roleOrder: Record<SquadRole, number> = {
 
 type RosterMember = {
   squadRole: SquadRole;
-  user: { profile?: { preferredLane: string | null } | null };
+  user: { profile?: { preferredLanes: Lane[] | null } | null };
 };
 
 export function sortRoster<T extends { squadRole: SquadRole }>(members: T[]) {
@@ -23,13 +23,17 @@ export function sortRoster<T extends { squadRole: SquadRole }>(members: T[]) {
 }
 
 export function rosterBreakdown<T extends RosterMember>(members: T[]) {
+  const filledLanes = new Set<Lane>();
+  for (const member of members) {
+    for (const lane of normalizeLanes(member.user.profile?.preferredLanes)) {
+      if (lane !== "flex") filledLanes.add(lane);
+    }
+  }
   return {
     leaders: members.filter((m) => ["leader", "coach"].includes(m.squadRole)),
     players: members.filter((m) => m.squadRole === "player"),
     reserves: members.filter((m) => m.squadRole === "reserve"),
-    filledLanes: new Set(
-      members.map((m) => m.user.profile?.preferredLane).filter(Boolean),
-    ).size,
+    filledLanes: filledLanes.size,
   };
 }
 
@@ -94,16 +98,16 @@ export function LaneSpread<T extends RosterMember>({
 }) {
   return (
     <div className="grid gap-2">
-      {Object.entries(LANE_LABELS).map(([lane, label]) => {
-        const count = members.filter(
-          (member) => member.user.profile?.preferredLane === lane,
+      {LANE_ORDER.map((lane) => {
+        const count = members.filter((member) =>
+          normalizeLanes(member.user.profile?.preferredLanes).includes(lane),
         ).length;
         return (
           <div
             key={lane}
             className="flex items-center justify-between gap-3 border-b py-2 text-sm last:border-b-0"
           >
-            <span className="text-muted-foreground">{label}</span>
+            <span className="text-muted-foreground">{LANE_LABELS[lane]}</span>
             <span className="font-medium">{count}</span>
           </div>
         );

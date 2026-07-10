@@ -10,7 +10,7 @@ import {
 import { Badge } from "@components/ui/shadcn/badge";
 import type { listPlayers } from "@features/players/queries";
 import { initials } from "@lib/format";
-import { LANE_LABELS } from "@lib/labels";
+import { formatLanes } from "@lib/labels";
 import { columns } from "./columns";
 
 type PlayerRow = Awaited<ReturnType<typeof listPlayers>>[number];
@@ -38,8 +38,8 @@ export function PlayersTable({
           title={player.user.name}
           meta={[
             player.ign,
-            player.preferredLane
-              ? LANE_LABELS[player.preferredLane]
+            player.preferredLanes && player.preferredLanes.length > 0
+              ? formatLanes(player.preferredLanes)
               : undefined,
           ]
             .filter(Boolean)

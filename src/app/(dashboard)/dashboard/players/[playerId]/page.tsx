@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@components/ui/shadcn/card";
 import { getPlayer } from "@features/players/queries";
-import { LANE_LABELS, ORG_ROLE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
+import { formatLanes, ORG_ROLE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
 import { userOrgRole } from "@server/session";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -68,12 +68,8 @@ export default async function PlayerDetailPage({
             <DetailRow label="Server ID" value={profile?.serverId ?? "—"} />
             <DetailRow label="Phone" value={profile?.phone ?? "—"} />
             <DetailRow
-              label="Preferred Lane"
-              value={
-                profile?.preferredLane
-                  ? LANE_LABELS[profile.preferredLane]
-                  : "—"
-              }
+              label="Preferred Lanes"
+              value={formatLanes(profile?.preferredLanes)}
             />
             <DetailRow
               label="Current Rank"
