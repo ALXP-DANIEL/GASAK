@@ -21,6 +21,11 @@ export const ORG_ROLE_LABELS: Record<OrgRole, string> = {
 // Temporary alias while call sites migrate to ORG_ROLE_LABELS
 export const ROLE_LABELS = ORG_ROLE_LABELS;
 
+// NOTE: Multi-select lanes + the "Flex" role were disabled per a product
+// decision (GASAK: one lane per player, no Flex). The `flex` label is kept so
+// any DB-backed `flex` values still render, but the UI no longer offers it.
+// Re-enable by restoring the Flex option in LaneSelectGroup and the rules in
+// canonicalizeLanes below.
 export const LANE_LABELS: Record<Lane, string> = {
   exp: "EXP",
   jungle: "Jungle",
@@ -64,16 +69,20 @@ export function normalizeLanes(
  * - de-duplicated and ordered (via {@link normalizeLanes});
  * - Flex is exclusive: if present, it collapses to just `["flex"]`;
  * - selecting all five specific lanes is equivalent to Flex.
+ *
+ * NOTE: Flex + multi-select are disabled per product decision (one lane per
+ * player, no Flex). The rules below are kept commented for future reference.
  */
 export function canonicalizeLanes(
   lanes: readonly (string | null | undefined)[] | null | undefined,
 ): Lane[] {
-  const normalized = normalizeLanes(lanes);
-  if (normalized.includes(FLEX_LANE)) return [FLEX_LANE];
-  if (SPECIFIC_LANES.every((lane) => normalized.includes(lane))) {
-    return [FLEX_LANE];
-  }
-  return normalized;
+  // const normalized = normalizeLanes(lanes);
+  // if (normalized.includes(FLEX_LANE)) return [FLEX_LANE];
+  // if (SPECIFIC_LANES.every((lane) => normalized.includes(lane))) {
+  //   return [FLEX_LANE];
+  // }
+  // return normalized;
+  return normalizeLanes(lanes);
 }
 
 /** Format a player's preferred lanes as a readable label (e.g. "EXP, Mid"). */

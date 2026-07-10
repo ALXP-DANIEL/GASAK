@@ -98,7 +98,7 @@ export function LaneSpread<T extends RosterMember>({
 }) {
   return (
     <div className="grid gap-2">
-      {LANE_ORDER.map((lane) => {
+      {LANE_ORDER.filter((lane) => lane !== "flex").map((lane) => {
         const count = members.filter((member) =>
           normalizeLanes(member.user.profile?.preferredLanes).includes(lane),
         ).length;

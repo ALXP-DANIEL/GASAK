@@ -215,7 +215,7 @@ export default async function SquadDetailPage({
                 Lane spread
               </h2>
               <div className="mt-4 grid gap-2">
-                {LANE_ORDER.map((lane) => {
+                {LANE_ORDER.filter((lane) => lane !== "flex").map((lane) => {
                   const count = roster.filter((member) =>
                     normalizeLanes(
                       member.user.profile?.preferredLanes,

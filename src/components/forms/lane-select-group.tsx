@@ -8,7 +8,7 @@ import {
   FieldError,
   FieldLabel,
 } from "@components/ui/shadcn/field";
-import { FLEX_LANE, LANE_LABELS, SPECIFIC_LANES } from "@lib/labels";
+import { LANE_LABELS } from "@lib/labels";
 import { cn } from "@lib/utils";
 import type { Lane } from "@server/db/schema";
 import {
@@ -25,8 +25,8 @@ type LaneOption = {
   Icon: React.ComponentType<{ size?: number; className?: string }>;
 };
 
-/** The five specific lanes (multi-selectable). */
-const SPECIFIC_LANE_OPTIONS: LaneOption[] = [
+/** Single-select lane options (Flex disabled per product decision). */
+const LANE_OPTIONS: LaneOption[] = [
   {
     value: "exp",
     label: LANE_LABELS.exp,
@@ -59,24 +59,23 @@ const SPECIFIC_LANE_OPTIONS: LaneOption[] = [
   },
 ];
 
-/** The flexible role: mutually exclusive with the specific lanes. */
-const FLEX_OPTION: LaneOption = {
-  value: FLEX_LANE,
-  label: LANE_LABELS.flex,
-  shortLabel: "Flex",
-  Icon: Icons.Actions.SwitchFocus,
-};
+// NOTE: Multi-select + Flex option (commented for future reference):
+// const FLEX_OPTION: LaneOption = {
+//   value: "flex",
+//   label: LANE_LABELS.flex,
+//   shortLabel: "Flex",
+//   Icon: Icons.Actions.SwitchFocus,
+// };
 
 function toLaneList(value: unknown): Lane[] {
   return Array.isArray(value) ? (value.filter(Boolean) as Lane[]) : [];
 }
 
 /**
- * Multi-select lane picker.
+ * Single-select lane picker (one lane per player).
  *
- * - The five specific lanes can be toggled on/off in any combination.
- * - Selecting "Flex" clears every specific lane (a flex player fills any role),
- *   and selecting any specific lane clears "Flex". The two are never combined.
+ * NOTE: Multi-select + Flex logic was disabled per product decision.
+ * Re-enable by restoring FLEX_OPTION and the toggleLane multi-select logic.
  */
 export function LaneSelectGroup<
   TFieldValues extends FieldValues,
@@ -100,43 +99,24 @@ export function LaneSelectGroup<
       control={control}
       render={({ field, fieldState }) => {
         const selected = toLaneList(field.value);
-        const isFlex = selected.includes(FLEX_LANE);
+        const activeLane = selected[0];
 
-        const toggleLane = (lane: Lane) => {
+        const selectLane = (lane: Lane) => {
           if (disabled) return;
-          if (lane === FLEX_LANE) {
-            // Flex is exclusive: toggle it on (clearing others) or off.
-            field.onChange(isFlex ? [] : [FLEX_LANE]);
-            return;
-          }
-          // Selecting a specific lane always drops Flex first.
-          const withoutFlex = selected.filter((l) => l !== FLEX_LANE);
-          const next: Lane[] = withoutFlex.includes(lane)
-            ? withoutFlex.filter((l) => l !== lane)
-            : [...withoutFlex, lane];
-          // Selecting every specific lane is equivalent to Flex ("plays any role").
-          if (SPECIFIC_LANES.every((l) => next.includes(l))) {
-            field.onChange([FLEX_LANE]);
-            return;
-          }
-          field.onChange(next);
+          // Single-select: clicking the active lane clears it, otherwise set it.
+          field.onChange(activeLane === lane ? [] : [lane]);
         };
 
-        const renderOption = ({
-          value,
-          label,
-          shortLabel,
-          Icon,
-        }: LaneOption) => {
-          const active = selected.includes(value);
+        const renderOption = ({ value, shortLabel, Icon }: LaneOption) => {
+          const active = activeLane === value;
           return (
             <button
               key={value}
               type="button"
               aria-pressed={active}
-              aria-label={label}
+              aria-label={LANE_LABELS[value]}
               disabled={disabled}
-              onClick={() => toggleLane(value)}
+              onClick={() => selectLane(value)}
               className={cn(
                 "group flex h-20 min-w-0 flex-1 basis-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-border/70 bg-background/80 px-2 text-center shadow-inner shadow-foreground/3 transition-colors",
                 "hover:border-primary/60 hover:bg-primary/10",
@@ -172,13 +152,7 @@ export function LaneSelectGroup<
                 className="flex items-stretch gap-2"
                 aria-disabled={disabled}
               >
-                {renderOption(FLEX_OPTION)}
-                <div className="flex shrink-0 items-center">
-                  <span className="px-1 text-[0.6rem] font-semibold uppercase tracking-wider text-muted-foreground">
-                    or
-                  </span>
-                </div>
-                {SPECIFIC_LANE_OPTIONS.map(renderOption)}
+                {LANE_OPTIONS.map(renderOption)}
               </div>
             </div>
             <FieldError errors={[fieldState.error]} />
