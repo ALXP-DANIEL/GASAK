@@ -7,6 +7,7 @@ import { ArrowClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ArrowClockwis
 import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ArrowCounterClockwise";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareOut";
 import { ArrowsLeftRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowsLeftRight";
+import { ArrowsOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowsOut";
 import { CalendarBlankIcon } from "@phosphor-icons/react/dist/ssr/CalendarBlank";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
 import { CaretUpIcon } from "@phosphor-icons/react/dist/ssr/CaretUp";
@@ -128,6 +129,7 @@ export const Icons = {
 
   Actions: {
     Add: PlusIcon,
+    Minus: MinusIcon,
     Edit: PencilSimpleIcon,
     Delete: TrashIcon,
     Eyedropper: EyedropperIcon,
@@ -135,6 +137,7 @@ export const Icons = {
     Settings: GearIcon,
     CaretUpDown: CaretUpDownIcon,
     SwitchFocus: ArrowsLeftRightIcon,
+    Fit: ArrowsOutIcon,
   },
 
   Editor: {
