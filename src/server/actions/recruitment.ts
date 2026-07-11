@@ -113,8 +113,10 @@ export async function updateApplicationStatus(
 
 const onboardSchema = z.object({
   applicationId: z.uuid(),
+  email: z.email("Enter a valid login email"),
   squadId: z.uuid("Pick a squad"),
   squadRole: z.enum(squadRoleEnum.enumValues),
+  tempPassword: z.string().min(8, "Use at least 8 characters").optional(),
 });
 
 function generateTempPassword() {
@@ -147,7 +149,9 @@ export async function onboardApplicant(
     return { ok: false, error: "Only accepted applications can be onboarded" };
   }
 
-  const email = application.email.toLowerCase();
+  // The login email is set at onboard time and may differ from the contact
+  // email collected on the public form (which is used only for outreach).
+  const email = parsed.data.email.toLowerCase();
   const existing = await db.query.user.findFirst({
     where: eq(user.email, email),
   });
@@ -164,19 +168,18 @@ export async function onboardApplicant(
   });
   if (!squad) return { ok: false, error: "Squad not found" };
 
-  const tempPassword = generateTempPassword();
-  const signup = await auth.api.signUpEmail({
+  const tempPassword =
+    parsed.data.tempPassword?.trim() || generateTempPassword();
+  // createUser (admin plugin) creates the account + hashed credential without
+  // opening a session, so the admin who is onboarding stays logged in.
+  const signup = await auth.api.createUser({
     body: {
       name: application.fullName,
       email,
       password: tempPassword,
+      role: "user",
     },
   });
-
-  await db
-    .update(user)
-    .set({ role: "user" })
-    .where(eq(user.id, signup.user.id));
 
   await db.insert(playerProfiles).values({
     userId: signup.user.id,

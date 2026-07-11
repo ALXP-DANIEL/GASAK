@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@components/ui/shadcn/dialog";
+import { Input } from "@components/ui/shadcn/input";
 import { Label } from "@components/ui/shadcn/label";
 import {
   Select,
@@ -71,6 +72,9 @@ export function ApplicationCard({
   const [notes, setNotes] = useState(application.reviewNotes ?? "");
   const [squadId, setSquadId] = useState(squads[0]?.id ?? "");
   const [squadRole, setSquadRole] = useState<SquadRole>("player");
+  const [onboardOpen, setOnboardOpen] = useState(false);
+  const [onboardEmail, setOnboardEmail] = useState(application.email);
+  const [onboardPassword, setOnboardPassword] = useState("");
   const [credentials, setCredentials] = useState<{
     email: string;
     tempPassword: string;
@@ -114,11 +118,15 @@ export function ApplicationCard({
     startTransition(async () => {
       const result = await onboardApplicant({
         applicationId: application.id,
+        email: onboardEmail,
         squadId,
         squadRole,
+        tempPassword: onboardPassword || undefined,
       });
 
       if (result.ok) {
+        setOnboardOpen(false);
+        setOnboardPassword("");
         toast.success(result.message);
         if (result.data) {
           setCredentials({
@@ -132,6 +140,14 @@ export function ApplicationCard({
 
       toast.error(result.error);
     });
+  }
+
+  function randomTempPassword() {
+    const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
+    let password = "";
+    for (let i = 0; i < 12; i++)
+      password += chars[Math.floor(Math.random() * chars.length)];
+    return password;
   }
 
   return (
@@ -309,44 +325,18 @@ export function ApplicationCard({
                   <p className="text-sm font-medium">
                     Onboard: create account and squad slot
                   </p>
-                  <div className="grid gap-2 desktop:grid-cols-[1fr_140px_auto]">
-                    <Select value={squadId} onValueChange={setSquadId}>
-                      <SelectTrigger aria-label="Onboard to squad">
-                        <SelectValue placeholder="Pick a squad" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {squads.map((squad) => (
-                          <SelectItem key={squad.id} value={squad.id}>
-                            {squad.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Select
-                      value={squadRole}
-                      onValueChange={(value) =>
-                        setSquadRole(value as SquadRole)
-                      }
-                    >
-                      <SelectTrigger aria-label="Onboard squad role">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {squadRoleEnum.enumValues.map((role) => (
-                          <SelectItem key={role} value={role}>
-                            {SQUAD_ROLE_LABELS[role]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      size="sm"
-                      disabled={pending || !squadId}
-                      onClick={onboard}
-                    >
-                      Onboard
-                    </Button>
-                  </div>
+                  <p className="text-xs leading-6 text-muted-foreground">
+                    Contact email is {application.email} — used only for
+                    outreach. Set the login email and a temporary password
+                    below.
+                  </p>
+                  <Button
+                    size="sm"
+                    disabled={pending}
+                    onClick={() => setOnboardOpen(true)}
+                  >
+                    Onboard
+                  </Button>
                 </div>
               )}
             </div>
@@ -378,6 +368,105 @@ export function ApplicationCard({
               </p>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={onboardOpen}
+        onOpenChange={(open) => {
+          setOnboardOpen(open);
+          if (!open) setOnboardPassword("");
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Onboard {application.fullName}</DialogTitle>
+            <DialogDescription>
+              Set the login email and a temporary password for the new account.
+              The application contact email ({application.email}) is used only
+              for outreach and does not need to match.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-1.5">
+              <Label htmlFor={`onboard-email-${application.id}`}>
+                Login email
+              </Label>
+              <Input
+                id={`onboard-email-${application.id}`}
+                type="email"
+                value={onboardEmail}
+                onChange={(event) => setOnboardEmail(event.target.value)}
+                placeholder={application.email}
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor={`onboard-password-${application.id}`}>
+                Temporary password
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id={`onboard-password-${application.id}`}
+                  value={onboardPassword}
+                  onChange={(event) => setOnboardPassword(event.target.value)}
+                  placeholder="Auto-generated if left blank"
+                  className="font-mono"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setOnboardPassword(randomTempPassword())}
+                >
+                  Generate
+                </Button>
+              </div>
+            </div>
+            <div className="grid gap-2 desktop:grid-cols-[1fr_140px]">
+              <Select value={squadId} onValueChange={setSquadId}>
+                <SelectTrigger aria-label="Onboard to squad">
+                  <SelectValue placeholder="Pick a squad" />
+                </SelectTrigger>
+                <SelectContent>
+                  {squads.map((squad) => (
+                    <SelectItem key={squad.id} value={squad.id}>
+                      {squad.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={squadRole}
+                onValueChange={(value) => setSquadRole(value as SquadRole)}
+              >
+                <SelectTrigger aria-label="Onboard squad role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {squadRoleEnum.enumValues.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {SQUAD_ROLE_LABELS[role]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setOnboardOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={pending || !squadId || !onboardEmail}
+                onClick={onboard}
+              >
+                Create account
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>
