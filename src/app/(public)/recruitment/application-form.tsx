@@ -139,43 +139,45 @@ export function ApplicationForm({
           title="MLBB profile"
           description="Your in-game identity and current competitive level."
         >
-          <div className="grid gap-4 desktop:grid-cols-2">
-            <FormField
-              control={control}
-              name="ign"
-              label="In-game name (IGN)"
-            />
-            <MlbbIdFields
-              control={control}
-              mlbbIdName="mlbbId"
-              serverIdName="serverId"
-            />
+          <div className="grid gap-4">
+            <div className="grid gap-4 desktop:grid-cols-2">
+              <FormField
+                control={control}
+                name="ign"
+                label="In-game name (IGN)"
+              />
+              <MlbbIdFields
+                control={control}
+                mlbbIdName="mlbbId"
+                serverIdName="serverId"
+              />
+              <FormSelect
+                control={control}
+                name="squadId"
+                label="Preferred squad (optional)"
+                options={[
+                  {
+                    value: ANY_SQUAD_VALUE,
+                    label: "No specific squad request",
+                  },
+                  ...squads.map((squad) => ({
+                    value: squad.id,
+                    label: squad.name,
+                  })),
+                ]}
+                placeholder="No specific squad request"
+                description={
+                  squads.length > 0
+                    ? "Only squads currently open for recruitment are listed."
+                    : "No squad is currently open for direct requests."
+                }
+              />
+            </div>
             <RankSelect
               control={control}
               name="currentRank"
               label="Current rank"
               description="Pick your tier, division, and stars (e.g. Legend V · 3★)."
-            />
-            <FormSelect
-              control={control}
-              name="squadId"
-              label="Preferred squad (optional)"
-              options={[
-                {
-                  value: ANY_SQUAD_VALUE,
-                  label: "No specific squad request",
-                },
-                ...squads.map((squad) => ({
-                  value: squad.id,
-                  label: squad.name,
-                })),
-              ]}
-              placeholder="No specific squad request"
-              description={
-                squads.length > 0
-                  ? "Only squads currently open for recruitment are listed."
-                  : "No squad is currently open for direct requests."
-              }
             />
           </div>
         </FormSection>
