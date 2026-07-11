@@ -61,7 +61,9 @@ export const columns: ColumnDef<LogRow>[] = [
     filterFn: "arrIncludesSome",
     header: "Action",
     cell: ({ row }) => (
-      <span className="font-medium">{row.original.action}</span>
+      <code className="border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-xs text-primary">
+        {row.original.action}
+      </code>
     ),
   },
   {
@@ -71,7 +73,7 @@ export const columns: ColumnDef<LogRow>[] = [
       <div className="grid gap-0.5">
         <span>{row.original.entityType}</span>
         {row.original.entityId && (
-          <span className="max-w-32 truncate text-muted-foreground">
+          <span className="max-w-32 truncate font-mono text-xs text-muted-foreground">
             {row.original.entityId}
           </span>
         )}

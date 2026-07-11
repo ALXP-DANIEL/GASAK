@@ -1,13 +1,8 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@components/ui/shadcn/card";
+import { Icons } from "@components/icons";
 import { cn } from "@lib/utils";
 import type { Icon } from "@phosphor-icons/react";
 import Link from "next/link";
+import { AccentTick } from "../page-surface";
 
 export function StatCard({
   label,
@@ -21,22 +16,27 @@ export function StatCard({
   icon: Icon;
 }) {
   return (
-    <Card className="bg-linear-to-t from-primary/5 to-card shadow-xs dark:bg-card">
-      <CardHeader>
-        <CardTitle>
-          <div className="flex size-7 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-            <StatIcon className="size-4" />
-          </div>
-        </CardTitle>
-        <CardDescription>{label}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-1">
-        <div className="text-3xl font-medium leading-none tracking-tight tabular-nums">
-          {value}
-        </div>
-        {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
-      </CardContent>
-    </Card>
+    <div className="group relative flex flex-col gap-3 overflow-hidden border bg-card p-4 shadow-xs transition-colors hover:bg-muted/40">
+      <span
+        aria-hidden
+        className="absolute top-0 left-0 h-0.5 w-8 -skew-x-12 bg-primary/0 transition-colors group-hover:bg-primary"
+      />
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          <AccentTick className="h-2.5 w-0.75 bg-primary/70" />
+          <span className="truncate">{label}</span>
+        </span>
+        <StatIcon
+          aria-hidden
+          className="size-4 shrink-0 text-muted-foreground/50"
+          weight="duotone"
+        />
+      </div>
+      <div className="font-heading text-3xl font-bold leading-none tabular-nums">
+        {value}
+      </div>
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    </div>
   );
 }
 
@@ -70,23 +70,37 @@ export function HomePanel({
   className?: string;
 }) {
   return (
-    <Card className={className}>
-      <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
-        <div className="flex flex-col gap-1">
-          <CardTitle className="text-base">{title}</CardTitle>
-          {description && <CardDescription>{description}</CardDescription>}
+    <section
+      className={cn(
+        "flex flex-col overflow-hidden border bg-card shadow-xs",
+        className,
+      )}
+    >
+      <header className="flex items-center justify-between gap-3 border-b border-border/70 bg-muted/40 px-4 py-3">
+        <div className="grid min-w-0 gap-0.5">
+          <h2 className="flex items-center gap-2 font-heading text-sm font-bold">
+            <AccentTick className="h-3 w-0.75" />
+            <span className="truncate">{title}</span>
+          </h2>
+          {description && (
+            <p className="text-xs text-muted-foreground">{description}</p>
+          )}
         </div>
         {action && (
           <Link
             href={action.href}
-            className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
+            className="group flex shrink-0 items-center gap-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-primary"
           >
             {action.label}
+            <Icons.Layout.Navigation.CaretRight
+              aria-hidden
+              className="size-3 transition-transform group-hover:translate-x-0.5"
+            />
           </Link>
         )}
-      </CardHeader>
-      <CardContent className="flex flex-col gap-1">{children}</CardContent>
-    </Card>
+      </header>
+      <div className="flex flex-1 flex-col gap-1 p-3">{children}</div>
+    </section>
   );
 }
 
@@ -114,13 +128,16 @@ export function HomeListItem({
   );
 
   const itemClass =
-    "flex items-center justify-between gap-3 rounded-md px-2 py-2";
+    "flex items-center justify-between gap-3 border-l-2 border-transparent px-2.5 py-2";
 
   if (href) {
     return (
       <Link
         href={href}
-        className={cn(itemClass, "transition-colors hover:bg-muted")}
+        className={cn(
+          itemClass,
+          "transition-colors hover:border-primary hover:bg-muted/50",
+        )}
       >
         {content}
       </Link>

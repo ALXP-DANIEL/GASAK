@@ -31,7 +31,11 @@ export function NavMain({ groups }: { groups: DashboardNavGroup[] }) {
       {groups.map((group) => (
         <SidebarGroup key={group.id}>
           {group.label && (
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:pointer-events-none">
+            <SidebarGroupLabel className="gap-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.18em] group-data-[collapsible=icon]:pointer-events-none">
+              <span
+                aria-hidden
+                className="h-2 w-0.5 -skew-x-12 bg-primary/60"
+              />
               {group.label}
             </SidebarGroupLabel>
           )}
@@ -43,6 +47,7 @@ export function NavMain({ groups }: { groups: DashboardNavGroup[] }) {
                     asChild
                     tooltip={item.label}
                     isActive={isActive(item.href)}
+                    className="rounded-none border-l-2 border-transparent data-[active=true]:border-primary data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
                   >
                     <Link href={item.href} onClick={handleNavigate}>
                       <item.icon

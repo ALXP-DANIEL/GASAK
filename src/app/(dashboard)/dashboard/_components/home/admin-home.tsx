@@ -2,6 +2,7 @@ import {
   type RevenuePoint,
   RevenueTrendChart,
 } from "@components/charts/revenue-trend-chart";
+import { Icons } from "@components/icons";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatDate, formatDateTime, formatRM } from "@lib/format";
@@ -148,6 +149,8 @@ export async function AdminHome() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Admin Dashboard"
+        kicker={`Overview — ${format(now, "EEEE, d MMMM")}`}
+        icon={Icons.Layout.Navigation.Home}
         description="Organization overview for squads, players, recruitment, and operations."
       />
 
@@ -156,21 +159,25 @@ export async function AdminHome() {
           label="Active Squads"
           value={activeTeams.value}
           hint={`${playerCount.value} registered players`}
+          icon={Icons.Stats.Squads}
         />
         <StatItem
           label="Total Users"
           value={totalUsers.value}
           hint={`+${usersThisMonth.value} this month`}
+          icon={Icons.Domain.Members}
         />
         <StatItem
           label="Needs Attention"
           value={attentionCount}
           hint="Applications, results, payments"
+          icon={Icons.Domain.Lightning}
         />
         <StatItem
           label="Store Revenue"
           value={formatRM(Number(revenue.value ?? 0))}
           hint="Paid and completed orders"
+          icon={Icons.Domain.Revenue}
         />
       </StatStrip>
 

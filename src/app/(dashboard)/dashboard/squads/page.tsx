@@ -1,4 +1,9 @@
-import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
+import {
+  EmptyState,
+  PageHeader,
+} from "@app/(dashboard)/dashboard/_components/page-surface";
+import { Icons } from "@components/icons";
+import { Stagger } from "@components/motion/reveal";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
 import { SquadLogo } from "@features/squads/components/squad-shared";
@@ -20,41 +25,55 @@ export default async function SquadsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Squads" description="Rosters across the organization.">
+      <PageHeader
+        title="Squads"
+        kicker="Management"
+        icon={Icons.Stats.Squads}
+        description="Rosters across the organization."
+      >
         <SquadFormDialog />
       </PageHeader>
 
       <StatStrip>
-        <StatItem label="Active" value={active.length} hint="Live rosters" />
+        <StatItem
+          label="Active"
+          value={active.length}
+          hint="Live rosters"
+          icon={Icons.Stats.Squads}
+        />
         <StatItem
           label="Recruiting"
           value={recruiting.length}
           hint="Open for applications"
+          icon={Icons.Domain.Recruitment}
         />
         <StatItem
           label="Members"
           value={totalMembers}
           hint="Across all squads"
+          icon={Icons.Domain.Members}
         />
         <StatItem
           label="Archived"
           value={archived.length}
           hint="Inactive squads"
+          icon={Icons.Domain.Squads}
         />
       </StatStrip>
 
       {rows.length === 0 ? (
-        <p className="border border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
-          No squads yet — create the first roster.
-        </p>
+        <EmptyState
+          message="No squads yet — create the first roster."
+          icon={Icons.Stats.Squads}
+        />
       ) : (
         <>
-          <div className="grid gap-3 desktop:grid-cols-3">
+          <Stagger className="grid gap-3 desktop:grid-cols-3">
             {active.map(({ squad, memberCount }) => (
               <Link
                 key={squad.id}
                 href={`/dashboard/squads/${squad.id}`}
-                className="group relative flex items-center gap-4 overflow-hidden border bg-card p-4 shadow-xs transition-colors hover:border-primary/50 hover:bg-muted/30"
+                className="hover-lift corner-cut group relative flex items-center gap-4 overflow-hidden border bg-card p-4 shadow-xs"
               >
                 <span
                   aria-hidden
@@ -79,13 +98,21 @@ export default async function SquadsPage() {
                     {squad.recruiting && <Badge>Recruiting</Badge>}
                   </div>
                 </div>
+                <Icons.Layout.Navigation.CaretRight
+                  aria-hidden
+                  className="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                />
               </Link>
             ))}
-          </div>
+          </Stagger>
 
           {archived.length > 0 && (
             <section className="grid gap-3">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              <h2 className="flex items-center gap-2 font-heading text-sm font-bold text-muted-foreground">
+                <span
+                  aria-hidden
+                  className="h-3 w-0.75 -skew-x-12 bg-muted-foreground/50"
+                />
                 Archived
               </h2>
               <div className="grid gap-3 desktop:grid-cols-3">

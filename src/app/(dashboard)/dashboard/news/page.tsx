@@ -1,3 +1,4 @@
+import { Icons } from "@components/icons";
 import { getUnreadNewsIds, markNewsRead } from "@server/actions/news";
 import { getManagedSquadIds, getMemberSquadIds } from "@server/authz";
 import { db, news, squads } from "@server/db";
@@ -60,6 +61,8 @@ export default async function NewsPage() {
     <main>
       <PageHeader
         title="News"
+        kicker="Squad"
+        icon={Icons.Domain.News}
         description="Global organization news and squad-specific updates."
       >
         {(role === "admin" || postableSquads.length > 0) && (

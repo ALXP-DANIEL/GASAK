@@ -37,6 +37,7 @@ export default async function PlayerDetailPage({
     <div className="flex flex-col gap-6">
       <PageHeader
         title={player.name}
+        kicker="Players"
         description="Player profile"
         actions={
           <Badge variant="outline">

@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@components/ui/shadcn/card";
 import { LANE_LABELS, LANE_ORDER, normalizeLanes } from "@lib/labels";
 import { cn } from "@lib/utils";
 import type { Lane, SquadRole } from "@server/db/schema";
@@ -75,19 +74,23 @@ export function SquadStat({
   icon: React.ReactNode;
 }) {
   return (
-    <Card className="shadow-xs">
-      <CardContent className="flex items-center gap-3 p-4">
-        <span className="grid size-9 place-items-center rounded-none border text-primary">
-          {icon}
-        </span>
-        <div>
-          <p className="font-heading text-2xl font-bold">{value}</p>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            {label}
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="group relative flex items-center gap-3 overflow-hidden border bg-card p-4 shadow-xs transition-colors hover:bg-muted/40">
+      <span
+        aria-hidden
+        className="absolute top-0 left-0 h-0.5 w-8 -skew-x-12 bg-primary/0 transition-colors group-hover:bg-primary"
+      />
+      <span className="corner-cut grid size-9 shrink-0 place-items-center border border-primary/40 bg-primary/10 text-primary">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="font-heading text-2xl font-bold leading-none tabular-nums">
+          {value}
+        </p>
+        <p className="mt-1 truncate text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          {label}
+        </p>
+      </div>
+    </div>
   );
 }
 

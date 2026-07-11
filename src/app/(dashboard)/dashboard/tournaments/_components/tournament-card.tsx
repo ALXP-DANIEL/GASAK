@@ -32,23 +32,20 @@ export function TournamentCard({ tournament }: { tournament: TournamentRow }) {
   return (
     <Link
       href={`/dashboard/tournaments/${tournament.id}`}
-      className="group flex flex-col gap-3 border bg-card p-4 shadow-xs transition-colors hover:border-primary/50 hover:bg-muted/30"
+      className="hover-lift corner-cut group relative flex flex-col gap-3 overflow-hidden border bg-card p-4 pl-5 shadow-xs"
     >
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-1"
+        style={{
+          backgroundColor: tournament.squad?.accentColor ?? "var(--primary)",
+        }}
+      />
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span
-              aria-hidden
-              className="size-2 shrink-0 rounded-full"
-              style={{
-                backgroundColor:
-                  tournament.squad?.accentColor ?? "var(--primary)",
-              }}
-            />
-            <h3 className="truncate font-medium group-hover:text-primary">
-              {tournament.name}
-            </h3>
-          </div>
+          <h3 className="truncate font-heading font-bold uppercase tracking-wide group-hover:text-primary">
+            {tournament.name}
+          </h3>
           <p className="mt-0.5 truncate text-sm text-muted-foreground">
             {tournament.squad?.name ?? "Unassigned"} ·{" "}
             {formatDate(tournament.date)}

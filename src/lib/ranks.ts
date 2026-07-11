@@ -79,7 +79,9 @@ export function isDivisioned(tier: RankTier): tier is DivisionedTier {
 export function isUncappedRank(tier: RankTier): boolean {
   return (
     tier in MYTHIC_RANKS &&
-    Boolean((MYTHIC_RANKS[tier as MythicTier] as { uncapped?: boolean }).uncapped)
+    Boolean(
+      (MYTHIC_RANKS[tier as MythicTier] as { uncapped?: boolean }).uncapped,
+    )
   );
 }
 
