@@ -80,14 +80,14 @@ export async function createOrganizationPosition(
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
 
-  if (
-    parsed.data.userId &&
-    !(await assertUserAvailable(parsed.data.userId))
-  ) {
+  if (parsed.data.userId && !(await assertUserAvailable(parsed.data.userId))) {
     return { ok: false, error: "That user already holds a position" };
   }
 
-  if (parsed.data.parentId && !(await assertParentExists(parsed.data.parentId))) {
+  if (
+    parsed.data.parentId &&
+    !(await assertParentExists(parsed.data.parentId))
+  ) {
     return { ok: false, error: "Selected parent position no longer exists" };
   }
 

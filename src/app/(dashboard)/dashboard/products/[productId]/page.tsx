@@ -44,6 +44,7 @@ export default async function ProductDetailPage({
     <main>
       <PageHeader
         title={product.name}
+        kicker="Products"
         description="Preview and manage this shop product."
       />
 

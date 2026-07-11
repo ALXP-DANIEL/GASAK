@@ -1,5 +1,6 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { PlayerCard } from "@components/cards/player/player-card";
+import { Icons } from "@components/icons";
 import { SplitView } from "@components/shared/split-view";
 import { Badge } from "@components/ui/shadcn/badge";
 import {
@@ -27,6 +28,8 @@ export default async function SettingsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Settings"
+        kicker="Account"
+        icon={Icons.Actions.Settings}
         description="Manage your account and player profile."
         actions={<Badge variant="outline">{ROLE_LABELS[role]}</Badge>}
       />

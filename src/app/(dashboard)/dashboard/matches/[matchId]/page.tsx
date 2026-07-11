@@ -36,6 +36,7 @@ export default async function MatchDetailPage({
     <div className="flex flex-col gap-6">
       <PageHeader
         title={`vs ${match.opponent}`}
+        kicker="Matches"
         description="Match record"
         actions={
           canManage ? (

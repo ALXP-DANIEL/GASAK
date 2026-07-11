@@ -41,7 +41,7 @@ export default async function DashboardLayout({
         primarySquadRole={primarySquadRole}
       />
       <SidebarInset className="min-w-0 overflow-x-clip">
-        <header className="flex h-12 shrink-0 items-center gap-2 border-b">
+        <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 backdrop-blur-md">
           <div className="flex w-full items-center gap-1 px-4 desktop:gap-2 desktop:px-6">
             <SidebarTrigger className="-ml-1" />
             <Separator
@@ -53,7 +53,7 @@ export default async function DashboardLayout({
           </div>
         </header>
         <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden p-4 mobile:pb-[calc(env(safe-area-inset-bottom)+1rem)] desktop:p-6">
-          {children}
+          <div className="mx-auto w-full max-w-384">{children}</div>
         </div>
       </SidebarInset>
     </SidebarProvider>

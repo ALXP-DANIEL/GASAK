@@ -78,6 +78,7 @@ export default async function NewsDetailPage({
     <main>
       <PageHeader
         title={item.title}
+        kicker="News"
         description="Preview and manage this news post."
       />
 

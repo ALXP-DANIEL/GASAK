@@ -65,7 +65,9 @@ export async function resetPassword(
 
 export async function changePassword(
   input: ChangePasswordInput,
-): Promise<AuthActionResult<Awaited<ReturnType<typeof auth.api.changePassword>>>> {
+): Promise<
+  AuthActionResult<Awaited<ReturnType<typeof auth.api.changePassword>>>
+> {
   const actor = await requireUser();
 
   const parsed = changePasswordSchema.safeParse(input);

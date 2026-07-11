@@ -55,7 +55,7 @@ export function CommandPalette({ access }: { access: DashboardAccess }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="ml-auto hidden items-center gap-2 rounded-md border bg-muted/40 px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted desktop:flex"
+        className="ml-auto hidden items-center gap-2 border bg-muted/40 px-2.5 py-1.5 text-xs uppercase tracking-wider text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground desktop:flex"
       >
         Search
         <Kbd>⌘K</Kbd>

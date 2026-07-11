@@ -46,15 +46,51 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
     ],
   },
   {
-    id: "competition",
-    label: "Competition",
+    id: "squad",
+    label: "Squad",
     items: [
+      {
+        href: "/dashboard/my-squad",
+        label: "My Squad",
+        icon: Icons.Domain.Members,
+        canAccess: (a) => a.hasSquad,
+      },
+      {
+        href: "/dashboard/schedules",
+        label: "Schedules",
+        icon: Icons.Domain.Calendar,
+        canAccess: canViewSquadArea,
+      },
+      {
+        href: "/dashboard/matches",
+        label: "Matches",
+        icon: Icons.Domain.Scrims,
+        canAccess: canViewSquadArea,
+      },
       {
         href: "/dashboard/tournaments",
         label: "Tournaments",
         icon: Icons.Stats.Trophies,
         canAccess: canViewSquadArea,
       },
+      {
+        href: "/dashboard/news",
+        label: "News",
+        icon: Icons.Domain.News,
+        canAccess: canViewSquadArea,
+      },
+      {
+        href: "/dashboard/recruitment",
+        label: "Recruitment",
+        icon: Icons.Domain.Recruitment,
+        canAccess: canManageSquadArea,
+      },
+    ],
+  },
+  {
+    id: "management",
+    label: "Management",
+    items: [
       {
         href: "/dashboard/squads",
         label: "Squads",
@@ -66,36 +102,6 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         label: "Players",
         icon: Icons.Domain.Players,
         canAccess: isAdmin,
-      },
-      {
-        href: "/dashboard/matches",
-        label: "Matches",
-        icon: Icons.Domain.Scrims,
-        canAccess: canViewSquadArea,
-      },
-      {
-        href: "/dashboard/schedules",
-        label: "Schedules",
-        icon: Icons.Domain.Calendar,
-        canAccess: canViewSquadArea,
-      },
-      {
-        href: "/dashboard/news",
-        label: "News",
-        icon: Icons.Domain.News,
-        canAccess: canViewSquadArea,
-      },
-      {
-        href: "/dashboard/my-squad",
-        label: "My Squad",
-        icon: Icons.Domain.Members,
-        canAccess: (a) => a.hasSquad,
-      },
-      {
-        href: "/dashboard/recruitment",
-        label: "Recruitment",
-        icon: Icons.Domain.Recruitment,
-        canAccess: canManageSquadArea,
       },
     ],
   },

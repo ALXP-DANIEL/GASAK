@@ -4,6 +4,7 @@ import {
   RevenueTrendChart,
 } from "@components/charts/revenue-trend-chart";
 import { SquadBarChart } from "@components/charts/squad-bar-chart";
+import { Icons } from "@components/icons";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatRM } from "@lib/format";
@@ -110,6 +111,8 @@ export default async function ReportsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Reports"
+        kicker="System"
+        icon={Icons.Domain.Reports}
         description="Activity summaries across the organization."
       />
 
@@ -120,11 +123,13 @@ export default async function ReportsPage() {
               label="Total Revenue"
               value={formatRM(Number(revenueAgg[0]?.total ?? 0))}
               hint="Paid and completed orders"
+              icon={Icons.Domain.Revenue}
             />
             <StatItem
               label="This Month"
               value={formatRM(Number(monthlyRevenue?.value ?? 0))}
               hint="Since the start of the month"
+              icon={Icons.Domain.Orders}
             />
           </>
         )}
@@ -134,11 +139,13 @@ export default async function ReportsPage() {
               label="Matches"
               value={totalMatches}
               hint="Recorded across all squads"
+              icon={Icons.Domain.Scrims}
             />
             <StatItem
               label="Tournaments"
               value={totalTournaments}
               hint="Entries across all squads"
+              icon={Icons.Stats.Trophies}
             />
           </>
         )}

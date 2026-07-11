@@ -2,6 +2,7 @@ import {
   type RevenuePoint,
   RevenueTrendChart,
 } from "@components/charts/revenue-trend-chart";
+import { Icons } from "@components/icons";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatDateTime, formatRM } from "@lib/format";
@@ -84,6 +85,8 @@ export async function SellerHome() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Seller Dashboard"
+        kicker={`Overview — ${format(now, "EEEE, d MMMM")}`}
+        icon={Icons.Domain.Shop}
         description="Store overview for orders, products, revenue, and fulfillment."
       />
 
@@ -92,21 +95,25 @@ export async function SellerHome() {
           label="Revenue"
           value={formatRM(Number(paidAgg.revenue ?? 0))}
           hint={`${paidAgg.orderCount} paid orders`}
+          icon={Icons.Domain.Revenue}
         />
         <StatItem
           label="Orders This Month"
           value={ordersThisMonth.value}
           hint={`${pendingCount.value} awaiting payment`}
+          icon={Icons.Domain.Orders}
         />
         <StatItem
           label="Active Products"
           value={productCount.value}
           hint={`${outOfStock.value} out of stock`}
+          icon={Icons.Domain.Products}
         />
         <StatItem
           label="Needs Fulfillment"
           value={pendingCount.value}
           hint="Pending or waiting payment"
+          icon={Icons.Domain.Lightning}
         />
       </StatStrip>
 

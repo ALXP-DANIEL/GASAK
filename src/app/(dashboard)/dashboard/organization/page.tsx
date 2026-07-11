@@ -1,3 +1,4 @@
+import { Icons } from "@components/icons";
 import { buildOrgTree, OrgChart } from "@components/org-chart/org-chart";
 import { OrgChartPanZoom } from "@components/org-chart/org-chart-pan-zoom";
 import { DeleteButton } from "@components/shared/delete-button";
@@ -40,6 +41,8 @@ export default async function OrganizationPage() {
     <main>
       <PageHeader
         title="Organization"
+        kicker="System"
+        icon={Icons.Domain.Members}
         description="Manage the public organization chart — hierarchy, titles, and who holds them."
       >
         <OrganizationPositionFormDialog
@@ -49,7 +52,10 @@ export default async function OrganizationPage() {
       </PageHeader>
 
       {tree.length === 0 ? (
-        <EmptyState message="No positions yet. Add your first position." />
+        <EmptyState
+          message="No positions yet. Add your first position."
+          icon={Icons.Domain.Members}
+        />
       ) : (
         <OrgChartPanZoom>
           <OrgChart

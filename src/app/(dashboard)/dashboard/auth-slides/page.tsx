@@ -1,3 +1,4 @@
+import { Icons } from "@components/icons";
 import { authSlides, db } from "@server/db";
 import { desc } from "drizzle-orm";
 import { requireDashboardRole } from "../_components/dashboard-section";
@@ -19,12 +20,17 @@ export default async function AuthSlidesPage() {
     <main>
       <PageHeader
         title="Auth Slides"
+        kicker="System"
+        icon={Icons.Editor.Image}
         description="Manage the carousel shown beside login, reset password, and forgot password pages."
       >
         <AuthSlideFormDialog />
       </PageHeader>
       {rows.length === 0 ? (
-        <EmptyState message="No auth slides yet. Add your first slide." />
+        <EmptyState
+          message="No auth slides yet. Add your first slide."
+          icon={Icons.Editor.Image}
+        />
       ) : (
         <SlidesGrid slides={rows} />
       )}

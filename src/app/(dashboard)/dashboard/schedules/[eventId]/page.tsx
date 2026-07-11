@@ -70,6 +70,7 @@ export default async function EventDetailPage({
     <div className="flex flex-col gap-6">
       <PageHeader
         title={event.title}
+        kicker="Schedules"
         description="Event details"
         actions={
           canManage ? (
