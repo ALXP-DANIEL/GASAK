@@ -3,6 +3,7 @@
 import { formFieldStyles } from "@components/forms/form-field";
 import { Field, FieldError, FieldLabel } from "@components/ui/shadcn/field";
 import { Input } from "@components/ui/shadcn/input";
+import { toNationalPhone } from "@lib/phone";
 import type { Control, FieldPath, FieldValues } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
@@ -54,8 +55,4 @@ export function PhonePrefixField<
       )}
     />
   );
-}
-
-function toNationalPhone(value: string) {
-  return value.replace(/\D/g, "").replace(/^60/, "").replace(/^0/, "");
 }

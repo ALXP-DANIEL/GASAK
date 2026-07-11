@@ -11,6 +11,7 @@ import { PhonePrefixField } from "@components/forms/phone-prefix-field";
 import { RankSelect } from "@components/forms/rank-select";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toMalaysiaPhone } from "@lib/phone";
 import { rankFieldSchema, rankOrder } from "@lib/ranks";
 import { updateProfile } from "@server/actions/players";
 import { useRouter } from "next/navigation";
@@ -155,9 +156,4 @@ export function ProfileForm({
       </Button>
     </DashboardForm>
   );
-}
-
-function toMalaysiaPhone(phone: string) {
-  const digits = phone.replace(/\D/g, "").replace(/^60/, "").replace(/^0/, "");
-  return `+60${digits}`;
 }
