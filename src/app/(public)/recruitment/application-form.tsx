@@ -8,6 +8,7 @@ import { RankSelect } from "@components/forms/rank-select";
 import { BrandCard } from "@components/ui/brand";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toMalaysiaPhone } from "@lib/phone";
 import { rankFieldSchema } from "@lib/ranks";
 import { submitApplication } from "@server/actions/public";
 import { laneEnum } from "@server/db/schema";
@@ -264,9 +265,4 @@ function FormSection({
       <div className="min-w-0">{children}</div>
     </section>
   );
-}
-
-function toMalaysiaPhone(phone: string) {
-  const digits = phone.replace(/\D/g, "").replace(/^60/, "").replace(/^0/, "");
-  return `+60${digits}`;
 }

@@ -13,6 +13,7 @@ import {
 } from "@components/ui/shadcn/dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formatRM } from "@lib/format";
+import { toMalaysiaPhone } from "@lib/phone";
 import { placeOrder } from "@server/actions/public";
 import type { Product } from "@server/db/schema";
 import { useRouter } from "next/navigation";
@@ -129,9 +130,4 @@ export function BuyButton({
       </DialogContent>
     </Dialog>
   );
-}
-
-function toMalaysiaPhone(phone: string) {
-  const digits = phone.replace(/\D/g, "").replace(/^60/, "").replace(/^0/, "");
-  return `+60${digits}`;
 }
