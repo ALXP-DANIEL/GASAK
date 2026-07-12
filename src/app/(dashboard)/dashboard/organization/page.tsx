@@ -40,7 +40,7 @@ export default async function OrganizationPage() {
       <PageHeader
         title="Organization"
         kicker="System"
-        icon={Icons.Domain.Members}
+        icon={Icons.Domain.Hierarchy}
         description="Manage the public organization chart — hierarchy, titles, and who holds them."
       >
         <OrganizationPositionFormDialog

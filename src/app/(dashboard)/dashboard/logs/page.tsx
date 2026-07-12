@@ -27,7 +27,7 @@ export default async function LogsPage() {
       <PageHeader
         title="Logs"
         kicker="System"
-        icon={Icons.Domain.Reports}
+        icon={Icons.Domain.Audit}
         description="Audit trail for successful app operations across admin, seller, and squad users."
       />
       <div className="flex flex-col gap-6">
