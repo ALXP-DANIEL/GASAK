@@ -37,7 +37,7 @@ export default async function PlayersPage() {
       <PageHeader
         title="Players"
         kicker="Management"
-        icon={Icons.Domain.Players}
+        icon={Icons.Stats.Players}
         description="Registered player profiles."
       />
 

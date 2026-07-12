@@ -33,7 +33,7 @@ export default async function UsersPage() {
       <PageHeader
         title="Users"
         kicker="System"
-        icon={Icons.Domain.Members}
+        icon={Icons.Domain.Accounts}
         description="Create accounts and control roles for the whole organization."
       >
         <CreateUserDialog />

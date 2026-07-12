@@ -26,7 +26,7 @@ export default async function SquadsPage() {
       <PageHeader
         title="Squads"
         kicker="Management"
-        icon={Icons.Stats.Squads}
+        icon={Icons.Domain.Squads}
         description="Rosters across the organization."
       >
         <SquadFormDialog />

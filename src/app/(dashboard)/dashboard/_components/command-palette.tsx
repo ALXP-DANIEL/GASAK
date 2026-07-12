@@ -28,14 +28,14 @@ import { resolveDashboardAccess } from "./sidebar/sidebar-focus";
 import { useSidebarFocus } from "./sidebar/sidebar-focus-toggle";
 
 const TYPE_META: Record<SearchResultType, { label: string; icon: Icon }> = {
-  player: { label: "Players", icon: Icons.Domain.Players },
-  squad: { label: "Squads", icon: Icons.Domain.Members },
+  player: { label: "Players", icon: Icons.Stats.Players },
+  squad: { label: "Squads", icon: Icons.Domain.Squads },
   tournament: { label: "Tournaments", icon: Icons.Stats.Trophies },
   match: { label: "Matches", icon: Icons.Domain.Scrims },
   news: { label: "News", icon: Icons.Domain.News },
   product: { label: "Products", icon: Icons.Domain.Products },
   order: { label: "Orders", icon: Icons.Domain.Orders },
-  user: { label: "Users", icon: Icons.Domain.Members },
+  user: { label: "Users", icon: Icons.Domain.Accounts },
 };
 
 const TYPE_ORDER: SearchResultType[] = [
