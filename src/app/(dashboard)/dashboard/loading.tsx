@@ -1,11 +1,21 @@
 import { Skeleton } from "@components/ui/shadcn/skeleton";
+import { DashboardHomeSkeleton } from "./_components/dashboard-bones";
 
 /**
- * Instant navigation feedback for every dashboard route — mirrors the
- * standard page shape (header, stat strip, panels) in the HUD language.
- * Also lets Link prefetching serve something immediately on dynamic routes.
+ * Instant navigation feedback for the dashboard home route. `DashboardHomeSkeleton`
+ * plays back real bone positions captured from the live page (via `npx boneyard-js
+ * build`) with a shimmer sweep; `fallback` is the hand-drawn placeholder shown only
+ * if bones haven't been captured yet (e.g. before the first `boneyard-js build` run).
  */
 export default function DashboardLoading() {
+  return (
+    <DashboardHomeSkeleton loading fallback={<StaticFallback />}>
+      {null}
+    </DashboardHomeSkeleton>
+  );
+}
+
+function StaticFallback() {
   return (
     <div className="flex flex-col gap-6">
       <div className="border-b pb-5">
