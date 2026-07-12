@@ -83,11 +83,13 @@ export function BuyButton({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="w-full font-semibold uppercase tracking-wider">
-          Buy now
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          <Button className="w-full font-semibold uppercase tracking-wider">
+            Buy now
+          </Button>
+        }
+      />
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="font-heading text-xl font-semibold uppercase tracking-wide">

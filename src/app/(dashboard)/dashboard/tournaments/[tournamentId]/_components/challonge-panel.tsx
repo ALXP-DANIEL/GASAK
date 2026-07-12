@@ -127,7 +127,7 @@ export function ChallongePanel({ tournament }: { tournament: Tournament }) {
               <div className="flex flex-col gap-2 desktop:flex-row">
                 <Select
                   value={participantId}
-                  onValueChange={setParticipantId}
+                  onValueChange={(value) => setParticipantId(value ?? "")}
                   disabled={pending}
                 >
                   <SelectTrigger className="w-full desktop:w-72">

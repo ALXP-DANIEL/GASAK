@@ -41,9 +41,11 @@ export function ForgotPasswordForm() {
           If an account exists for that address, we sent a link to reset your
           password.
         </p>
-        <Button asChild variant="outline" className="w-full">
-          <Link href="/login">Back to sign in</Link>
-        </Button>
+        <Button
+          variant="outline"
+          className="w-full"
+          render={<Link href="/login">Back to sign in</Link>}
+        />
       </div>
     );
   }

@@ -73,10 +73,10 @@ export function SidebarFocusToggle({
     <div className="grid">
       {/* Expanded: full labeled toggle — crossfades out when the sidebar collapses to icons. */}
       <ToggleGroup
-        type="single"
-        value={focus}
-        onValueChange={(value) => {
-          if (value) onChange(value as SidebarFocus);
+        value={[focus]}
+        onValueChange={(values) => {
+          const next = values[0];
+          if (next) onChange(next as SidebarFocus);
         }}
         variant="outline"
         size="sm"
@@ -97,14 +97,16 @@ export function SidebarFocusToggle({
       <SidebarMenu className="pointer-events-none col-start-1 row-start-1 opacity-0 transition-opacity duration-200 ease-linear group-data-[collapsible=icon]:pointer-events-auto group-data-[collapsible=icon]:opacity-100">
         <SidebarMenuItem>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <SidebarMenuButton
-                onClick={() => onChange(nextFocus)}
-                aria-label={`Currently ${currentLabel} — switch to ${nextLabel}`}
-              >
-                <Icons.Actions.SwitchFocus size={14} />
-              </SidebarMenuButton>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <SidebarMenuButton
+                  onClick={() => onChange(nextFocus)}
+                  aria-label={`Currently ${currentLabel} — switch to ${nextLabel}`}
+                >
+                  <Icons.Actions.SwitchFocus size={14} />
+                </SidebarMenuButton>
+              }
+            />
             <TooltipContent side="right">
               {currentLabel} — switch to {nextLabel}
             </TooltipContent>

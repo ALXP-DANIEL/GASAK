@@ -44,18 +44,18 @@ export function NavMain({ groups }: { groups: DashboardNavGroup[] }) {
               {group.items.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
-                    asChild
                     tooltip={item.label}
                     isActive={isActive(item.href)}
                     className="rounded-none border-l-2 border-transparent data-[active=true]:border-primary data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
-                  >
-                    <Link href={item.href} onClick={handleNavigate}>
-                      <item.icon
-                        weight={isActive(item.href) ? "fill" : "regular"}
-                      />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
+                    render={
+                      <Link href={item.href} onClick={handleNavigate}>
+                        <item.icon
+                          weight={isActive(item.href) ? "fill" : "regular"}
+                        />
+                        <span>{item.label}</span>
+                      </Link>
+                    }
+                  />
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

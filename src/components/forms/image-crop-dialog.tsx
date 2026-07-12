@@ -118,7 +118,9 @@ export function ImageCropDialog({
               min={1}
               max={3}
               step={0.05}
-              onValueChange={([value]) => setZoom(value)}
+              onValueChange={(value) =>
+                setZoom(Array.isArray(value) ? value[0] : value)
+              }
               className="flex-1"
             />
           </div>
