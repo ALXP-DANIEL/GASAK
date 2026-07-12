@@ -1,3 +1,4 @@
+import { BreadcrumbLabelSync } from "@app/(dashboard)/dashboard/_components/breadcrumb-label-sync";
 import { PlayerCard } from "@components/cards/player/player-card";
 import { Icons } from "@components/icons";
 import { SplitView } from "@components/shared/split-view";
@@ -57,6 +58,7 @@ export default async function SquadDetailPage({
 
   return (
     <Accent color={squad.accentColor}>
+      <BreadcrumbLabelSync label={squad.name} />
       <div className="grid gap-6">
         <section className="relative overflow-hidden rounded-lg border border-primary/25 bg-card">
           {squad.bannerUrl && (

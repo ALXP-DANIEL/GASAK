@@ -85,6 +85,7 @@ export default async function TournamentDetailPage({
     <div className="flex flex-col gap-6">
       <PageHeader
         title={tournament.name}
+        breadcrumbLabel={tournament.name}
         kicker="Tournaments"
         description="Tournament run"
         actions={

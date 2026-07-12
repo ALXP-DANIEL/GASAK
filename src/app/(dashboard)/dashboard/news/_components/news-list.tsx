@@ -69,7 +69,14 @@ export function NewsList({
           onValueChange={(value) => setAudience(value ?? ALL_AUDIENCES)}
         >
           <SelectTrigger aria-label="Audience" className="w-40">
-            <SelectValue />
+            <SelectValue>
+              {(value: string) =>
+                value === ALL_AUDIENCES
+                  ? "All audiences"
+                  : (audienceOptions.find((option) => option.value === value)
+                      ?.label ?? value)
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL_AUDIENCES}>All audiences</SelectItem>

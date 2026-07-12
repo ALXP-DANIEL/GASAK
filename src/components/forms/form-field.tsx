@@ -231,7 +231,12 @@ export function FormSelect<
               aria-invalid={fieldState.invalid}
               className={`${controlClass} w-full`}
             >
-              <SelectValue placeholder={placeholder} />
+              <SelectValue placeholder={placeholder}>
+                {(value: string) =>
+                  options.find((option) => option.value === value)?.label ??
+                  value
+                }
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {options.map((option) => (

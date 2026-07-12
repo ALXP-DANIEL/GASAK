@@ -69,7 +69,7 @@ export function UserRoleSelect({
       disabled={pending || isSelf}
     >
       <SelectTrigger aria-label={`Role for ${user.name}`} className="w-32">
-        <SelectValue />
+        <SelectValue>{(value: OrgRole) => ORG_ROLE_LABELS[value]}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         {ORG_ROLES.map((item) => (

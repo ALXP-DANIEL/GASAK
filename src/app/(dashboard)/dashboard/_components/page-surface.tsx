@@ -1,5 +1,6 @@
 import { cn } from "@lib/utils";
 import type { Icon } from "@phosphor-icons/react";
+import { BreadcrumbLabelSync } from "./breadcrumb-label-sync";
 
 /**
  * Skewed accent tick placed before uppercase micro-labels — the smallest
@@ -21,6 +22,7 @@ export function PageHeader({
   icon: HeaderIcon,
   actions,
   children,
+  breadcrumbLabel,
 }: {
   title: React.ReactNode;
   description?: React.ReactNode;
@@ -30,11 +32,17 @@ export function PageHeader({
   icon?: Icon;
   actions?: React.ReactNode;
   children?: React.ReactNode;
+  /**
+   * On a detail page (e.g. `/dashboard/players/[playerId]`), the record's
+   * display name — shown in the breadcrumb trail instead of the raw id.
+   */
+  breadcrumbLabel?: string;
 }) {
   const headerActions = actions ?? children;
 
   return (
     <header className="relative mb-6 border-b pb-5">
+      {breadcrumbLabel && <BreadcrumbLabelSync label={breadcrumbLabel} />}
       <div
         aria-hidden
         className="bg-grid pointer-events-none absolute -inset-x-2 -top-2 bottom-0 opacity-40"
