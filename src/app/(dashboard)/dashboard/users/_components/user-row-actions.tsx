@@ -108,16 +108,18 @@ export function UserRowActions({
     <div className="flex justify-end gap-1">
       <EditUserDialog user={user} />
       <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            disabled={pending || isSelf}
-            aria-label={`Delete ${user.name}`}
-          >
-            <Icons.Actions.Delete className="text-destructive" />
-          </Button>
-        </AlertDialogTrigger>
+        <AlertDialogTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={pending || isSelf}
+              aria-label={`Delete ${user.name}`}
+            >
+              <Icons.Actions.Delete className="text-destructive" />
+            </Button>
+          }
+        />
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {user.name}'s account?</AlertDialogTitle>

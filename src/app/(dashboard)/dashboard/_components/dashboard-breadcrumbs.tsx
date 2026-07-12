@@ -44,9 +44,7 @@ export function DashboardBreadcrumbs() {
       <Breadcrumb className="mobile:hidden">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/dashboard">Dashboard</Link>
-            </BreadcrumbLink>
+            <BreadcrumbLink render={<Link href="/dashboard">Dashboard</Link>} />
           </BreadcrumbItem>
           {segments.map((segment, index) => {
             const href = `/dashboard/${segments.slice(0, index + 1).join("/")}`;
@@ -59,9 +57,9 @@ export function DashboardBreadcrumbs() {
                   {isLast ? (
                     <BreadcrumbPage>{formatSegment(segment)}</BreadcrumbPage>
                   ) : (
-                    <BreadcrumbLink asChild>
-                      <Link href={href}>{formatSegment(segment)}</Link>
-                    </BreadcrumbLink>
+                    <BreadcrumbLink
+                      render={<Link href={href}>{formatSegment(segment)}</Link>}
+                    />
                   )}
                 </BreadcrumbItem>
               </div>

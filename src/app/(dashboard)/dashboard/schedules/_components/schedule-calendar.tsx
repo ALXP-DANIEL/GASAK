@@ -197,7 +197,12 @@ export function ScheduleCalendar({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={selectedCalendar} onValueChange={setSelectedCalendar}>
+          <Select
+            value={selectedCalendar}
+            onValueChange={(value) =>
+              setSelectedCalendar(value ?? allCalendarKey)
+            }
+          >
             <SelectTrigger
               aria-label="Calendar filter"
               className="w-full desktop:w-48"

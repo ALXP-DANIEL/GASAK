@@ -48,14 +48,17 @@ export function AppSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="h-auto">
-              <Logo
-                href="/"
-                size={24}
-                wordmark="full"
-                wordmarkClassName="group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:opacity-0"
-              />
-            </SidebarMenuButton>
+            <SidebarMenuButton
+              className="h-auto"
+              render={
+                <Logo
+                  href="/"
+                  size={24}
+                  wordmark="full"
+                  wordmarkClassName="group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:opacity-0"
+                />
+              }
+            />
           </SidebarMenuItem>
         </SidebarMenu>
         {canToggleFocus(access) && primarySquadRole && (

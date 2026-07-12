@@ -89,11 +89,9 @@ export default function StatusPage({
                 return (
                   <Button
                     key={`${href}-${label}`}
-                    asChild
                     className={buttonClassName}
-                  >
-                    <Link href={href}>{label}</Link>
-                  </Button>
+                    render={<Link href={href}>{label}</Link>}
+                  />
                 );
               })}
             </div>

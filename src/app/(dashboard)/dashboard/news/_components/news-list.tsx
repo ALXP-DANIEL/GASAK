@@ -64,7 +64,10 @@ export function NewsList({
           onChange={(event) => setSearch(event.target.value)}
           className="max-w-sm"
         />
-        <Select value={audience} onValueChange={setAudience}>
+        <Select
+          value={audience}
+          onValueChange={(value) => setAudience(value ?? ALL_AUDIENCES)}
+        >
           <SelectTrigger aria-label="Audience" className="w-40">
             <SelectValue />
           </SelectTrigger>

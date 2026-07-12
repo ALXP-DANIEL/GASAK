@@ -52,11 +52,7 @@ export function Credenza({
           {children}
         </Dialog>
       ) : (
-        <Drawer
-          open={open}
-          onOpenChange={onOpenChange}
-          shouldScaleBackground={false}
-        >
+        <Drawer open={open} onOpenChange={onOpenChange}>
           {children}
         </Drawer>
       )}
@@ -73,7 +69,10 @@ export function CredenzaTrigger({
 }) {
   const { isDesktop } = useCredenzaContext();
   const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
-  return <Trigger asChild={asChild}>{children}</Trigger>;
+  if (asChild) {
+    return <Trigger render={children as React.ReactElement} />;
+  }
+  return <Trigger>{children}</Trigger>;
 }
 
 export function CredenzaContent({
@@ -175,5 +174,8 @@ export function CredenzaClose({
 }) {
   const { isDesktop } = useCredenzaContext();
   const Close = isDesktop ? DialogClose : DrawerClose;
-  return <Close asChild={asChild}>{children}</Close>;
+  if (asChild) {
+    return <Close render={children as React.ReactElement} />;
+  }
+  return <Close>{children}</Close>;
 }

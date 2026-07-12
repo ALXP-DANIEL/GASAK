@@ -8,8 +8,8 @@ import {
   type Locale,
 } from "react-day-picker"
 
-import { cn } from "@lib/utils"
-import { Button, buttonVariants } from "@components/ui/shadcn/button"
+import { cn } from "@/lib/utils"
+import { Button, buttonVariants } from "@/components/ui/shadcn/button"
 import { CaretLeftIcon, CaretRightIcon, CaretDownIcon } from "@phosphor-icons/react"
 
 function Calendar({
@@ -196,7 +196,6 @@ function CalendarDayButton({
 
   return (
     <Button
-      ref={ref}
       variant="ghost"
       size="icon"
       data-day={day.date.toLocaleDateString(locale?.code)}

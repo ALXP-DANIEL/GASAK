@@ -472,21 +472,23 @@ export function FormDatePicker<
             {label}
           </FieldLabel>
           <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                id={field.name}
-                type="button"
-                variant="outline"
-                disabled={disabled}
-                onBlur={field.onBlur}
-                aria-invalid={fieldState.invalid}
-                className={`${controlClass} w-full justify-start gap-2 text-left font-normal data-[empty=true]:text-muted-foreground`}
-                data-empty={!field.value}
-              >
-                <Icons.Domain.Calendar className="size-4" />
-                {field.value ? format(field.value, dateFormat) : placeholder}
-              </Button>
-            </PopoverTrigger>
+            <PopoverTrigger
+              render={
+                <Button
+                  id={field.name}
+                  type="button"
+                  variant="outline"
+                  disabled={disabled}
+                  onBlur={field.onBlur}
+                  aria-invalid={fieldState.invalid}
+                  className={`${controlClass} w-full justify-start gap-2 text-left font-normal data-[empty=true]:text-muted-foreground`}
+                  data-empty={!field.value}
+                >
+                  <Icons.Domain.Calendar className="size-4" />
+                  {field.value ? format(field.value, dateFormat) : placeholder}
+                </Button>
+              }
+            />
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"

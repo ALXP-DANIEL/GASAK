@@ -398,16 +398,18 @@ export function SquadRosterTable({
             {canManage && (
               <TableCell className="text-right">
                 <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={pending}
-                      aria-label={`Remove ${member.user.name}`}
-                    >
-                      <Icons.Actions.Delete className="text-destructive" />
-                    </Button>
-                  </AlertDialogTrigger>
+                  <AlertDialogTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={pending}
+                        aria-label={`Remove ${member.user.name}`}
+                      >
+                        <Icons.Actions.Delete className="text-destructive" />
+                      </Button>
+                    }
+                  />
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>

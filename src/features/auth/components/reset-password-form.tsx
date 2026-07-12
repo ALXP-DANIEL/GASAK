@@ -35,9 +35,10 @@ export function ResetPasswordForm() {
           This password reset link is missing or expired. Request a new one to
           continue.
         </p>
-        <Button asChild className="w-full">
-          <Link href="/forgot-password">Request new link</Link>
-        </Button>
+        <Button
+          className="w-full"
+          render={<Link href="/forgot-password">Request new link</Link>}
+        />
       </div>
     );
   }

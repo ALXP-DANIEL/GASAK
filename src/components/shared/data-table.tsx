@@ -252,16 +252,18 @@ function DataTableFacetedFilter<TData>({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="border-dashed">
-          {title}
-          {selected.size > 0 && (
-            <Badge variant="secondary" className="ml-1 rounded-sm px-1">
-              {selected.size}
-            </Badge>
-          )}
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <Button variant="outline" size="sm" className="border-dashed">
+            {title}
+            {selected.size > 0 && (
+              <Badge variant="secondary" className="ml-1 rounded-sm px-1">
+                {selected.size}
+              </Badge>
+            )}
+          </Button>
+        }
+      />
       <PopoverContent className="w-48 p-0" align="start">
         <Command>
           <CommandInput aria-label={`Search ${title}`} placeholder={title} />

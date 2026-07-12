@@ -129,11 +129,15 @@ export default async function MySquadPage() {
                       </div>
 
                       {isManaged && (
-                        <Button variant="outline" asChild className="w-fit">
-                          <Link href={`/dashboard/squads/${squad.id}`}>
-                            Manage squad
-                          </Link>
-                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-fit"
+                          render={
+                            <Link href={`/dashboard/squads/${squad.id}`}>
+                              Manage squad
+                            </Link>
+                          }
+                        />
                       )}
                     </div>
                   </div>
