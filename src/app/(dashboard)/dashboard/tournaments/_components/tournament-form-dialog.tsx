@@ -174,7 +174,13 @@ export function TournamentFormDialog({
                     <SelectTrigger
                       className={`${formFieldStyles.control} w-full`}
                     >
-                      <SelectValue />
+                      <SelectValue>
+                        {(value: string) =>
+                          trackingOptions.find(
+                            (option) => option.value === value,
+                          )?.label ?? value
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {trackingOptions.map((option) => (

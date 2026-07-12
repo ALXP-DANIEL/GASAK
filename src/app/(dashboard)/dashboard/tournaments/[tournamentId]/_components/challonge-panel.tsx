@@ -131,7 +131,13 @@ export function ChallongePanel({ tournament }: { tournament: Tournament }) {
                   disabled={pending}
                 >
                   <SelectTrigger className="w-full desktop:w-72">
-                    <SelectValue placeholder="Which participant is us?" />
+                    <SelectValue placeholder="Which participant is us?">
+                      {(value: string) =>
+                        participants.find(
+                          (participant) => participant.id === value,
+                        )?.name ?? value
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {participants.map((participant) => (

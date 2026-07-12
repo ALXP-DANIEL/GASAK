@@ -208,7 +208,9 @@ export function ScheduleCalendar({
               className="w-full desktop:w-48"
             >
               <CalendarBlankIcon />
-              <SelectValue />
+              <SelectValue>
+                {(value: string) => calendarLabel(value, calendars)}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -248,7 +250,11 @@ export function ScheduleCalendar({
             onValueChange={(value) => changeView(value as typeof view)}
           >
             <SelectTrigger aria-label="Calendar view" className="w-28">
-              <SelectValue />
+              <SelectValue>
+                {(value: string) =>
+                  views.find((item) => item.key === value)?.label ?? value
+                }
+              </SelectValue>
             </SelectTrigger>
             <SelectContent align="end">
               <SelectGroup>

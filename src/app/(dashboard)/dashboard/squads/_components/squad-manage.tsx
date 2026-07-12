@@ -379,7 +379,11 @@ export function SquadRosterTable({
                     aria-label={`Role for ${member.user.name}`}
                     className="w-28"
                   >
-                    <SelectValue />
+                    <SelectValue>
+                      {(value: SquadMemberRow["squadRole"]) =>
+                        SQUAD_ROLE_LABELS[value]
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {squadRoleEnum.enumValues.map((role) => (

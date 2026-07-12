@@ -285,7 +285,12 @@ export function ApplicationCard({
                     onValueChange={(value) => setLeaderId(value ?? "")}
                   >
                     <SelectTrigger aria-label="Assign application to leader">
-                      <SelectValue placeholder="Assign to leader..." />
+                      <SelectValue placeholder="Assign to leader...">
+                        {(value: string) =>
+                          leaders.find((leader) => leader.id === value)?.name ??
+                          value
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {leaders.map((leader) => (
@@ -437,7 +442,11 @@ export function ApplicationCard({
                 onValueChange={(value) => setSquadId(value ?? "")}
               >
                 <SelectTrigger aria-label="Onboard to squad">
-                  <SelectValue placeholder="Pick a squad" />
+                  <SelectValue placeholder="Pick a squad">
+                    {(value: string) =>
+                      squads.find((squad) => squad.id === value)?.name ?? value
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {squads.map((squad) => (
@@ -452,7 +461,9 @@ export function ApplicationCard({
                 onValueChange={(value) => setSquadRole(value as SquadRole)}
               >
                 <SelectTrigger aria-label="Onboard squad role">
-                  <SelectValue />
+                  <SelectValue>
+                    {(value: SquadRole) => SQUAD_ROLE_LABELS[value]}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {squadRoleEnum.enumValues.map((role) => (
