@@ -12,8 +12,6 @@ import Link from "next/link";
 import { requireDashboardRole } from "../_components/dashboard-section";
 import { SquadFormDialog } from "./_components/squad-form";
 
-export const dynamic = "force-dynamic";
-
 export default async function SquadsPage() {
   await requireDashboardRole("admin");
   const rows = await listSquads();

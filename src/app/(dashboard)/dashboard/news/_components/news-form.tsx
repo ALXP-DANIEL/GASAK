@@ -2,7 +2,7 @@
 
 import { DashboardForm } from "@components/forms/dashboard-form";
 import { FormField, FormSelect } from "@components/forms/form-field";
-import { FormRichText } from "@components/forms/rich-text-editor";
+import { FormRichText } from "@components/forms/rich-text-editor-lazy";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {

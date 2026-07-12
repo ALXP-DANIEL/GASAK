@@ -6,7 +6,7 @@ import { db, news, newsReads } from "@server/db";
 import { userOrgRole } from "@server/session";
 import { saveUpload } from "@server/uploads";
 import { and, eq, inArray } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "./public";
 
@@ -56,6 +56,7 @@ export async function createNews(
   });
 
   revalidatePath("/dashboard/news");
+  updateTag("news");
   revalidatePath("/dashboard");
   revalidatePath("/");
   return { ok: true, message: "News posted" };
@@ -107,6 +108,7 @@ export async function updateNews(
   });
 
   revalidatePath("/dashboard/news");
+  updateTag("news");
   revalidatePath(`/dashboard/news/${id}`);
   revalidatePath("/dashboard");
   revalidatePath("/");
@@ -156,6 +158,7 @@ export async function deleteNews(id: string): Promise<ActionResult> {
   });
 
   revalidatePath("/dashboard/news");
+  updateTag("news");
   revalidatePath("/dashboard");
   revalidatePath("/");
   return { ok: true, message: "News deleted" };

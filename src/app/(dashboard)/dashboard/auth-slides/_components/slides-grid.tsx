@@ -22,7 +22,6 @@ export function SlidesGrid({ slides }: { slides: AuthSlide[] }) {
               fill
               sizes="(min-width: 48rem) 33vw, 100vw"
               className="object-cover"
-              unoptimized
             />
             <div className="absolute top-2 right-2 flex gap-1.5">
               <Badge variant="secondary">#{slide.sortOrder}</Badge>

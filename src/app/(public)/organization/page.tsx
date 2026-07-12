@@ -1,3 +1,5 @@
+"use cache";
+
 import { buildOrgTree, OrgChart } from "@components/org-chart/org-chart";
 import { OrgChartPanZoom } from "@components/org-chart/org-chart-pan-zoom";
 import { PageHero } from "@components/ui/brand";
@@ -9,8 +11,7 @@ import {
 import { initials } from "@lib/format";
 import { createPageMetadata } from "@lib/metadata";
 import { db } from "@server/db";
-
-export const dynamic = "force-dynamic";
+import { cacheLife, cacheTag } from "next/cache";
 
 export const metadata = createPageMetadata({
   title: "Organization",
@@ -20,6 +21,9 @@ export const metadata = createPageMetadata({
 });
 
 export default async function OrganizationPage() {
+  cacheLife("hours");
+  cacheTag("organization");
+
   const positions = await db.query.organizationPositions.findMany({
     orderBy: (t, { asc }) => asc(t.sortOrder),
     with: { user: true },

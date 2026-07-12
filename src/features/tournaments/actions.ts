@@ -11,7 +11,7 @@ import {
 import { db, tournamentRounds, tournaments } from "@server/db";
 import { userOrgRole } from "@server/session";
 import { asc, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { tournamentRoundSchema, tournamentSchema } from "./schema";
 import type { TournamentInput, TournamentRoundInput } from "./types";
 
@@ -31,6 +31,7 @@ function parseTournament(
 
 function revalidateTournaments(tournamentId?: string) {
   revalidatePath("/dashboard/tournaments");
+  updateTag("tournaments");
   if (tournamentId) {
     revalidatePath(`/dashboard/tournaments/${tournamentId}`);
   }

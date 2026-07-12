@@ -6,11 +6,12 @@ import { db, squadMembers, squadRoleEnum, squads } from "@server/db";
 import { userOrgRole } from "@server/session";
 import { saveUpload } from "@server/uploads";
 import { and, eq, ne } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "./public";
 
 function revalidateSquads() {
+  updateTag("squads");
   revalidatePath("/dashboard/squads");
   revalidatePath("/dashboard/my-squad");
   revalidatePath("/squads");

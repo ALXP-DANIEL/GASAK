@@ -4,11 +4,12 @@ import { logActivity } from "@server/activity-log";
 import { actionUser } from "@server/authz";
 import { db, organizationPositions } from "@server/db";
 import { and, eq, ne } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "./public";
 
 function revalidateOrganization() {
+  updateTag("organization");
   revalidatePath("/dashboard/organization");
   revalidatePath("/organization");
 }

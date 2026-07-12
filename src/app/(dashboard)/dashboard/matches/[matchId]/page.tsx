@@ -18,8 +18,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireDashboardRole } from "../../_components/dashboard-section";
 
-export const dynamic = "force-dynamic";
-
 export default async function MatchDetailPage({
   params,
 }: {

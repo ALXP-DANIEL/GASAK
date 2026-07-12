@@ -43,8 +43,6 @@ import { TournamentFormDialog } from "../_components/tournament-form-dialog";
 import { ChallongePanel } from "./_components/challonge-panel";
 import { RoundFormDialog } from "./_components/round-form-dialog";
 
-export const dynamic = "force-dynamic";
-
 const outcomeVariant: Record<
   MatchOutcome,
   "default" | "secondary" | "outline" | "destructive"

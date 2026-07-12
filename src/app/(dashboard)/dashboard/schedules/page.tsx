@@ -9,9 +9,7 @@ import { addDays } from "date-fns";
 import { inArray, isNull, or } from "drizzle-orm";
 import { requireDashboardRole } from "../_components/dashboard-section";
 import { NextEventCountdown } from "./_components/next-event-countdown";
-import { ScheduleCalendar } from "./_components/schedule-calendar";
-
-export const dynamic = "force-dynamic";
+import { ScheduleCalendar } from "./_components/schedule-calendar-lazy";
 
 export default async function SchedulesPage() {
   const { user, role } = await requireDashboardRole();

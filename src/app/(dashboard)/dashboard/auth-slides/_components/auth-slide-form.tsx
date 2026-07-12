@@ -108,6 +108,11 @@ export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
                 name="image"
                 label={`Image ${slide?.imageUrl ? "(replace)" : ""}`}
                 accept="image/*"
+                cropConfig={{
+                  aspect: 3 / 4,
+                  outputWidth: 1080,
+                  outputHeight: 1440,
+                }}
               />
             </DashboardFormGrid>
             <FormCheckbox

@@ -6,8 +6,6 @@ import { EmptyState, PageHeader } from "../_components/page-surface";
 import { AuthSlideFormDialog } from "./_components/auth-slide-form";
 import { SlidesGrid } from "./_components/slides-grid";
 
-export const dynamic = "force-dynamic";
-
 export default async function AuthSlidesPage() {
   await requireDashboardRole("admin");
 

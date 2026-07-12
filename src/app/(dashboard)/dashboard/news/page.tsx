@@ -8,8 +8,6 @@ import { PageHeader } from "../_components/page-surface";
 import { NewsFormDialog } from "./_components/news-form";
 import { NewsList } from "./_components/news-list";
 
-export const dynamic = "force-dynamic";
-
 export default async function NewsPage() {
   const actor = await requireUser();
   const role = userOrgRole(actor);

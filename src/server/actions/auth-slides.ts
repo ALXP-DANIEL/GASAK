@@ -5,7 +5,7 @@ import { actionUser } from "@server/authz";
 import { authSlides, db } from "@server/db";
 import { saveUpload } from "@server/uploads";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "./public";
 
@@ -32,6 +32,7 @@ function parseSlideForm(formData: FormData) {
 
 function revalidateAuthSlides() {
   revalidatePath("/dashboard/auth-slides");
+  updateTag("auth-slides");
   revalidatePath("/login");
   revalidatePath("/forgot-password");
   revalidatePath("/reset-password");

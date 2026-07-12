@@ -129,6 +129,11 @@ export function ProductFormDialog({ product }: { product?: Product }) {
                 name="image"
                 label={`Image ${product?.imageUrl ? "(replace)" : ""}`}
                 accept="image/*"
+                cropConfig={{
+                  aspect: 1,
+                  outputWidth: 1024,
+                  outputHeight: 1024,
+                }}
               />
             </DashboardFormGrid>
             <FormField

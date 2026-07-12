@@ -1,3 +1,5 @@
+"use cache";
+
 import { ProductPurchasePanel } from "@components/cards";
 import { Icons } from "@components/icons";
 import { BrandBadge, BrandCard, LinkButton } from "@components/ui/brand";
@@ -6,10 +8,9 @@ import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
 import { createPageMetadata } from "@lib/metadata";
 import { db, products } from "@server/db";
 import { eq } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-
-export const dynamic = "force-dynamic";
 
 async function getProduct(productId: string) {
   return db.query.products.findFirst({
@@ -26,6 +27,9 @@ export async function generateMetadata({
 }: {
   params: Promise<{ productId: string }>;
 }) {
+  cacheLife("hours");
+  cacheTag("products");
+
   const { productId } = await params;
   const product = await getProduct(productId);
   if (!product) return {};
@@ -47,6 +51,9 @@ export default async function ProductPage({
 }: {
   params: Promise<{ productId: string }>;
 }) {
+  cacheLife("hours");
+  cacheTag("products");
+
   const { productId } = await params;
   const product = await getProduct(productId);
   if (!product?.active) notFound();
@@ -73,7 +80,6 @@ export default async function ProductPage({
               priority
               sizes="(min-width: 768px) 30rem, calc(100vw - 2rem)"
               className="object-cover"
-              unoptimized
             />
           ) : (
             <div className="grid h-full place-items-center">

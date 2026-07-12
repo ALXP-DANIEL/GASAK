@@ -1,10 +1,11 @@
+"use cache";
+
 import { ContentCardGrid, SquadCard } from "@components/cards";
 import { BrandBadge, LinkButton, PageHero } from "@components/ui/brand";
 import { createPageMetadata } from "@lib/metadata";
 import { db, squadMembers, squads } from "@server/db";
 import { count, eq } from "drizzle-orm";
-
-export const dynamic = "force-dynamic";
+import { cacheLife, cacheTag } from "next/cache";
 
 export const metadata = createPageMetadata({
   title: "Squads",
@@ -14,6 +15,9 @@ export const metadata = createPageMetadata({
 });
 
 export default async function SquadsPage() {
+  cacheLife("hours");
+  cacheTag("squads");
+
   const rows = await db
     .select({
       squad: squads,

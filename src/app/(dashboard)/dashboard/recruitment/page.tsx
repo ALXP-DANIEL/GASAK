@@ -20,8 +20,6 @@ import { forbidden } from "next/navigation";
 import { EmptyState, PageHeader } from "../_components/page-surface";
 import { ApplicationCard } from "./_components/application-card";
 
-export const dynamic = "force-dynamic";
-
 const KANBAN_STATUS_META: Record<
   ApplicationStatus,
   { tone: string; barColor: string; description: string }

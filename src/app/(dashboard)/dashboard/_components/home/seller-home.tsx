@@ -1,7 +1,4 @@
-import {
-  type RevenuePoint,
-  RevenueTrendChart,
-} from "@components/charts/revenue-trend-chart";
+import { type RevenuePoint, RevenueTrendChart } from "@components/charts/lazy";
 import { Icons } from "@components/icons";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";

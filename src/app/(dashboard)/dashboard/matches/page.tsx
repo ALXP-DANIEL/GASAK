@@ -9,8 +9,6 @@ import { FormStrip } from "./_components/form-strip";
 import { MatchFormDialog } from "./_components/match-form-dialog";
 import { MatchesTable } from "./_components/matches-table";
 
-export const dynamic = "force-dynamic";
-
 export default async function MatchesPage() {
   const { user, role } = await requireDashboardRole();
   const squadIds =

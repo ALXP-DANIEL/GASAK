@@ -16,8 +16,6 @@ import { eq } from "drizzle-orm";
 import { requireDashboardRole } from "../_components/dashboard-section";
 import { ProfileForm } from "./_components/profile-form";
 
-export const dynamic = "force-dynamic";
-
 export default async function SettingsPage() {
   const { user, role } = await requireDashboardRole();
   const profile = await db.query.playerProfiles.findFirst({

@@ -165,12 +165,18 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
               name="logo"
               label="Logo (replace)"
               accept="image/*"
+              cropConfig={{ aspect: 1, outputWidth: 512, outputHeight: 512 }}
             />
             <FormFileInput
               control={control}
               name="banner"
               label="Banner (replace)"
               accept="image/*"
+              cropConfig={{
+                aspect: 21 / 9,
+                outputWidth: 1920,
+                outputHeight: 823,
+              }}
             />
             <Button type="submit" disabled={pending}>
               {pending ? "Saving..." : "Save changes"}

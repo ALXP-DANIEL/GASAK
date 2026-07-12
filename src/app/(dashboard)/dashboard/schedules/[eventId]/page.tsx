@@ -25,8 +25,6 @@ import { requireDashboardRole } from "../../_components/dashboard-section";
 import { EventFormDialog } from "../_components/event-form-dialog";
 import { LogResultDialog } from "../_components/log-result-dialog";
 
-export const dynamic = "force-dynamic";
-
 export default async function EventDetailPage({
   params,
 }: {

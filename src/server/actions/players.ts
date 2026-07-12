@@ -8,7 +8,7 @@ import { db, laneEnum, playerProfiles, user } from "@server/db";
 import { userOrgRole } from "@server/session";
 import { saveUpload } from "@server/uploads";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "./public";
 
@@ -103,16 +103,17 @@ export async function updateProfile(
     }
   }
 
-  await db.update(user).set(userUpdates).where(eq(user.id, targetUserId));
-
   const { name: _name, ...profile } = parsed.data;
-  await db
-    .insert(playerProfiles)
-    .values({ userId: targetUserId, ...profile })
-    .onConflictDoUpdate({
-      target: playerProfiles.userId,
-      set: { ...profile, updatedAt: new Date() },
-    });
+  await Promise.all([
+    db.update(user).set(userUpdates).where(eq(user.id, targetUserId)),
+    db
+      .insert(playerProfiles)
+      .values({ userId: targetUserId, ...profile })
+      .onConflictDoUpdate({
+        target: playerProfiles.userId,
+        set: { ...profile, updatedAt: new Date() },
+      }),
+  ]);
   await logActivity({
     actor,
     action: "update",
@@ -127,5 +128,6 @@ export async function updateProfile(
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard/players");
   revalidatePath("/squads");
+  updateTag("players");
   return { ok: true, message: "Profile saved" };
 }

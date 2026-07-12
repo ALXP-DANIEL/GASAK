@@ -6,8 +6,6 @@ import { requireDashboardRole } from "../_components/dashboard-section";
 import { PageHeader } from "../_components/page-surface";
 import { LogsTable } from "./_components/logs-table";
 
-export const dynamic = "force-dynamic";
-
 export default async function LogsPage() {
   await requireDashboardRole("admin");
 

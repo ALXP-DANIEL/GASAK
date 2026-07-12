@@ -1,3 +1,5 @@
+"use cache";
+
 import { BuyButton, ContentCardGrid, ProductCard } from "@components/cards";
 import { PageHero, SectionHeader } from "@components/ui/brand";
 import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
@@ -9,9 +11,8 @@ import {
   products,
 } from "@server/db";
 import { and, eq, gt } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { OrderLookup } from "./order-lookup";
-
-export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
   title: "shop",
@@ -22,6 +23,9 @@ export const metadata = createPageMetadata({
 });
 
 export default async function shopPage() {
+  cacheLife("hours");
+  cacheTag("products");
+
   const items = await db
     .select()
     .from(products)

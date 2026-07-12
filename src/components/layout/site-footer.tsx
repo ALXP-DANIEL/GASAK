@@ -2,6 +2,7 @@ import { Icons } from "@components/icons";
 import { ScrollTopButton } from "@components/ui/scroll-top-button";
 import { footerQuickLinks, footerSupportLinks } from "@config/navigation";
 import { siteConfig } from "@config/site";
+import { cacheLife } from "next/cache";
 import Link from "next/link";
 import { Logo } from "./logo";
 
@@ -161,11 +162,17 @@ export function SiteFooter() {
       <div className="border-t border-primary/15">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4 desktop:px-8">
           <p className="text-[10px] text-muted-foreground">
-            © {new Date().getFullYear()} GASAK ESPORT. All Rights Reserved.
+            © <CopyrightYear /> GASAK ESPORT. All Rights Reserved.
           </p>
           <ScrollTopButton />
         </div>
       </div>
     </footer>
   );
+}
+
+async function CopyrightYear() {
+  "use cache";
+  cacheLife("days");
+  return <>{new Date().getFullYear()}</>;
 }

@@ -58,7 +58,6 @@ export function SquadLogo({
         width={128}
         height={128}
         className="size-full object-cover"
-        unoptimized={Boolean(src)}
       />
     </div>
   );

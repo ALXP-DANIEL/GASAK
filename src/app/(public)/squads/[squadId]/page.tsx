@@ -1,3 +1,5 @@
+"use cache";
+
 import { PlayerCard } from "@components/cards/player/player-card";
 import { Icons } from "@components/icons";
 import { Accent } from "@components/ui/accent";
@@ -9,10 +11,9 @@ import { createPageMetadata } from "@lib/metadata";
 import { db, scrims, squads, tournaments } from "@server/db";
 import type { SquadRole } from "@server/db/schema";
 import { desc, eq } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-
-export const dynamic = "force-dynamic";
 
 const roleOrder: Record<SquadRole, number> = {
   leader: 0,
@@ -39,6 +40,9 @@ export async function generateMetadata({
 }: {
   params: Promise<{ squadId: string }>;
 }) {
+  cacheLife("hours");
+  cacheTag("squads", "players");
+
   const { squadId } = await params;
   const squad = await getSquadProfile(squadId);
   if (!squad || squad.archived) return {};
@@ -62,6 +66,9 @@ export default async function SquadDetailPage({
 }: {
   params: Promise<{ squadId: string }>;
 }) {
+  cacheLife("hours");
+  cacheTag("squads", "players");
+
   const { squadId } = await params;
 
   const squad = await getSquadProfile(squadId);
@@ -114,7 +121,6 @@ export default async function SquadDetailPage({
               fill
               priority
               className="object-cover opacity-25"
-              unoptimized
             />
           )}
           <div className="absolute inset-0 bg-linear-to-r from-background via-background/90 to-background/35" />
@@ -306,7 +312,6 @@ function SquadLogo({
         width={128}
         height={128}
         className="size-full object-cover"
-        unoptimized={Boolean(src)}
       />
     </div>
   );

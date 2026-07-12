@@ -111,6 +111,12 @@ export function ProfileForm({
           name="avatar"
           label={`Profile picture ${imageUrl ? "(replace)" : ""}`}
           accept="image/*"
+          cropConfig={{
+            aspect: 1,
+            outputWidth: 512,
+            outputHeight: 512,
+            cropShape: "round",
+          }}
         />
         {imageUrl && (
           <p className="text-xs text-muted-foreground">

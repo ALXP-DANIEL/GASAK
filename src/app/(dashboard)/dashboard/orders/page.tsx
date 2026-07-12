@@ -22,8 +22,6 @@ function statusFilterOptions(statuses: (keyof typeof ORDER_STATUS_LABELS)[]) {
   }));
 }
 
-export const dynamic = "force-dynamic";
-
 export default async function OrdersPage() {
   await requireOrgRole("admin", "seller");
 

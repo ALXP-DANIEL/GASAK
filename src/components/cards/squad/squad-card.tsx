@@ -88,7 +88,6 @@ function DefaultSquadCard({
               alt={`${squad.name} banner`}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
-              unoptimized
             />
           )}
           <div
@@ -149,7 +148,6 @@ function SquadLogo({
         width={size}
         height={size}
         className="size-full object-cover"
-        unoptimized={Boolean(squad.logoUrl)}
       />
     </div>
   );

@@ -26,8 +26,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { EmptyState, PageHeader } from "../_components/page-surface";
 
-export const dynamic = "force-dynamic";
-
 async function getMySquads(squadIds: string[]) {
   if (squadIds.length === 0) return [];
 
@@ -89,7 +87,6 @@ export default async function MySquadPage() {
                         alt={`${squad.name} banner`}
                         fill
                         className="object-cover opacity-20"
-                        unoptimized
                       />
                     )}
                     <div

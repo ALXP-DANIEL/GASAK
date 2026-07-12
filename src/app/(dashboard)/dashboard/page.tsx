@@ -3,8 +3,6 @@ import { AdminHome } from "./_components/home/admin-home";
 import { SellerHome } from "./_components/home/seller-home";
 import { SquadHome } from "./_components/home/squad-home";
 
-export const dynamic = "force-dynamic";
-
 export default async function DashboardPage() {
   const { user, access, effectiveAccess } = await getDashboardContext();
 

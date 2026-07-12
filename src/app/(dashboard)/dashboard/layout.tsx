@@ -5,22 +5,64 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@components/ui/shadcn/sidebar";
+import { Skeleton } from "@components/ui/shadcn/skeleton";
 import { cookies } from "next/headers";
+import { Suspense } from "react";
 import { env } from "@/env";
 import { CommandPalette } from "./_components/command-palette";
 import { DashboardBreadcrumbs } from "./_components/dashboard-breadcrumbs";
 import { getDashboardContext } from "./_components/dashboard-context";
 import { AppSidebar } from "./_components/sidebar/app-sidebar";
 
-export const dynamic = "force-dynamic";
-
 const showDebugLogin = env.NODE_ENV !== "production";
 
-export default async function DashboardLayout({
+/**
+ * The shell reads session + sidebar cookies, so it must live below a
+ * Suspense boundary under cacheComponents; the fallback sketches the
+ * sidebar rail and header so first paint isn't a blank screen.
+ */
+export default function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  return (
+    <Suspense fallback={<ShellSkeleton />}>
+      <DashboardShell>{children}</DashboardShell>
+    </Suspense>
+  );
+}
+
+function ShellSkeleton() {
+  return (
+    <div className="flex min-h-svh w-full">
+      <div className="hidden w-64 shrink-0 flex-col gap-4 border-r bg-sidebar p-4 desktop:flex">
+        <Skeleton className="h-8 w-36" />
+        <div className="mt-4 grid gap-2">
+          {Array.from({ length: 7 }, (_, index) => (
+            <Skeleton
+              // biome-ignore lint/suspicious/noArrayIndexKey: static placeholder list
+              key={index}
+              className="h-8 w-full"
+            />
+          ))}
+        </div>
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex h-14 items-center gap-3 border-b px-4 desktop:px-6">
+          <Skeleton className="size-7" />
+          <Skeleton className="h-4 w-40" />
+        </div>
+        <div className="p-4 desktop:p-6">
+          <Skeleton className="h-9 w-56" />
+          <Skeleton className="mt-4 h-32 w-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function DashboardShell({ children }: { children: React.ReactNode }) {
   const [{ user, access, primarySquadRole }, cookieStore] = await Promise.all([
     getDashboardContext(),
     cookies(),
