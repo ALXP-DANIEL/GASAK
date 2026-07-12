@@ -16,6 +16,7 @@ import { ChartBarIcon } from "@phosphor-icons/react/dist/ssr/ChartBar";
 import { CheckCircleIcon } from "@phosphor-icons/react/dist/ssr/CheckCircle";
 import { CircleIcon } from "@phosphor-icons/react/dist/ssr/Circle";
 import { ClipboardTextIcon } from "@phosphor-icons/react/dist/ssr/ClipboardText";
+import { ClockIcon } from "@phosphor-icons/react/dist/ssr/Clock";
 import { ClockCounterClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ClockCounterClockwise";
 import { CodeIcon } from "@phosphor-icons/react/dist/ssr/Code";
 import { CrosshairIcon } from "@phosphor-icons/react/dist/ssr/Crosshair";
@@ -62,6 +63,7 @@ import { TiktokLogoIcon } from "@phosphor-icons/react/dist/ssr/TiktokLogo";
 import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { TreeStructureIcon } from "@phosphor-icons/react/dist/ssr/TreeStructure";
 import { TrophyIcon } from "@phosphor-icons/react/dist/ssr/Trophy";
+import { UploadSimpleIcon } from "@phosphor-icons/react/dist/ssr/UploadSimple";
 import { UserIcon } from "@phosphor-icons/react/dist/ssr/User";
 import { UserGearIcon } from "@phosphor-icons/react/dist/ssr/UserGear";
 import { UsersFourIcon } from "@phosphor-icons/react/dist/ssr/UsersFour";
@@ -131,6 +133,7 @@ export const Icons = {
     Accounts: UserGearIcon,
     Hierarchy: TreeStructureIcon,
     Audit: ClockCounterClockwiseIcon,
+    Time: ClockIcon,
   },
 
   Actions: {
@@ -144,6 +147,7 @@ export const Icons = {
     CaretUpDown: CaretUpDownIcon,
     SwitchFocus: ArrowsLeftRightIcon,
     Fit: ArrowsOutIcon,
+    Upload: UploadSimpleIcon,
   },
 
   Editor: {

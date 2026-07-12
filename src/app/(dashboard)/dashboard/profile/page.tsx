@@ -13,22 +13,16 @@ import {
   CardTitle,
 } from "@components/ui/shadcn/card";
 import { getPlayer } from "@features/players/queries";
-import { ORG_ROLE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
-import { userOrgRole } from "@server/session";
+import { ROLE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireDashboardRole } from "../../_components/dashboard-section";
-import { ProfileEditDialog } from "../../settings/_components/profile-edit-dialog";
-import { buildProfileFormDefaults } from "../../settings/_components/profile-form-schema";
+import { requireDashboardRole } from "../_components/dashboard-section";
+import { ProfileEditDialog } from "../settings/_components/profile-edit-dialog";
+import { buildProfileFormDefaults } from "../settings/_components/profile-form-schema";
 
-export default async function PlayerDetailPage({
-  params,
-}: {
-  params: Promise<{ playerId: string }>;
-}) {
-  await requireDashboardRole("admin");
-  const { playerId } = await params;
-  const player = await getPlayer(playerId);
+export default async function ProfilePage() {
+  const { user, role } = await requireDashboardRole();
+  const player = await getPlayer(user.id);
   if (!player) notFound();
 
   const profile = player.profile;
@@ -36,20 +30,17 @@ export default async function PlayerDetailPage({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title={player.name}
-        breadcrumbLabel={player.name}
-        kicker="Players"
+        title="Profile"
+        kicker="Account"
         icon={Icons.Stats.Players}
-        description="Player profile"
+        description="Your player card as it appears across the dashboard."
         actions={
           <>
-            <Badge variant="outline">
-              {ORG_ROLE_LABELS[userOrgRole(player)]}
-            </Badge>
+            <Badge variant="outline">{ROLE_LABELS[role]}</Badge>
             <ProfileEditDialog
-              userId={player.id}
-              imageUrl={player.image}
-              defaultValues={buildProfileFormDefaults(player.name, profile)}
+              userId={user.id}
+              imageUrl={user.image}
+              defaultValues={buildProfileFormDefaults(user.name, profile)}
             />
           </>
         }
@@ -63,10 +54,7 @@ export default async function PlayerDetailPage({
                 <CardTitle>Player details</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4">
-                <DetailRow
-                  label="Role"
-                  value={ORG_ROLE_LABELS[userOrgRole(player)]}
-                />
+                <DetailRow label="Role" value={ROLE_LABELS[role]} />
                 <DetailRow label="Full Name" value={profile?.fullName ?? "—"} />
                 <DetailRow label="Email" value={player.email} />
                 <DetailRow label="Phone" value={profile?.phone ?? "—"} />

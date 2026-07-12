@@ -1,4 +1,4 @@
-import { PlayerCard } from "@components/cards/player/player-card";
+import { ProfileHeroCard } from "@components/cards/player/profile-hero-card";
 import { Icons } from "@components/icons";
 import { Reveal } from "@components/motion/reveal";
 import { SplitView } from "@components/shared/split-view";
@@ -201,14 +201,13 @@ export default async function MySquadPage() {
                     <CardContent>
                       <div className="grid gap-3 desktop:grid-cols-2">
                         {members.map((member) => (
-                          <PlayerCard
+                          <ProfileHeroCard
                             key={member.id}
                             name={member.user.name}
-                            email={member.user.email}
                             image={member.user.image}
                             profile={member.user.profile}
                             squadRole={member.squadRole}
-                            showContact={canSeeContacts}
+                            compact
                           />
                         ))}
                       </div>

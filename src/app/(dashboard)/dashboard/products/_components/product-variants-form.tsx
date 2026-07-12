@@ -1,7 +1,7 @@
 "use client";
 
-import { DashboardForm } from "@components/forms/dashboard-form";
 import { FormField, FormSwitch } from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -9,6 +9,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -206,87 +207,109 @@ export function ProductVariantsDialog({
             becomes an orderable variant with its own price and stock.
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
-            {optionFields.map((field, index) => (
-              <div
-                key={field.id}
-                className="grid grid-cols-[1fr_2fr_auto] items-end gap-2"
-              >
-                <FormField
-                  control={control}
-                  name={`options.${index}.name`}
-                  label="Option name"
-                  placeholder="e.g. Color"
-                />
-                <FormField
-                  control={control}
-                  name={`options.${index}.valuesText`}
-                  label="Values (comma separated)"
-                  placeholder="e.g. Red, Blue, Green"
-                />
+        <CredenzaBody>
+          <form
+            id="product-variants-form"
+            onSubmit={handleSubmit}
+            className="grid gap-5"
+          >
+            <FormSection
+              title="Option Types"
+              description="Up to 2 option types (e.g. Color, Size)."
+            >
+              {optionFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="grid grid-cols-[1fr_2fr_auto] items-end gap-2"
+                >
+                  <FormField
+                    control={control}
+                    name={`options.${index}.name`}
+                    label="Option name"
+                    placeholder="e.g. Color"
+                  />
+                  <FormField
+                    control={control}
+                    name={`options.${index}.valuesText`}
+                    label="Values (comma separated)"
+                    placeholder="e.g. Red, Blue, Green"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => removeOption(index)}
+                  >
+                    <Icons.Actions.Delete />
+                  </Button>
+                </div>
+              ))}
+
+              {optionFields.length < 2 && (
                 <Button
                   type="button"
                   variant="outline"
-                  size="icon"
-                  onClick={() => removeOption(index)}
+                  size="sm"
+                  className="w-fit"
+                  onClick={() => appendOption({ name: "", valuesText: "" })}
                 >
-                  <Icons.Actions.Delete />
+                  <Icons.Actions.Add />
+                  Add option type
                 </Button>
-              </div>
-            ))}
-
-            {optionFields.length < 2 && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-fit"
-                onClick={() => appendOption({ name: "", valuesText: "" })}
-              >
-                <Icons.Actions.Add />
-                Add option type
-              </Button>
-            )}
+              )}
+            </FormSection>
 
             {variantFields.length > 0 && (
-              <div className="grid gap-2 overflow-x-auto rounded-md border border-input">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-input text-left text-xs uppercase tracking-wider text-muted-foreground">
-                      {optionFields.map((field, i) => (
-                        <th key={field.id} className="p-2">
-                          {optionsWatch[i]?.name || `Option ${i + 1}`}
-                        </th>
+              <FormSection
+                title="Variants"
+                description="Each combination becomes an orderable variant with its own price and stock."
+              >
+                <div className="grid gap-2 overflow-x-auto rounded-md border border-input">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-input text-left text-xs uppercase tracking-wider text-muted-foreground">
+                        {optionFields.map((field, i) => (
+                          <th key={field.id} className="p-2">
+                            {optionsWatch[i]?.name || `Option ${i + 1}`}
+                          </th>
+                        ))}
+                        <th className="p-2">Price (RM)</th>
+                        <th className="p-2">Stock</th>
+                        <th className="p-2">Image</th>
+                        <th className="p-2">Active</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {variantFields.map((field, index) => (
+                        <VariantRow
+                          key={field.id}
+                          control={control}
+                          index={index}
+                          optionValues={field.optionValues}
+                          onImageUploaded={(url) =>
+                            form.setValue(`variants.${index}.imageUrl`, url)
+                          }
+                        />
                       ))}
-                      <th className="p-2">Price (RM)</th>
-                      <th className="p-2">Stock</th>
-                      <th className="p-2">Image</th>
-                      <th className="p-2">Active</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {variantFields.map((field, index) => (
-                      <VariantRow
-                        key={field.id}
-                        control={control}
-                        index={index}
-                        optionValues={field.optionValues}
-                        onImageUploaded={(url) =>
-                          form.setValue(`variants.${index}.imageUrl`, url)
-                        }
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </tbody>
+                  </table>
+                </div>
+              </FormSection>
             )}
-
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : "Save variants"}
-            </Button>
-          </DashboardForm>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="product-variants-form" disabled={pending}>
+            {pending ? "Saving..." : "Save variants"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

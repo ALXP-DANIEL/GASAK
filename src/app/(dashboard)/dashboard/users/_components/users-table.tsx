@@ -1,8 +1,8 @@
 "use client";
 
-import { DashboardForm } from "@components/forms/dashboard-form";
 import { EmailAliasField } from "@components/forms/email-alias-field";
 import { FormField, FormSelect } from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -10,6 +10,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -76,32 +77,47 @@ export function CreateUserDialog() {
             assigned via squad membership, not here.
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
-            <FormField control={control} name="name" label="Name" />
-            <EmailAliasField
-              control={control}
-              name="emailAlias"
-              label="Email"
-              domain={EMAIL_DOMAIN}
-            />
-            <FormField
-              control={control}
-              name="password"
-              label="Temporary password"
-              description="The user must set a new password the first time they log in."
-            />
-            <FormSelect
-              control={control}
-              name="role"
-              label="Role"
-              options={roleOptions}
-            />
-            <Button type="submit" disabled={pending}>
-              {pending ? "Creating..." : "Create user"}
-            </Button>
-          </DashboardForm>
+        <CredenzaBody>
+          <form
+            id="create-user-form"
+            onSubmit={handleSubmit}
+            className="grid gap-5"
+          >
+            <FormSection title="Account">
+              <FormField control={control} name="name" label="Name" />
+              <EmailAliasField
+                control={control}
+                name="emailAlias"
+                label="Email"
+                domain={EMAIL_DOMAIN}
+              />
+              <FormField
+                control={control}
+                name="password"
+                label="Temporary password"
+                description="The user must set a new password the first time they log in."
+              />
+              <FormSelect
+                control={control}
+                name="role"
+                label="Role"
+                options={roleOptions}
+              />
+            </FormSection>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="create-user-form" disabled={pending}>
+            {pending ? "Creating..." : "Create user"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );
@@ -134,8 +150,12 @@ export function EditUserDialog({ user }: { user: UserRow }) {
           <CredenzaTitle>Edit user</CredenzaTitle>
           <CredenzaDescription>Update name and email.</CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
+        <CredenzaBody>
+          <form
+            id="edit-user-form"
+            onSubmit={handleSubmit}
+            className="grid gap-5"
+          >
             <FormField control={control} name="name" label="Name" />
             <FormField
               control={control}
@@ -143,11 +163,20 @@ export function EditUserDialog({ user }: { user: UserRow }) {
               label="Email"
               type="email"
             />
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : "Save changes"}
-            </Button>
-          </DashboardForm>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="edit-user-form" disabled={pending}>
+            {pending ? "Saving..." : "Save changes"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

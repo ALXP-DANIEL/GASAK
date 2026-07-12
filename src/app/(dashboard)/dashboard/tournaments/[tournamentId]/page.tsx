@@ -2,6 +2,7 @@ import {
   DetailRow,
   PageHeader,
 } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { Icons } from "@components/icons";
 import { DeleteButton } from "@components/shared/delete-button";
 import { Badge } from "@components/ui/shadcn/badge";
 import {
@@ -87,6 +88,7 @@ export default async function TournamentDetailPage({
         title={tournament.name}
         breadcrumbLabel={tournament.name}
         kicker="Tournaments"
+        icon={Icons.Stats.Trophies}
         description="Tournament run"
         actions={
           canManage ? (

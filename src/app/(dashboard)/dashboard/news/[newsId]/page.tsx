@@ -78,6 +78,7 @@ export default async function NewsDetailPage({
         title={item.title}
         breadcrumbLabel={item.title}
         kicker="News"
+        icon={Icons.Domain.News}
         description="Preview and manage this news post."
       />
 

@@ -11,5 +11,5 @@ export const eventSchema = z.object({
   startsAt: z.string().min(1, "Start time is required"),
   endsAt: z.string().optional(),
   location: z.string().optional(),
-  squadId: z.string(),
+  squadId: z.string().min(1, "Pick a squad"),
 });

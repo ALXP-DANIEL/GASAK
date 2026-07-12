@@ -1,5 +1,5 @@
 import { BreadcrumbLabelSync } from "@app/(dashboard)/dashboard/_components/breadcrumb-label-sync";
-import { PlayerCard } from "@components/cards/player/player-card";
+import { ProfileHeroCard } from "@components/cards/player/profile-hero-card";
 import { Icons } from "@components/icons";
 import { SplitView } from "@components/shared/split-view";
 import { Accent } from "@components/ui/accent";
@@ -8,7 +8,7 @@ import { Badge } from "@components/ui/shadcn/badge";
 import {
   LaneSpread,
   rosterBreakdown,
-  SquadLogo,
+  SquadHeroHeader,
   SquadStat,
   sortRoster,
 } from "@features/squads/components/squad-shared";
@@ -16,7 +16,6 @@ import { getSquad } from "@features/squads/queries";
 import { canManageSquad } from "@server/authz";
 import { db } from "@server/db";
 import { requireUser, userOrgRole } from "@server/session";
-import Image from "next/image";
 import { forbidden, notFound } from "next/navigation";
 import {
   AddSquadMemberDialog,
@@ -60,48 +59,20 @@ export default async function SquadDetailPage({
     <Accent color={squad.accentColor}>
       <BreadcrumbLabelSync label={squad.name} />
       <div className="grid gap-6">
-        <section className="relative overflow-hidden rounded-lg border border-primary/25 bg-card">
-          {squad.bannerUrl && (
-            <Image
-              src={squad.bannerUrl}
-              alt={`${squad.name} banner`}
-              fill
-              priority
-              className="object-cover opacity-20"
-            />
-          )}
-          <div className="absolute inset-0 bg-linear-to-r from-background via-background/90 to-background/35" />
-
-          <div className="relative grid gap-6 p-5 desktop:grid-cols-[1fr_auto] desktop:p-8">
-            <div className="flex min-w-0 flex-col gap-5 desktop:flex-row desktop:items-end">
-              <SquadLogo
-                src={squad.logoUrl}
-                name={squad.name}
-                className="size-24 desktop:size-28"
-              />
-              <div className="min-w-0">
-                <div className="flex flex-wrap gap-2">
-                  <BrandBadge>Dashboard squad</BrandBadge>
-                  {squad.archived && <Badge variant="outline">Archived</Badge>}
-                </div>
-                <h1 className="mt-4 text-balance font-heading text-4xl font-bold uppercase leading-tight tracking-wide desktop:text-5xl">
-                  {squad.name}
-                </h1>
-                {squad.description && (
-                  <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
-                    {squad.description}
-                  </p>
-                )}
-              </div>
+        <SquadHeroHeader
+          squad={squad}
+          badge={
+            <div className="flex flex-wrap gap-2">
+              <BrandBadge>Dashboard squad</BrandBadge>
+              {squad.archived && <Badge variant="outline">Archived</Badge>}
             </div>
-
-            <div className="grid gap-3 desktop:w-56">
-              <HeroMetric label="Members" value={roster.length} />
-              <HeroMetric label="Filled lanes" value={filledLanes} />
-              <HeroMetric label="Leadership" value={leaders.length} />
-            </div>
-          </div>
-        </section>
+          }
+          metrics={[
+            { label: "Members", value: roster.length },
+            { label: "Filled lanes", value: filledLanes },
+            { label: "Leadership", value: leaders.length },
+          ]}
+        />
 
         <section className="grid grid-cols-2 gap-4 desktop:grid-cols-4">
           <SquadStat
@@ -197,14 +168,13 @@ export default async function SquadDetailPage({
             ) : (
               <div className="mt-6 grid gap-3 desktop:grid-cols-2">
                 {roster.map((member) => (
-                  <PlayerCard
+                  <ProfileHeroCard
                     key={member.id}
                     name={member.user.name}
-                    email={member.user.email}
                     image={member.user.image}
                     profile={member.user.profile}
                     squadRole={member.squadRole}
-                    showContact
+                    compact
                   />
                 ))}
               </div>
@@ -213,16 +183,5 @@ export default async function SquadDetailPage({
         </SplitView>
       </div>
     </Accent>
-  );
-}
-
-function HeroMetric({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="border border-primary/20 bg-background/70 p-3">
-      <p className="font-heading text-2xl font-bold text-primary">{value}</p>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-        {label}
-      </p>
-    </div>
   );
 }

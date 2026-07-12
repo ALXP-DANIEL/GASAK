@@ -2,6 +2,7 @@ import {
   DetailRow,
   PageHeader,
 } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { Icons } from "@components/icons";
 import { DeleteButton } from "@components/shared/delete-button";
 import { Badge } from "@components/ui/shadcn/badge";
 import {
@@ -36,6 +37,7 @@ export default async function MatchDetailPage({
         title={`vs ${match.opponent}`}
         breadcrumbLabel={`vs ${match.opponent}`}
         kicker="Matches"
+        icon={Icons.Domain.Scrims}
         description="Match record"
         actions={
           canManage ? (

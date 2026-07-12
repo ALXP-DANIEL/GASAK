@@ -1,14 +1,13 @@
 "use client";
 
+import { DashboardFormGrid } from "@components/forms/dashboard-form";
 import {
-  DashboardForm,
-  DashboardFormGrid,
-} from "@components/forms/dashboard-form";
-import {
+  FormDateTimeField,
   FormField,
   FormSelect,
   formFieldStyles,
 } from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -16,6 +15,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -40,6 +40,7 @@ import {
   TOURNAMENT_FORMAT_LABELS,
   TOURNAMENT_STATUS_LABELS,
 } from "@lib/labels";
+import { cn } from "@lib/utils";
 import {
   type Tournament,
   tournamentFormatEnum,
@@ -85,7 +86,7 @@ export function TournamentFormDialog({
         format: tournament?.format ?? "single_elimination",
         status: tournament?.status ?? "upcoming",
         challongeUrl: tournament?.challongeUrl ?? "",
-        squadId: tournament?.squadId ?? squads[0]?.value ?? "",
+        squadId: tournament?.squadId ?? "",
       },
       action: (values) =>
         tournament
@@ -114,53 +115,66 @@ export function TournamentFormDialog({
             Track a tournament run for one of your squads.
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
-            <FormField control={control} name="name" label="Tournament Name" />
-            <DashboardFormGrid>
-              <FormSelect
-                control={control}
-                name="squadId"
-                label="Squad"
-                options={squads}
-                placeholder="Pick a squad"
-              />
+        <CredenzaBody>
+          <form
+            id="tournament-form"
+            onSubmit={handleSubmit}
+            className="grid gap-5"
+          >
+            <FormSection title="Tournament Details">
               <FormField
                 control={control}
-                name="date"
-                label="Date"
-                type="datetime-local"
+                name="name"
+                label="Tournament Name"
               />
-            </DashboardFormGrid>
-            <DashboardFormGrid>
-              <FormSelect
-                control={control}
-                name="format"
-                label="Format"
-                options={formatOptions}
-              />
-              <FormSelect
-                control={control}
-                name="status"
-                label="Status"
-                options={statusOptions}
-              />
-            </DashboardFormGrid>
-            <DashboardFormGrid>
-              <FormField control={control} name="organizer" label="Organizer" />
-              <FormField control={control} name="prize" label="Prize" />
-            </DashboardFormGrid>
-            <DashboardFormGrid>
-              <FormField
-                control={control}
-                name="placement"
-                label="Placement"
-                placeholder="e.g. Champion, Top 4"
-              />
-              <FormField control={control} name="mvp" label="MVP" />
-            </DashboardFormGrid>
+              <DashboardFormGrid>
+                <FormSelect
+                  control={control}
+                  name="squadId"
+                  label="Squad"
+                  options={squads}
+                  placeholder="Pick a squad"
+                />
+                <FormDateTimeField control={control} name="date" label="Date" />
+              </DashboardFormGrid>
+              <DashboardFormGrid>
+                <FormSelect
+                  control={control}
+                  name="format"
+                  label="Format"
+                  options={formatOptions}
+                />
+                <FormSelect
+                  control={control}
+                  name="status"
+                  label="Status"
+                  options={statusOptions}
+                />
+              </DashboardFormGrid>
+            </FormSection>
+
+            <FormSection title="Results">
+              <DashboardFormGrid>
+                <FormField
+                  control={control}
+                  name="organizer"
+                  label="Organizer"
+                />
+                <FormField control={control} name="prize" label="Prize" />
+              </DashboardFormGrid>
+              <DashboardFormGrid>
+                <FormField
+                  control={control}
+                  name="placement"
+                  label="Placement"
+                  placeholder="e.g. Champion, Top 4"
+                />
+                <FormField control={control} name="mvp" label="MVP" />
+              </DashboardFormGrid>
+            </FormSection>
+
             {!isEdit && (
-              <>
+              <FormSection title="Tracking">
                 <Field className={formFieldStyles.fieldShell}>
                   <FieldLabel className={formFieldStyles.label}>
                     Tracking
@@ -172,7 +186,10 @@ export function TournamentFormDialog({
                     }
                   >
                     <SelectTrigger
-                      className={`${formFieldStyles.control} w-full`}
+                      className={cn(
+                        formFieldStyles.control,
+                        "w-full data-[size=default]:h-10",
+                      )}
                     >
                       <SelectValue>
                         {(value: string) =>
@@ -201,17 +218,26 @@ export function TournamentFormDialog({
                     description="You'll pick which participant is your squad and sync rounds after creating the tournament."
                   />
                 )}
-              </>
+              </FormSection>
             )}
-            <Button type="submit" disabled={pending}>
-              {pending
-                ? "Saving..."
-                : isEdit
-                  ? "Update Tournament"
-                  : "Create Tournament"}
-            </Button>
-          </DashboardForm>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="tournament-form" disabled={pending}>
+            {pending
+              ? "Saving..."
+              : isEdit
+                ? "Update Tournament"
+                : "Create Tournament"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

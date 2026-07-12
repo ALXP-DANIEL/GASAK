@@ -2,6 +2,7 @@ import {
   DetailRow,
   PageHeader,
 } from "@app/(dashboard)/dashboard/_components/page-surface";
+import { Icons } from "@components/icons";
 import { DeleteButton } from "@components/shared/delete-button";
 import {
   Card,
@@ -70,6 +71,7 @@ export default async function EventDetailPage({
         title={event.title}
         breadcrumbLabel={event.title}
         kicker="Schedules"
+        icon={Icons.Domain.Calendar}
         description="Event details"
         actions={
           canManage ? (

@@ -1,6 +1,5 @@
 "use client";
 
-import { DashboardForm } from "@components/forms/dashboard-form";
 import { FormField, FormSelect } from "@components/forms/form-field";
 import { FormRichText } from "@components/forms/rich-text-editor-lazy";
 import { Icons } from "@components/icons";
@@ -10,6 +9,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -73,8 +73,8 @@ export function NewsFormDialog({
               : "Post to a squad you lead."}
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
+        <CredenzaBody>
+          <form id="news-form" onSubmit={handleSubmit} className="grid gap-5">
             <FormField control={control} name="title" label="Title" />
             <FormSelect
               control={control}
@@ -84,11 +84,20 @@ export function NewsFormDialog({
               placeholder="Pick audience"
             />
             <FormRichText control={control} name="content" label="Content" />
-            <Button type="submit" disabled={pending}>
-              {pending ? "Posting..." : "Post news"}
-            </Button>
-          </DashboardForm>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="news-form" disabled={pending}>
+            {pending ? "Posting..." : "Post news"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

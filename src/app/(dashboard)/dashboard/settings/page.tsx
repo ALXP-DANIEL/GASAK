@@ -1,8 +1,10 @@
-import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
-import { PlayerCard } from "@components/cards/player/player-card";
+import {
+  DetailRow,
+  PageHeader,
+} from "@app/(dashboard)/dashboard/_components/page-surface";
 import { Icons } from "@components/icons";
-import { SplitView } from "@components/shared/split-view";
 import { Badge } from "@components/ui/shadcn/badge";
+import { buttonVariants } from "@components/ui/shadcn/button";
 import {
   Card,
   CardContent,
@@ -11,16 +13,13 @@ import {
   CardTitle,
 } from "@components/ui/shadcn/card";
 import { ROLE_LABELS } from "@lib/labels";
-import { db, playerProfiles } from "@server/db";
-import { eq } from "drizzle-orm";
+import { cn } from "@lib/utils";
+import Link from "next/link";
 import { requireDashboardRole } from "../_components/dashboard-section";
-import { ProfileForm } from "./_components/profile-form";
+import { ChangePasswordCard } from "./_components/change-password-card";
 
 export default async function SettingsPage() {
   const { user, role } = await requireDashboardRole();
-  const profile = await db.query.playerProfiles.findFirst({
-    where: eq(playerProfiles.userId, user.id),
-  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -28,48 +27,33 @@ export default async function SettingsPage() {
         title="Settings"
         kicker="Account"
         icon={Icons.Actions.Settings}
-        description="Manage your account and player profile."
+        description="Manage your account and app preferences."
         actions={<Badge variant="outline">{ROLE_LABELS[role]}</Badge>}
       />
-      <SplitView
-        aside={
-          <PlayerCard
-            name={user.name ?? "Player"}
-            email={user.email}
-            image={user.image}
-            profile={profile}
-            showContact
-          />
-        }
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Profile</CardTitle>
-            <CardDescription>
-              Your display name and player details. Email: {user.email}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ProfileForm
-              userId={user.id}
-              imageUrl={user.image}
-              defaultValues={{
-                name: user.name ?? "",
-                fullName: profile?.fullName ?? "",
-                nickname: profile?.nickname ?? "",
-                ign: profile?.ign ?? "",
-                mlbbId: profile?.mlbbId ?? "",
-                serverId: profile?.serverId ?? "",
-                phone: profile?.phone ?? "",
-                preferredLanes: profile?.preferredLanes ?? [],
-                currentRank: profile?.currentRank ?? undefined,
-                peakRank: profile?.peakRank ?? undefined,
-                avatar: null,
-              }}
-            />
-          </CardContent>
-        </Card>
-      </SplitView>
+      <Card className="max-w-3xl">
+        <CardHeader>
+          <CardTitle className="text-base">Account</CardTitle>
+          <CardDescription>
+            Your account details as registered with GASAK.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <DetailRow label="Name" value={user.name} />
+          <DetailRow label="Email" value={user.email} />
+          <DetailRow label="Role" value={ROLE_LABELS[role]} />
+          <Link
+            href="/dashboard/profile"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "w-fit",
+            )}
+          >
+            <Icons.Stats.Players />
+            View & edit player profile
+          </Link>
+        </CardContent>
+      </Card>
+      <ChangePasswordCard />
     </div>
   );
 }

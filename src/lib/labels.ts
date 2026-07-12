@@ -95,6 +95,16 @@ export function formatLanes(
   return normalized.map((lane) => LANE_LABELS[lane]).join(", ");
 }
 
+/** Format a player's MLBB ID with server, e.g. "(2151) 123456789". */
+export function formatMlbbId(
+  mlbbId: string | null | undefined,
+  serverId: string | null | undefined,
+  fallback = "-",
+): string {
+  if (!mlbbId) return fallback;
+  return `${serverId ? `(${serverId}) ` : ""}${mlbbId}`;
+}
+
 export const SQUAD_ROLE_LABELS: Record<SquadRole, string> = {
   leader: "Leader",
   coach: "Coach",

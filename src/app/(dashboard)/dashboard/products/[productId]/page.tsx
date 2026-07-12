@@ -1,4 +1,5 @@
 import { ContentCardGrid, ProductCard } from "@components/cards";
+import { Icons } from "@components/icons";
 import { DeleteButton } from "@components/shared/delete-button";
 import { Badge } from "@components/ui/shadcn/badge";
 import {
@@ -44,6 +45,7 @@ export default async function ProductDetailPage({
         title={product.name}
         breadcrumbLabel={product.name}
         kicker="Products"
+        icon={Icons.Domain.Products}
         description="Preview and manage this shop product."
       />
 

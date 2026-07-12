@@ -104,6 +104,14 @@ export function NavUser({ user }: { user: SidebarUser }) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               render={
+                <a href="/dashboard/profile">
+                  <Icons.Stats.Players />
+                  Profile
+                </a>
+              }
+            />
+            <DropdownMenuItem
+              render={
                 <a href="/dashboard/settings">
                   <Icons.Actions.Settings />
                   Settings

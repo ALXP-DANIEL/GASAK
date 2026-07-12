@@ -1,15 +1,13 @@
 "use client";
 
-import {
-  DashboardForm,
-  DashboardFormGrid,
-} from "@components/forms/dashboard-form";
+import { DashboardFormGrid } from "@components/forms/dashboard-form";
 import {
   FormCheckbox,
   FormField,
   FormFileInput,
   FormSelect,
 } from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -17,6 +15,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -102,61 +101,74 @@ export function ProductFormDialog({ product }: { product?: Product }) {
               : "Add a product to the GASAK shop."}
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
-            <FormField control={control} name="name" label="Name" />
-            <DashboardFormGrid>
-              <FormSelect
-                control={control}
-                name="category"
-                label="Category"
-                options={categoryOptions}
-              />
+        <CredenzaBody>
+          <form
+            id="product-form"
+            onSubmit={handleSubmit}
+            className="grid gap-5"
+          >
+            <FormSection title="Details">
+              <FormField control={control} name="name" label="Name" />
+              <DashboardFormGrid>
+                <FormSelect
+                  control={control}
+                  name="category"
+                  label="Category"
+                  options={categoryOptions}
+                />
+                <FormField
+                  control={control}
+                  name="price"
+                  label="Price (RM)"
+                  type="number"
+                />
+                <FormField
+                  control={control}
+                  name="stock"
+                  label="Stock"
+                  type="number"
+                />
+                <FormFileInput
+                  control={control}
+                  name="image"
+                  label={`Image ${product?.imageUrl ? "(replace)" : ""}`}
+                  accept="image/*"
+                  cropConfig={{
+                    aspect: 1,
+                    outputWidth: 1024,
+                    outputHeight: 1024,
+                  }}
+                />
+              </DashboardFormGrid>
               <FormField
                 control={control}
-                name="price"
-                label="Price (RM)"
-                type="number"
+                name="description"
+                label="Description"
+                as="textarea"
+                rows={3}
               />
-              <FormField
+            </FormSection>
+            <FormSection title="Visibility">
+              <FormCheckbox
                 control={control}
-                name="stock"
-                label="Stock"
-                type="number"
+                name="active"
+                label="Visible in the public shop"
               />
-              <FormFileInput
-                control={control}
-                name="image"
-                label={`Image ${product?.imageUrl ? "(replace)" : ""}`}
-                accept="image/*"
-                cropConfig={{
-                  aspect: 1,
-                  outputWidth: 1024,
-                  outputHeight: 1024,
-                }}
-              />
-            </DashboardFormGrid>
-            <FormField
-              control={control}
-              name="description"
-              label="Description"
-              as="textarea"
-              rows={3}
-            />
-            <FormCheckbox
-              control={control}
-              name="active"
-              label="Visible in the public shop"
-            />
-            <Button type="submit" disabled={pending}>
-              {pending
-                ? "Saving..."
-                : isEdit
-                  ? "Save changes"
-                  : "Create product"}
-            </Button>
-          </DashboardForm>
+            </FormSection>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="product-form" disabled={pending}>
+            {pending ? "Saving..." : isEdit ? "Save changes" : "Create product"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

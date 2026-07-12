@@ -1,7 +1,7 @@
 "use client";
 
-import { DashboardForm } from "@components/forms/dashboard-form";
 import { FormField, FormSwitch } from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -9,6 +9,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -24,6 +25,8 @@ const squadFormSchema = z.object({
 });
 
 type SquadFormInput = z.infer<typeof squadFormSchema>;
+
+const FORM_ID = "squad-create-form";
 
 export function SquadFormDialog() {
   const { open, setOpen, control, pending, handleSubmit } =
@@ -55,26 +58,37 @@ export function SquadFormDialog() {
             Add a new squad to the organization.
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
-            <FormField control={control} name="name" label="Squad Name" />
-            <FormField
-              control={control}
-              name="description"
-              label="Description"
-              as="textarea"
-            />
-            <FormSwitch
-              control={control}
-              name="recruiting"
-              label="Open for recruitment"
-              description="Show this squad as an optional choice on the public recruitment form."
-            />
-            <Button type="submit" disabled={pending}>
-              {pending ? "Creating..." : "Create Squad"}
-            </Button>
-          </DashboardForm>
+        <CredenzaBody>
+          <form id={FORM_ID} onSubmit={handleSubmit} className="grid gap-5">
+            <FormSection title="Squad Details">
+              <FormField control={control} name="name" label="Squad Name" />
+              <FormField
+                control={control}
+                name="description"
+                label="Description"
+                as="textarea"
+              />
+              <FormSwitch
+                control={control}
+                name="recruiting"
+                label="Open for recruitment"
+                description="Show this squad as an optional choice on the public recruitment form."
+              />
+            </FormSection>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form={FORM_ID} disabled={pending}>
+            {pending ? "Creating..." : "Create Squad"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

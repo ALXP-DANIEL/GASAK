@@ -1,10 +1,12 @@
 "use client";
 
+import { DashboardFormGrid } from "@components/forms/dashboard-form";
 import {
-  DashboardForm,
-  DashboardFormGrid,
-} from "@components/forms/dashboard-form";
-import { FormField, FormSelect } from "@components/forms/form-field";
+  FormDateTimeField,
+  FormField,
+  FormSelect,
+} from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -12,6 +14,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -102,63 +105,75 @@ export function RoundFormDialog({
             Log a round of this tournament — who you faced and how it went.
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
-            <DashboardFormGrid>
+        <CredenzaBody>
+          <form id="round-form" onSubmit={handleSubmit} className="grid gap-5">
+            <FormSection title="Round">
+              <DashboardFormGrid>
+                <FormField
+                  control={control}
+                  name="roundLabel"
+                  label="Round"
+                  placeholder="e.g. Round 1, Semifinal"
+                />
+                <FormField control={control} name="opponent" label="Opponent" />
+              </DashboardFormGrid>
+              <DashboardFormGrid>
+                <FormSelect
+                  control={control}
+                  name="outcome"
+                  label="Outcome"
+                  options={outcomeOptions}
+                />
+                <FormField
+                  control={control}
+                  name="score"
+                  label="Score"
+                  placeholder="e.g. 2-1"
+                />
+              </DashboardFormGrid>
+              <DashboardFormGrid>
+                <FormDateTimeField
+                  control={control}
+                  name="scheduledAt"
+                  label="Played At"
+                />
+                <FormSelect
+                  control={control}
+                  name="eventId"
+                  label="Schedule Event"
+                  options={eventOptions}
+                />
+              </DashboardFormGrid>
+            </FormSection>
+            <FormSection title="Notes">
               <FormField
                 control={control}
-                name="roundLabel"
-                label="Round"
-                placeholder="e.g. Round 1, Semifinal"
-              />
-              <FormField control={control} name="opponent" label="Opponent" />
-            </DashboardFormGrid>
-            <DashboardFormGrid>
-              <FormSelect
-                control={control}
-                name="outcome"
-                label="Outcome"
-                options={outcomeOptions}
+                name="replayLink"
+                label="Replay Link"
+                type="url"
+                placeholder="https://"
               />
               <FormField
                 control={control}
-                name="score"
-                label="Score"
-                placeholder="e.g. 2-1"
+                name="notes"
+                label="Notes"
+                as="textarea"
               />
-            </DashboardFormGrid>
-            <DashboardFormGrid>
-              <FormField
-                control={control}
-                name="scheduledAt"
-                label="Played At"
-                type="datetime-local"
-              />
-              <FormSelect
-                control={control}
-                name="eventId"
-                label="Schedule Event"
-                options={eventOptions}
-              />
-            </DashboardFormGrid>
-            <FormField
-              control={control}
-              name="replayLink"
-              label="Replay Link"
-              type="url"
-              placeholder="https://"
-            />
-            <FormField
-              control={control}
-              name="notes"
-              label="Notes"
-              as="textarea"
-            />
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : isEdit ? "Update Round" : "Add Round"}
-            </Button>
-          </DashboardForm>
+            </FormSection>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="round-form" disabled={pending}>
+            {pending ? "Saving..." : isEdit ? "Update Round" : "Add Round"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

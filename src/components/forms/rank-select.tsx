@@ -198,49 +198,6 @@ function RankField<
           disabled && "opacity-60",
         )}
       >
-        {/* Current selection */}
-        <div className="flex min-h-20 items-center justify-between gap-4 border-b border-border bg-muted/20 px-4 py-3">
-          {tier ? (
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-lg border border-primary/40 bg-primary/5 text-primary">
-                <Icons.Stats.Trophies size={22} weight="fill" />
-              </div>
-
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-foreground">
-                  {tier}
-                </p>
-
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {divisioned && (
-                    <>
-                      Division {toRoman(value.division ?? 1)}
-                      <span className="mx-1.5">·</span>
-                    </>
-                  )}
-                  {stars} {stars === 1 ? "star" : "stars"}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-lg border border-dashed border-border bg-background text-muted-foreground">
-                <Icons.Stats.Trophies size={20} />
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-foreground">
-                  No rank selected
-                </p>
-
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Choose your current MLBB rank below.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
         <div className="space-y-6 p-4">
           {/* Tier selection */}
           <div className="space-y-3">

@@ -1,7 +1,7 @@
 "use client";
 
-import { DashboardForm } from "@components/forms/dashboard-form";
 import { FormField, FormSelect } from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -9,6 +9,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -130,48 +131,69 @@ export function OrganizationPositionFormDialog({
             organization position.
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
-            <FormField control={control} name="title" label="Title" />
-            <FormField
-              control={control}
-              name="sortOrder"
-              label="Sort order"
-              type="number"
-            />
-            <FormSelect
-              control={control}
-              name="userId"
-              label="Assigned user"
-              options={[
-                { value: UNASSIGNED, label: "Vacant" },
-                ...availableUsers.map((u) => ({
-                  value: u.id,
-                  label: `${u.name} (${u.email})`,
-                })),
-              ]}
-            />
-            <FormSelect
-              control={control}
-              name="parentId"
-              label="Reports to"
-              options={[
-                { value: NO_PARENT, label: "Top of hierarchy" },
-                ...availableParents.map((p) => ({
-                  value: p.id,
-                  label: p.title,
-                })),
-              ]}
-            />
-            <Button type="submit" disabled={pending}>
-              {pending
-                ? "Saving..."
-                : isEdit
-                  ? "Save changes"
-                  : "Create position"}
-            </Button>
-          </DashboardForm>
+        <CredenzaBody>
+          <form
+            id="organization-position-form"
+            onSubmit={handleSubmit}
+            className="grid gap-5"
+          >
+            <FormSection title="Details">
+              <FormField control={control} name="title" label="Title" />
+              <FormField
+                control={control}
+                name="sortOrder"
+                label="Sort order"
+                type="number"
+              />
+            </FormSection>
+            <FormSection title="Hierarchy">
+              <FormSelect
+                control={control}
+                name="userId"
+                label="Assigned user"
+                options={[
+                  { value: UNASSIGNED, label: "Vacant" },
+                  ...availableUsers.map((u) => ({
+                    value: u.id,
+                    label: `${u.name} (${u.email})`,
+                  })),
+                ]}
+              />
+              <FormSelect
+                control={control}
+                name="parentId"
+                label="Reports to"
+                options={[
+                  { value: NO_PARENT, label: "Top of hierarchy" },
+                  ...availableParents.map((p) => ({
+                    value: p.id,
+                    label: p.title,
+                  })),
+                ]}
+              />
+            </FormSection>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="organization-position-form"
+            disabled={pending}
+          >
+            {pending
+              ? "Saving..."
+              : isEdit
+                ? "Save changes"
+                : "Create position"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

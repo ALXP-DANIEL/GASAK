@@ -1,14 +1,12 @@
 "use client";
 
-import {
-  DashboardForm,
-  DashboardFormGrid,
-} from "@components/forms/dashboard-form";
+import { DashboardFormGrid } from "@components/forms/dashboard-form";
 import {
   FormCheckbox,
   FormField,
   FormFileInput,
 } from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -16,6 +14,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -85,46 +84,63 @@ export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
             Manage the image and copy shown beside auth pages.
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
-            <FormField control={control} name="eyebrow" label="Eyebrow" />
-            <FormField control={control} name="title" label="Title" />
-            <FormField
-              control={control}
-              name="description"
-              label="Description"
-              as="textarea"
-              rows={3}
-            />
-            <DashboardFormGrid>
+        <CredenzaBody>
+          <form
+            id="auth-slide-form"
+            onSubmit={handleSubmit}
+            className="grid gap-5"
+          >
+            <FormSection title="Copy">
+              <FormField control={control} name="eyebrow" label="Eyebrow" />
+              <FormField control={control} name="title" label="Title" />
               <FormField
                 control={control}
-                name="sortOrder"
-                label="Sort order"
-                type="number"
+                name="description"
+                label="Description"
+                as="textarea"
+                rows={3}
               />
-              <FormFileInput
+            </FormSection>
+            <FormSection title="Display">
+              <DashboardFormGrid>
+                <FormField
+                  control={control}
+                  name="sortOrder"
+                  label="Sort order"
+                  type="number"
+                />
+                <FormFileInput
+                  control={control}
+                  name="image"
+                  label={`Image ${slide?.imageUrl ? "(replace)" : ""}`}
+                  accept="image/*"
+                  cropConfig={{
+                    aspect: 3 / 4,
+                    outputWidth: 1080,
+                    outputHeight: 1440,
+                  }}
+                />
+              </DashboardFormGrid>
+              <FormCheckbox
                 control={control}
-                name="image"
-                label={`Image ${slide?.imageUrl ? "(replace)" : ""}`}
-                accept="image/*"
-                cropConfig={{
-                  aspect: 3 / 4,
-                  outputWidth: 1080,
-                  outputHeight: 1440,
-                }}
+                name="active"
+                label="Visible on auth pages"
               />
-            </DashboardFormGrid>
-            <FormCheckbox
-              control={control}
-              name="active"
-              label="Visible on auth pages"
-            />
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : isEdit ? "Save changes" : "Create slide"}
-            </Button>
-          </DashboardForm>
+            </FormSection>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="auth-slide-form" disabled={pending}>
+            {pending ? "Saving..." : isEdit ? "Save changes" : "Create slide"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );
