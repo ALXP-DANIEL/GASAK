@@ -2,8 +2,8 @@ import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface"
 import {
   type RevenuePoint,
   RevenueTrendChart,
-} from "@components/charts/revenue-trend-chart";
-import { SquadBarChart } from "@components/charts/squad-bar-chart";
+  SquadBarChart,
+} from "@components/charts/lazy";
 import { Icons } from "@components/icons";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
@@ -19,8 +19,6 @@ import {
   HomeListItem,
   HomePanel,
 } from "../_components/home/widgets";
-
-export const dynamic = "force-dynamic";
 
 export default async function ReportsPage() {
   const { effectiveAccess } = await getDashboardContext();

@@ -16,7 +16,7 @@ import {
 } from "@server/db";
 import { userOrgRole } from "@server/session";
 import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "./public";
 
@@ -209,6 +209,8 @@ export async function onboardApplicant(
   revalidatePath("/dashboard/squads");
   revalidatePath("/dashboard/users");
   revalidatePath("/squads");
+  updateTag("squads");
+  updateTag("players");
   return {
     ok: true,
     message: `${application.fullName} onboarded to ${squad.name}`,

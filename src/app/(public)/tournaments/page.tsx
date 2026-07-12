@@ -1,3 +1,5 @@
+"use cache";
+
 import { Icons } from "@components/icons";
 import { BrandBadge, BrandCard, PageHero } from "@components/ui/brand";
 import { Badge } from "@components/ui/shadcn/badge";
@@ -6,9 +8,8 @@ import { TOURNAMENT_FORMAT_LABELS } from "@lib/labels";
 import { createPageMetadata } from "@lib/metadata";
 import { db, squads, tournaments } from "@server/db";
 import { desc, eq } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
-
-export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
   title: "Tournaments",
@@ -18,6 +19,9 @@ export const metadata = createPageMetadata({
 });
 
 export default async function TournamentsPage() {
+  cacheLife("hours");
+  cacheTag("tournaments");
+
   const rows = await db
     .select({ tournament: tournaments, squad: squads })
     .from(tournaments)
@@ -148,7 +152,6 @@ function FeaturedTournament({
               fill
               sizes="(min-width: 768px) 58rem, calc(100vw - 2rem)"
               className="object-cover opacity-70"
-              unoptimized
             />
           ) : (
             <div className="grid min-h-[22rem] place-items-center">

@@ -1,8 +1,11 @@
+"use cache";
+
 import { Icons } from "@components/icons";
 import { BrandCard, LinkButton } from "@components/ui/brand";
 import { createPageMetadata } from "@lib/metadata";
 import { db, squads } from "@server/db";
 import { and, eq } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { ApplicationForm } from "./application-form";
 
 export const metadata = createPageMetadata({
@@ -13,6 +16,9 @@ export const metadata = createPageMetadata({
 });
 
 export default async function RecruitmentPage() {
+  cacheLife("hours");
+  cacheTag("squads");
+
   const recruitingSquads = await db
     .select({ id: squads.id, name: squads.name })
     .from(squads)

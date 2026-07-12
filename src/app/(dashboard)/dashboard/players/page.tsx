@@ -11,8 +11,6 @@ import { laneEnum } from "@server/db/schema";
 import { requireDashboardRole } from "../_components/dashboard-section";
 import { PlayersTable } from "./_components/players-table";
 
-export const dynamic = "force-dynamic";
-
 const laneFilterOptions = laneEnum.enumValues.map((value) => ({
   value,
   label: LANE_LABELS[value],

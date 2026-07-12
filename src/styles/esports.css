@@ -70,6 +70,37 @@
     color-mix(in oklab, var(--primary) 35%, transparent);
 }
 
+/* Splash overlay — pure CSS so the fade runs before hydration; never
+   intercepts input. Timings mirrored in splash-gate.tsx. */
+.splash-overlay {
+  pointer-events: none;
+  animation: splash-fade 0.4s ease-in-out 0.45s forwards;
+}
+
+.splash-line {
+  width: 0;
+  animation: splash-line-grow 0.34s ease-in-out forwards;
+}
+
+@keyframes splash-fade {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes splash-line-grow {
+  to {
+    width: 96px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-overlay {
+    display: none;
+  }
+}
+
 /* FullCalendar theme bridge */
 .fc {
   --fc-border-color: var(--border);

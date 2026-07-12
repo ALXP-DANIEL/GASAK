@@ -6,7 +6,7 @@ import { actionUser } from "@server/authz";
 import { db, user } from "@server/db";
 import { ORG_ROLES } from "@server/db/schema";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import type { ActionResult } from "./public";
@@ -32,6 +32,7 @@ const updateUserSchema = z.object({
 function revalidateUsers() {
   revalidatePath("/dashboard/users");
   revalidatePath("/dashboard");
+  updateTag("players");
 }
 
 function actionError(error: unknown, fallback: string) {

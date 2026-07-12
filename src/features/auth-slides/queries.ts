@@ -1,5 +1,6 @@
 import { authSlides, db } from "@server/db";
 import { asc } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 
 export type AuthCarouselSlide = {
   id: string;
@@ -10,6 +11,10 @@ export type AuthCarouselSlide = {
 };
 
 export async function listActiveAuthSlides(): Promise<AuthCarouselSlide[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("auth-slides");
+
   const rows = await db.query.authSlides.findMany({
     where: (slide, { eq }) => eq(slide.active, true),
     orderBy: [asc(authSlides.sortOrder), asc(authSlides.createdAt)],

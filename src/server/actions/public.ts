@@ -15,7 +15,7 @@ import {
   squads,
 } from "@server/db";
 import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { markOrderPaid } from "./shop";
 
@@ -161,6 +161,7 @@ export async function placeOrder(
 
   revalidatePath("/dashboard/orders");
   revalidatePath("/shop");
+  updateTag("products");
   return { ok: true, data: { orderNo } };
 }
 
@@ -208,6 +209,7 @@ export async function createBillplzPayment(
 
   revalidatePath("/dashboard/orders");
   revalidatePath("/shop");
+  updateTag("products");
   return { ok: true, data: { url: bill.url } };
 }
 

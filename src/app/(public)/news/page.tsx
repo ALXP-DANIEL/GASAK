@@ -1,11 +1,12 @@
+"use cache";
+
 import { ContentCardGrid, NewsCard } from "@components/cards";
 import { SectionHeader } from "@components/ui/brand";
 import { createPageMetadata } from "@lib/metadata";
 import { db, news } from "@server/db";
 import { desc, isNull } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { FeaturedNews } from "./_components/featured-news";
-
-export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
   title: "News",
@@ -15,6 +16,9 @@ export const metadata = createPageMetadata({
 });
 
 export default async function NewsPage() {
+  cacheLife("hours");
+  cacheTag("news");
+
   const items = await db
     .select()
     .from(news)

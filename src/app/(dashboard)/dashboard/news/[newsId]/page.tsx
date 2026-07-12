@@ -16,8 +16,6 @@ import { notFound } from "next/navigation";
 import { DetailRow, PageHeader } from "../../_components/page-surface";
 import { NewsInlineEditor } from "../_components/news-inline-editor";
 
-export const dynamic = "force-dynamic";
-
 export default async function NewsDetailPage({
   params,
 }: {

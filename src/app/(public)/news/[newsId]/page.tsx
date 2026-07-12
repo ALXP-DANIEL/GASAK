@@ -1,3 +1,5 @@
+"use cache";
+
 import { NewsCard } from "@components/cards";
 import { Icons } from "@components/icons";
 import { HtmlContent } from "@components/shared/html-content";
@@ -6,9 +8,8 @@ import { formatDate, stripHtml } from "@lib/format";
 import { createPageMetadata } from "@lib/metadata";
 import { db } from "@server/db";
 import { desc, eq, isNull, ne } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
-
-export const dynamic = "force-dynamic";
 
 async function getNews(newsId: string) {
   return db.query.news.findFirst({
@@ -29,6 +30,9 @@ export async function generateMetadata({
 }: {
   params: Promise<{ newsId: string }>;
 }) {
+  cacheLife("hours");
+  cacheTag("news");
+
   const { newsId } = await params;
   const item = await getNews(newsId);
   if (!item) return {};
@@ -47,6 +51,9 @@ export default async function NewsDetailPage({
 }: {
   params: Promise<{ newsId: string }>;
 }) {
+  cacheLife("hours");
+  cacheTag("news");
+
   const { newsId } = await params;
   const item = await getNews(newsId);
   if (!item) notFound();

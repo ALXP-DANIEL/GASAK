@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  type ImageCropConfig,
+  ImageCropDialog,
+} from "@components/forms/image-crop-dialog";
 import { Icons } from "@components/icons";
 import { Button } from "@components/ui/shadcn/button";
 import { Calendar } from "@components/ui/shadcn/calendar";
@@ -27,7 +31,9 @@ import {
 } from "@components/ui/shadcn/select";
 import { Switch } from "@components/ui/shadcn/switch";
 import { Textarea } from "@components/ui/shadcn/textarea";
+import { compressImage } from "@lib/compress-image";
 import { format } from "date-fns";
+import { useRef, useState } from "react";
 import {
   type Control,
   Controller,
@@ -512,6 +518,14 @@ type FormFileInputProps<
 > = BaseFieldProps<TFieldValues, TName> & {
   accept?: string;
   multiple?: boolean;
+  /** Longest edge for client-side image compression before upload. */
+  imageMaxDimension?: number;
+  /**
+   * When set, picking a file opens a crop dialog first; the file that
+   * reaches form state is always exactly `outputWidth` x `outputHeight`.
+   * Only meaningful for single-file (non-`multiple`) image fields.
+   */
+  cropConfig?: ImageCropConfig;
 };
 
 export function FormFileInput<
@@ -526,41 +540,91 @@ export function FormFileInput<
   disabled,
   accept,
   multiple,
+  imageMaxDimension = 1600,
+  cropConfig,
 }: FormFileInputProps<TFieldValues, TName>) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [pendingCrop, setPendingCrop] = useState<{
+    url: string;
+    fileName: string;
+    apply: (file: File) => void;
+  } | null>(null);
+
+  function clearInput() {
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
+  function closeCropDialog() {
+    if (pendingCrop) URL.revokeObjectURL(pendingCrop.url);
+    setPendingCrop(null);
+    clearInput();
+  }
+
   return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid} className={fieldShellClass}>
-          <FieldLabel
-            htmlFor={field.name}
-            className={hideLabel ? "sr-only" : labelClass}
-          >
-            {label}
-          </FieldLabel>
-          <Input
-            id={field.name}
-            name={field.name}
-            type="file"
-            accept={accept}
-            multiple={multiple}
-            disabled={disabled}
-            onBlur={field.onBlur}
-            ref={field.ref}
-            onChange={(e) => {
-              const files = e.target.files;
-              field.onChange(
-                multiple ? Array.from(files ?? []) : (files?.[0] ?? null),
-              );
-            }}
-            aria-invalid={fieldState.invalid}
-            className={controlClass}
-          />
-          {description && <FieldDescription>{description}</FieldDescription>}
-          <FieldError errors={[fieldState.error]} />
-        </Field>
+    <>
+      <Controller
+        name={name}
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid} className={fieldShellClass}>
+            <FieldLabel
+              htmlFor={field.name}
+              className={hideLabel ? "sr-only" : labelClass}
+            >
+              {label}
+            </FieldLabel>
+            <Input
+              id={field.name}
+              name={field.name}
+              type="file"
+              accept={accept}
+              multiple={multiple}
+              disabled={disabled}
+              onBlur={field.onBlur}
+              ref={(node) => {
+                field.ref(node);
+                inputRef.current = node;
+              }}
+              onChange={async (e) => {
+                const files = Array.from(e.target.files ?? []);
+                const file = files[0];
+
+                if (cropConfig && !multiple && file) {
+                  setPendingCrop({
+                    url: URL.createObjectURL(file),
+                    fileName: file.name,
+                    apply: (cropped) => field.onChange(cropped),
+                  });
+                  return;
+                }
+
+                const compressed = await Promise.all(
+                  files.map((f) => compressImage(f, imageMaxDimension)),
+                );
+                field.onChange(multiple ? compressed : (compressed[0] ?? null));
+              }}
+              aria-invalid={fieldState.invalid}
+              className={controlClass}
+            />
+            {description && <FieldDescription>{description}</FieldDescription>}
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+      {cropConfig && (
+        <ImageCropDialog
+          open={pendingCrop !== null}
+          imageUrl={pendingCrop?.url ?? null}
+          fileName={pendingCrop?.fileName ?? "image"}
+          config={cropConfig}
+          onCancel={closeCropDialog}
+          onConfirm={(file) => {
+            pendingCrop?.apply(file);
+            setPendingCrop(null);
+            clearInput();
+          }}
+        />
       )}
-    />
+    </>
   );
 }

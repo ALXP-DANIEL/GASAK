@@ -25,8 +25,6 @@ import {
   SquadRosterTable,
 } from "../_components/squad-manage";
 
-export const dynamic = "force-dynamic";
-
 export default async function SquadDetailPage({
   params,
 }: {
@@ -68,7 +66,6 @@ export default async function SquadDetailPage({
               fill
               priority
               className="object-cover opacity-20"
-              unoptimized
             />
           )}
           <div className="absolute inset-0 bg-linear-to-r from-background via-background/90 to-background/35" />

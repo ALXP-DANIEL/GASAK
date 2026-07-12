@@ -2,7 +2,7 @@
 
 import { DashboardForm } from "@components/forms/dashboard-form";
 import { FormField, FormSelect } from "@components/forms/form-field";
-import { FormRichText } from "@components/forms/rich-text-editor";
+import { FormRichText } from "@components/forms/rich-text-editor-lazy";
 import { Icons } from "@components/icons";
 import { DeleteButton } from "@components/shared/delete-button";
 import { HtmlContent } from "@components/shared/html-content";

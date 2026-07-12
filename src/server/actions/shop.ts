@@ -15,11 +15,12 @@ import {
 } from "@server/db";
 import { saveUpload } from "@server/uploads";
 import { eq, sql } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "./public";
 
 function revalidateShop() {
+  updateTag("products");
   revalidatePath("/dashboard/products");
   revalidatePath("/dashboard/orders");
   revalidatePath("/dashboard");

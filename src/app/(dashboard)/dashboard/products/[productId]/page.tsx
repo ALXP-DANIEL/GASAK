@@ -18,8 +18,6 @@ import { DetailRow, PageHeader } from "../../_components/page-surface";
 import { ProductFormDialog } from "../_components/product-form";
 import { ProductVariantsDialog } from "../_components/product-variants-form";
 
-export const dynamic = "force-dynamic";
-
 async function getProduct(productId: string) {
   return db.query.products.findFirst({
     where: eq(products.id, productId),

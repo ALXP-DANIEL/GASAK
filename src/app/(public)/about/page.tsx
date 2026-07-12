@@ -1,10 +1,11 @@
+"use cache";
+
 import { Icons } from "@components/icons";
 import { BrandCard, LinkButton } from "@components/ui/brand";
 import { createPageMetadata } from "@lib/metadata";
 import { db, playerProfiles, squads, tournaments } from "@server/db";
 import { count, eq } from "drizzle-orm";
-
-export const dynamic = "force-dynamic";
+import { cacheLife, cacheTag } from "next/cache";
 
 export const metadata = createPageMetadata({
   title: "About",
@@ -50,6 +51,9 @@ const PILLARS = [
 ];
 
 export default async function AboutPage() {
+  cacheLife("hours");
+  cacheTag("squads", "players", "tournaments");
+
   const [[squadCount], [playerCount], [tournamentCount]] = await Promise.all([
     db
       .select({ value: count() })

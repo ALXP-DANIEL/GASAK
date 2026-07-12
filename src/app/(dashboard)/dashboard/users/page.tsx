@@ -7,8 +7,6 @@ import { PageHeader } from "../_components/page-surface";
 import { UsersDataTable } from "./_components/users-data-table";
 import { CreateUserDialog } from "./_components/users-table";
 
-export const dynamic = "force-dynamic";
-
 export default async function UsersPage() {
   const actor = await requireOrgRole("admin");
 

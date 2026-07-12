@@ -1,3 +1,5 @@
+"use cache";
+
 import { createPageMetadata } from "@lib/metadata";
 import {
   db,
@@ -8,6 +10,7 @@ import {
   tournaments,
 } from "@server/db";
 import { count, desc, eq, isNull } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { AboutSection } from "./_components/home/about-section";
 import { CtaBanner } from "./_components/home/cta-banner";
 import { Hero } from "./_components/home/hero";
@@ -15,8 +18,6 @@ import { NewsSection } from "./_components/home/news-section";
 import { ProductsSection } from "./_components/home/products-section";
 import { SquadsSection } from "./_components/home/squads-section";
 import { StatsBar } from "./_components/home/stats-bar";
-
-export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
   title: "Home",
@@ -26,6 +27,9 @@ export const metadata = createPageMetadata({
 });
 
 export default async function HomePage() {
+  cacheLife("hours");
+  cacheTag("squads", "players", "tournaments", "news", "products");
+
   const [
     [squadCount],
     [playerCount],

@@ -2,8 +2,6 @@ import { siteConfig } from "@config/site";
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 
-export const runtime = "edge";
-
 const BRAND_GOLD = "#e0af3b";
 const DARK = "#050506";
 const INK = "#0c0d10";

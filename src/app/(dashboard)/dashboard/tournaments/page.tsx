@@ -21,8 +21,6 @@ import { TournamentCard } from "./_components/tournament-card";
 import { TournamentFormDialog } from "./_components/tournament-form-dialog";
 import { TournamentsAllTable } from "./_components/tournaments-all-table";
 
-export const dynamic = "force-dynamic";
-
 export default async function TournamentsPage() {
   const { user, role } = await requireDashboardRole();
   const squadIds =

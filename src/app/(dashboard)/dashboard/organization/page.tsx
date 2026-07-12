@@ -14,8 +14,6 @@ import { requireDashboardRole } from "../_components/dashboard-section";
 import { EmptyState, PageHeader } from "../_components/page-surface";
 import { OrganizationPositionFormDialog } from "./_components/organization-form";
 
-export const dynamic = "force-dynamic";
-
 export default async function OrganizationPage() {
   await requireDashboardRole("admin");
 

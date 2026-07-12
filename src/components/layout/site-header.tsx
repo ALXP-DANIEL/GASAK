@@ -5,10 +5,10 @@ import { publicNavigation } from "@config/navigation";
 import { cn } from "@lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { Logo } from "./logo";
 
-function AuthLink({
+export function AuthLink({
   isLoggedIn,
   className,
   onClick,
@@ -42,50 +42,101 @@ function AuthLink({
   );
 }
 
-export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
+function isActivePath(pathname: string | null, href: string) {
+  if (pathname === null) return false;
+  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+}
+
+/**
+ * usePathname needs a Suspense boundary on dynamic-param routes under
+ * cacheComponents, so the nav renders a static (no active highlight)
+ * fallback in the prerendered shell and the highlighted version streams in.
+ */
+function DesktopNav({ pathname }: { pathname: string | null }) {
+  return (
+    <nav
+      className="hidden items-center gap-5 desktop:flex"
+      aria-label="Main navigation"
+    >
+      {publicNavigation.map(({ label, href }) => (
+        <Link
+          key={label}
+          href={href}
+          className={cn(
+            "border-b-2 pb-0.5 text-[11px] font-semibold uppercase tracking-wider transition-colors",
+            isActivePath(pathname, href)
+              ? "border-primary text-primary"
+              : "border-transparent text-foreground/80 hover:text-primary",
+          )}
+        >
+          {label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+function DesktopNavActive() {
   const pathname = usePathname();
+  return <DesktopNav pathname={pathname} />;
+}
+
+function MobileNav({
+  pathname,
+  onNavigate,
+}: {
+  pathname: string | null;
+  onNavigate: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      {publicNavigation.map(({ label, href }) => (
+        <Link
+          key={label}
+          href={href}
+          onClick={onNavigate}
+          className={cn(
+            "text-sm font-semibold uppercase tracking-wider",
+            isActivePath(pathname, href)
+              ? "text-primary"
+              : "text-foreground/80",
+          )}
+        >
+          {label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+function MobileNavActive({ onNavigate }: { onNavigate: () => void }) {
+  const pathname = usePathname();
+  return <MobileNav pathname={pathname} onNavigate={onNavigate} />;
+}
+
+export function SiteHeader({ authSlot }: { authSlot: React.ReactNode }) {
   const [open, setOpen] = useState(false);
-
-  // Close the mobile menu on navigation
-  // biome-ignore lint/correctness/useExhaustiveDependencies: pathname change is the close signal
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const closeMenu = () => setOpen(false);
 
   return (
     <header className="sticky top-0 z-50 bg-linear-to-b from-background/95 via-background/80 to-transparent backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 desktop:px-8">
         <Logo size={40} wordmark="full" />
 
-        <nav
-          className="hidden items-center gap-5 desktop:flex"
-          aria-label="Main navigation"
+        <Suspense fallback={<DesktopNav pathname={null} />}>
+          <DesktopNavActive />
+        </Suspense>
+
+        <div className="hidden items-center gap-2 desktop:flex">{authSlot}</div>
+
+        {/* onClickCapture closes the menu when the auth link navigates */}
+        <div
+          className="flex items-center gap-3 desktop:hidden"
+          onClickCapture={(event) => {
+            if ((event.target as HTMLElement).closest("a")) closeMenu();
+          }}
         >
-          {publicNavigation.map(({ label, href }) => (
-            <Link
-              key={label}
-              href={href}
-              className={cn(
-                "border-b-2 pb-0.5 text-[11px] font-semibold uppercase tracking-wider transition-colors",
-                isActive(href)
-                  ? "border-primary text-primary"
-                  : "border-transparent text-foreground/80 hover:text-primary",
-              )}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="hidden items-center gap-2 desktop:flex">
-          <AuthLink isLoggedIn={isLoggedIn} />
-        </div>
-
-        <div className="flex items-center gap-3 desktop:hidden">
-          <AuthLink isLoggedIn={isLoggedIn} />
+          {authSlot}
           <button
             type="button"
             className="text-primary"
@@ -114,21 +165,11 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           className="overflow-hidden border-t border-primary/20 px-4 py-4"
           aria-label="Mobile navigation"
         >
-          <div className="flex flex-col gap-3">
-            {publicNavigation.map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "text-sm font-semibold uppercase tracking-wider",
-                  isActive(href) ? "text-primary" : "text-foreground/80",
-                )}
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
+          <Suspense
+            fallback={<MobileNav pathname={null} onNavigate={closeMenu} />}
+          >
+            <MobileNavActive onNavigate={closeMenu} />
+          </Suspense>
         </nav>
       </div>
     </header>

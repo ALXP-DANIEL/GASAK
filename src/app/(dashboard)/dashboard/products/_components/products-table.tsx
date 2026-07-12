@@ -47,7 +47,6 @@ export function ProductsTable({
                 width={40}
                 height={40}
                 className="size-10 rounded-none border object-cover"
-                unoptimized
               />
             ) : (
               <div className="grid size-10 place-items-center rounded-none border bg-muted text-xs text-muted-foreground">

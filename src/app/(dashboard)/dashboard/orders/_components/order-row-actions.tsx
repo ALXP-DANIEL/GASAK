@@ -12,7 +12,7 @@ import { updateOrderStatus } from "@server/actions/shop";
 import type { Order, OrderStatus, Product } from "@server/db/schema";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useOptimistic, useTransition } from "react";
 import { toast } from "sonner";
 
 const NEXT_ACTIONS: Partial<
@@ -31,12 +31,15 @@ export function OrderRowActions({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const actions = NEXT_ACTIONS[order.status] ?? [];
+  // Flip the available actions immediately; reverts if the action fails.
+  const [optimisticStatus, setOptimisticStatus] = useOptimistic(order.status);
+  const actions = NEXT_ACTIONS[optimisticStatus] ?? [];
   const canCancel =
-    order.status !== "completed" && order.status !== "cancelled";
+    optimisticStatus !== "completed" && optimisticStatus !== "cancelled";
 
   function setStatus(status: OrderStatus) {
     startTransition(async () => {
+      setOptimisticStatus(status);
       const result = await updateOrderStatus(order.id, status);
       if (result.ok) {
         toast.success(result.message);
@@ -67,7 +70,6 @@ export function OrderRowActions({
                 alt="Payment proof"
                 fill
                 className="object-contain"
-                unoptimized
               />
             </div>
           </CredenzaContent>

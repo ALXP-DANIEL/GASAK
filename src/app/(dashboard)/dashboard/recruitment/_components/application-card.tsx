@@ -49,7 +49,7 @@ import {
   squadRoleEnum,
 } from "@server/db/schema";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { DetailRow } from "../../_components/page-surface";
 
@@ -79,12 +79,18 @@ export function ApplicationCard({
     email: string;
     tempPassword: string;
   } | null>(null);
+  // Card state follows the optimistic status so decisions feel instant;
+  // it reverts automatically if the server action fails.
+  const [optimisticStatus, setOptimisticStatus] = useOptimistic(
+    application.status,
+  );
 
   const decided =
-    application.status === "accepted" || application.status === "rejected";
+    optimisticStatus === "accepted" || optimisticStatus === "rejected";
 
   function setStatus(status: ApplicationStatus) {
     startTransition(async () => {
+      setOptimisticStatus(status);
       const result = await updateApplicationStatus({
         applicationId: application.id,
         status,
@@ -169,15 +175,15 @@ export function ApplicationCard({
               </div>
               <Badge
                 variant={
-                  application.status === "rejected"
+                  optimisticStatus === "rejected"
                     ? "destructive"
-                    : application.status === "accepted" ||
-                        application.status === "trial"
+                    : optimisticStatus === "accepted" ||
+                        optimisticStatus === "trial"
                       ? "default"
                       : "outline"
                 }
               >
-                {APPLICATION_STATUS_LABELS[application.status]}
+                {APPLICATION_STATUS_LABELS[optimisticStatus]}
               </Badge>
             </div>
 
@@ -197,7 +203,7 @@ export function ApplicationCard({
           <CredenzaHeader>
             <CredenzaTitle>{application.fullName}</CredenzaTitle>
             <CredenzaDescription>
-              {`Application ${APPLICATION_STATUS_LABELS[application.status]}`}
+              {`Application ${APPLICATION_STATUS_LABELS[optimisticStatus]}`}
             </CredenzaDescription>
           </CredenzaHeader>
           <CredenzaBody className="grid gap-5">
@@ -243,7 +249,7 @@ export function ApplicationCard({
               <div className="flex flex-wrap gap-2">
                 {!decided && (
                   <>
-                    {application.status !== "trial" && (
+                    {optimisticStatus !== "trial" && (
                       <Button
                         size="sm"
                         variant="secondary"
@@ -320,7 +326,7 @@ export function ApplicationCard({
                 </p>
               )}
 
-              {isAdmin && application.status === "accepted" && (
+              {isAdmin && optimisticStatus === "accepted" && (
                 <div className="grid gap-2 border bg-background/60 p-3">
                   <p className="text-sm font-medium">
                     Onboard: create account and squad slot

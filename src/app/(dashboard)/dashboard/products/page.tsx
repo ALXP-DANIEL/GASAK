@@ -14,8 +14,6 @@ const categoryFilterOptions = productCategoryEnum.enumValues.map((value) => ({
   label: PRODUCT_CATEGORY_LABELS[value],
 }));
 
-export const dynamic = "force-dynamic";
-
 export default async function ProductsPage() {
   await requireOrgRole("admin", "seller");
 
