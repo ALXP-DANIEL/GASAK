@@ -16,6 +16,7 @@ import { ChartBarIcon } from "@phosphor-icons/react/dist/ssr/ChartBar";
 import { CheckCircleIcon } from "@phosphor-icons/react/dist/ssr/CheckCircle";
 import { CircleIcon } from "@phosphor-icons/react/dist/ssr/Circle";
 import { ClipboardTextIcon } from "@phosphor-icons/react/dist/ssr/ClipboardText";
+import { ClockCounterClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ClockCounterClockwise";
 import { CodeIcon } from "@phosphor-icons/react/dist/ssr/Code";
 import { CrosshairIcon } from "@phosphor-icons/react/dist/ssr/Crosshair";
 import { CurrencyCircleDollarIcon } from "@phosphor-icons/react/dist/ssr/CurrencyCircleDollar";
@@ -59,8 +60,10 @@ import { TextStrikethroughIcon } from "@phosphor-icons/react/dist/ssr/TextStrike
 import { TextUnderlineIcon } from "@phosphor-icons/react/dist/ssr/TextUnderline";
 import { TiktokLogoIcon } from "@phosphor-icons/react/dist/ssr/TiktokLogo";
 import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { TreeStructureIcon } from "@phosphor-icons/react/dist/ssr/TreeStructure";
 import { TrophyIcon } from "@phosphor-icons/react/dist/ssr/Trophy";
 import { UserIcon } from "@phosphor-icons/react/dist/ssr/User";
+import { UserGearIcon } from "@phosphor-icons/react/dist/ssr/UserGear";
 import { UsersFourIcon } from "@phosphor-icons/react/dist/ssr/UsersFour";
 import { UsersThreeIcon } from "@phosphor-icons/react/dist/ssr/UsersThree";
 import { XIcon } from "@phosphor-icons/react/dist/ssr/X";
@@ -125,6 +128,9 @@ export const Icons = {
     News: NewspaperIcon,
     Shop: ShoppingBagIcon,
     Reports: ChartBarIcon,
+    Accounts: UserGearIcon,
+    Hierarchy: TreeStructureIcon,
+    Audit: ClockCounterClockwiseIcon,
   },
 
   Actions: {

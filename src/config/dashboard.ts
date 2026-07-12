@@ -94,13 +94,13 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
       {
         href: "/dashboard/squads",
         label: "Squads",
-        icon: Icons.Stats.Squads,
+        icon: Icons.Domain.Squads,
         canAccess: isAdmin,
       },
       {
         href: "/dashboard/players",
         label: "Players",
-        icon: Icons.Domain.Players,
+        icon: Icons.Stats.Players,
         canAccess: isAdmin,
       },
     ],
@@ -130,25 +130,25 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
       {
         href: "/dashboard/users",
         label: "Users",
-        icon: Icons.Domain.Members,
+        icon: Icons.Domain.Accounts,
         canAccess: isAdmin,
       },
       {
         href: "/dashboard/auth-slides",
         label: "Auth Slides",
-        icon: Icons.Domain.News,
+        icon: Icons.Editor.Image,
         canAccess: isAdmin,
       },
       {
         href: "/dashboard/organization",
         label: "Organization",
-        icon: Icons.Domain.Members,
+        icon: Icons.Domain.Hierarchy,
         canAccess: isAdmin,
       },
       {
         href: "/dashboard/logs",
         label: "Logs",
-        icon: Icons.Domain.Reports,
+        icon: Icons.Domain.Audit,
         canAccess: isAdmin,
       },
       {
