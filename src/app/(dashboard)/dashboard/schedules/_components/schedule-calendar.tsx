@@ -22,6 +22,7 @@ import listPlugin from "@fullcalendar/react/list";
 import multiMonthPlugin from "@fullcalendar/react/multimonth";
 import timeGridPlugin from "@fullcalendar/react/timegrid";
 import { useScreen } from "@hooks/use-screen";
+import { formatDateTime, formatTime } from "@lib/format";
 import { EVENT_TYPE_LABELS } from "@lib/labels";
 import { cn } from "@lib/utils";
 import { CalendarBlankIcon } from "@phosphor-icons/react/dist/ssr/CalendarBlank";
@@ -343,9 +344,8 @@ export function ScheduleCalendar({
             <div className="mt-1.5 grid gap-0.5 text-xs text-muted-foreground">
               <span>{EVENT_TYPE_LABELS[hover.event.type]}</span>
               <span>
-                {format(new Date(hover.event.startsAt), "MMM d, h:mm a")}
-                {hover.event.endsAt &&
-                  ` – ${format(new Date(hover.event.endsAt), "h:mm a")}`}
+                {formatDateTime(hover.event.startsAt)}
+                {hover.event.endsAt && ` – ${formatTime(hover.event.endsAt)}`}
               </span>
               {hover.event.location && <span>{hover.event.location}</span>}
               <span>{hover.event.squadName ?? "Organization-wide"}</span>

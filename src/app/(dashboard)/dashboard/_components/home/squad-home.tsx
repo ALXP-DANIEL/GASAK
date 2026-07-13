@@ -1,11 +1,10 @@
 import { Icons } from "@components/icons";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
-import { formatDate, formatDateTime } from "@lib/format";
+import { formatDate, formatDateTime, formatMY } from "@lib/format";
 import { EVENT_TYPE_LABELS, resultBadgeVariant } from "@lib/labels";
 import { getMemberSquadIds } from "@server/authz";
 import { db, events, news, scrims, squads, tournaments } from "@server/db";
-import { format } from "date-fns";
 import { and, desc, gte, inArray, isNull, or } from "drizzle-orm";
 import { PageHeader } from "../page-surface";
 import { EmptyState, HomeListItem, HomePanel } from "./widgets";
@@ -79,7 +78,7 @@ export async function SquadHome({
     <div className="flex flex-col gap-6">
       <PageHeader
         title={isLeader ? "Leader Dashboard" : "Member Dashboard"}
-        kicker={`Overview — ${format(now, "EEEE, d MMMM")}`}
+        kicker={`Overview — ${formatMY(now, "EEEE, d MMMM")}`}
         icon={Icons.Stats.Squads}
         description={
           isLeader

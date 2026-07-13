@@ -1,5 +1,4 @@
-import { format } from "date-fns";
-import { fromZonedTime } from "date-fns-tz";
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 
 const MY_TIME_ZONE = "Asia/Kuala_Lumpur";
 
@@ -10,21 +9,36 @@ export function formatRM(sen: number) {
   }).format(sen / 100);
 }
 
+/**
+ * All display helpers below render in Malaysia time explicitly, not the
+ * runtime's local timezone — this must stay symmetric with
+ * parseMYDateTimeLocal below, otherwise a server render (UTC on Vercel) and
+ * a browser in a different timezone can show different calendar days for
+ * the same stored instant.
+ */
 export function formatDate(date: Date | string) {
-  return format(new Date(date), "d MMM yyyy");
+  return formatInTimeZone(new Date(date), MY_TIME_ZONE, "d MMM yyyy");
 }
 
 export function formatDateTime(date: Date | string) {
-  return format(new Date(date), "d MMM yyyy, h:mm a");
+  return formatInTimeZone(new Date(date), MY_TIME_ZONE, "d MMM yyyy, h:mm a");
 }
 
 export function formatTime(date: Date | string) {
-  return format(new Date(date), "h:mm a");
+  return formatInTimeZone(new Date(date), MY_TIME_ZONE, "h:mm a");
+}
+
+/**
+ * General-purpose Malaysia-time formatter for callers that need a custom
+ * date-fns format string (e.g. "yyyy-MM-dd" day keys for grouping/bucketing).
+ */
+export function formatMY(date: Date | string, formatStr: string) {
+  return formatInTimeZone(new Date(date), MY_TIME_ZONE, formatStr);
 }
 
 /** For <input type="datetime-local"> default values */
 export function toDateTimeLocal(date: Date | string) {
-  return format(new Date(date), "yyyy-MM-dd'T'HH:mm");
+  return formatInTimeZone(new Date(date), MY_TIME_ZONE, "yyyy-MM-dd'T'HH:mm");
 }
 
 /**

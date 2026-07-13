@@ -8,10 +8,10 @@ import { Icons } from "@components/icons";
 import { PageSkeleton } from "@components/shared/page-skeleton";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
-import { formatRM } from "@lib/format";
+import { formatMY, formatRM } from "@lib/format";
 import { ORDER_STATUS_LABELS } from "@lib/labels";
 import { db, orders, scrims, squads, tournaments } from "@server/db";
-import { format, startOfMonth, subDays } from "date-fns";
+import { startOfMonth, subDays } from "date-fns";
 import { and, count, desc, eq, gte, inArray, sum } from "drizzle-orm";
 import { forbidden } from "next/navigation";
 import { getDashboardContext } from "../_components/dashboard-context";
@@ -91,12 +91,12 @@ export default async function ReportsPage() {
 
   const revenueTrend: RevenuePoint[] = Array.from({ length: 30 }, (_, i) => {
     const day = subDays(now, 29 - i);
-    return { key: format(day, "yyyy-MM-dd"), label: format(day, "d MMM") };
+    return { key: formatMY(day, "yyyy-MM-dd"), label: formatMY(day, "d MMM") };
   }).map(({ key, label }) => ({
     label,
     revenue:
       paidOrders
-        .filter((order) => format(order.updatedAt, "yyyy-MM-dd") === key)
+        .filter((order) => formatMY(order.updatedAt, "yyyy-MM-dd") === key)
         .reduce((total, order) => total + order.totalSen, 0) / 100,
   }));
 
