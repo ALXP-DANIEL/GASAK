@@ -35,6 +35,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EventCalendarViews } from "./event-calendar-views";
 import { EventFormDialog } from "./event-form-dialog";
+import { ScheduleAgendaList } from "./schedule-agenda-list";
 
 type ScheduleEvent = {
   id: string;
@@ -143,6 +144,15 @@ export function ScheduleCalendar({
     }
     return events.filter((event) => event.squadId === selectedCalendar);
   }, [events, selectedCalendar]);
+
+  // The agenda list isn't a FullCalendar view, so it never fires datesSet —
+  // keep the count and title in sync with it manually.
+  useEffect(() => {
+    if (isMobile && view === "listMonth") {
+      setTitle("Agenda");
+      setVisibleEventCount(filteredEvents.length);
+    }
+  }, [isMobile, view, filteredEvents]);
 
   const calendarEvents = useMemo<EventInput[]>(
     () =>
@@ -283,42 +293,46 @@ export function ScheduleCalendar({
       </div>
 
       <div className="calendar-shell relative bg-background">
-        <EventCalendarViews
-          controller={controller}
-          plugins={[...plugins]}
-          initialView={view}
-          headerToolbar={false}
-          events={calendarEvents}
-          height="auto"
-          nowIndicator
-          dayMaxEvents={3}
-          popoverCloseContent={() => (
-            <XIcon className="size-5 text-muted-foreground group-hover:text-foreground" />
-          )}
-          eventTimeFormat={{
-            hour: "numeric",
-            minute: "2-digit",
-            meridiem: "short",
-          }}
-          datesSet={handleDatesSet}
-          eventClick={(info) => {
-            setHover(null);
-            router.push(`/dashboard/schedules/${info.event.id}`);
-          }}
-          eventMouseEnter={handleEventMouseEnter}
-          eventMouseLeave={handleEventMouseLeave}
-          eventClass={(info) =>
-            cn(
-              "cursor-pointer",
-              info.isSelected
-                ? ["outline-3", info.isDragging && "shadow-lg"]
-                : "focus-visible:outline-3",
-              "outline-ring/50",
-            )
-          }
-        />
+        {isMobile && view === "listMonth" ? (
+          <ScheduleAgendaList events={filteredEvents} />
+        ) : (
+          <EventCalendarViews
+            controller={controller}
+            plugins={[...plugins]}
+            initialView={view}
+            headerToolbar={false}
+            events={calendarEvents}
+            height="auto"
+            nowIndicator
+            dayMaxEvents={3}
+            popoverCloseContent={() => (
+              <XIcon className="size-5 text-muted-foreground group-hover:text-foreground" />
+            )}
+            eventTimeFormat={{
+              hour: "numeric",
+              minute: "2-digit",
+              meridiem: "short",
+            }}
+            datesSet={handleDatesSet}
+            eventClick={(info) => {
+              setHover(null);
+              router.push(`/dashboard/schedules/${info.event.id}`);
+            }}
+            eventMouseEnter={handleEventMouseEnter}
+            eventMouseLeave={handleEventMouseLeave}
+            eventClass={(info) =>
+              cn(
+                "cursor-pointer",
+                info.isSelected
+                  ? ["outline-3", info.isDragging && "shadow-lg"]
+                  : "focus-visible:outline-3",
+                "outline-ring/50",
+              )
+            }
+          />
+        )}
 
-        {hover && (
+        {hover && !isMobile && (
           <div
             className="fixed z-50 w-64 rounded-md border bg-popover p-3 text-popover-foreground shadow-lg"
             style={{ top: hover.top, left: hover.left }}

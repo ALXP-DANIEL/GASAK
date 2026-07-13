@@ -1,4 +1,7 @@
 import { format } from "date-fns";
+import { fromZonedTime } from "date-fns-tz";
+
+const MY_TIME_ZONE = "Asia/Kuala_Lumpur";
 
 export function formatRM(sen: number) {
   return new Intl.NumberFormat("ms-MY", {
@@ -22,6 +25,16 @@ export function formatTime(date: Date | string) {
 /** For <input type="datetime-local"> default values */
 export function toDateTimeLocal(date: Date | string) {
   return format(new Date(date), "yyyy-MM-dd'T'HH:mm");
+}
+
+/**
+ * Parses a naive "yyyy-MM-dd'T'HH:mm" string (from <input type="datetime-local">)
+ * as Malaysia time rather than the runtime's local timezone. Needed because
+ * server actions run on Node, whose local timezone (UTC) differs from the
+ * browser's — a bare `new Date(string)` would shift the stored instant.
+ */
+export function parseMYDateTimeLocal(value: string): Date {
+  return fromZonedTime(value, MY_TIME_ZONE);
 }
 
 /** First letters of the first two words, uppercased — avatar fallbacks. */
