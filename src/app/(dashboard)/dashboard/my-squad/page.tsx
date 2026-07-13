@@ -1,6 +1,7 @@
 import { ProfileHeroCard } from "@components/cards/player/profile-hero-card";
 import { Icons } from "@components/icons";
 import { Reveal } from "@components/motion/reveal";
+import { CornerCutBorder } from "@components/shared/corner-cut-border";
 import { SplitView } from "@components/shared/split-view";
 import { Badge } from "@components/ui/shadcn/badge";
 import { Button } from "@components/ui/shadcn/button";
@@ -80,7 +81,7 @@ export default async function MySquadPage() {
             return (
               <section key={squad.id} className="grid gap-5">
                 <Reveal>
-                  <div className="corner-cut relative overflow-hidden border bg-card">
+                  <CornerCutBorder contentClassName="relative overflow-hidden bg-card">
                     {squad.bannerUrl && (
                       <Image
                         src={squad.bannerUrl}
@@ -140,7 +141,7 @@ export default async function MySquadPage() {
                         />
                       )}
                     </div>
-                  </div>
+                  </CornerCutBorder>
                 </Reveal>
 
                 <div className="grid grid-cols-2 gap-4 desktop:grid-cols-4">

@@ -2,6 +2,7 @@
 
 import { EmptyState } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { Reveal, Stagger } from "@components/motion/reveal";
+import { CornerCutBorder } from "@components/shared/corner-cut-border";
 import { Badge } from "@components/ui/shadcn/badge";
 import { Input } from "@components/ui/shadcn/input";
 import {
@@ -122,37 +123,39 @@ function FeaturedNewsItem({ item }: { item: NewsRow }) {
   return (
     <Link
       href={`/dashboard/news/${item.id}`}
-      className={cn(
-        "corner-cut hover-lift group relative flex flex-col gap-2 overflow-hidden border bg-card p-5 shadow-xs desktop:p-6",
-        item.isUnread && "border-primary/40",
-      )}
+      className="hover-lift group block"
     >
-      <div
-        aria-hidden
-        className="bg-grid pointer-events-none absolute inset-0 opacity-40"
-      />
-      <div className="relative flex items-center gap-2">
-        <span aria-hidden className="h-2.5 w-0.75 -skew-x-12 bg-primary" />
-        <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
-          Latest
-        </span>
-        {item.isUnread && <UnreadDot />}
-        <Badge
-          variant={item.squad ? "outline" : "default"}
-          className="ml-auto shrink-0"
-        >
-          {item.squad?.name ?? "Global"}
-        </Badge>
-      </div>
-      <h3 className="relative font-heading text-2xl font-bold group-hover:text-primary">
-        {item.title}
-      </h3>
-      <p className="relative line-clamp-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-        {stripHtml(item.content)}
-      </p>
-      <p className="relative text-xs text-muted-foreground">
-        {item.author?.name ?? "Unknown"} · {formatDateTime(item.createdAt)}
-      </p>
+      <CornerCutBorder
+        borderClassName={item.isUnread ? "bg-primary/40" : "bg-border"}
+        contentClassName="relative flex flex-col gap-2 overflow-hidden bg-card p-5 shadow-xs desktop:p-6"
+      >
+        <div
+          aria-hidden
+          className="bg-grid pointer-events-none absolute inset-0 opacity-40"
+        />
+        <div className="relative flex items-center gap-2">
+          <span aria-hidden className="h-2.5 w-0.75 -skew-x-12 bg-primary" />
+          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
+            Latest
+          </span>
+          {item.isUnread && <UnreadDot />}
+          <Badge
+            variant={item.squad ? "outline" : "default"}
+            className="ml-auto shrink-0"
+          >
+            {item.squad?.name ?? "Global"}
+          </Badge>
+        </div>
+        <h3 className="relative font-heading text-2xl font-bold group-hover:text-primary">
+          {item.title}
+        </h3>
+        <p className="relative line-clamp-3 max-w-3xl text-sm leading-6 text-muted-foreground">
+          {stripHtml(item.content)}
+        </p>
+        <p className="relative text-xs text-muted-foreground">
+          {item.author?.name ?? "Unknown"} · {formatDateTime(item.createdAt)}
+        </p>
+      </CornerCutBorder>
     </Link>
   );
 }

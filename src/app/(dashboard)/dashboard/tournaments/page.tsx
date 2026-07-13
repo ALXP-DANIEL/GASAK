@@ -4,6 +4,7 @@ import {
 } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { Icons } from "@components/icons";
 import { Stagger } from "@components/motion/reveal";
+import { CornerCutBorder } from "@components/shared/corner-cut-border";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import {
   Tabs,
@@ -108,7 +109,10 @@ export default async function TournamentsPage() {
       </StatStrip>
 
       {championshipRuns.length > 0 && (
-        <div className="corner-cut relative overflow-hidden border border-primary/40 bg-primary/5 p-4">
+        <CornerCutBorder
+          borderClassName="bg-primary/40"
+          contentClassName="relative overflow-hidden bg-primary/5 p-4"
+        >
           <div
             aria-hidden
             className="bg-grid pointer-events-none absolute inset-0 opacity-40"
@@ -143,7 +147,7 @@ export default async function TournamentsPage() {
               ))}
             </Stagger>
           </div>
-        </div>
+        </CornerCutBorder>
       )}
 
       <Tabs defaultValue={defaultTab}>

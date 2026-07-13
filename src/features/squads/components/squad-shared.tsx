@@ -1,3 +1,4 @@
+import { CornerCutBorder } from "@components/shared/corner-cut-border";
 import { LANE_LABELS, LANE_ORDER, normalizeLanes } from "@lib/labels";
 import { cn } from "@lib/utils";
 import type { Lane, SquadRole } from "@server/db/schema";
@@ -186,9 +187,13 @@ export function SquadStat({
         aria-hidden
         className="absolute top-0 left-0 h-0.5 w-8 -skew-x-12 bg-primary/0 transition-colors group-hover:bg-primary"
       />
-      <span className="corner-cut grid size-9 shrink-0 place-items-center border border-primary/40 bg-primary/10 text-primary">
+      <CornerCutBorder
+        borderClassName="bg-primary/40"
+        className="size-9 shrink-0"
+        contentClassName="grid size-full place-items-center bg-primary/10 text-primary"
+      >
         {icon}
-      </span>
+      </CornerCutBorder>
       <div className="min-w-0">
         <p className="font-heading text-2xl font-bold leading-none tabular-nums">
           {value}

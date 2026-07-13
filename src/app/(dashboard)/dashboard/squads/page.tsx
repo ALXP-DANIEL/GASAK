@@ -4,6 +4,7 @@ import {
 } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { Icons } from "@components/icons";
 import { Stagger } from "@components/motion/reveal";
+import { CornerCutBorder } from "@components/shared/corner-cut-border";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
 import { SquadLogo } from "@features/squads/components/squad-shared";
@@ -71,35 +72,37 @@ export default async function SquadsPage() {
               <Link
                 key={squad.id}
                 href={`/dashboard/squads/${squad.id}`}
-                className="hover-lift corner-cut group relative flex items-center gap-4 overflow-hidden border bg-card p-4 shadow-xs"
+                className="hover-lift group block"
               >
-                <span
-                  aria-hidden
-                  className="absolute inset-y-0 left-0 w-1"
-                  style={{
-                    backgroundColor: squad.accentColor ?? "var(--primary)",
-                  }}
-                />
-                <SquadLogo
-                  src={squad.logoUrl}
-                  name={squad.name}
-                  className="size-14"
-                />
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate font-heading text-lg font-bold uppercase tracking-wide group-hover:text-primary">
-                    {squad.name}
-                  </h3>
-                  <p className="truncate text-sm text-muted-foreground">
-                    {memberCount} member{memberCount === 1 ? "" : "s"}
-                  </p>
-                  <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    {squad.recruiting && <Badge>Recruiting</Badge>}
+                <CornerCutBorder contentClassName="relative flex items-center gap-4 overflow-hidden bg-card p-4 shadow-xs">
+                  <span
+                    aria-hidden
+                    className="absolute inset-y-0 left-0 w-1"
+                    style={{
+                      backgroundColor: squad.accentColor ?? "var(--primary)",
+                    }}
+                  />
+                  <SquadLogo
+                    src={squad.logoUrl}
+                    name={squad.name}
+                    className="size-14"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate font-heading text-lg font-bold uppercase tracking-wide group-hover:text-primary">
+                      {squad.name}
+                    </h3>
+                    <p className="truncate text-sm text-muted-foreground">
+                      {memberCount} member{memberCount === 1 ? "" : "s"}
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {squad.recruiting && <Badge>Recruiting</Badge>}
+                    </div>
                   </div>
-                </div>
-                <Icons.Layout.Navigation.CaretRight
-                  aria-hidden
-                  className="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
-                />
+                  <Icons.Layout.Navigation.CaretRight
+                    aria-hidden
+                    className="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                  />
+                </CornerCutBorder>
               </Link>
             ))}
           </Stagger>

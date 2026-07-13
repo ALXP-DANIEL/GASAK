@@ -1,4 +1,5 @@
 import { Icons } from "@components/icons";
+import { CornerCutBorder } from "@components/shared/corner-cut-border";
 import {
   Avatar,
   AvatarFallback,
@@ -54,11 +55,10 @@ export function ProfileHeroCard({
   const peakRank = formatRank(profile?.peakRank);
 
   return (
-    <article
-      className={cn(
-        "corner-cut relative isolate overflow-hidden border border-primary/30 bg-card shadow-glow",
-        className,
-      )}
+    <CornerCutBorder
+      borderClassName="bg-primary/30"
+      className={className}
+      contentClassName="relative isolate overflow-hidden bg-card shadow-glow"
     >
       <div
         aria-hidden
@@ -173,7 +173,7 @@ export function ProfileHeroCard({
           />
         </div>
       </div>
-    </article>
+    </CornerCutBorder>
   );
 }
 

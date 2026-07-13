@@ -1,3 +1,4 @@
+import { CornerCutBorder } from "@components/shared/corner-cut-border";
 import { cn } from "@lib/utils";
 import type { Icon } from "@phosphor-icons/react";
 import { BreadcrumbLabelSync } from "./breadcrumb-label-sync";
@@ -50,11 +51,14 @@ export function PageHeader({
       <div className="relative flex flex-col gap-4 desktop:flex-row desktop:items-end desktop:justify-between">
         <div className="flex min-w-0 items-center gap-4">
           {HeaderIcon && (
-            <div
-              aria-hidden
-              className="corner-cut hidden size-12 shrink-0 place-items-center border border-primary/40 bg-primary/10 text-primary desktop:grid"
-            >
-              <HeaderIcon className="size-6" weight="duotone" />
+            <div aria-hidden className="hidden size-12 shrink-0 desktop:block">
+              <CornerCutBorder
+                borderClassName="bg-primary/40"
+                className="size-full"
+                contentClassName="grid size-full place-items-center bg-primary/10 text-primary"
+              >
+                <HeaderIcon className="size-6" weight="duotone" />
+              </CornerCutBorder>
             </div>
           )}
           <div className="grid min-w-0 gap-1">
