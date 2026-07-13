@@ -1,5 +1,6 @@
 import { SegmentedBar } from "@components/charts/segmented-bar";
 import { Icons } from "@components/icons";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
 import { db, productCategoryEnum, products } from "@server/db";
@@ -32,47 +33,49 @@ export default async function ProductsPage() {
   const categories = categoryMix.filter((entry) => entry.value > 0).length;
 
   return (
-    <main>
-      <PageHeader
-        title="Products"
-        kicker="Commerce"
-        icon={Icons.Domain.Products}
-        description="Diamonds, weekly passes, joki, and coaching packages."
-      >
-        <ProductFormDialog />
-      </PageHeader>
+    <PageSkeleton name="products" loading={false}>
+      <main>
+        <PageHeader
+          title="Products"
+          kicker="Commerce"
+          icon={Icons.Domain.Products}
+          description="Diamonds, weekly passes, joki, and coaching packages."
+        >
+          <ProductFormDialog />
+        </PageHeader>
 
-      <div className="flex flex-col gap-6">
-        <StatStrip>
-          <StatItem
-            label="Active"
-            value={active.length}
-            hint={`${rows.length} products total`}
-            icon={Icons.Domain.Products}
-          />
-          <StatItem
-            label="Out of Stock"
-            value={outOfStock.length}
-            hint="Active products at zero stock"
-            icon={Icons.Domain.Lightning}
-          />
-          <StatItem
-            label="Categories"
-            value={categories}
-            hint="In the catalog"
-            icon={Icons.Domain.Shop}
-          />
-        </StatStrip>
+        <div className="flex flex-col gap-6">
+          <StatStrip>
+            <StatItem
+              label="Active"
+              value={active.length}
+              hint={`${rows.length} products total`}
+              icon={Icons.Domain.Products}
+            />
+            <StatItem
+              label="Out of Stock"
+              value={outOfStock.length}
+              hint="Active products at zero stock"
+              icon={Icons.Domain.Lightning}
+            />
+            <StatItem
+              label="Categories"
+              value={categories}
+              hint="In the catalog"
+              icon={Icons.Domain.Shop}
+            />
+          </StatStrip>
 
-        <div className="border bg-card p-4 shadow-xs">
-          <SegmentedBar title="Catalog by category" segments={categoryMix} />
+          <div className="border bg-card p-4 shadow-xs">
+            <SegmentedBar title="Catalog by category" segments={categoryMix} />
+          </div>
+
+          <ProductsTable
+            rows={rows}
+            categoryFilterOptions={categoryFilterOptions}
+          />
         </div>
-
-        <ProductsTable
-          rows={rows}
-          categoryFilterOptions={categoryFilterOptions}
-        />
-      </div>
-    </main>
+      </main>
+    </PageSkeleton>
   );
 }

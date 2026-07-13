@@ -1,5 +1,6 @@
 import { SegmentedBar } from "@components/charts/segmented-bar";
 import { Icons } from "@components/icons";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import {
   Tabs,
@@ -47,98 +48,103 @@ export default async function OrdersPage() {
     .reduce((total, order) => total + order.totalSen, 0);
 
   return (
-    <main>
-      <PageHeader
-        title="Orders"
-        kicker="Commerce"
-        icon={Icons.Domain.Orders}
-        description="Verify payments and move orders through fulfillment."
-      />
-
-      <StatStrip className="mb-6">
-        <StatItem
-          label="Needs Action"
-          value={needsAction.length}
-          hint="Pending or waiting payment"
-          icon={Icons.Domain.Lightning}
-        />
-        <StatItem
-          label="In Progress"
-          value={inProgress.length}
-          hint="Paid or processing"
+    <PageSkeleton name="orders" loading={false}>
+      <main>
+        <PageHeader
+          title="Orders"
+          kicker="Commerce"
           icon={Icons.Domain.Orders}
+          description="Verify payments and move orders through fulfillment."
         />
-        <StatItem
-          label="Done"
-          value={done.length}
-          hint="Completed or cancelled"
-          icon={Icons.Status.Success}
-        />
-        <StatItem
-          label="Revenue"
-          value={formatRM(paidRevenue)}
-          hint="Paid and completed orders"
-          icon={Icons.Domain.Revenue}
-        />
-      </StatStrip>
 
-      <div className="mb-6 border bg-card p-4 shadow-xs">
-        <SegmentedBar
-          title="Fulfillment pipeline"
-          segments={[
-            {
-              label: "Needs action",
-              value: needsAction.length,
-              color: "var(--color-amber-500)",
-            },
-            {
-              label: "In progress",
-              value: inProgress.length,
-              color: "var(--color-blue-500)",
-            },
-            {
-              label: "Done",
-              value: done.length,
-              color: "var(--color-emerald-500)",
-            },
-          ]}
-        />
-      </div>
+        <StatStrip className="mb-6">
+          <StatItem
+            label="Needs Action"
+            value={needsAction.length}
+            hint="Pending or waiting payment"
+            icon={Icons.Domain.Lightning}
+          />
+          <StatItem
+            label="In Progress"
+            value={inProgress.length}
+            hint="Paid or processing"
+            icon={Icons.Domain.Orders}
+          />
+          <StatItem
+            label="Done"
+            value={done.length}
+            hint="Completed or cancelled"
+            icon={Icons.Status.Success}
+          />
+          <StatItem
+            label="Revenue"
+            value={formatRM(paidRevenue)}
+            hint="Paid and completed orders"
+            icon={Icons.Domain.Revenue}
+          />
+        </StatStrip>
 
-      <Tabs defaultValue="action">
-        <TabsList className="mobile:w-full">
-          <TabsTrigger value="action" className="mobile:flex-1">
-            Needs action ({needsAction.length})
-          </TabsTrigger>
-          <TabsTrigger value="progress" className="mobile:flex-1">
-            In progress ({inProgress.length})
-          </TabsTrigger>
-          <TabsTrigger value="done" className="mobile:flex-1">
-            Done ({done.length})
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="action" className="mt-4">
-          <OrdersTable
-            rows={needsAction}
-            emptyMessage="No orders waiting on you."
-            statusOptions={statusFilterOptions(["pending", "waiting_payment"])}
+        <div className="mb-6 border bg-card p-4 shadow-xs">
+          <SegmentedBar
+            title="Fulfillment pipeline"
+            segments={[
+              {
+                label: "Needs action",
+                value: needsAction.length,
+                color: "var(--color-amber-500)",
+              },
+              {
+                label: "In progress",
+                value: inProgress.length,
+                color: "var(--color-blue-500)",
+              },
+              {
+                label: "Done",
+                value: done.length,
+                color: "var(--color-emerald-500)",
+              },
+            ]}
           />
-        </TabsContent>
-        <TabsContent value="progress" className="mt-4">
-          <OrdersTable
-            rows={inProgress}
-            emptyMessage="Nothing in fulfillment right now."
-            statusOptions={statusFilterOptions(["paid", "processing"])}
-          />
-        </TabsContent>
-        <TabsContent value="done" className="mt-4">
-          <OrdersTable
-            rows={done}
-            emptyMessage="No completed or cancelled orders yet."
-            statusOptions={statusFilterOptions(["completed", "cancelled"])}
-          />
-        </TabsContent>
-      </Tabs>
-    </main>
+        </div>
+
+        <Tabs defaultValue="action">
+          <TabsList className="mobile:w-full">
+            <TabsTrigger value="action" className="mobile:flex-1">
+              Needs action ({needsAction.length})
+            </TabsTrigger>
+            <TabsTrigger value="progress" className="mobile:flex-1">
+              In progress ({inProgress.length})
+            </TabsTrigger>
+            <TabsTrigger value="done" className="mobile:flex-1">
+              Done ({done.length})
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="action" className="mt-4">
+            <OrdersTable
+              rows={needsAction}
+              emptyMessage="No orders waiting on you."
+              statusOptions={statusFilterOptions([
+                "pending",
+                "waiting_payment",
+              ])}
+            />
+          </TabsContent>
+          <TabsContent value="progress" className="mt-4">
+            <OrdersTable
+              rows={inProgress}
+              emptyMessage="Nothing in fulfillment right now."
+              statusOptions={statusFilterOptions(["paid", "processing"])}
+            />
+          </TabsContent>
+          <TabsContent value="done" className="mt-4">
+            <OrdersTable
+              rows={done}
+              emptyMessage="No completed or cancelled orders yet."
+              statusOptions={statusFilterOptions(["completed", "cancelled"])}
+            />
+          </TabsContent>
+        </Tabs>
+      </main>
+    </PageSkeleton>
   );
 }

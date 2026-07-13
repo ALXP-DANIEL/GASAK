@@ -7,12 +7,20 @@ import { SquadHome } from "./_components/home/squad-home";
 export default async function DashboardPage() {
   const { user, access, effectiveAccess } = await getDashboardContext();
 
+  let variant: "admin" | "seller" | "squad";
   let content: React.ReactNode;
-  if (effectiveAccess.orgRole === "admin") content = <AdminHome />;
-  else if (effectiveAccess.orgRole === "seller") content = <SellerHome />;
-  else content = <SquadHome userId={user.id} isLeader={access.managesSquad} />;
+  if (effectiveAccess.orgRole === "admin") {
+    variant = "admin";
+    content = <AdminHome />;
+  } else if (effectiveAccess.orgRole === "seller") {
+    variant = "seller";
+    content = <SellerHome />;
+  } else {
+    variant = "squad";
+    content = <SquadHome userId={user.id} isLeader={access.managesSquad} />;
+  }
 
   return (
-    <DashboardHomeSkeleton loading={false}>{content}</DashboardHomeSkeleton>
+    <DashboardHomeSkeleton variant={variant}>{content}</DashboardHomeSkeleton>
   );
 }

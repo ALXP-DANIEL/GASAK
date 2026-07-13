@@ -4,6 +4,7 @@ import {
 } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { Icons } from "@components/icons";
 import { DeleteButton } from "@components/shared/delete-button";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import {
   Card,
   CardContent,
@@ -66,99 +67,103 @@ export default async function EventDetailPage({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={event.title}
-        breadcrumbLabel={event.title}
-        kicker="Schedules"
-        icon={Icons.Domain.Calendar}
-        description="Event details"
-        actions={
-          canManage ? (
-            <>
-              {showLogResult && (
-                <LogResultDialog
-                  event={{
-                    id: event.id,
-                    title: event.title,
-                    type: event.type,
-                    startsAt: event.startsAt.toISOString(),
-                    squadId: event.squadId,
-                  }}
+    <PageSkeleton name="schedules-detail" loading={false}>
+      <div className="flex flex-col gap-6">
+        <PageHeader
+          title={event.title}
+          breadcrumbLabel={event.title}
+          kicker="Schedules"
+          icon={Icons.Domain.Calendar}
+          description="Event details"
+          actions={
+            canManage ? (
+              <>
+                {showLogResult && (
+                  <LogResultDialog
+                    event={{
+                      id: event.id,
+                      title: event.title,
+                      type: event.type,
+                      startsAt: event.startsAt.toISOString(),
+                      squadId: event.squadId,
+                    }}
+                    squads={squads}
+                    tournaments={tournamentOptions}
+                  />
+                )}
+                <EventFormDialog
                   squads={squads}
-                  tournaments={tournamentOptions}
+                  allowOrgWide={role === "admin"}
+                  event={event}
                 />
-              )}
-              <EventFormDialog
-                squads={squads}
-                allowOrgWide={role === "admin"}
-                event={event}
+                <DeleteButton
+                  action={deleteEvent.bind(null, event.id)}
+                  title="Delete event?"
+                  description={`This will permanently remove "${event.title}".`}
+                  redirectTo="/dashboard/schedules"
+                />
+              </>
+            ) : undefined
+          }
+        />
+        <Card>
+          <CardHeader>
+            <CardTitle>Event details</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <DetailRow label="Type" value={EVENT_TYPE_LABELS[event.type]} />
+            <DetailRow
+              label="Squad"
+              value={event.squad?.name ?? "Organization-wide"}
+            />
+            <DetailRow label="Starts" value={formatDateTime(event.startsAt)} />
+            <DetailRow
+              label="Ends"
+              value={event.endsAt ? formatDateTime(event.endsAt) : "—"}
+            />
+            <DetailRow label="Location" value={event.location ?? "—"} />
+            {event.description && (
+              <DetailRow
+                label="Description"
+                value={
+                  <span className="whitespace-pre-wrap">
+                    {event.description}
+                  </span>
+                }
               />
-              <DeleteButton
-                action={deleteEvent.bind(null, event.id)}
-                title="Delete event?"
-                description={`This will permanently remove "${event.title}".`}
-                redirectTo="/dashboard/schedules"
+            )}
+            {linkedScrim && (
+              <DetailRow
+                label="Result"
+                value={
+                  <Link
+                    href={`/dashboard/matches/${linkedScrim.id}`}
+                    className="underline underline-offset-4 hover:text-primary"
+                  >
+                    vs {linkedScrim.opponent}
+                    {linkedScrim.result ? ` — ${linkedScrim.result}` : ""}
+                  </Link>
+                }
               />
-            </>
-          ) : undefined
-        }
-      />
-      <Card>
-        <CardHeader>
-          <CardTitle>Event details</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <DetailRow label="Type" value={EVENT_TYPE_LABELS[event.type]} />
-          <DetailRow
-            label="Squad"
-            value={event.squad?.name ?? "Organization-wide"}
-          />
-          <DetailRow label="Starts" value={formatDateTime(event.startsAt)} />
-          <DetailRow
-            label="Ends"
-            value={event.endsAt ? formatDateTime(event.endsAt) : "—"}
-          />
-          <DetailRow label="Location" value={event.location ?? "—"} />
-          {event.description && (
-            <DetailRow
-              label="Description"
-              value={
-                <span className="whitespace-pre-wrap">{event.description}</span>
-              }
-            />
-          )}
-          {linkedScrim && (
-            <DetailRow
-              label="Result"
-              value={
-                <Link
-                  href={`/dashboard/matches/${linkedScrim.id}`}
-                  className="underline underline-offset-4 hover:text-primary"
-                >
-                  vs {linkedScrim.opponent}
-                  {linkedScrim.result ? ` — ${linkedScrim.result}` : ""}
-                </Link>
-              }
-            />
-          )}
-          {linkedRound && (
-            <DetailRow
-              label="Result"
-              value={
-                <Link
-                  href={`/dashboard/tournaments/${linkedRound.tournamentId}`}
-                  className="underline underline-offset-4 hover:text-primary"
-                >
-                  {linkedRound.tournament.name} · {linkedRound.roundLabel} vs{" "}
-                  {linkedRound.opponent} —{" "}
-                  {MATCH_OUTCOME_LABELS[linkedRound.outcome]}
-                </Link>
-              }
-            />
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            )}
+            {linkedRound && (
+              <DetailRow
+                label="Result"
+                value={
+                  <Link
+                    href={`/dashboard/tournaments/${linkedRound.tournamentId}`}
+                    className="underline underline-offset-4 hover:text-primary"
+                  >
+                    {linkedRound.tournament.name} · {linkedRound.roundLabel} vs{" "}
+                    {linkedRound.opponent} —{" "}
+                    {MATCH_OUTCOME_LABELS[linkedRound.outcome]}
+                  </Link>
+                }
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </PageSkeleton>
   );
 }

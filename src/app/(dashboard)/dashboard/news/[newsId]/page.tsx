@@ -1,5 +1,6 @@
 import { Icons } from "@components/icons";
 import { HtmlContent } from "@components/shared/html-content";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { Badge } from "@components/ui/shadcn/badge";
 import {
   Card,
@@ -73,40 +74,42 @@ export default async function NewsDetailPage({
   );
 
   return (
-    <main>
-      <PageHeader
-        title={item.title}
-        breadcrumbLabel={item.title}
-        kicker="News"
-        icon={Icons.Domain.News}
-        description="Preview and manage this news post."
-      />
+    <PageSkeleton name="news-detail" loading={false}>
+      <main>
+        <PageHeader
+          title={item.title}
+          breadcrumbLabel={item.title}
+          kicker="News"
+          icon={Icons.Domain.News}
+          description="Preview and manage this news post."
+        />
 
-      {canManage ? (
-        <NewsInlineEditor
-          news={item}
-          squads={postableSquads}
-          allowGlobal={role === "admin"}
-        >
-          {detailsCard}
-        </NewsInlineEditor>
-      ) : (
-        <div className="grid gap-6 desktop:grid-cols-[minmax(0,1fr)_24rem]">
-          <Card className="shadow-xs">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
-                <Icons.Domain.News size={14} />
-                {formatDateTime(item.createdAt)}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <HtmlContent content={item.content} />
-            </CardContent>
-          </Card>
+        {canManage ? (
+          <NewsInlineEditor
+            news={item}
+            squads={postableSquads}
+            allowGlobal={role === "admin"}
+          >
+            {detailsCard}
+          </NewsInlineEditor>
+        ) : (
+          <div className="grid gap-6 desktop:grid-cols-[minmax(0,1fr)_24rem]">
+            <Card className="shadow-xs">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+                  <Icons.Domain.News size={14} />
+                  {formatDateTime(item.createdAt)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <HtmlContent content={item.content} />
+              </CardContent>
+            </Card>
 
-          <div className="grid h-fit gap-4">{detailsCard}</div>
-        </div>
-      )}
-    </main>
+            <div className="grid h-fit gap-4">{detailsCard}</div>
+          </div>
+        )}
+      </main>
+    </PageSkeleton>
   );
 }

@@ -1,5 +1,6 @@
 import { SegmentedBar } from "@components/charts/segmented-bar";
 import { Icons } from "@components/icons";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { db } from "@server/db";
 import { requireOrgRole } from "@server/session";
@@ -29,69 +30,71 @@ export default async function UsersPage() {
   const banned = users.filter((user) => user.banned).length;
 
   return (
-    <main>
-      <PageHeader
-        title="Users"
-        kicker="System"
-        icon={Icons.Domain.Accounts}
-        description="Create accounts and control roles for the whole organization."
-      >
-        <CreateUserDialog />
-      </PageHeader>
+    <PageSkeleton name="users" loading={false}>
+      <main>
+        <PageHeader
+          title="Users"
+          kicker="System"
+          icon={Icons.Domain.Accounts}
+          description="Create accounts and control roles for the whole organization."
+        >
+          <CreateUserDialog />
+        </PageHeader>
 
-      <div className="flex flex-col gap-6">
-        <StatStrip>
-          <StatItem
-            label="Accounts"
-            value={users.length}
-            hint="All registered users"
-            icon={Icons.Domain.Members}
-          />
-          <StatItem
-            label="Admins"
-            value={admins}
-            hint="Full organization access"
-            icon={Icons.Actions.Settings}
-          />
-          <StatItem
-            label="Sellers"
-            value={sellers}
-            hint="Commerce access"
-            icon={Icons.Domain.Shop}
-          />
-          <StatItem
-            label="Banned"
-            value={banned}
-            hint="Suspended accounts"
-            icon={Icons.Status.Failed}
-          />
-        </StatStrip>
+        <div className="flex flex-col gap-6">
+          <StatStrip>
+            <StatItem
+              label="Accounts"
+              value={users.length}
+              hint="All registered users"
+              icon={Icons.Domain.Members}
+            />
+            <StatItem
+              label="Admins"
+              value={admins}
+              hint="Full organization access"
+              icon={Icons.Actions.Settings}
+            />
+            <StatItem
+              label="Sellers"
+              value={sellers}
+              hint="Commerce access"
+              icon={Icons.Domain.Shop}
+            />
+            <StatItem
+              label="Banned"
+              value={banned}
+              hint="Suspended accounts"
+              icon={Icons.Status.Failed}
+            />
+          </StatStrip>
 
-        <div className="border bg-card p-4 shadow-xs">
-          <SegmentedBar
-            title="Accounts by role"
-            segments={[
-              {
-                label: "Admins",
-                value: admins,
-                color: "var(--chart-1)",
-              },
-              {
-                label: "Sellers",
-                value: sellers,
-                color: "var(--chart-2)",
-              },
-              {
-                label: "Members",
-                value: users.length - admins - sellers,
-                color: "var(--chart-5)",
-              },
-            ]}
-          />
+          <div className="border bg-card p-4 shadow-xs">
+            <SegmentedBar
+              title="Accounts by role"
+              segments={[
+                {
+                  label: "Admins",
+                  value: admins,
+                  color: "var(--chart-1)",
+                },
+                {
+                  label: "Sellers",
+                  value: sellers,
+                  color: "var(--chart-2)",
+                },
+                {
+                  label: "Members",
+                  value: users.length - admins - sellers,
+                  color: "var(--chart-5)",
+                },
+              ]}
+            />
+          </div>
+
+          <UsersDataTable users={users} currentUserId={actor.id} />
         </div>
-
-        <UsersDataTable users={users} currentUserId={actor.id} />
-      </div>
-    </main>
+      </main>
+    </PageSkeleton>
   );
 }
