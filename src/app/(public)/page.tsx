@@ -1,5 +1,6 @@
 "use cache";
 
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { createPageMetadata } from "@lib/metadata";
 import {
   db,
@@ -65,20 +66,22 @@ export default async function HomePage() {
   ]);
 
   return (
-    <>
-      <Hero />
-      <StatsBar
-        stats={{
-          squads: squadCount.value,
-          tournaments: tournamentCount.value,
-          players: playerCount.value,
-        }}
-      />
-      <SquadsSection squads={featuredSquads} />
-      <AboutSection />
-      <NewsSection items={newsItems} />
-      <ProductsSection products={topProducts} />
-      <CtaBanner />
-    </>
+    <PageSkeleton name="home" loading={false}>
+      <>
+        <Hero />
+        <StatsBar
+          stats={{
+            squads: squadCount.value,
+            tournaments: tournamentCount.value,
+            players: playerCount.value,
+          }}
+        />
+        <SquadsSection squads={featuredSquads} />
+        <AboutSection />
+        <NewsSection items={newsItems} />
+        <ProductsSection products={topProducts} />
+        <CtaBanner />
+      </>
+    </PageSkeleton>
   );
 }

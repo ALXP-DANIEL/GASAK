@@ -2,6 +2,7 @@
 
 import { ProfileHeroCard } from "@components/cards/player/profile-hero-card";
 import { Icons } from "@components/icons";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { Accent } from "@components/ui/accent";
 import { BrandBadge, BrandCard, LinkButton } from "@components/ui/brand";
 import { Badge } from "@components/ui/shadcn/badge";
@@ -110,160 +111,162 @@ export default async function SquadDetailPage({
   ).size;
 
   return (
-    <Accent color={squad.accentColor}>
-      <main className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 desktop:px-8 desktop:py-12">
-        <LinkButton href="/squads" size="sm" className="w-fit">
-          Back to squads
-        </LinkButton>
+    <PageSkeleton name="squads-public-detail" loading={false}>
+      <Accent color={squad.accentColor}>
+        <main className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 desktop:px-8 desktop:py-12">
+          <LinkButton href="/squads" size="sm" className="w-fit">
+            Back to squads
+          </LinkButton>
 
-        <SquadHeroHeader
-          squad={squad}
-          badge={<BrandBadge>Squad Profile</BrandBadge>}
-          metrics={[
-            { label: "Members", value: roster.length },
-            { label: "Filled lanes", value: filledLanes },
-            {
-              label: "Recent matches",
-              value: recentTournaments.length + recentScrims.length,
-            },
-          ]}
-          size="lg"
-        />
+          <SquadHeroHeader
+            squad={squad}
+            badge={<BrandBadge>Squad Profile</BrandBadge>}
+            metrics={[
+              { label: "Members", value: roster.length },
+              { label: "Filled lanes", value: filledLanes },
+              {
+                label: "Recent matches",
+                value: recentTournaments.length + recentScrims.length,
+              },
+            ]}
+            size="lg"
+          />
 
-        <section className="grid gap-4 desktop:grid-cols-4">
-          <SquadStat
-            label="Leadership"
-            value={leaders.length}
-            icon={<Icons.Domain.Members size={18} />}
-          />
-          <SquadStat
-            label="Players"
-            value={players.length}
-            icon={<Icons.Domain.Players size={18} />}
-          />
-          <SquadStat
-            label="Reserve"
-            value={reserves.length}
-            icon={<Icons.Stats.Players size={18} />}
-          />
-          <SquadStat
-            label="Activity"
-            value={recentTournaments.length + recentScrims.length}
-            icon={<Icons.Stats.Trophies size={18} />}
-          />
-        </section>
+          <section className="grid gap-4 desktop:grid-cols-4">
+            <SquadStat
+              label="Leadership"
+              value={leaders.length}
+              icon={<Icons.Domain.Members size={18} />}
+            />
+            <SquadStat
+              label="Players"
+              value={players.length}
+              icon={<Icons.Domain.Players size={18} />}
+            />
+            <SquadStat
+              label="Reserve"
+              value={reserves.length}
+              icon={<Icons.Stats.Players size={18} />}
+            />
+            <SquadStat
+              label="Activity"
+              value={recentTournaments.length + recentScrims.length}
+              icon={<Icons.Stats.Trophies size={18} />}
+            />
+          </section>
 
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
-          <BrandCard interactive={false} className="p-5 desktop:p-7">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-                  Roster
+          <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+            <BrandCard interactive={false} className="p-5 desktop:p-7">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+                    Roster
+                  </p>
+                  <h2 className="mt-2 font-heading text-2xl font-bold uppercase tracking-wide">
+                    Active lineup
+                  </h2>
+                </div>
+                <Badge variant="outline">
+                  {roster.length} member{roster.length === 1 ? "" : "s"}
+                </Badge>
+              </div>
+
+              {roster.length === 0 ? (
+                <p className="mt-6 text-sm text-muted-foreground">
+                  Roster forming. Check back soon.
                 </p>
-                <h2 className="mt-2 font-heading text-2xl font-bold uppercase tracking-wide">
-                  Active lineup
+              ) : (
+                <div className="mt-6 grid gap-3 desktop:grid-cols-2">
+                  {roster.map((member) => (
+                    <ProfileHeroCard
+                      key={member.id}
+                      name={member.user.name}
+                      image={member.user.image}
+                      profile={member.user.profile}
+                      squadRole={member.squadRole}
+                      compact
+                    />
+                  ))}
+                </div>
+              )}
+            </BrandCard>
+
+            <div className="grid h-fit gap-6">
+              <BrandCard interactive={false} className="p-5">
+                <h2 className="font-heading text-sm font-bold uppercase tracking-wider">
+                  Lane spread
                 </h2>
-              </div>
-              <Badge variant="outline">
-                {roster.length} member{roster.length === 1 ? "" : "s"}
-              </Badge>
-            </div>
+                <div className="mt-4 grid gap-2">
+                  {LANE_ORDER.filter((lane) => lane !== "flex").map((lane) => {
+                    const count = roster.filter((member) =>
+                      normalizeLanes(
+                        member.user.profile?.preferredLanes,
+                      ).includes(lane),
+                    ).length;
+                    return (
+                      <div
+                        key={lane}
+                        className="flex items-center justify-between gap-3 border-b border-border py-2 text-sm last:border-b-0"
+                      >
+                        <span className="text-muted-foreground">
+                          {LANE_LABELS[lane]}
+                        </span>
+                        <span className="font-medium">{count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </BrandCard>
 
-            {roster.length === 0 ? (
-              <p className="mt-6 text-sm text-muted-foreground">
-                Roster forming. Check back soon.
-              </p>
-            ) : (
-              <div className="mt-6 grid gap-3 desktop:grid-cols-2">
-                {roster.map((member) => (
-                  <ProfileHeroCard
-                    key={member.id}
-                    name={member.user.name}
-                    image={member.user.image}
-                    profile={member.user.profile}
-                    squadRole={member.squadRole}
-                    compact
+              <BrandCard interactive={false} className="p-5">
+                <h2 className="font-heading text-sm font-bold uppercase tracking-wider">
+                  Squad status
+                </h2>
+                <div className="mt-4 grid gap-3 text-xs text-muted-foreground">
+                  <StatusNote
+                    icon={<Icons.Status.Success size={16} />}
+                    text="Public squad profile is active."
                   />
-                ))}
-              </div>
-            )}
-          </BrandCard>
+                  <StatusNote
+                    icon={<Icons.Domain.Recruitment size={16} />}
+                    text="Recruitment is handled through the GASAK application form."
+                  />
+                  <StatusNote
+                    icon={<Icons.Domain.Calendar size={16} />}
+                    text="Tournament and scrim activity is updated by squad staff."
+                  />
+                </div>
+              </BrandCard>
+            </div>
+          </section>
 
-          <div className="grid h-fit gap-6">
-            <BrandCard interactive={false} className="p-5">
-              <h2 className="font-heading text-sm font-bold uppercase tracking-wider">
-                Lane spread
-              </h2>
-              <div className="mt-4 grid gap-2">
-                {LANE_ORDER.filter((lane) => lane !== "flex").map((lane) => {
-                  const count = roster.filter((member) =>
-                    normalizeLanes(
-                      member.user.profile?.preferredLanes,
-                    ).includes(lane),
-                  ).length;
-                  return (
-                    <div
-                      key={lane}
-                      className="flex items-center justify-between gap-3 border-b border-border py-2 text-sm last:border-b-0"
-                    >
-                      <span className="text-muted-foreground">
-                        {LANE_LABELS[lane]}
-                      </span>
-                      <span className="font-medium">{count}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </BrandCard>
-
-            <BrandCard interactive={false} className="p-5">
-              <h2 className="font-heading text-sm font-bold uppercase tracking-wider">
-                Squad status
-              </h2>
-              <div className="mt-4 grid gap-3 text-xs text-muted-foreground">
-                <StatusNote
-                  icon={<Icons.Status.Success size={16} />}
-                  text="Public squad profile is active."
-                />
-                <StatusNote
-                  icon={<Icons.Domain.Recruitment size={16} />}
-                  text="Recruitment is handled through the GASAK application form."
-                />
-                <StatusNote
-                  icon={<Icons.Domain.Calendar size={16} />}
-                  text="Tournament and scrim activity is updated by squad staff."
-                />
-              </div>
-            </BrandCard>
-          </div>
-        </section>
-
-        <section className="grid gap-6 desktop:grid-cols-2">
-          <ActivityPanel
-            title="Tournament history"
-            empty="No tournament records yet."
-            items={recentTournaments.map((item) => ({
-              id: item.id,
-              title: item.name,
-              date: item.date,
-              meta: item.organizer,
-              badge: item.placement,
-            }))}
-          />
-          <ActivityPanel
-            title="Recent scrims"
-            empty="No scrim records yet."
-            items={recentScrims.map((item) => ({
-              id: item.id,
-              title: `vs ${item.opponent}`,
-              date: item.date,
-              meta: item.notes,
-              badge: item.result,
-            }))}
-          />
-        </section>
-      </main>
-    </Accent>
+          <section className="grid gap-6 desktop:grid-cols-2">
+            <ActivityPanel
+              title="Tournament history"
+              empty="No tournament records yet."
+              items={recentTournaments.map((item) => ({
+                id: item.id,
+                title: item.name,
+                date: item.date,
+                meta: item.organizer,
+                badge: item.placement,
+              }))}
+            />
+            <ActivityPanel
+              title="Recent scrims"
+              empty="No scrim records yet."
+              items={recentScrims.map((item) => ({
+                id: item.id,
+                title: `vs ${item.opponent}`,
+                date: item.date,
+                meta: item.notes,
+                badge: item.result,
+              }))}
+            />
+          </section>
+        </main>
+      </Accent>
+    </PageSkeleton>
   );
 }
 

@@ -1,6 +1,7 @@
 "use cache";
 
 import { Icons } from "@components/icons";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { BrandBadge, BrandCard, PageHero } from "@components/ui/brand";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatDate } from "@lib/format";
@@ -36,72 +37,74 @@ export default async function TournamentsPage() {
     .size;
 
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-10 desktop:px-8 desktop:py-14">
-      <PageHero
-        eyebrow="Tournaments"
-        title="Every stage, every result"
-        description="Tournament runs across every GASAK squad — qualifiers, community cups, and championship brackets."
-      />
+    <PageSkeleton name="tournaments-public" loading={false}>
+      <main className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-10 desktop:px-8 desktop:py-14">
+        <PageHero
+          eyebrow="Tournaments"
+          title="Every stage, every result"
+          description="Tournament runs across every GASAK squad — qualifiers, community cups, and championship brackets."
+        />
 
-      <section className="grid gap-4 desktop:grid-cols-3">
-        <TournamentStat
-          label="Tournament records"
-          value={rows.length}
-          icon={<Icons.Stats.Trophies size={18} />}
-        />
-        <TournamentStat
-          label="Squads represented"
-          value={squadCount}
-          icon={<Icons.Stats.Squads size={18} />}
-        />
-        <TournamentStat
-          label="Results logged"
-          value={resultCount}
-          icon={<Icons.Status.Success size={18} />}
-        />
-      </section>
-
-      {!featured ? (
-        <BrandCard interactive={false} className="p-8 text-center">
-          <p className="text-muted-foreground">
-            No tournaments recorded yet — check back soon.
-          </p>
-        </BrandCard>
-      ) : (
-        <>
-          <FeaturedTournament
-            tournament={featured.tournament}
-            squad={featured.squad}
+        <section className="grid gap-4 desktop:grid-cols-3">
+          <TournamentStat
+            label="Tournament records"
+            value={rows.length}
+            icon={<Icons.Stats.Trophies size={18} />}
           />
+          <TournamentStat
+            label="Squads represented"
+            value={squadCount}
+            icon={<Icons.Stats.Squads size={18} />}
+          />
+          <TournamentStat
+            label="Results logged"
+            value={resultCount}
+            icon={<Icons.Status.Success size={18} />}
+          />
+        </section>
 
-          <section className="grid gap-5">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
-                Archive
-              </p>
-              <h2 className="mt-2 font-heading text-2xl font-bold uppercase tracking-wide">
-                Tournament history
-              </h2>
-            </div>
+        {!featured ? (
+          <BrandCard interactive={false} className="p-8 text-center">
+            <p className="text-muted-foreground">
+              No tournaments recorded yet — check back soon.
+            </p>
+          </BrandCard>
+        ) : (
+          <>
+            <FeaturedTournament
+              tournament={featured.tournament}
+              squad={featured.squad}
+            />
 
-            <div className="relative grid gap-4">
-              {history.map(({ tournament, squad }) => (
-                <TournamentRow
-                  key={tournament.id}
-                  tournament={tournament}
-                  squad={squad}
-                />
-              ))}
-              {history.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  More tournament records will appear here after the next run.
+            <section className="grid gap-5">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+                  Archive
                 </p>
-              )}
-            </div>
-          </section>
-        </>
-      )}
-    </main>
+                <h2 className="mt-2 font-heading text-2xl font-bold uppercase tracking-wide">
+                  Tournament history
+                </h2>
+              </div>
+
+              <div className="relative grid gap-4">
+                {history.map(({ tournament, squad }) => (
+                  <TournamentRow
+                    key={tournament.id}
+                    tournament={tournament}
+                    squad={squad}
+                  />
+                ))}
+                {history.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    More tournament records will appear here after the next run.
+                  </p>
+                )}
+              </div>
+            </section>
+          </>
+        )}
+      </main>
+    </PageSkeleton>
   );
 }
 

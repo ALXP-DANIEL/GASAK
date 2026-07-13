@@ -1,6 +1,7 @@
 "use cache";
 
 import { ContentCardGrid, SquadCard } from "@components/cards";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { BrandBadge, LinkButton, PageHero } from "@components/ui/brand";
 import { createPageMetadata } from "@lib/metadata";
 import { db, squadMembers, squads } from "@server/db";
@@ -30,32 +31,34 @@ export default async function SquadsPage() {
     .orderBy(squads.createdAt);
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-10 desktop:px-8 desktop:py-14">
-      <PageHero
-        eyebrow="Our Squads"
-        title="Tournament-ready rosters"
-        description="The teams representing GASAK in tournaments, scrims, and academy development."
-      />
+    <PageSkeleton name="squads-public" loading={false}>
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-10 desktop:px-8 desktop:py-14">
+        <PageHero
+          eyebrow="Our Squads"
+          title="Tournament-ready rosters"
+          description="The teams representing GASAK in tournaments, scrims, and academy development."
+        />
 
-      <ContentCardGrid density="wide">
-        {rows.map(({ squad, memberCount }) => (
-          <SquadCard
-            key={squad.id}
-            squad={squad}
-            memberCount={memberCount}
-            variant="default"
-          />
-        ))}
-        {rows.length === 0 && (
-          <p className="text-muted-foreground">
-            No squads yet — check back soon.
-          </p>
-        )}
-      </ContentCardGrid>
-      <BrandBadge>Want in? Apply through the recruitment page.</BrandBadge>
-      <LinkButton href="/recruitment" caret className="w-fit">
-        Apply now
-      </LinkButton>
-    </div>
+        <ContentCardGrid density="wide">
+          {rows.map(({ squad, memberCount }) => (
+            <SquadCard
+              key={squad.id}
+              squad={squad}
+              memberCount={memberCount}
+              variant="default"
+            />
+          ))}
+          {rows.length === 0 && (
+            <p className="text-muted-foreground">
+              No squads yet — check back soon.
+            </p>
+          )}
+        </ContentCardGrid>
+        <BrandBadge>Want in? Apply through the recruitment page.</BrandBadge>
+        <LinkButton href="/recruitment" caret className="w-fit">
+          Apply now
+        </LinkButton>
+      </div>
+    </PageSkeleton>
   );
 }
