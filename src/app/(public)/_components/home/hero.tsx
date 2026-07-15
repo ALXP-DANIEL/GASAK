@@ -100,6 +100,19 @@ export function Hero() {
             </Link>
           </div>
         </div>
+
+        <div
+          className="hero-float absolute -right-4 top-1/2 hidden -translate-y-1/2 desktop:block"
+          aria-hidden="true"
+        >
+          <Image
+            src="/images/gasak-logo.png"
+            alt=""
+            width={640}
+            height={640}
+            className="h-auto w-104 drop-shadow-2xl desktop:w-136"
+          />
+        </div>
       </div>
     </section>
   );
