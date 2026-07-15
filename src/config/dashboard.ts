@@ -121,6 +121,12 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         icon: Icons.Domain.Products,
         canAccess: canUseCommerce,
       },
+      {
+        href: "/dashboard/joki",
+        label: "Joki",
+        icon: Icons.Domain.Joki,
+        canAccess: canUseCommerce,
+      },
     ],
   },
   {

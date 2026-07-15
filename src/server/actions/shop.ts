@@ -195,6 +195,50 @@ export async function markOrderPaid(
   order: typeof orders.$inferSelect,
   verifiedBy: string | null,
 ): Promise<void> {
+  // Joki split payment: the first paid bill is the 50% deposit (boost can
+  // start), the second is the balance (order complete). No stock is involved
+  // — joki orders hang off a zero-stock anchor product.
+  if (order.jokiDetails && order.depositSen) {
+    if (!order.depositPaidAt) {
+      await db
+        .update(orders)
+        .set({
+          status: "paid",
+          depositPaidAt: new Date(),
+          // cleared so the settled deposit bill can't be re-read as the
+          // balance payment by the Billplz sync fallback
+          billplzBillId: null,
+          paymentVerifiedBy: verifiedBy,
+          paymentVerifiedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(orders.id, order.id));
+      await logActivity({
+        action: "update",
+        entityType: "order",
+        entityId: order.id,
+        description: `Joki order ${order.orderNo}: 50% deposit paid — boost can start`,
+      });
+    } else if (!order.balancePaidAt) {
+      await db
+        .update(orders)
+        .set({
+          status: "completed",
+          balancePaidAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(orders.id, order.id));
+      await logActivity({
+        action: "update",
+        entityType: "order",
+        entityId: order.id,
+        description: `Joki order ${order.orderNo}: balance paid — order completed`,
+      });
+    }
+    revalidateShop();
+    return;
+  }
+
   if (order.status === "paid") return; // already marked — avoid double stock deduction
 
   if (order.variantId) {
@@ -264,9 +308,11 @@ export async function updateOrderStatus(
     return { ok: true, message: `Order ${order.orderNo} → paid` };
   }
 
-  // Cancelling a paid order returns the reserved stock.
+  // Cancelling a paid order returns the reserved stock. Joki orders never
+  // deducted stock (zero-stock anchor product), so nothing to restore.
   if (
     status === "cancelled" &&
+    !order.jokiDetails &&
     (order.status === "paid" || order.status === "processing")
   ) {
     if (order.variantId) {

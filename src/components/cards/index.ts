@@ -3,6 +3,7 @@ export {
   BuyButton,
   type BuyButtonProps,
   ProductCard,
+  type ProductCardData,
   type ProductCardProps,
   ProductPurchasePanel,
   type ProductWithVariants,

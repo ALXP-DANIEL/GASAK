@@ -1,13 +1,13 @@
 "use client";
 
 import { formFieldStyles } from "@components/forms/form-field";
-import { Icons } from "@components/icons";
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldLabel,
 } from "@components/ui/shadcn/field";
+import { RANK_TIER_ICON } from "@lib/rank-icons";
 import {
   DIVISIONED_RANKS,
   isDivisioned,
@@ -21,6 +21,7 @@ import {
   toRoman,
 } from "@lib/ranks";
 import { cn } from "@lib/utils";
+import Image from "next/image";
 import { useEffect } from "react";
 import {
   type Control,
@@ -42,6 +43,13 @@ type RankSelectProps<
   disabled?: boolean;
   /** When set, tiers stronger than this rank are disabled (e.g. current <= peak). */
   maxRank?: MlbbRank | null;
+  /** When true, only the tier grid shows — division/star pickers are hidden
+   * (e.g. flat-rate packages price by tier alone, so division/stars are
+   * meaningless there). */
+  tierOnly?: boolean;
+  /** Hint under the "Rank tier" heading — defaults to the "current rank"
+   * wording, override for other uses (e.g. a target/goal rank picker). */
+  tierHint?: string;
 };
 
 export function RankSelect<
@@ -54,6 +62,8 @@ export function RankSelect<
   description,
   disabled = false,
   maxRank = null,
+  tierOnly = false,
+  tierHint,
 }: RankSelectProps<TFieldValues, TName>) {
   return (
     <Controller
@@ -67,6 +77,8 @@ export function RankSelect<
           description={description}
           disabled={disabled}
           maxRank={maxRank}
+          tierOnly={tierOnly}
+          tierHint={tierHint}
         />
       )}
     />
@@ -83,6 +95,8 @@ function RankField<
   description,
   disabled = false,
   maxRank = null,
+  tierOnly = false,
+  tierHint = "Select the highest rank you currently hold.",
 }: {
   field: ControllerRenderProps<TFieldValues, TName>;
   fieldState: ControllerFieldState;
@@ -90,6 +104,8 @@ function RankField<
   description?: string;
   disabled?: boolean;
   maxRank?: MlbbRank | null;
+  tierOnly?: boolean;
+  tierHint?: string;
 }) {
   const value = (field.value ?? {}) as Partial<MlbbRank>;
 
@@ -207,7 +223,7 @@ function RankField<
               </p>
 
               <p className="mt-1 text-xs text-muted-foreground/80">
-                Select the highest rank you currently hold.
+                {tierHint}
               </p>
             </div>
 
@@ -238,11 +254,14 @@ function RankField<
                     )}
                   >
                     <div className="flex w-full items-start justify-between gap-2">
-                      <Icons.Stats.Trophies
-                        size={19}
-                        weight={selected ? "fill" : "regular"}
+                      <Image
+                        src={RANK_TIER_ICON[optionTier]}
+                        alt=""
+                        width={28}
+                        height={28}
                         className={cn(
-                          selected ? "text-primary" : "text-muted-foreground",
+                          "size-7 object-contain transition-[filter] duration-200",
+                          !selected && "opacity-70 saturate-[0.4]",
                         )}
                       />
                     </div>
@@ -264,7 +283,7 @@ function RankField<
           </div>
 
           {/* Rank configuration */}
-          {tier && (
+          {tier && !tierOnly && (
             <div className="grid gap-4 border-t border-border pt-5 desktop:grid-cols-[minmax(0,1fr)_18rem]">
               {/* Division */}
               <div className="space-y-3">

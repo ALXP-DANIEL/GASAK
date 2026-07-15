@@ -26,10 +26,19 @@ import { createProduct, updateProduct } from "@server/actions/shop";
 import { type Product, productCategoryEnum } from "@server/db/schema";
 import { z } from "zod";
 
-const categoryOptions = productCategoryEnum.enumValues.map((item) => ({
-  value: item,
-  label: PRODUCT_CATEGORY_LABELS[item],
-}));
+// Diamonds/weekly pass are paused for now (temporary — re-enable by removing
+// from this set); coaching was retired as a shop category entirely.
+const TEMPORARILY_DISABLED_CATEGORIES = new Set(["diamonds", "weekly_pass"]);
+
+const categoryOptions = productCategoryEnum.enumValues
+  .filter((item) => item !== "coaching")
+  .map((item) => ({
+    value: item,
+    label: TEMPORARILY_DISABLED_CATEGORIES.has(item)
+      ? `${PRODUCT_CATEGORY_LABELS[item]} (paused)`
+      : PRODUCT_CATEGORY_LABELS[item],
+    disabled: TEMPORARILY_DISABLED_CATEGORIES.has(item),
+  }));
 
 const schema = z.object({
   name: z.string().min(2, "Product name is required"),
@@ -54,7 +63,7 @@ export function ProductFormDialog({ product }: { product?: Product }) {
       schema,
       defaultValues: {
         name: product?.name ?? "",
-        category: product?.category ?? "diamonds",
+        category: product?.category ?? "joki",
         description: product?.description ?? "",
         price: product ? Number((product.priceSen / 100).toFixed(2)) : 0,
         stock: product?.stock ?? 0,

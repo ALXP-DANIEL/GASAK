@@ -47,6 +47,7 @@ import { PhoneIcon } from "@phosphor-icons/react/dist/ssr/Phone";
 import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { QuotesIcon } from "@phosphor-icons/react/dist/ssr/Quotes";
 import { ReceiptIcon } from "@phosphor-icons/react/dist/ssr/Receipt";
+import { RocketLaunchIcon } from "@phosphor-icons/react/dist/ssr/RocketLaunch";
 import { ShoppingBagIcon } from "@phosphor-icons/react/dist/ssr/ShoppingBag";
 import { SignOutIcon } from "@phosphor-icons/react/dist/ssr/SignOut";
 import { SquaresFourIcon } from "@phosphor-icons/react/dist/ssr/SquaresFour";
@@ -124,6 +125,7 @@ export const Icons = {
     Recruitment: ClipboardTextIcon,
     Products: PackageIcon,
     Orders: ReceiptIcon,
+    Joki: RocketLaunchIcon,
     Revenue: CurrencyCircleDollarIcon,
     Community: HandFistIcon,
     Lightning: LightningIcon,

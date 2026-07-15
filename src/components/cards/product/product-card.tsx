@@ -7,13 +7,26 @@ import { Icons } from "@components/icons";
 import { LinkButton } from "@components/ui/brand";
 import { formatRM } from "@lib/format";
 import { cn } from "@lib/utils";
-import type { Product } from "@server/db/schema";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+/**
+ * Minimal shape ProductCard actually renders — a real `Product` row (or any
+ * shop-listing item, e.g. a synthetic joki service) satisfies this
+ * structurally, so callers aren't required to have a full DB row.
+ */
+export type ProductCardData = {
+  name: string;
+  priceSen: number;
+  description?: string | null;
+  imageUrl?: string | null;
+  /** Shown in the default footer as "N in stock" — omit for non-stock items. */
+  stock?: number;
+};
+
 export type ProductCardProps = {
-  product: Product;
+  product: ProductCardData;
   action?: ReactNode | false;
   href?: string;
   variant?: ContentCardVariant;
@@ -96,11 +109,12 @@ export function ProductCard({
               {product.description}
             </p>
             <div className="mt-auto pt-5">
-              {footer ?? (
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  {product.stock} in stock
-                </p>
-              )}
+              {footer ??
+                (product.stock !== undefined && (
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    {product.stock} in stock
+                  </p>
+                ))}
             </div>
           </>
         )}
@@ -122,7 +136,7 @@ function ProductImage({
   product,
   compact,
 }: {
-  product: Product;
+  product: ProductCardData;
   compact: boolean;
 }) {
   return (

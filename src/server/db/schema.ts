@@ -618,6 +618,74 @@ export const productVariantOptionValues = createTable(
   ],
 );
 
+// ---------------------------------------------------------------------------
+// Joki (rank boost) catalog — pricing is a calculator (tier rate × stars)
+// plus flat-rate rank-range packages, so it lives outside the Shopee-style
+// product/variant matrix. Joki orders still flow through the shared `orders`
+// table (via a hidden anchor product) so payment, webhook, and admin order
+// management are reused unchanged; the boost specifics ride in
+// `orders.jokiDetails`.
+// ---------------------------------------------------------------------------
+
+// Display order on the public pricelist/checkout follows the real MLBB rank
+// hierarchy (see RANK_TIERS in @lib/ranks + jokiTierHierarchyIndex in
+// @lib/joki) — there is no manual sort field to keep in sync.
+export const jokiTiers = createTable("joki_tiers", {
+  id: uuid("id")
+    .primaryKey()
+    .$defaultFn(() => generateId()),
+  name: text("name").notNull(),
+  // per-star boosting rate, stored in sen (RM cents)
+  pricePerStarSen: integer("price_per_star_sen").notNull(),
+  active: boolean("active").notNull().default(true),
+});
+
+// A flat-rate boost segment between two tiers (e.g. "Epic → Legend" RM15).
+// The public checkout lets the buyer pick any from→to tier range and prices
+// it as the cheapest chain of these segments — see computeJokiPackagePath in
+// src/lib/joki.ts.
+export const jokiPackages = createTable("joki_packages", {
+  id: uuid("id")
+    .primaryKey()
+    .$defaultFn(() => generateId()),
+  // e.g. "Epic → Legend"
+  name: text("name").notNull(),
+  fromTierId: uuid("from_tier_id").references(() => jokiTiers.id, {
+    onDelete: "cascade",
+  }),
+  toTierId: uuid("to_tier_id").references(() => jokiTiers.id, {
+    onDelete: "cascade",
+  }),
+  priceSen: integer("price_sen").notNull(),
+  active: boolean("active").notNull().default(true),
+});
+
+// One row per pricing mode — the hero image shown on the public /shop/joki/*
+// detail pages and the /shop listing card, uploaded from the joki admin
+// config page. Structurally separate from jokiTiers/jokiPackages since it
+// isn't tied to any single tier or package.
+export const jokiServiceImages = createTable("joki_service_images", {
+  mode: text("mode").primaryKey().$type<"per_star" | "package">(),
+  imageUrl: text("image_url"),
+});
+
+/** Boost specifics captured at checkout for a joki order. */
+export type JokiOrderDetails = {
+  mlbbId: string;
+  serverId: string;
+  mode: "per_star" | "package";
+  /** free-text, e.g. "Epic III · 2 stars" */
+  currentRank?: string;
+  /** free-text target rank, e.g. "Legend V · 0 stars" */
+  targetRank?: string;
+  /** per_star mode: total stars boosted across every rate tier crossed */
+  stars?: number;
+  /** per_star mode: per-tier breakdown when the boost crosses rate tiers */
+  starLegs?: { tierName: string; stars: number; priceSen: number }[];
+  /** package mode */
+  packageName?: string;
+};
+
 export const orders = createTable(
   "orders",
   {
@@ -641,6 +709,14 @@ export const orders = createTable(
     paymentMethod: paymentMethodEnum("payment_method"),
     paymentProofUrl: text("payment_proof_url"),
     billplzBillId: text("billplz_bill_id"),
+    // present only on joki (rank boost) orders — see JokiOrderDetails
+    jokiDetails: jsonb("joki_details").$type<JokiOrderDetails>(),
+    // Joki split payment: 50% deposit before the boost starts, the remaining
+    // balance after the boost is done. When depositSen is set the order pays
+    // in two Billplz legs; both null on regular product orders.
+    depositSen: integer("deposit_sen"),
+    depositPaidAt: timestamp("deposit_paid_at", { withTimezone: true }),
+    balancePaidAt: timestamp("balance_paid_at", { withTimezone: true }),
     paymentVerifiedBy: text("payment_verified_by").references(() => user.id, {
       onDelete: "set null",
     }),
@@ -880,6 +956,9 @@ export type ProductOption = typeof productOptions.$inferSelect;
 export type ProductOptionValue = typeof productOptionValues.$inferSelect;
 export type ProductVariant = typeof productVariants.$inferSelect;
 export type Order = typeof orders.$inferSelect;
+export type JokiTier = typeof jokiTiers.$inferSelect;
+export type JokiPackage = typeof jokiPackages.$inferSelect;
+export type JokiServiceImage = typeof jokiServiceImages.$inferSelect;
 
 export type Lane = (typeof laneEnum.enumValues)[number];
 export type SquadRole = (typeof squadRoleEnum.enumValues)[number];

@@ -6,6 +6,8 @@ import {
   authSlides,
   db,
   events,
+  jokiPackages,
+  jokiTiers,
   news,
   type OrgRole,
   orders,
@@ -80,6 +82,120 @@ async function syncDemoAccountRoles() {
   }
 
   await ensureAuthSlides();
+}
+
+/**
+ * Seeds the joki (rank boost) catalog: per-star tier rates + flat-rate
+ * package promos, plus the hidden anchor product joki orders attach to
+ * (stock 0 keeps it out of the shop listing). Legacy flat joki products are
+ * deactivated — the /shop/joki calculator replaces them.
+ */
+async function ensureJokiCatalog(createdBy: string | null) {
+  // Legacy rows used short aliases ("Honor"/"Glory") for the two Mythic
+  // sub-tiers — rename in place so `name` matches the real RankTier value
+  // everywhere (fromTierId/toTierId FK references are untouched by this).
+  await db
+    .update(jokiTiers)
+    .set({ name: "Mythical Honor" })
+    .where(eq(jokiTiers.name, "Honor"));
+  await db
+    .update(jokiTiers)
+    .set({ name: "Mythical Glory" })
+    .where(eq(jokiTiers.name, "Glory"));
+
+  // Covers the full MLBB rank ladder, not just Epic..Glory.
+  const defaultTierRates: [string, number][] = [
+    ["Warrior", 50],
+    ["Elite", 80],
+    ["Master", 100],
+    ["Grandmaster", 150],
+    ["Epic", 200],
+    ["Legend", 300],
+    ["Mythic", 350],
+    ["Mythical Honor", 400],
+    ["Mythical Glory", 600],
+    ["Mythical Immortal", 1000],
+  ];
+  const existingTierNames = new Set(
+    (await db.select().from(jokiTiers)).map((t) => t.name),
+  );
+  const missingTiers = defaultTierRates.filter(
+    ([name]) => !existingTierNames.has(name),
+  );
+  if (missingTiers.length > 0) {
+    await db.insert(jokiTiers).values(
+      missingTiers.map(([name, pricePerStarSen]) => ({
+        name,
+        pricePerStarSen,
+      })),
+    );
+  }
+
+  // Package segments are tier-linked so the checkout can price any from→to
+  // range as the cheapest chain (see computeJokiPackagePath). Ensured
+  // additively (never wiped) so admin-added packages survive reseeding.
+  const tiersByName = new Map(
+    (await db.select().from(jokiTiers)).map((t) => [t.name, t.id]),
+  );
+  async function ensureEdge(from: string, to: string, priceSen: number) {
+    const fromTierId = tiersByName.get(from);
+    const toTierId = tiersByName.get(to);
+    if (!fromTierId || !toTierId) return;
+    const exists = await db.query.jokiPackages.findFirst({
+      where: and(
+        eq(jokiPackages.fromTierId, fromTierId),
+        eq(jokiPackages.toTierId, toTierId),
+      ),
+    });
+    if (exists) return;
+    await db.insert(jokiPackages).values({
+      name: `${from} → ${to}`,
+      fromTierId,
+      toTierId,
+      priceSen,
+    });
+  }
+  await ensureEdge("Warrior", "Elite", 500);
+  await ensureEdge("Elite", "Master", 800);
+  await ensureEdge("Master", "Grandmaster", 1200);
+  await ensureEdge("Grandmaster", "Epic", 1500);
+  await ensureEdge("Epic", "Legend", 1500);
+  await ensureEdge("Legend", "Mythic", 6000);
+  await ensureEdge("Epic", "Mythic", 7000);
+  await ensureEdge("Mythic", "Mythical Honor", 8000);
+  await ensureEdge("Mythical Honor", "Mythical Glory", 9000);
+  await ensureEdge("Mythical Glory", "Mythical Immortal", 15_000);
+
+  const anchor = await db.query.products.findFirst({
+    where: and(
+      eq(products.name, "Joki Rank Boost"),
+      eq(products.category, "joki"),
+    ),
+  });
+  if (!anchor) {
+    await db.insert(products).values({
+      name: "Joki Rank Boost",
+      category: "joki",
+      description:
+        "MLBB rank boost by GASAK players — priced per star or by package.",
+      priceSen: 0,
+      stock: 0,
+      active: true,
+      createdBy,
+    });
+  }
+
+  // Retire legacy flat-price joki products (replaced by /shop/joki).
+  const legacyJoki = await db.query.products.findMany({
+    where: and(eq(products.category, "joki"), eq(products.active, true)),
+  });
+  for (const legacy of legacyJoki) {
+    if (legacy.name === "Joki Rank Boost") continue;
+    await db
+      .update(products)
+      .set({ active: false })
+      .where(eq(products.id, legacy.id));
+  }
 }
 
 async function ensureAuthSlides() {
@@ -178,6 +294,10 @@ async function main() {
       where: eq(user.email, "admin@gasak.gg"),
     });
     if (admin) await ensureOrganizationPositions(admin);
+    const existingSeller = await db.query.user.findFirst({
+      where: eq(user.email, "seller@gasak.gg"),
+    });
+    await ensureJokiCatalog(existingSeller?.id ?? null);
     console.log("Database already seeded, skipping.");
     return;
   }
@@ -753,37 +873,12 @@ async function main() {
         active: true,
         createdBy: seller.id,
       },
-      {
-        name: "Joki Mythic → Mythical Honor",
-        category: "joki",
-        description:
-          "Rank boost by GASAK players. Safe, no cheats, VPN protected.",
-        priceSen: 5000,
-        stock: 10,
-        active: true,
-        createdBy: seller.id,
-      },
-      {
-        name: "1-on-1 Coaching (2 hours)",
-        category: "coaching",
-        description:
-          "Personal coaching session with a GASAK Alpha player — VOD review and live queue.",
-        priceSen: 8000,
-        stock: 20,
-        active: true,
-        createdBy: seller.id,
-      },
       ...[
         ["257 Diamonds", "diamonds", 1650, 999],
         ["344 Diamonds", "diamonds", 2200, 999],
         ["429 Diamonds", "diamonds", 2750, 999],
         ["706 Diamonds", "diamonds", 4400, 800],
         ["Twilight Pass", "weekly_pass", 4200, 100],
-        ["Rank Push Coaching", "coaching", 12_000, 12],
-        ["Duo Queue Review", "coaching", 6000, 20],
-        ["Joki Legend to Mythic", "joki", 3500, 15],
-        ["Joki Honor to Glory", "joki", 9000, 8],
-        ["Draft Review Session", "coaching", 4500, 25],
       ].map(([name, category, priceSen, stock]) => ({
         name: name as string,
         category: category as "diamonds" | "weekly_pass" | "joki" | "coaching",
@@ -857,6 +952,7 @@ async function main() {
 
   await ensureAuthSlides();
   await ensureOrganizationPositions(admin);
+  await ensureJokiCatalog(seller.id);
 
   console.log("Seed complete.");
   console.log(
