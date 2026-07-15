@@ -53,6 +53,10 @@ export default async function shopPage() {
   );
   const imageByMode = new Map(serviceImages.map((r) => [r.mode, r.imageUrl]));
 
+  const hasPerStar = jokiTiersSorted.length > 0;
+  const hasPackage = packageRows.length > 0;
+  const showJokiSection = hasPerStar || hasPackage;
+
   const byCategory = productCategoryEnum.enumValues
     .map((category) => ({
       category: category as ProductCategory,
@@ -72,61 +76,67 @@ export default async function shopPage() {
           <OrderLookup />
         </div>
 
-        <section className="flex flex-col gap-4">
-          <SectionHeader align="left" title="Joki Rank MLBB" />
-          <ContentCardGrid>
-            <ProductCard
-              product={{
-                name: "Joki — Per Star",
-                priceSen: cheapestPerStar,
-                description:
-                  "Pick your current and target rank — stars and price are calculated automatically across every rate tier crossed.",
-                imageUrl: imageByMode.get("per_star"),
-              }}
-              variant="default"
-              href="/shop/joki/per-star"
-              footer={
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  Priced per star
-                </p>
-              }
-              action={
-                <LinkButton
+        {showJokiSection && (
+          <section className="flex flex-col gap-4">
+            <SectionHeader align="left" title="Joki Rank MLBB" />
+            <ContentCardGrid>
+              {hasPerStar && (
+                <ProductCard
+                  product={{
+                    name: "Joki — Per Star",
+                    priceSen: cheapestPerStar,
+                    description:
+                      "Pick your current and target rank — stars and price are calculated automatically across every rate tier crossed.",
+                    imageUrl: imageByMode.get("per_star"),
+                  }}
+                  variant="default"
                   href="/shop/joki/per-star"
-                  size="sm"
-                  className="w-full"
-                >
-                  View
-                </LinkButton>
-              }
-            />
-            <ProductCard
-              product={{
-                name: "Joki — Package Promo",
-                priceSen: cheapestPackage,
-                description:
-                  "Flat-rate boosts between two ranks, auto-combined to price any current → target range at the cheapest mix.",
-                imageUrl: imageByMode.get("package"),
-              }}
-              variant="default"
-              href="/shop/joki/package"
-              footer={
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  Flat-rate bundles
-                </p>
-              }
-              action={
-                <LinkButton
+                  footer={
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                      Priced per star
+                    </p>
+                  }
+                  action={
+                    <LinkButton
+                      href="/shop/joki/per-star"
+                      size="sm"
+                      className="w-full"
+                    >
+                      View
+                    </LinkButton>
+                  }
+                />
+              )}
+              {hasPackage && (
+                <ProductCard
+                  product={{
+                    name: "Joki — Package Promo",
+                    priceSen: cheapestPackage,
+                    description:
+                      "Flat-rate boosts between two ranks, auto-combined to price any current → target range at the cheapest mix.",
+                    imageUrl: imageByMode.get("package"),
+                  }}
+                  variant="default"
                   href="/shop/joki/package"
-                  size="sm"
-                  className="w-full"
-                >
-                  View
-                </LinkButton>
-              }
-            />
-          </ContentCardGrid>
-        </section>
+                  footer={
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                      Flat-rate bundles
+                    </p>
+                  }
+                  action={
+                    <LinkButton
+                      href="/shop/joki/package"
+                      size="sm"
+                      className="w-full"
+                    >
+                      View
+                    </LinkButton>
+                  }
+                />
+              )}
+            </ContentCardGrid>
+          </section>
+        )}
 
         {byCategory.map(({ category, items: group }) => (
           <section key={category} className="flex flex-col gap-4">
