@@ -20,10 +20,8 @@ export const siteConfig: SiteConfig = {
     author: "https://alifdaniel.dpdns.org",
   },
   links: {
-    github: "https://github.com/ALXP-DANIEL",
-    instagram: "https://www.instagram.com/thealifhaker1/",
-    linkedin: "https://www.linkedin.com/in/thealifhaker1",
-    email: "alifdaniel.workspace@gmail.com",
+    email: "gasakesportofficial@gmail.com",
+    tiktok: "https://www.tiktok.com/@gasak_esport",
   },
   ogImage: `${env.NEXT_PUBLIC_SITE_URL}/api/og`,
 };

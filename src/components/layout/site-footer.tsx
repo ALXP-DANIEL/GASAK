@@ -7,25 +7,25 @@ import Link from "next/link";
 import { Logo } from "./logo";
 
 const SOCIALS = [
-  {
-    Icon: Icons.Social.Facebook,
-    label: "Facebook",
-    href: siteConfig.links.instagram,
-  },
-  {
-    Icon: Icons.Social.Instagram,
-    label: "Instagram",
-    href: siteConfig.links.instagram,
-  },
-  {
-    Icon: Icons.Social.Youtube,
-    label: "YouTube",
-    href: siteConfig.links.instagram,
-  },
+  // {
+  //   Icon: Icons.Social.Facebook,
+  //   label: "Facebook",
+  //   href: siteConfig.links.instagram,
+  // },
+  // {
+  //   Icon: Icons.Social.Instagram,
+  //   label: "Instagram",
+  //   href: siteConfig.links.instagram,
+  // },
+  // {
+  //   Icon: Icons.Social.Youtube,
+  //   label: "YouTube",
+  //   href: siteConfig.links.instagram,
+  // },
   {
     Icon: Icons.Social.Tiktok,
     label: "TikTok",
-    href: siteConfig.links.instagram,
+    href: siteConfig.links.tiktok,
   },
 ];
 

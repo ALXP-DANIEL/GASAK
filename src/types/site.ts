@@ -8,10 +8,8 @@ export type SiteConfig = {
     author: string;
   };
   links: {
-    github: string;
-    instagram: string;
-    linkedin: string;
     email: string;
+    tiktok: string;
   };
   ogImage: string;
 };
