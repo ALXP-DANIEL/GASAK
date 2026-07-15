@@ -1,11 +1,20 @@
 import { Icons } from "@components/icons";
+import Image from "next/image";
 import Link from "next/link";
 
 export function Hero() {
   return (
     <section id="home" className="relative overflow-hidden bg-background">
+      <Image
+        src="/images/hero.png"
+        alt=""
+        fill
+        priority
+        className="object-cover"
+        aria-hidden="true"
+      />
       <div
-        className="absolute inset-0 bg-linear-to-br from-primary/20 via-background to-background"
+        className="absolute inset-0 bg-linear-to-br from-primary/20 via-background/80 to-background"
         aria-hidden="true"
       />
       <div
