@@ -27,11 +27,14 @@ import { type Product, productCategoryEnum } from "@server/db/schema";
 import { z } from "zod";
 
 // Diamonds/weekly pass are paused for now (temporary — re-enable by removing
-// from this set); coaching was retired as a shop category entirely.
+// from this set); coaching was retired as a shop category entirely; joki is
+// now managed on its own dedicated /dashboard/joki page (tiers/packages),
+// not as a generic product.
 const TEMPORARILY_DISABLED_CATEGORIES = new Set(["diamonds", "weekly_pass"]);
+const RETIRED_CATEGORIES = new Set(["coaching", "joki"]);
 
 const categoryOptions = productCategoryEnum.enumValues
-  .filter((item) => item !== "coaching")
+  .filter((item) => !RETIRED_CATEGORIES.has(item))
   .map((item) => ({
     value: item,
     label: TEMPORARILY_DISABLED_CATEGORIES.has(item)
@@ -63,7 +66,7 @@ export function ProductFormDialog({ product }: { product?: Product }) {
       schema,
       defaultValues: {
         name: product?.name ?? "",
-        category: product?.category ?? "joki",
+        category: product?.category ?? "diamonds",
         description: product?.description ?? "",
         price: product ? Number((product.priceSen / 100).toFixed(2)) : 0,
         stock: product?.stock ?? 0,

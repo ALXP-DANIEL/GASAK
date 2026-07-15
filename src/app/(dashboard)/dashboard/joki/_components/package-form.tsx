@@ -27,6 +27,8 @@ import {
   updateJokiPackage,
 } from "@server/actions/joki";
 import type { JokiPackage, JokiTier } from "@server/db/schema";
+import { useEffect } from "react";
+import { useWatch } from "react-hook-form";
 import { z } from "zod";
 
 const schema = z.object({
@@ -37,18 +39,36 @@ const schema = z.object({
   active: z.boolean(),
 }) satisfies z.ZodType<PackageInput>;
 
+const pairKey = (fromTierId: string, toTierId: string) =>
+  `${fromTierId}:${toTierId}`;
+
 export function PackageFormDialog({
   pkg,
   tiers,
+  packages,
 }: {
   pkg?: JokiPackage;
   tiers: JokiTier[];
+  /** All existing packages — used to block re-adding an already-covered range. */
+  packages: JokiPackage[];
 }) {
   const isEdit = Boolean(pkg);
   const orderedTiers = sortJokiTiers(tiers);
-  const tierOptions = orderedTiers.map((t) => ({ value: t.id, label: t.name }));
+  const tierIndex = new Map(orderedTiers.map((t, i) => [t.id, i]));
 
-  const { open, setOpen, control, pending, handleSubmit } =
+  // Every forward tier-pair already covered by another package (excluding
+  // this package's own pair, so editing it doesn't lock itself out).
+  const takenPairs = new Set(
+    packages
+      .filter((p) => p.id !== pkg?.id && p.fromTierId && p.toTierId)
+      .map((p) => pairKey(p.fromTierId as string, p.toTierId as string)),
+  );
+
+  const totalForwardPairs =
+    (orderedTiers.length * (orderedTiers.length - 1)) / 2;
+  const allPairsTaken = !isEdit && takenPairs.size >= totalForwardPairs;
+
+  const { open, setOpen, control, pending, handleSubmit, form } =
     useEntityDialog<PackageInput>({
       schema,
       defaultValues: {
@@ -62,6 +82,31 @@ export function PackageFormDialog({
         pkg ? updateJokiPackage(pkg.id, values) : createJokiPackage(values),
     });
 
+  const fromTierId = useWatch({ control, name: "fromTierId" });
+
+  const fromOptions = orderedTiers.map((t) => ({ value: t.id, label: t.name }));
+  const toOptions = orderedTiers
+    .filter((t) => {
+      const fromIdx = tierIndex.get(fromTierId);
+      const toIdx = tierIndex.get(t.id);
+      if (fromIdx === undefined || toIdx === undefined || toIdx <= fromIdx) {
+        return false;
+      }
+      return !takenPairs.has(pairKey(fromTierId, t.id));
+    })
+    .map((t) => ({ value: t.id, label: t.name }));
+
+  // Keep "To tier" valid whenever "From tier" changes and the previous
+  // selection no longer clears the hierarchy/duplicate-pair filter above.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only re-check when the from-tier selection changes; form/toOptions are read fresh each run
+  useEffect(() => {
+    const toTierId = form.getValues("toTierId");
+    if (toOptions.some((o) => o.value === toTierId)) return;
+    form.setValue("toTierId", toOptions[0]?.value ?? "", {
+      shouldValidate: true,
+    });
+  }, [fromTierId]);
+
   return (
     <Credenza open={open} onOpenChange={setOpen}>
       <CredenzaTrigger asChild>
@@ -70,9 +115,9 @@ export function PackageFormDialog({
             Edit
           </Button>
         ) : (
-          <Button>
+          <Button disabled={allPairsTaken}>
             <Icons.Actions.Add />
-            New package
+            {allPairsTaken ? "All ranges covered" : "New package"}
           </Button>
         )}
       </CredenzaTrigger>
@@ -98,13 +143,18 @@ export function PackageFormDialog({
                   control={control}
                   name="fromTierId"
                   label="From tier"
-                  options={tierOptions}
+                  options={fromOptions}
                 />
                 <FormSelect
                   control={control}
                   name="toTierId"
                   label="To tier"
-                  options={tierOptions}
+                  options={toOptions}
+                  description={
+                    toOptions.length === 0
+                      ? "Every range from this tier is already covered."
+                      : undefined
+                  }
                 />
               </DashboardFormGrid>
               <FormField
@@ -129,7 +179,11 @@ export function PackageFormDialog({
           >
             Cancel
           </Button>
-          <Button type="submit" form="package-form" disabled={pending}>
+          <Button
+            type="submit"
+            form="package-form"
+            disabled={pending || toOptions.length === 0}
+          >
             {pending ? "Saving..." : isEdit ? "Save changes" : "Create package"}
           </Button>
         </CredenzaFooter>

@@ -10,6 +10,7 @@ import { PackageFormDialog } from "./package-form";
 
 export function buildPackageColumns(
   tiers: JokiTier[],
+  packages: JokiPackage[],
 ): ColumnDef<JokiPackage>[] {
   const tierName = (id: string | null) =>
     tiers.find((t) => t.id === id)?.name ?? "—";
@@ -48,7 +49,11 @@ export function buildPackageColumns(
       header: "",
       cell: ({ row }) => (
         <div className="flex justify-end gap-2">
-          <PackageFormDialog pkg={row.original} tiers={tiers} />
+          <PackageFormDialog
+            pkg={row.original}
+            tiers={tiers}
+            packages={packages}
+          />
           <DeleteButton
             action={() => deleteJokiPackage(row.original.id)}
             title="Delete this package?"

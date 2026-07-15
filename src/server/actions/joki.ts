@@ -5,7 +5,7 @@ import { logActivity } from "@server/activity-log";
 import { actionUser } from "@server/authz";
 import { db, jokiPackages, jokiServiceImages, jokiTiers } from "@server/db";
 import { saveUpload } from "@server/uploads";
-import { eq, or } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "./public";
@@ -163,6 +163,19 @@ export async function createJokiPackage(
     return { ok: false, error: parsed.error.issues[0].message };
   }
 
+  const existing = await db.query.jokiPackages.findFirst({
+    where: and(
+      eq(jokiPackages.fromTierId, parsed.data.fromTierId),
+      eq(jokiPackages.toTierId, parsed.data.toTierId),
+    ),
+  });
+  if (existing) {
+    return {
+      ok: false,
+      error: `A package for that range already exists: "${existing.name}"`,
+    };
+  }
+
   const [row] = await db
     .insert(jokiPackages)
     .values({
@@ -196,6 +209,19 @@ export async function updateJokiPackage(
   const parsed = packageSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0].message };
+  }
+
+  const existing = await db.query.jokiPackages.findFirst({
+    where: and(
+      eq(jokiPackages.fromTierId, parsed.data.fromTierId),
+      eq(jokiPackages.toTierId, parsed.data.toTierId),
+    ),
+  });
+  if (existing && existing.id !== packageId) {
+    return {
+      ok: false,
+      error: `A package for that range already exists: "${existing.name}"`,
+    };
   }
 
   const [row] = await db

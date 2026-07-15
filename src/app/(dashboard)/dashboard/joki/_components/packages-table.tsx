@@ -19,7 +19,7 @@ export function PackagesTable({
 
   return (
     <DataTable
-      columns={buildPackageColumns(tiers)}
+      columns={buildPackageColumns(tiers, rows)}
       data={rows}
       emptyMessage="No packages yet. Add your first flat-rate boost."
       renderMobileCard={(pkg) => (
