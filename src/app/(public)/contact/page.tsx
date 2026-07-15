@@ -21,20 +21,20 @@ export default function ContactPage() {
       href: `mailto:${siteConfig.links.email}`,
       label: siteConfig.links.email,
     },
-    {
-      Icon: Icons.Social.Instagram,
-      title: "Instagram",
-      description: "Match updates, highlights, and news.",
-      href: siteConfig.links.instagram,
-      label: "@thealifhaker1",
-    },
-    {
-      Icon: Icons.Social.Linkedin,
-      title: "LinkedIn",
-      description: "Business and partnership opportunities.",
-      href: siteConfig.links.linkedin,
-      label: "GASAK Esports",
-    },
+    // {
+    //   Icon: Icons.Social.Instagram,
+    //   title: "Instagram",
+    //   description: "Match updates, highlights, and news.",
+    //   href: siteConfig.links.instagram,
+    //   label: "@thealifhaker1",
+    // },
+    // {
+    //   Icon: Icons.Social.Linkedin,
+    //   title: "LinkedIn",
+    //   description: "Business and partnership opportunities.",
+    //   href: siteConfig.links.linkedin,
+    //   label: "GASAK Esports",
+    // },
   ];
 
   return (
