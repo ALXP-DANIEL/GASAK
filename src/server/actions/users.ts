@@ -5,6 +5,7 @@ import { auth } from "@server/auth";
 import { actionUser } from "@server/authz";
 import { db, user } from "@server/db";
 import { ORG_ROLES } from "@server/db/schema";
+import { sendWelcomeEmail } from "@server/email";
 import { eq } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { headers } from "next/headers";
@@ -14,6 +15,7 @@ import type { ActionResult } from "./public";
 const createUserSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.email("Enter a valid email"),
+  personalEmail: z.email("Enter a valid personal email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   role: z.enum(ORG_ROLES),
 });
@@ -27,6 +29,10 @@ const updateUserSchema = z.object({
   userId: z.string().min(1, "User is required"),
   name: z.string().min(2, "Name is required"),
   email: z.email("Enter a valid email"),
+  personalEmail: z
+    .email("Enter a valid personal email")
+    .nullable()
+    .or(z.literal("").transform(() => null)),
 });
 
 function revalidateUsers() {
@@ -58,9 +64,24 @@ export async function createDashboardUser(
         email: parsed.data.email,
         password: parsed.data.password,
         role: parsed.data.role as "admin",
-        data: { mustChangePassword: true },
+        data: {
+          mustChangePassword: true,
+          personalEmail: parsed.data.personalEmail,
+        },
       },
     });
+    // Hand over the login details; a delivery failure must not undo the
+    // account creation — the admin can still share credentials manually.
+    try {
+      await sendWelcomeEmail({
+        to: parsed.data.personalEmail,
+        userName: parsed.data.name,
+        loginEmail: parsed.data.email,
+        tempPassword: parsed.data.password,
+      });
+    } catch {
+      // logged inside sendWelcomeEmail
+    }
     await logActivity({
       actor,
       action: "create",
@@ -133,7 +154,11 @@ export async function updateDashboardUser(
 
   const [row] = await db
     .update(user)
-    .set({ name: parsed.data.name, email: parsed.data.email })
+    .set({
+      name: parsed.data.name,
+      email: parsed.data.email,
+      personalEmail: parsed.data.personalEmail,
+    })
     .where(eq(user.id, parsed.data.userId))
     .returning();
   if (!row) return { ok: false, error: "User not found" };

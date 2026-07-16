@@ -51,6 +51,10 @@ export const user = pgTable("user", {
   banReason: text("ban_reason"),
   banExpires: timestamp("ban_expires"),
   mustChangePassword: boolean("must_change_password").notNull().default(false),
+  // Real inbox (e.g. Gmail) for a user whose login email is a @gasak.my
+  // alias without a mailbox — password resets and onboarding emails are
+  // delivered here. Nullable for legacy accounts created before this field.
+  personalEmail: text("personal_email"),
 });
 
 export const session = pgTable(

@@ -41,6 +41,7 @@ const createUserFormSchema = z.object({
       /^[a-zA-Z0-9._-]+$/,
       "Only letters, numbers, dots, underscores, and hyphens",
     ),
+  personalEmail: z.email("Enter a valid personal email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   role: z.enum(ORG_ROLES),
 });
@@ -51,11 +52,18 @@ export function CreateUserDialog() {
   const { open, setOpen, control, pending, handleSubmit } =
     useEntityDialog<CreateUserFormValues>({
       schema: createUserFormSchema,
-      defaultValues: { name: "", emailAlias: "", password: "", role: "user" },
+      defaultValues: {
+        name: "",
+        emailAlias: "",
+        personalEmail: "",
+        password: "",
+        role: "user",
+      },
       action: (values) =>
         createDashboardUser({
           name: values.name,
           email: `${values.emailAlias}@${EMAIL_DOMAIN}`,
+          personalEmail: values.personalEmail,
           password: values.password,
           role: values.role,
         }),
@@ -93,9 +101,16 @@ export function CreateUserDialog() {
               />
               <FormField
                 control={control}
+                name="personalEmail"
+                label="Personal email"
+                type="email"
+                description="Real inbox (e.g. Gmail) — login details and password resets are delivered here."
+              />
+              <FormField
+                control={control}
                 name="password"
                 label="Temporary password"
-                description="The user must set a new password the first time they log in."
+                description="Emailed to the personal inbox; the user must set a new password on first login."
               />
               <FormSelect
                 control={control}
@@ -126,6 +141,10 @@ export function CreateUserDialog() {
 const editUserFormSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.email("Enter a valid email"),
+  personalEmail: z
+    .email("Enter a valid personal email")
+    .or(z.literal(""))
+    .transform((value) => value || null),
 });
 
 type EditUserFormValues = z.infer<typeof editUserFormSchema>;
@@ -134,7 +153,11 @@ export function EditUserDialog({ user }: { user: UserRow }) {
   const { open, setOpen, control, pending, handleSubmit } =
     useEntityDialog<EditUserFormValues>({
       schema: editUserFormSchema,
-      defaultValues: { name: user.name, email: user.email },
+      defaultValues: {
+        name: user.name,
+        email: user.email,
+        personalEmail: user.personalEmail ?? "",
+      },
       action: (values) => updateDashboardUser({ userId: user.id, ...values }),
     });
 
@@ -162,6 +185,13 @@ export function EditUserDialog({ user }: { user: UserRow }) {
               name="email"
               label="Email"
               type="email"
+            />
+            <FormField
+              control={control}
+              name="personalEmail"
+              label="Personal email"
+              type="email"
+              description="Real inbox for password resets. Leave empty to clear."
             />
           </form>
         </CredenzaBody>

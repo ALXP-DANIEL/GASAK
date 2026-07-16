@@ -20,6 +20,7 @@ export default async function UsersPage() {
     id: row.id,
     name: row.name,
     email: row.email,
+    personalEmail: row.personalEmail,
     role: row.role ?? "user",
     ign: row.profile?.ign ?? null,
     banned: row.banned ?? false,
