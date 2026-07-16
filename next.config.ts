@@ -32,6 +32,10 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     authInterrupts: true,
+    // TypeScript 7 doesn't expose the JS compiler API next build's default
+    // checker uses — this runs the project-local tsc CLI instead. See
+    // https://nextjs.org/docs/app/api-reference/config/next-config-js/useTypeScriptCli
+    useTypeScriptCli: true,
     serverActions: {
       // Image uploads (auth images, galleries, products) send the file in
       // the action body; the default 1 MB limit 500s before saveUpload's

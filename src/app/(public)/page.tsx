@@ -67,21 +67,19 @@ export default async function HomePage() {
 
   return (
     <PageSkeleton name="home" loading={false}>
-      <>
-        <Hero />
-        <StatsBar
-          stats={{
-            squads: squadCount.value,
-            tournaments: tournamentCount.value,
-            players: playerCount.value,
-          }}
-        />
-        <SquadsSection squads={featuredSquads} />
-        <AboutSection />
-        <NewsSection items={newsItems} />
-        <ProductsSection products={topProducts} />
-        <CtaBanner />
-      </>
+      <Hero />
+      <StatsBar
+        stats={{
+          squads: squadCount.value,
+          tournaments: tournamentCount.value,
+          players: playerCount.value,
+        }}
+      />
+      <SquadsSection squads={featuredSquads} />
+      <AboutSection />
+      <NewsSection items={newsItems} />
+      <ProductsSection products={topProducts} />
+      <CtaBanner />
     </PageSkeleton>
   );
 }
