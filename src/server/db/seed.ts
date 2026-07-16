@@ -913,7 +913,7 @@ async function main() {
       ign: `Trial${index + 1}`,
       mlbbId: String(880_000_000 + index),
       serverId: String(3000 + (index % 5)),
-      currentRank: mkRank(index % 2 === 0 ? "Mythic" : "Legend", 10),
+      peakRank: mkRank(index % 2 === 0 ? "Mythic" : "Legend", 10),
       preferredLanes: [
         (["exp", "jungle", "mid", "gold", "roam"] as const)[index % 5],
       ],

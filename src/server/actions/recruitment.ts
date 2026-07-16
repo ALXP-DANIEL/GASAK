@@ -189,7 +189,7 @@ export async function onboardApplicant(
     serverId: application.serverId,
     phone: application.phone,
     preferredLanes: application.preferredLanes,
-    currentRank: application.currentRank,
+    peakRank: application.peakRank,
   });
 
   await db.insert(squadMembers).values({

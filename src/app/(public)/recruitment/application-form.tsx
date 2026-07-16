@@ -26,7 +26,7 @@ const schema = z.object({
   mlbbId: z.string().min(4, "Enter a valid MLBB ID"),
   serverId: z.string().min(1, "Server ID is required"),
   squadId: z.string().optional(),
-  currentRank: rankFieldSchema,
+  peakRank: rankFieldSchema,
   preferredLanes: z
     .array(z.enum(laneEnum.enumValues))
     .min(1, "Select at least one lane"),
@@ -57,7 +57,7 @@ export function ApplicationForm({
       mlbbId: "",
       serverId: "",
       squadId: ANY_SQUAD_VALUE,
-      currentRank: undefined,
+      peakRank: undefined,
       preferredLanes: [],
       heroPool: "",
       previousTeam: "",
@@ -177,9 +177,9 @@ export function ApplicationForm({
             </div>
             <RankSelect
               control={control}
-              name="currentRank"
-              label="Current rank"
-              description="Pick your tier, division, and stars (e.g. Legend V · 3★)."
+              name="peakRank"
+              label="Peak rank"
+              description="Pick the highest tier, division, and stars you've reached (e.g. Legend V · 3★)."
             />
           </div>
         </IndexedFormSection>

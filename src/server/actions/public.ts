@@ -40,7 +40,7 @@ const applicationSchema = z.object({
   mlbbId: z.string().min(4, "Enter a valid MLBB ID"),
   serverId: z.string().min(1, "Server ID is required"),
   squadId: z.uuid().optional(),
-  currentRank: rankFieldSchema,
+  peakRank: rankFieldSchema,
   preferredLanes: z
     .array(z.enum(laneEnum.enumValues))
     .min(1, "Select at least one lane")

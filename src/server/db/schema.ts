@@ -272,7 +272,7 @@ export const applications = createTable("applications", {
   ign: text("ign").notNull(),
   mlbbId: text("mlbb_id").notNull(),
   serverId: text("server_id").notNull(),
-  currentRank: jsonb("current_rank").$type<MlbbRank>().notNull(),
+  peakRank: jsonb("peak_rank").$type<MlbbRank>().notNull(),
   preferredLanes: laneEnum("preferred_lanes").array().notNull(),
   heroPool: text("hero_pool").notNull(),
   previousTeam: text("previous_team"),
