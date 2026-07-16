@@ -466,7 +466,7 @@ async function main() {
     })),
   ]);
 
-  const [alpha, academy, bravo, charlie, delta, creators] = await db
+  const allSquads = await db
     .insert(squads)
     .values([
       {
@@ -475,6 +475,7 @@ async function main() {
           "The main competitive roster of GASAK, grinding MPL qualifiers and major community tournaments.",
         logoUrl: "/images/squad-a.png",
         accentColor: "#e0af3b",
+        division: "gasak",
       },
       {
         name: "GASAK Academy",
@@ -482,31 +483,74 @@ async function main() {
           "Development squad for rising talent — the pipeline into GASAK Alpha.",
         logoUrl: "/images/squad-b.png",
         accentColor: "#5fb0ff",
+        division: "gasak",
       },
       {
         name: "GASAK Bravo",
         description: "Second competitive roster focused on weekly cups.",
         logoUrl: "/images/squad-retak.png",
         accentColor: "#3ddc84",
+        division: "gasak",
       },
       {
         name: "GASAK Charlie",
         description: "Community tournament lineup for rising players.",
         logoUrl: "/images/squad-vultra.png",
         accentColor: "#ff6f5e",
+        division: "gasak",
       },
       {
         name: "GASAK Delta",
         description: "Scrim-heavy development roster for role specialists.",
         accentColor: "#c792ff",
+        division: "gasak",
       },
       {
         name: "GASAK Creators",
         description: "Content and coaching squad for public sessions.",
         accentColor: "#ffd35f",
+        division: "gasak",
+      },
+      {
+        name: "Nexus Prime",
+        description:
+          "Nexus flagship roster — aggressive early-game shotcallers.",
+        logoUrl: "/images/squad-retak.png",
+        accentColor: "#ff6f5e",
+        division: "nexus",
+      },
+      {
+        name: "Nexus Surge",
+        description: "Nexus development roster for rising duelists.",
+        accentColor: "#c792ff",
+        division: "nexus",
+      },
+      {
+        name: "Velrix Phantom",
+        description: "Velrix main lineup — control and macro specialists.",
+        accentColor: "#ffd35f",
+        division: "velrix",
+      },
+      {
+        name: "Velrix Tempest",
+        description: "Velrix scrim-heavy roster built around flexible lanes.",
+        accentColor: "#5fb0ff",
+        division: "velrix",
       },
     ])
     .returning();
+
+  const squadByName = Object.fromEntries(allSquads.map((s) => [s.name, s]));
+  const alpha = squadByName["GASAK Alpha"];
+  const academy = squadByName["GASAK Academy"];
+  const bravo = squadByName["GASAK Bravo"];
+  const charlie = squadByName["GASAK Charlie"];
+  const delta = squadByName["GASAK Delta"];
+  const creators = squadByName["GASAK Creators"];
+  const nexusPrime = squadByName["Nexus Prime"];
+  const nexusSurge = squadByName["Nexus Surge"];
+  const velrixPhantom = squadByName["Velrix Phantom"];
+  const velrixTempest = squadByName["Velrix Tempest"];
 
   await db.insert(squadMembers).values([
     { squadId: alpha.id, userId: leader.id, squadRole: "leader" },
@@ -517,9 +561,17 @@ async function main() {
     // Manage/Player focus toggle for org roles that also have a squad.
     { squadId: academy.id, userId: seller.id, squadRole: "coach" },
     ...extraPlayers.map((player, index) => ({
-      squadId: [academy.id, bravo.id, charlie.id, delta.id, creators.id][
-        index % 5
-      ],
+      squadId: [
+        academy.id,
+        bravo.id,
+        charlie.id,
+        delta.id,
+        creators.id,
+        nexusPrime.id,
+        nexusSurge.id,
+        velrixPhantom.id,
+        velrixTempest.id,
+      ][index % 9],
       userId: player.id,
       squadRole: (index % 5 === 0
         ? "leader"
@@ -974,7 +1026,9 @@ async function main() {
   console.log(
     "Logins: admin@gasak.gg/admin123, leader@gasak.gg/leader123, member@gasak.gg/member123, seller@gasak.gg/seller123",
   );
-  console.log(`Squads: ${alpha.name}, ${academy.name}`);
+  console.log(
+    `Squads: ${alpha.name} (gasak), ${nexusPrime.name} (nexus), ${velrixPhantom.name} (velrix)`,
+  );
 }
 
 main().then(

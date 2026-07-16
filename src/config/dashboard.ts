@@ -98,6 +98,26 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         label: "Squads",
         icon: Icons.Domain.Squads,
         canAccess: isAdmin,
+        children: [
+          {
+            href: "/dashboard/squads?division=gasak",
+            label: "Gasak",
+            icon: Icons.Domain.Squads,
+            canAccess: isAdmin,
+          },
+          {
+            href: "/dashboard/squads?division=nexus",
+            label: "Nexus",
+            icon: Icons.Domain.Squads,
+            canAccess: isAdmin,
+          },
+          {
+            href: "/dashboard/squads?division=velrix",
+            label: "Velrix",
+            icon: Icons.Domain.Squads,
+            canAccess: isAdmin,
+          },
+        ],
       },
       {
         href: "/dashboard/players",

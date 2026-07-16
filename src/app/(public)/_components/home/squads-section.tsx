@@ -21,10 +21,18 @@ export function SquadsSection({ squads }: { squads: Squad[] }) {
         ))}
       </ContentCardGrid>
 
-      <div className="mt-8 flex justify-center">
+      <div className="mt-8 flex flex-col items-center gap-4">
         <LinkButton href="/squads" caret>
-          View all squads
+          View all gasak squad
         </LinkButton>
+        <div className="flex flex-col gap-3 desktop:flex-row">
+          <LinkButton href="/squads/division/nexus" variant="outline" caret>
+            View all nexus squad
+          </LinkButton>
+          <LinkButton href="/squads/division/velrix" variant="outline" caret>
+            View all velrix squad
+          </LinkButton>
+        </div>
       </div>
     </section>
   );

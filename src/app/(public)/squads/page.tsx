@@ -1,11 +1,13 @@
 "use cache";
 
-import { ContentCardGrid, SquadCard } from "@components/cards";
+import { Stagger } from "@components/motion/reveal";
 import { PageSkeleton } from "@components/shared/page-skeleton";
 import { BrandBadge, LinkButton, PageHero } from "@components/ui/brand";
+import { Badge } from "@components/ui/shadcn/badge";
+import { SquadRowCard } from "@features/squads/components/squad-shared";
 import { createPageMetadata } from "@lib/metadata";
 import { db, squadMembers, squads } from "@server/db";
-import { count, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
 export const metadata = createPageMetadata({
@@ -26,7 +28,7 @@ export default async function SquadsPage() {
     })
     .from(squads)
     .leftJoin(squadMembers, eq(squadMembers.squadId, squads.id))
-    .where(eq(squads.archived, false))
+    .where(and(eq(squads.archived, false), eq(squads.division, "gasak")))
     .groupBy(squads.id)
     .orderBy(squads.createdAt);
 
@@ -39,13 +41,15 @@ export default async function SquadsPage() {
           description="The teams representing GASAK in tournaments, scrims, and academy development."
         />
 
-        <ContentCardGrid density="wide">
+        <Stagger className="grid gap-3 desktop:grid-cols-2">
           {rows.map(({ squad, memberCount }) => (
-            <SquadCard
+            <SquadRowCard
               key={squad.id}
+              href={`/squads/${squad.id}`}
               squad={squad}
               memberCount={memberCount}
-              variant="default"
+              showDescription
+              badges={squad.recruiting && <Badge>Recruiting</Badge>}
             />
           ))}
           {rows.length === 0 && (
@@ -53,7 +57,7 @@ export default async function SquadsPage() {
               No squads yet — check back soon.
             </p>
           )}
-        </ContentCardGrid>
+        </Stagger>
         <BrandBadge>Want in? Apply through the recruitment page.</BrandBadge>
         <LinkButton href="/recruitment" caret className="w-fit">
           Apply now

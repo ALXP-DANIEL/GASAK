@@ -7,6 +7,7 @@ import type {
   OrgRole,
   PaymentMethod,
   ProductCategory,
+  SquadDivision,
   SquadRole,
   TournamentFormat,
   TournamentStatus,
@@ -111,6 +112,22 @@ export const SQUAD_ROLE_LABELS: Record<SquadRole, string> = {
   player: "Player",
   reserve: "Reserve",
 };
+
+export const SQUAD_DIVISION_LABELS: Record<SquadDivision, string> = {
+  gasak: "GASAK",
+  nexus: "Nexus",
+  velrix: "Velrix",
+};
+
+export const SQUAD_DIVISION_SLUGS = [
+  "gasak",
+  "nexus",
+  "velrix",
+] as const satisfies readonly SquadDivision[];
+
+export function isSquadDivision(value: unknown): value is SquadDivision {
+  return (SQUAD_DIVISION_SLUGS as readonly unknown[]).includes(value);
+}
 
 export const APPLICATION_STATUS_LABELS: Record<ApplicationStatus, string> = {
   applied: "Applied",

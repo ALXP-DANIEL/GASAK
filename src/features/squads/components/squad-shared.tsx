@@ -1,8 +1,10 @@
+import { Icons } from "@components/icons";
 import { CornerCutBorder } from "@components/shared/corner-cut-border";
 import { LANE_LABELS, LANE_ORDER, normalizeLanes } from "@lib/labels";
 import { cn } from "@lib/utils";
 import type { Lane, SquadRole } from "@server/db/schema";
 import Image from "next/image";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 export const roleOrder: Record<SquadRole, number> = {
@@ -62,6 +64,68 @@ export function SquadLogo({
         className="size-full object-cover"
       />
     </div>
+  );
+}
+
+type SquadRowCardSquad = {
+  name: string;
+  logoUrl: string | null;
+  accentColor: string | null;
+  description?: string | null;
+};
+
+/**
+ * Corner-cut squad row — accent bar, logo, name, member count, optional
+ * badges — shared by the dashboard squads list and the public squad lists.
+ */
+export function SquadRowCard({
+  href,
+  squad,
+  memberCount,
+  showDescription = false,
+  badges,
+}: {
+  href: string;
+  squad: SquadRowCardSquad;
+  memberCount: number;
+  /** Show the squad description under the member count (public lists). */
+  showDescription?: boolean;
+  badges?: ReactNode;
+}) {
+  return (
+    <Link href={href} className="hover-lift group block h-full">
+      <CornerCutBorder
+        className="h-full"
+        contentClassName="relative flex h-full items-center gap-4 overflow-hidden bg-card p-4 shadow-xs"
+      >
+        <span
+          aria-hidden
+          className="absolute inset-y-0 left-0 w-1"
+          style={{ backgroundColor: squad.accentColor ?? "var(--primary)" }}
+        />
+        <SquadLogo src={squad.logoUrl} name={squad.name} className="size-14" />
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-heading text-lg font-bold uppercase tracking-wide group-hover:text-primary">
+            {squad.name}
+          </h3>
+          <p className="truncate text-sm text-muted-foreground">
+            {memberCount} member{memberCount === 1 ? "" : "s"}
+          </p>
+          {showDescription && squad.description && (
+            <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground/80">
+              {squad.description}
+            </p>
+          )}
+          {badges && (
+            <div className="mt-1.5 flex flex-wrap gap-1.5">{badges}</div>
+          )}
+        </div>
+        <Icons.Layout.Navigation.CaretRight
+          aria-hidden
+          className="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+        />
+      </CornerCutBorder>
+    </Link>
   );
 }
 

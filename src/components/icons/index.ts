@@ -37,6 +37,7 @@ import { LinkSimpleIcon } from "@phosphor-icons/react/dist/ssr/LinkSimple";
 import { ListIcon } from "@phosphor-icons/react/dist/ssr/List";
 import { ListBulletsIcon } from "@phosphor-icons/react/dist/ssr/ListBullets";
 import { ListNumbersIcon } from "@phosphor-icons/react/dist/ssr/ListNumbers";
+import { LockSimpleIcon } from "@phosphor-icons/react/dist/ssr/LockSimple";
 import { MapPinIcon } from "@phosphor-icons/react/dist/ssr/MapPin";
 import { MinusIcon } from "@phosphor-icons/react/dist/ssr/Minus";
 import { MoonIcon } from "@phosphor-icons/react/dist/ssr/Moon";
@@ -108,6 +109,7 @@ export const Icons = {
     Success: CheckCircleIcon,
     Pending: CircleIcon,
     Failed: XCircleIcon,
+    Locked: LockSimpleIcon,
   },
 
   Stats: {

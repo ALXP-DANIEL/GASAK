@@ -133,6 +133,14 @@ export const squadRoleEnum = pgEnum("squad_role", [
   "reserve",
 ]);
 
+export const squadDivisionEnum = pgEnum("squad_division", [
+  "gasak",
+  "nexus",
+  "velrix",
+]);
+
+export type SquadDivision = (typeof squadDivisionEnum.enumValues)[number];
+
 export const applicationStatusEnum = pgEnum("application_status", [
   "applied",
   "under_review",
@@ -235,6 +243,8 @@ export const squads = createTable("squads", {
   accentColor: text("accent_color"),
   recruiting: boolean("recruiting").notNull().default(false),
   archived: boolean("archived").notNull().default(false),
+  // Division this squad belongs to: the main GASAK roster, Nexus, or Velrix.
+  division: squadDivisionEnum("division").notNull().default("gasak"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

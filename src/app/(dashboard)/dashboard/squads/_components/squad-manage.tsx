@@ -49,7 +49,11 @@ import {
   TableHeader,
   TableRow,
 } from "@components/ui/shadcn/table";
-import { formatLanes, SQUAD_ROLE_LABELS } from "@lib/labels";
+import {
+  formatLanes,
+  SQUAD_DIVISION_SLUGS,
+  SQUAD_ROLE_LABELS,
+} from "@lib/labels";
 import {
   addSquadMember,
   deleteSquad,
@@ -58,11 +62,17 @@ import {
   updateSquad,
   updateSquadMemberRole,
 } from "@server/actions/squads";
-import { type Lane, squadRoleEnum } from "@server/db/schema";
+import {
+  type Lane,
+  type SquadDivision,
+  squadRoleEnum,
+} from "@server/db/schema";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { DivisionPicker } from "./division-picker";
 
 type SquadMemberRow = {
   id: string;
@@ -82,6 +92,7 @@ type SquadDetail = {
   accentColor: string | null;
   recruiting: boolean;
   archived: boolean;
+  division: SquadDivision;
   members: SquadMemberRow[];
 };
 
@@ -90,6 +101,7 @@ const squadFormSchema = z.object({
   description: z.string().optional(),
   accentColor: z.string().optional(),
   recruiting: z.boolean(),
+  division: z.enum(SQUAD_DIVISION_SLUGS),
   logo: z.instanceof(File).nullable(),
   banner: z.instanceof(File).nullable(),
 });
@@ -111,6 +123,7 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
       description: squad.description ?? "",
       accentColor: squad.accentColor ?? "",
       recruiting: squad.recruiting,
+      division: squad.division,
       logo: null,
       banner: null,
     },
@@ -120,6 +133,7 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
       if (values.description) formData.set("description", values.description);
       if (values.accentColor) formData.set("accentColor", values.accentColor);
       formData.set("recruiting", String(values.recruiting));
+      formData.set("division", values.division);
       if (values.logo) formData.set("logo", values.logo);
       if (values.banner) formData.set("banner", values.banner);
       return updateSquad(squad.id, formData);
@@ -147,6 +161,16 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
           >
             <FormSection title="Details">
               <FormField control={control} name="name" label="Squad name" />
+              <Controller
+                control={control}
+                name="division"
+                render={({ field }) => (
+                  <DivisionPicker
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
               <FormField
                 control={control}
                 name="description"

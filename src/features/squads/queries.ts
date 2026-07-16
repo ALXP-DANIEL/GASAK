@@ -1,14 +1,15 @@
 import { getManagedSquadIds } from "@server/authz";
 import { db, squadMembers, squads } from "@server/db";
-import type { OrgRole } from "@server/db/schema";
+import type { OrgRole, SquadDivision } from "@server/db/schema";
 import { count, eq } from "drizzle-orm";
 
-/** Admin-only: every squad with its member count. */
-export async function listSquads() {
+/** Admin-only: every squad with its member count, optionally filtered by division. */
+export async function listSquads(division?: SquadDivision) {
   return db
     .select({ squad: squads, memberCount: count(squadMembers.id) })
     .from(squads)
     .leftJoin(squadMembers, eq(squadMembers.squadId, squads.id))
+    .where(division ? eq(squads.division, division) : undefined)
     .groupBy(squads.id)
     .orderBy(squads.createdAt);
 }

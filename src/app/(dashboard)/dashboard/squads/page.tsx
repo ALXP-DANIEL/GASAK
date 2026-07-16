@@ -4,19 +4,32 @@ import {
 } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { Icons } from "@components/icons";
 import { Stagger } from "@components/motion/reveal";
-import { CornerCutBorder } from "@components/shared/corner-cut-border";
 import { PageSkeleton } from "@components/shared/page-skeleton";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
-import { SquadLogo } from "@features/squads/components/squad-shared";
+import {
+  SquadLogo,
+  SquadRowCard,
+} from "@features/squads/components/squad-shared";
 import { listSquads } from "@features/squads/queries";
+import {
+  isSquadDivision,
+  SQUAD_DIVISION_LABELS,
+  SQUAD_DIVISION_SLUGS,
+} from "@lib/labels";
 import Link from "next/link";
 import { requireDashboardRole } from "../_components/dashboard-section";
 import { SquadFormDialog } from "./_components/squad-form";
 
-export default async function SquadsPage() {
+export default async function SquadsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ division?: string }>;
+}) {
   await requireDashboardRole("admin");
-  const rows = await listSquads();
+  const { division } = await searchParams;
+  const activeDivision = isSquadDivision(division) ? division : null;
+  const rows = await listSquads(activeDivision ?? undefined);
 
   const active = rows.filter(({ squad }) => !squad.archived);
   const archived = rows.filter(({ squad }) => squad.archived);
@@ -27,12 +40,21 @@ export default async function SquadsPage() {
     <PageSkeleton name="squads" loading={false}>
       <div className="flex flex-col gap-6">
         <PageHeader
-          title="Squads"
+          title={
+            activeDivision ? SQUAD_DIVISION_LABELS[activeDivision] : "Squads"
+          }
           kicker="Management"
           icon={Icons.Domain.Squads}
-          description="Rosters across the organization."
+          description={
+            activeDivision
+              ? `Rosters in the ${SQUAD_DIVISION_LABELS[activeDivision]} division.`
+              : "Rosters across the organization."
+          }
         >
-          <SquadFormDialog />
+          <SquadFormDialog
+            key={activeDivision ?? "all"}
+            lockedDivision={activeDivision ?? undefined}
+          />
         </PageHeader>
 
         <StatStrip>
@@ -69,45 +91,37 @@ export default async function SquadsPage() {
           />
         ) : (
           <>
-            <Stagger className="grid gap-3 desktop:grid-cols-3">
-              {active.map(({ squad, memberCount }) => (
-                <Link
-                  key={squad.id}
-                  href={`/dashboard/squads/${squad.id}`}
-                  className="hover-lift group block"
-                >
-                  <CornerCutBorder contentClassName="relative flex items-center gap-4 overflow-hidden bg-card p-4 shadow-xs">
+            {SQUAD_DIVISION_SLUGS.filter(
+              (slug) => !activeDivision || slug === activeDivision,
+            ).map((slug) => {
+              const divisionRows = active.filter(
+                ({ squad }) => squad.division === slug,
+              );
+              if (divisionRows.length === 0) return null;
+              const label = SQUAD_DIVISION_LABELS[slug];
+              return (
+                <section key={slug} className="grid gap-3">
+                  <h2 className="flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-wide text-muted-foreground">
                     <span
                       aria-hidden
-                      className="absolute inset-y-0 left-0 w-1"
-                      style={{
-                        backgroundColor: squad.accentColor ?? "var(--primary)",
-                      }}
+                      className="h-3 w-0.75 -skew-x-12 bg-primary/60"
                     />
-                    <SquadLogo
-                      src={squad.logoUrl}
-                      name={squad.name}
-                      className="size-14"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <h3 className="truncate font-heading text-lg font-bold uppercase tracking-wide group-hover:text-primary">
-                        {squad.name}
-                      </h3>
-                      <p className="truncate text-sm text-muted-foreground">
-                        {memberCount} member{memberCount === 1 ? "" : "s"}
-                      </p>
-                      <div className="mt-1.5 flex flex-wrap gap-1.5">
-                        {squad.recruiting && <Badge>Recruiting</Badge>}
-                      </div>
-                    </div>
-                    <Icons.Layout.Navigation.CaretRight
-                      aria-hidden
-                      className="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
-                    />
-                  </CornerCutBorder>
-                </Link>
-              ))}
-            </Stagger>
+                    {label}
+                  </h2>
+                  <Stagger className="grid gap-3 desktop:grid-cols-3">
+                    {divisionRows.map(({ squad, memberCount }) => (
+                      <SquadRowCard
+                        key={squad.id}
+                        href={`/dashboard/squads/${squad.id}`}
+                        squad={squad}
+                        memberCount={memberCount}
+                        badges={squad.recruiting && <Badge>Recruiting</Badge>}
+                      />
+                    ))}
+                  </Stagger>
+                </section>
+              );
+            })}
 
             {archived.length > 0 && (
               <section className="grid gap-3">
@@ -135,7 +149,8 @@ export default async function SquadsPage() {
                           {squad.name}
                         </h3>
                         <p className="truncate text-sm text-muted-foreground">
-                          {memberCount} member{memberCount === 1 ? "" : "s"}
+                          {memberCount} member
+                          {memberCount === 1 ? "" : "s"}
                         </p>
                         <div className="mt-1.5">
                           <Badge variant="outline">Archived</Badge>
