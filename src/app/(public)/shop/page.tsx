@@ -31,18 +31,20 @@ export default async function shopPage() {
   cacheTag("joki");
 
   const [merchItems, tierRows, packageRows, serviceImages] = await Promise.all([
-    db
-      .select()
-      .from(products)
-      .where(
-        and(
-          eq(products.active, true),
-          gt(products.stock, 0),
-          // Only joki (own section) and merchandise are live for now.
-          eq(products.category, "merchandise"),
-        ),
-      )
-      .orderBy(products.priceSen),
+    db.query.products.findMany({
+      where: and(
+        eq(products.active, true),
+        gt(products.stock, 0),
+        // Only joki (own section) and merchandise are live for now.
+        eq(products.category, "merchandise"),
+      ),
+      orderBy: (p, { asc }) => asc(p.priceSen),
+      // Listing cards fall back to the first gallery image when the
+      // product has no cover image.
+      with: {
+        gallery: { orderBy: (g, { asc }) => asc(g.sortOrder), limit: 1 },
+      },
+    }),
     db.select().from(jokiTiers).where(eq(jokiTiers.active, true)),
     db.select().from(jokiPackages).where(eq(jokiPackages.active, true)),
     db
@@ -148,7 +150,10 @@ export default async function shopPage() {
               {merchItems.map((product) => (
                 <ProductCard
                   key={product.id}
-                  product={product}
+                  product={{
+                    ...product,
+                    imageUrl: product.imageUrl ?? product.gallery[0]?.imageUrl,
+                  }}
                   variant="default"
                   href={`/shop/${product.id}`}
                   action={

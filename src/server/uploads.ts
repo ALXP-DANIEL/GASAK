@@ -25,7 +25,8 @@ export async function saveUpload(
     | "tournaments"
     | "auth-slides"
     | "news"
-    | "joki",
+    | "joki"
+    | "galleries",
 ): Promise<string> {
   if (!ALLOWED_TYPES.has(file.type)) {
     throw new Error("Only JPEG, PNG, WebP or GIF images are allowed");

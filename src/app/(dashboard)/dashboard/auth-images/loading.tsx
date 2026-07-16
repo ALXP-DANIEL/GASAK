@@ -1,8 +1,8 @@
 import { PageSkeleton } from "@components/shared/page-skeleton";
 
-export default function AuthSlidesLoading() {
+export default function AuthImagesLoading() {
   return (
-    <PageSkeleton name="auth-slides" loading>
+    <PageSkeleton name="auth-images" loading>
       {null}
     </PageSkeleton>
   );

@@ -3,9 +3,10 @@ import { and, eq } from "drizzle-orm";
 import { auth } from "../auth";
 import {
   applications,
-  authSlides,
+  authImages,
   db,
   events,
+  galleries,
   jokiPackages,
   jokiTiers,
   news,
@@ -13,6 +14,7 @@ import {
   orders,
   organizationPositions,
   playerProfiles,
+  productGallery,
   products,
   scrims,
   squadMembers,
@@ -81,7 +83,7 @@ async function syncDemoAccountRoles() {
     }
   }
 
-  await ensureAuthSlides();
+  await ensureAuthImages();
 }
 
 /**
@@ -198,38 +200,77 @@ async function ensureJokiCatalog(createdBy: string | null) {
   }
 }
 
-async function ensureAuthSlides() {
-  const existing = await db.select().from(authSlides).limit(1);
+async function ensureAuthImages() {
+  const existing = await db.select().from(authImages).limit(1);
   if (existing.length > 0) return;
 
-  await db.insert(authSlides).values([
-    {
-      eyebrow: "GASAK Management",
-      title: "Run the squad from one command center",
-      description: "Track schedules, rosters, recruitment, and match activity.",
-      imageUrl: "/images/hero.png",
-      sortOrder: 0,
+  await db.insert(authImages).values(
+    Array.from({ length: 20 }, (_, i) => ({
+      imageUrl: `https://picsum.photos/seed/gasak${i}/1080/1440`,
       active: true,
-    },
-    {
-      eyebrow: "GASAK Management",
-      title: "Keep competitive squads aligned",
-      description:
-        "Leaders manage their own squad flow without losing oversight.",
-      imageUrl: "/images/squad-a.png",
-      sortOrder: 10,
+    })),
+  );
+}
+
+const galleryCaptions = [
+  "Scrim night at the GASAK house",
+  "Champions of the regional qualifier",
+  "Squad grind before worlds",
+  "Drafting the perfect comp",
+  "Post-match debrief",
+  "Merch drop: jersey v2",
+  "Fan meet & greet",
+  "Bootcamp sunrise",
+  "Trophy lift moment",
+  "Mid-laner clutch",
+  "Tactical whiteboard",
+  "Community tournament",
+  "New gaming lounge",
+  "Victory pose",
+  "Coach review session",
+  "Ring light stream setup",
+  "Hype mural wall",
+  "Custom mousepads arrived",
+  "Watch party finals",
+  "Off-season team bonding",
+];
+
+async function ensureGalleries() {
+  const existing = await db.select().from(galleries).limit(1);
+  if (existing.length > 0) return;
+
+  await db.insert(galleries).values(
+    galleryCaptions.map((caption, i) => ({
+      title: caption,
+      description: `A moment from the GASAK family — ${caption}.`,
+      imageUrl: `https://picsum.photos/seed/gallery${i}/1200/900`,
+      sortOrder: i * 10,
       active: true,
-    },
-    {
-      eyebrow: "GASAK Management",
-      title: "Built for the GASAK organization",
-      description:
-        "Admin, seller, leader, and player workflows stay separated.",
-      imageUrl: "/images/about-family.png",
-      sortOrder: 20,
-      active: true,
-    },
-  ]);
+    })),
+  );
+}
+
+async function ensureProductGallery() {
+  const products_ = await db.query.products.findMany({
+    where: eq(products.category, "merchandise"),
+  });
+  if (products_.length === 0) return;
+
+  for (const product of products_) {
+    const existing = await db
+      .select()
+      .from(productGallery)
+      .where(eq(productGallery.productId, product.id));
+    if (existing.length > 0) continue;
+
+    await db.insert(productGallery).values(
+      [0, 1, 2].map((i) => ({
+        productId: product.id,
+        imageUrl: `https://picsum.photos/seed/merch-${product.id.slice(0, 8)}-${i}/1024/1024`,
+        sortOrder: i,
+      })),
+    );
+  }
 }
 
 async function ensureOrganizationPositions(admin: {
@@ -298,6 +339,8 @@ async function main() {
       where: eq(user.email, "seller@gasak.gg"),
     });
     await ensureJokiCatalog(existingSeller?.id ?? null);
+    await ensureGalleries();
+    await ensureProductGallery();
     console.log("Database already seeded, skipping.");
     return;
   }
@@ -921,7 +964,9 @@ async function main() {
     }),
   );
 
-  await ensureAuthSlides();
+  await ensureAuthImages();
+  await ensureGalleries();
+  await ensureProductGallery();
   await ensureOrganizationPositions(admin);
   await ensureJokiCatalog(seller.id);
 

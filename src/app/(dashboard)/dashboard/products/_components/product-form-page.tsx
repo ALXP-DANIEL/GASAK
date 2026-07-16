@@ -16,6 +16,7 @@ import { formatRM } from "@lib/format";
 import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
 import {
   createProduct,
+  setProductGalleryFiles,
   setProductVariants,
   updateProduct,
   uploadVariantImage,
@@ -23,6 +24,7 @@ import {
 import {
   type Product,
   type ProductCategory,
+  type ProductGallery,
   type ProductOption,
   type ProductOptionValue,
   type ProductVariant,
@@ -41,6 +43,7 @@ export type ProductWithVariants = Product & {
   variants: (ProductVariant & {
     optionValues: { optionValue: ProductOptionValue }[];
   })[];
+  gallery: ProductGallery[];
 };
 
 const categoryOptions = productCategoryEnum.enumValues.map((item) => ({
@@ -74,6 +77,10 @@ const schema = z
     category: z.enum(productCategoryEnum.enumValues),
     description: z.string().optional(),
     image: z.instanceof(File).nullable(),
+    gallery: z
+      .array(z.instanceof(File).nullable())
+      .max(3, "At most 3 gallery images"),
+    galleryRemove: z.array(z.boolean()),
     active: z.boolean(),
     hasVariants: z.boolean(),
     price: numberOrEmpty.optional(),
@@ -202,6 +209,8 @@ function buildDefaults(
     category: product?.category ?? fixedCategory ?? "merchandise",
     description: product?.description ?? "",
     image: null,
+    gallery: [null, null, null],
+    galleryRemove: [false, false, false],
     active: product?.active ?? true,
     hasVariants: product?.hasVariants ?? false,
     price: product ? Number((product.priceSen / 100).toFixed(2)) : undefined,
@@ -229,6 +238,7 @@ export function ProductFormPage({
   const { control, handleSubmit } = form;
 
   const hasVariants = useWatch({ control, name: "hasVariants" });
+  const galleryRemove = useWatch({ control, name: "galleryRemove" });
   const optionsWatch = useWatch({ control, name: "options" });
 
   const {
@@ -330,6 +340,28 @@ export function ProductFormPage({
           toast.error(variantsResult.error);
           return;
         }
+
+        const galleryForm = new FormData();
+        for (let i = 0; i < 3; i++) {
+          const file = values.gallery?.[i];
+          if (file instanceof File) {
+            galleryForm.set(`galleryImage_${i}`, file);
+          } else if (
+            !values.galleryRemove?.[i] &&
+            product?.gallery?.[i]?.imageUrl
+          ) {
+            // No new file and not removed: keep the existing image.
+            galleryForm.set(`galleryKeep_${i}`, product.gallery[i].imageUrl);
+          }
+        }
+        const galleryResult = await setProductGalleryFiles(
+          productId,
+          galleryForm,
+        );
+        if (!galleryResult.ok) {
+          toast.error(galleryResult.error);
+          return;
+        }
       }
 
       toast.success(isEdit ? "Product updated" : "Product created");
@@ -393,6 +425,60 @@ export function ProductFormPage({
             accept="image/*"
             cropConfig={{ aspect: 1, outputWidth: 1024, outputHeight: 1024 }}
           />
+          <div className="grid gap-4 desktop:grid-cols-3">
+            {[0, 1, 2].map((slot) => {
+              const existing = product?.gallery?.[slot]?.imageUrl;
+              const removed = galleryRemove?.[slot] ?? false;
+              const keepingExisting = Boolean(existing) && !removed;
+              return (
+                <div key={slot} className="grid gap-2">
+                  {existing && (
+                    <div className="flex items-center gap-3">
+                      <div className="relative size-14 shrink-0 overflow-hidden rounded-md border border-border/70 bg-muted">
+                        <Image
+                          src={existing}
+                          alt=""
+                          fill
+                          sizes="56px"
+                          className={
+                            removed ? "object-cover opacity-40" : "object-cover"
+                          }
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          form.setValue(`galleryRemove.${slot}`, !removed, {
+                            shouldDirty: true,
+                          })
+                        }
+                      >
+                        {removed ? "Undo remove" : "Remove"}
+                      </Button>
+                    </div>
+                  )}
+                  <FormFileInput
+                    control={control}
+                    name={`gallery.${slot}`}
+                    label={`Gallery image ${slot + 1}${
+                      keepingExisting ? " (replace)" : ""
+                    }`}
+                    accept="image/*"
+                    cropConfig={{
+                      aspect: 1,
+                      outputWidth: 1024,
+                      outputHeight: 1024,
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Up to 3 supplementary gallery images shown on the product page.
+          </p>
         </IndexedFormSection>
 
         <IndexedFormSection

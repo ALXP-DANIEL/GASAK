@@ -449,15 +449,11 @@ export const newsReads = createTable(
   (t) => [uniqueIndex("gasak_news_reads_news_user_idx").on(t.newsId, t.userId)],
 );
 
-export const authSlides = createTable("auth_slides", {
+export const authImages = createTable("auth_slides", {
   id: uuid("id")
     .primaryKey()
     .$defaultFn(() => generateId()),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  eyebrow: text("eyebrow").notNull().default("GASAK Management"),
   imageUrl: text("image_url").notNull(),
-  sortOrder: integer("sort_order").notNull().default(0),
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -466,6 +462,30 @@ export const authSlides = createTable("auth_slides", {
     .notNull()
     .defaultNow(),
 });
+
+// Public-facing gallery — GASAK uploads any number of images, each with a
+// title/description, shown on the public gallery page. Independent of the
+// auth-side image grid (`authImages`).
+export const galleries = createTable(
+  "galleries",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    imageUrl: text("image_url").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("gasak_galleries_active_idx").on(t.active, t.sortOrder)],
+);
 
 export const organizationPositions = createTable(
   "organization_positions",
@@ -598,6 +618,26 @@ export const productVariants = createTable(
     active: boolean("active").notNull().default(true),
   },
   (t) => [index("gasak_product_variants_product_idx").on(t.productId)],
+);
+
+// Supplementary merch product images (max 3 per product, enforced in the
+// action layer). products.imageUrl stays the cover/primary image.
+export const productGallery = createTable(
+  "product_gallery",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    imageUrl: text("image_url").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("gasak_product_gallery_product_idx").on(t.productId)],
 );
 
 // Join table: which option values make up a given variant.
@@ -879,6 +919,14 @@ export const productRelations = relations(products, ({ many }) => ({
   orders: many(orders),
   options: many(productOptions),
   variants: many(productVariants),
+  gallery: many(productGallery),
+}));
+
+export const productGalleryRelations = relations(productGallery, ({ one }) => ({
+  product: one(products, {
+    fields: [productGallery.productId],
+    references: [products.id],
+  }),
 }));
 
 export const productOptionRelations = relations(
@@ -963,13 +1011,15 @@ export type TournamentRound = typeof tournamentRounds.$inferSelect;
 export type Scrim = typeof scrims.$inferSelect;
 export type News = typeof news.$inferSelect;
 export type NewsRead = typeof newsReads.$inferSelect;
-export type AuthSlide = typeof authSlides.$inferSelect;
+export type AuthImage = typeof authImages.$inferSelect;
+export type Gallery = typeof galleries.$inferSelect;
 export type OrganizationPosition = typeof organizationPositions.$inferSelect;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type ProductOption = typeof productOptions.$inferSelect;
 export type ProductOptionValue = typeof productOptionValues.$inferSelect;
 export type ProductVariant = typeof productVariants.$inferSelect;
+export type ProductGallery = typeof productGallery.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type JokiTier = typeof jokiTiers.$inferSelect;
 export type JokiPackage = typeof jokiPackages.$inferSelect;

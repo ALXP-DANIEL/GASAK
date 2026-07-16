@@ -1,6 +1,7 @@
 "use cache";
 
 import { ProductPurchasePanel } from "@components/cards";
+import { ProductGallery } from "@components/cards/product/product-gallery";
 import { Icons } from "@components/icons";
 import { PageSkeleton } from "@components/shared/page-skeleton";
 import { BrandBadge, BrandCard, LinkButton } from "@components/ui/brand";
@@ -10,7 +11,6 @@ import { createPageMetadata } from "@lib/metadata";
 import { db, products } from "@server/db";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 
 async function getProduct(productId: string) {
@@ -19,6 +19,7 @@ async function getProduct(productId: string) {
     with: {
       options: { with: { values: true } },
       variants: { with: { optionValues: { with: { optionValue: true } } } },
+      gallery: { orderBy: (g, { asc }) => asc(g.sortOrder) },
     },
   });
 }
@@ -59,6 +60,11 @@ export default async function ProductPage({
   const product = await getProduct(productId);
   if (!product?.active) notFound();
   const categoryLabel = PRODUCT_CATEGORY_LABELS[product.category];
+  const galleryImages = product.gallery ?? [];
+  const allImages = [
+    ...(product.imageUrl ? [{ id: "cover", imageUrl: product.imageUrl }] : []),
+    ...galleryImages.map((g) => ({ id: g.id, imageUrl: g.imageUrl })),
+  ];
 
   return (
     <PageSkeleton name="shop-public-detail" loading={false}>
@@ -70,26 +76,7 @@ export default async function ProductPage({
         </div>
 
         <section className="grid gap-6 desktop:grid-cols-[minmax(20rem,30rem)_minmax(0,1fr)]">
-          <BrandCard
-            interactive={false}
-            className="relative aspect-square overflow-hidden bg-secondary"
-          >
-            {product.imageUrl ? (
-              <Image
-                src={product.imageUrl}
-                alt={product.name}
-                fill
-                priority
-                sizes="(min-width: 768px) 30rem, calc(100vw - 2rem)"
-                className="object-cover"
-              />
-            ) : (
-              <div className="grid h-full place-items-center">
-                <Icons.Domain.Shop size={64} className="text-primary/45" />
-              </div>
-            )}
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background/80 to-transparent" />
-          </BrandCard>
+          <ProductGallery images={allImages} alt={product.name} />
 
           <BrandCard interactive={false} className="p-5 desktop:p-7">
             <BrandBadge>{categoryLabel}</BrandBadge>

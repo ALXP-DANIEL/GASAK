@@ -1,34 +1,34 @@
 import { Icons } from "@components/icons";
 import { PageSkeleton } from "@components/shared/page-skeleton";
-import { authSlides, db } from "@server/db";
+import { authImages, db } from "@server/db";
 import { desc } from "drizzle-orm";
 import { requireDashboardRole } from "../_components/dashboard-section";
 import { EmptyState, PageHeader } from "../_components/page-surface";
-import { AuthSlideFormDialog } from "./_components/auth-slide-form";
-import { SlidesGrid } from "./_components/slides-grid";
+import { AuthImageFormDialog } from "./_components/auth-image-form";
+import { SlidesGrid } from "./_components/images-grid";
 
-export default async function AuthSlidesPage() {
+export default async function AuthImagesPage() {
   await requireDashboardRole("admin");
 
   const rows = await db
     .select()
-    .from(authSlides)
-    .orderBy(authSlides.sortOrder, desc(authSlides.createdAt));
+    .from(authImages)
+    .orderBy(desc(authImages.createdAt));
 
   return (
-    <PageSkeleton name="auth-slides" loading={false}>
+    <PageSkeleton name="auth-images" loading={false}>
       <main>
         <PageHeader
-          title="Auth Slides"
+          title="Auth Images"
           kicker="System"
           icon={Icons.Editor.Image}
-          description="Manage the carousel shown beside login, reset password, and forgot password pages."
+          description="Manage the image grid shown as the background behind login, reset password, and forgot password pages."
         >
-          <AuthSlideFormDialog />
+          <AuthImageFormDialog />
         </PageHeader>
         {rows.length === 0 ? (
           <EmptyState
-            message="No auth slides yet. Add your first slide."
+            message="No auth images yet. Add your first image."
             icon={Icons.Editor.Image}
           />
         ) : (

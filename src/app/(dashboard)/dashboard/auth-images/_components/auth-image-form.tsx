@@ -1,11 +1,7 @@
 "use client";
 
 import { DashboardFormGrid } from "@components/forms/dashboard-form";
-import {
-  FormCheckbox,
-  FormField,
-  FormFileInput,
-} from "@components/forms/form-field";
+import { FormCheckbox, FormFileInput } from "@components/forms/form-field";
 import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
@@ -20,46 +16,34 @@ import {
   CredenzaTrigger,
 } from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
-import { createAuthSlide, updateAuthSlide } from "@server/actions/auth-slides";
-import type { AuthSlide } from "@server/db/schema";
+import { createAuthImage, updateAuthImage } from "@server/actions/auth-images";
+import type { AuthImage } from "@server/db/schema";
 import { z } from "zod";
 
 const schema = z.object({
-  title: z.string().min(2, "Title is required"),
-  description: z.string().min(2, "Description is required"),
-  eyebrow: z.string().min(2, "Eyebrow is required"),
-  sortOrder: z.number("Enter a sort order").int(),
   image: z.instanceof(File).nullable(),
   active: z.boolean(),
 });
 
 type Values = z.infer<typeof schema>;
 
-export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
+export function AuthImageFormDialog({ slide }: { slide?: AuthImage }) {
   const isEdit = Boolean(slide);
 
   const { open, setOpen, control, pending, handleSubmit } =
     useEntityDialog<Values>({
       schema,
       defaultValues: {
-        title: slide?.title ?? "",
-        description: slide?.description ?? "",
-        eyebrow: slide?.eyebrow ?? "GASAK Management",
-        sortOrder: slide?.sortOrder ?? 0,
         image: null,
         active: slide?.active ?? true,
       },
       action: (values) => {
         const formData = new FormData();
-        formData.set("title", values.title);
-        formData.set("description", values.description);
-        formData.set("eyebrow", values.eyebrow);
-        formData.set("sortOrder", String(values.sortOrder));
         formData.set("active", values.active ? "on" : "off");
         if (values.image) formData.set("image", values.image);
         return slide
-          ? updateAuthSlide(slide.id, formData)
-          : createAuthSlide(formData);
+          ? updateAuthImage(slide.id, formData)
+          : createAuthImage(formData);
       },
     });
 
@@ -73,15 +57,15 @@ export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
         ) : (
           <Button>
             <Icons.Actions.Add />
-            New slide
+            New image
           </Button>
         )}
       </CredenzaTrigger>
       <CredenzaContent className="max-h-[85dvh] overflow-y-auto">
         <CredenzaHeader>
-          <CredenzaTitle>{isEdit ? "Edit slide" : "New slide"}</CredenzaTitle>
+          <CredenzaTitle>{isEdit ? "Edit image" : "New image"}</CredenzaTitle>
           <CredenzaDescription>
-            Manage the image and copy shown beside auth pages.
+            Manage the image shown in the auth-side background grid.
           </CredenzaDescription>
         </CredenzaHeader>
         <CredenzaBody>
@@ -90,34 +74,17 @@ export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
             onSubmit={handleSubmit}
             className="grid gap-5"
           >
-            <FormSection title="Copy">
-              <FormField control={control} name="eyebrow" label="Eyebrow" />
-              <FormField control={control} name="title" label="Title" />
-              <FormField
-                control={control}
-                name="description"
-                label="Description"
-                as="textarea"
-                rows={3}
-              />
-            </FormSection>
             <FormSection title="Display">
               <DashboardFormGrid>
-                <FormField
-                  control={control}
-                  name="sortOrder"
-                  label="Sort order"
-                  type="number"
-                />
                 <FormFileInput
                   control={control}
                   name="image"
                   label={`Image ${slide?.imageUrl ? "(replace)" : ""}`}
                   accept="image/*"
                   cropConfig={{
-                    aspect: 3 / 4,
-                    outputWidth: 1080,
-                    outputHeight: 1440,
+                    aspect: 1,
+                    outputWidth: 1024,
+                    outputHeight: 1024,
                   }}
                 />
               </DashboardFormGrid>
@@ -138,7 +105,7 @@ export function AuthSlideFormDialog({ slide }: { slide?: AuthSlide }) {
             Cancel
           </Button>
           <Button type="submit" form="auth-slide-form" disabled={pending}>
-            {pending ? "Saving..." : isEdit ? "Save changes" : "Create slide"}
+            {pending ? "Saving..." : isEdit ? "Save changes" : "Create image"}
           </Button>
         </CredenzaFooter>
       </CredenzaContent>

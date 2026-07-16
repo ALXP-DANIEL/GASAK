@@ -7,6 +7,7 @@ import {
   type OrderStatus,
   orders,
   productCategoryEnum,
+  productGallery,
   productOptions,
   productOptionValues,
   products,
@@ -403,4 +404,66 @@ export async function uploadVariantImage(
   } catch (err) {
     return { ok: false, error: (err as Error).message };
   }
+}
+
+/**
+ * Saves up to 3 gallery images for a product. Each slot carries either a new
+ * upload (`galleryImage_${i}`, mirrors the cover-image flow) or the URL of the
+ * existing image to keep (`galleryKeep_${i}`); empty slots are dropped.
+ */
+export async function setProductGalleryFiles(
+  productId: string,
+  formData: FormData,
+): Promise<ActionResult> {
+  const actor = await actionUser("admin", "seller");
+  if (!actor) return { ok: false, error: "Unauthorized" };
+
+  const product = await db.query.products.findFirst({
+    where: eq(products.id, productId),
+  });
+  if (!product) return { ok: false, error: "Product not found" };
+
+  const imageUrls: string[] = [];
+  for (let i = 0; i < 3; i++) {
+    const file = formData.get(`galleryImage_${i}`);
+    if (file instanceof File && file.size > 0) {
+      try {
+        imageUrls.push(await saveUpload(file, "products"));
+      } catch (err) {
+        return { ok: false, error: (err as Error).message };
+      }
+      continue;
+    }
+    const keep = formData.get(`galleryKeep_${i}`);
+    if (typeof keep === "string" && keep.length > 0) {
+      imageUrls.push(keep);
+    }
+  }
+
+  await db
+    .delete(productGallery)
+    .where(eq(productGallery.productId, productId));
+
+  if (imageUrls.length > 0) {
+    await db.insert(productGallery).values(
+      imageUrls.map((imageUrl, index) => ({
+        productId,
+        imageUrl,
+        sortOrder: index,
+      })),
+    );
+  }
+
+  await logActivity({
+    actor,
+    action: "update",
+    entityType: "product",
+    entityId: productId,
+    description: `Updated gallery for product "${product.name}"`,
+  });
+
+  revalidateShop();
+  revalidatePath(`/dashboard/products/${productId}`);
+  revalidatePath(`/shop/${productId}`);
+  return { ok: true, message: "Gallery saved" };
 }

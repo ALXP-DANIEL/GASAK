@@ -7,6 +7,7 @@ const publicPaths = [
   "/tournaments",
   "/squads",
   "/shop",
+  "/gallery",
   "/contact",
   "/news",
   "/recruitment",

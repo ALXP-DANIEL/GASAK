@@ -154,3 +154,17 @@
   font-style: italic;
   letter-spacing: 0.03em;
 }
+
+/* Auth background grid: each square tile breathes (fades + swells) on its
+   own randomized cycle; the tile swaps to a random image at each trough. */
+@keyframes authGridPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}

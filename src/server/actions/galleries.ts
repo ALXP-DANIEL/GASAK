@@ -2,17 +2,16 @@
 
 import { logActivity } from "@server/activity-log";
 import { actionUser } from "@server/authz";
-import { authSlides, db } from "@server/db";
+import { db, galleries } from "@server/db";
 import { saveUpload } from "@server/uploads";
 import { eq } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "./public";
 
-const slideSchema = z.object({
+const gallerySchema = z.object({
   title: z.string().min(2, "Title is required"),
-  description: z.string().min(2, "Description is required"),
-  eyebrow: z.string().min(2, "Eyebrow is required"),
+  description: z.string().optional().default(""),
   sortOrder: z
     .string()
     .min(1, "Sort order is required")
@@ -21,30 +20,27 @@ const slideSchema = z.object({
     }),
 });
 
-function parseSlideForm(formData: FormData) {
-  return slideSchema.safeParse({
+function parseGalleryForm(formData: FormData) {
+  return gallerySchema.safeParse({
     title: formData.get("title"),
-    description: formData.get("description"),
-    eyebrow: formData.get("eyebrow"),
+    description: formData.get("description") ?? "",
     sortOrder: formData.get("sortOrder"),
   });
 }
 
-function revalidateAuthSlides() {
-  revalidatePath("/dashboard/auth-slides");
-  updateTag("auth-slides");
-  revalidatePath("/login");
-  revalidatePath("/forgot-password");
-  revalidatePath("/reset-password");
+function revalidateGalleries() {
+  revalidatePath("/dashboard/galleries");
+  updateTag("galleries");
+  revalidatePath("/gallery");
 }
 
-export async function createAuthSlide(
+export async function createGalleryImage(
   formData: FormData,
 ): Promise<ActionResult> {
   const actor = await actionUser("admin");
   if (!actor) return { ok: false, error: "Unauthorized" };
 
-  const parsed = parseSlideForm(formData);
+  const parsed = parseGalleryForm(formData);
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
 
@@ -55,17 +51,16 @@ export async function createAuthSlide(
 
   let imageUrl: string;
   try {
-    imageUrl = await saveUpload(image, "auth-slides");
+    imageUrl = await saveUpload(image, "galleries");
   } catch (err) {
     return { ok: false, error: (err as Error).message };
   }
 
   const [row] = await db
-    .insert(authSlides)
+    .insert(galleries)
     .values({
       title: parsed.data.title,
       description: parsed.data.description,
-      eyebrow: parsed.data.eyebrow,
       imageUrl,
       sortOrder: Number(parsed.data.sortOrder),
       active: formData.get("active") === "on",
@@ -74,30 +69,29 @@ export async function createAuthSlide(
   await logActivity({
     actor,
     action: "create",
-    entityType: "auth_slide",
+    entityType: "gallery",
     entityId: row.id,
-    description: `Created auth slide "${row.title}"`,
+    description: `Created gallery image "${row.title}"`,
   });
 
-  revalidateAuthSlides();
-  return { ok: true, message: "Auth slide created" };
+  revalidateGalleries();
+  return { ok: true, message: "Gallery image created" };
 }
 
-export async function updateAuthSlide(
-  slideId: string,
+export async function updateGalleryImage(
+  imageId: string,
   formData: FormData,
 ): Promise<ActionResult> {
   const actor = await actionUser("admin");
   if (!actor) return { ok: false, error: "Unauthorized" };
 
-  const parsed = parseSlideForm(formData);
+  const parsed = parseGalleryForm(formData);
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
 
-  const updates: Partial<typeof authSlides.$inferInsert> = {
+  const updates: Partial<typeof galleries.$inferInsert> = {
     title: parsed.data.title,
     description: parsed.data.description,
-    eyebrow: parsed.data.eyebrow,
     sortOrder: Number(parsed.data.sortOrder),
     active: formData.get("active") === "on",
     updatedAt: new Date(),
@@ -106,47 +100,49 @@ export async function updateAuthSlide(
   const image = formData.get("image");
   if (image instanceof File && image.size > 0) {
     try {
-      updates.imageUrl = await saveUpload(image, "auth-slides");
+      updates.imageUrl = await saveUpload(image, "galleries");
     } catch (err) {
       return { ok: false, error: (err as Error).message };
     }
   }
 
   const [row] = await db
-    .update(authSlides)
+    .update(galleries)
     .set(updates)
-    .where(eq(authSlides.id, slideId))
+    .where(eq(galleries.id, imageId))
     .returning();
-  if (!row) return { ok: false, error: "Auth slide not found" };
+  if (!row) return { ok: false, error: "Gallery image not found" };
   await logActivity({
     actor,
     action: "update",
-    entityType: "auth_slide",
+    entityType: "gallery",
     entityId: row.id,
-    description: `Updated auth slide "${row.title}"`,
+    description: `Updated gallery image "${row.title}"`,
   });
 
-  revalidateAuthSlides();
-  return { ok: true, message: "Auth slide updated" };
+  revalidateGalleries();
+  return { ok: true, message: "Gallery image updated" };
 }
 
-export async function deleteAuthSlide(slideId: string): Promise<ActionResult> {
+export async function deleteGalleryImage(
+  imageId: string,
+): Promise<ActionResult> {
   const actor = await actionUser("admin");
   if (!actor) return { ok: false, error: "Unauthorized" };
 
   const [row] = await db
-    .delete(authSlides)
-    .where(eq(authSlides.id, slideId))
+    .delete(galleries)
+    .where(eq(galleries.id, imageId))
     .returning();
-  if (!row) return { ok: false, error: "Auth slide not found" };
+  if (!row) return { ok: false, error: "Gallery image not found" };
   await logActivity({
     actor,
     action: "delete",
-    entityType: "auth_slide",
+    entityType: "gallery",
     entityId: row.id,
-    description: `Deleted auth slide "${row.title}"`,
+    description: `Deleted gallery image "${row.title}"`,
   });
 
-  revalidateAuthSlides();
-  return { ok: true, message: "Auth slide deleted" };
+  revalidateGalleries();
+  return { ok: true, message: "Gallery image deleted" };
 }

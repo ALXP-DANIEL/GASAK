@@ -150,8 +150,14 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         canAccess: isAdmin,
       },
       {
-        href: "/dashboard/auth-slides",
-        label: "Auth Slides",
+        href: "/dashboard/auth-images",
+        label: "Auth Images",
+        icon: Icons.Editor.Image,
+        canAccess: isAdmin,
+      },
+      {
+        href: "/dashboard/galleries",
+        label: "Gallery",
         icon: Icons.Editor.Image,
         canAccess: isAdmin,
       },
