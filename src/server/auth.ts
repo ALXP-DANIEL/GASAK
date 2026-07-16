@@ -1,6 +1,7 @@
 import "server-only";
 
 import { db } from "@server/db";
+import { sendPasswordResetEmail } from "@server/email";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
@@ -32,10 +33,13 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    // No SMTP configured in V1 — the reset link is printed to the server
-    // console so an admin can forward it manually.
+    resetPasswordTokenExpiresIn: 60 * 60, // 1 hour, matches the email copy
     sendResetPassword: async ({ user, url }) => {
-      console.log(`[GASAK] Password reset for ${user.email}: ${url}`);
+      await sendPasswordResetEmail({
+        to: user.email,
+        userName: user.name,
+        url,
+      });
     },
   },
   plugins: [

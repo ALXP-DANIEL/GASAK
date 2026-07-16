@@ -30,7 +30,7 @@ const roleOptions = ORG_ROLES.map((item) => ({
   label: ORG_ROLE_LABELS[item],
 }));
 
-const EMAIL_DOMAIN = "gasak.com";
+const EMAIL_DOMAIN = "gasak.my";
 
 const createUserFormSchema = z.object({
   name: z.string().min(2, "Name is required"),

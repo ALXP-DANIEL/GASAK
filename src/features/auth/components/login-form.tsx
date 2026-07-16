@@ -75,7 +75,7 @@ export function LoginForm() {
           name="email"
           label="Email"
           type="email"
-          placeholder="you@gasak.gg"
+          placeholder="you@gasak.my"
           autoComplete="email"
         />
         <FormField
