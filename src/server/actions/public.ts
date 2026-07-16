@@ -22,10 +22,11 @@ import {
   productVariants,
   squads,
 } from "@server/db";
-import { and, eq } from "drizzle-orm";
+import { markOrderPaid } from "@server/order-payment";
+import { RATE_LIMITED_ERROR, rateLimit } from "@server/rate-limit";
+import { and, count, eq, gte } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
-import { markOrderPaid } from "./shop";
 
 export type ActionResult =
   | { ok: true; message?: string; data?: Record<string, string> }
@@ -55,6 +56,26 @@ export async function submitApplication(
   const parsed = applicationSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0].message };
+  }
+
+  if (!(await rateLimit("application", 3, 60 * 60 * 1000))) {
+    return { ok: false, error: RATE_LIMITED_ERROR };
+  }
+  // Durable cap: one pending application per email per day.
+  const [recent] = await db
+    .select({ n: count() })
+    .from(applications)
+    .where(
+      and(
+        eq(applications.email, parsed.data.email),
+        gte(applications.createdAt, new Date(Date.now() - 24 * 60 * 60 * 1000)),
+      ),
+    );
+  if ((recent?.n ?? 0) >= 1) {
+    return {
+      ok: false,
+      error: "You already applied recently — we'll be in touch by email.",
+    };
   }
 
   if (parsed.data.squadId) {
@@ -92,6 +113,14 @@ export async function submitApplication(
   };
 }
 
+const shippingAddressSchema = z.object({
+  line1: z.string().min(3, "Enter your address"),
+  line2: z.string().optional(),
+  city: z.string().min(1, "Enter your city"),
+  state: z.string().min(1, "Enter your state"),
+  postcode: z.string().min(4, "Enter a valid postcode"),
+});
+
 const checkoutSchema = z.object({
   productId: z.uuid(),
   variantId: z.uuid().nullable().optional(),
@@ -99,14 +128,39 @@ const checkoutSchema = z.object({
   customerPhone: z.string().min(6, "Enter a valid phone number"),
   customerEmail: z.email("Enter a valid email"),
   quantity: z.coerce.number().int().min(1).max(99),
+  shippingAddress: shippingAddressSchema.optional(),
 });
 
 function generateOrderNo() {
+  // 10 chars over a 31-symbol alphabet ≈ 8×10^14 combinations — the order
+  // number doubles as the access token for the public order page (which
+  // shows customer PII), so it must resist brute-force enumeration.
   const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
   let code = "";
-  for (let i = 0; i < 6; i++) code += chars[randomInt(chars.length)];
+  for (let i = 0; i < 10; i++) code += chars[randomInt(chars.length)];
   return `GSK-${code}`;
 }
+
+// Durable per-customer cap: counts recent orders for an email so the limit
+// holds across serverless instances (the in-memory IP limit does not).
+async function recentOrdersExceed(
+  customerEmail: string,
+  limit: number,
+  windowMs: number,
+): Promise<boolean> {
+  const [row] = await db
+    .select({ n: count() })
+    .from(orders)
+    .where(
+      and(
+        eq(orders.customerEmail, customerEmail),
+        gte(orders.createdAt, new Date(Date.now() - windowMs)),
+      ),
+    );
+  return (row?.n ?? 0) >= limit;
+}
+
+const ORDER_LIMIT = { perIp: 5, perEmail: 5, windowMs: 15 * 60 * 1000 };
 
 export async function placeOrder(
   input: z.infer<typeof checkoutSchema>,
@@ -114,6 +168,21 @@ export async function placeOrder(
   const parsed = checkoutSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0].message };
+  }
+
+  if (
+    !(await rateLimit("place-order", ORDER_LIMIT.perIp, ORDER_LIMIT.windowMs))
+  ) {
+    return { ok: false, error: RATE_LIMITED_ERROR };
+  }
+  if (
+    await recentOrdersExceed(
+      parsed.data.customerEmail,
+      ORDER_LIMIT.perEmail,
+      ORDER_LIMIT.windowMs,
+    )
+  ) {
+    return { ok: false, error: RATE_LIMITED_ERROR };
   }
 
   const product = await db.query.products.findFirst({
@@ -125,6 +194,7 @@ export async function placeOrder(
 
   let unitPriceSen = product.priceSen;
   let availableStock = product.stock;
+  let variantLabel: string | null = null;
 
   if (product.hasVariants) {
     if (!parsed.data.variantId) {
@@ -132,16 +202,23 @@ export async function placeOrder(
     }
     const variant = await db.query.productVariants.findFirst({
       where: eq(productVariants.id, parsed.data.variantId),
+      with: { optionValues: { with: { optionValue: true } } },
     });
     if (!variant || variant.productId !== product.id || !variant.active) {
       return { ok: false, error: "Selected option is not available" };
     }
     unitPriceSen = variant.priceSen;
     availableStock = variant.stock;
+    variantLabel =
+      variant.optionValues.map((v) => v.optionValue.value).join(" · ") || null;
   }
 
   if (availableStock < parsed.data.quantity) {
     return { ok: false, error: "Not enough stock for that quantity" };
+  }
+
+  if (product.category === "merchandise" && !parsed.data.shippingAddress) {
+    return { ok: false, error: "Enter a delivery address for this item" };
   }
 
   const orderNo = generateOrderNo();
@@ -154,10 +231,13 @@ export async function placeOrder(
       customerEmail: parsed.data.customerEmail,
       productId: product.id,
       variantId: product.hasVariants ? parsed.data.variantId : null,
+      variantLabel,
       quantity: parsed.data.quantity,
       unitPriceSen,
       totalSen: unitPriceSen * parsed.data.quantity,
       status: "pending",
+      shippingAddress:
+        product.category === "merchandise" ? parsed.data.shippingAddress : null,
     })
     .returning();
   await logActivity({
@@ -207,7 +287,6 @@ const jokiCheckoutSchema = z.object({
   customerPhone: z.string().min(6, "Enter a valid phone number"),
   customerEmail: z.email("Enter a valid email"),
   mlbbId: z.string().min(4, "Enter a valid MLBB ID"),
-  serverId: z.string().min(1, "Server ID is required"),
   mode: z.enum(["per_star", "package"]),
   fromRank: rankFieldSchema,
   toRank: rankFieldSchema,
@@ -221,6 +300,21 @@ export async function placeJokiOrder(
     return { ok: false, error: parsed.error.issues[0].message };
   }
   const data = parsed.data;
+
+  if (
+    !(await rateLimit("place-order", ORDER_LIMIT.perIp, ORDER_LIMIT.windowMs))
+  ) {
+    return { ok: false, error: RATE_LIMITED_ERROR };
+  }
+  if (
+    await recentOrdersExceed(
+      data.customerEmail,
+      ORDER_LIMIT.perEmail,
+      ORDER_LIMIT.windowMs,
+    )
+  ) {
+    return { ok: false, error: RATE_LIMITED_ERROR };
+  }
   const currentRank = formatRank(data.fromRank);
   const targetRank = formatRank(data.toRank);
 
@@ -247,7 +341,6 @@ export async function placeJokiOrder(
     unitPriceSen = Math.round(path.totalSen / path.totalStars);
     details = {
       mlbbId: data.mlbbId,
-      serverId: data.serverId,
       mode: "per_star",
       currentRank,
       targetRank,
@@ -286,7 +379,6 @@ export async function placeJokiOrder(
     totalSen = path.totalSen;
     details = {
       mlbbId: data.mlbbId,
-      serverId: data.serverId,
       mode: "package",
       currentRank,
       targetRank,
@@ -328,6 +420,10 @@ export async function placeJokiOrder(
 export async function createBillplzPayment(
   orderNo: string,
 ): Promise<ActionResult> {
+  if (!(await rateLimit("billplz-pay", 10, 15 * 60 * 1000))) {
+    return { ok: false, error: RATE_LIMITED_ERROR };
+  }
+
   const order = await db.query.orders.findFirst({
     where: eq(orders.orderNo, orderNo),
     with: { product: true },

@@ -14,6 +14,8 @@ export type DashboardNavItem = {
   label: string;
   icon: Icon;
   canAccess: (access: DashboardAccess) => boolean;
+  /** Sub-pages rendered as an indented submenu under this item. */
+  children?: DashboardNavItem[];
 };
 
 export type DashboardNavGroup = {
@@ -120,12 +122,20 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         label: "Products",
         icon: Icons.Domain.Products,
         canAccess: canUseCommerce,
-      },
-      {
-        href: "/dashboard/joki",
-        label: "Joki",
-        icon: Icons.Domain.Joki,
-        canAccess: canUseCommerce,
+        children: [
+          {
+            href: "/dashboard/products/joki",
+            label: "Joki",
+            icon: Icons.Domain.Joki,
+            canAccess: canUseCommerce,
+          },
+          {
+            href: "/dashboard/products/merchandise",
+            label: "Merchandise",
+            icon: Icons.Domain.Merchandise,
+            canAccess: canUseCommerce,
+          },
+        ],
       },
     ],
   },

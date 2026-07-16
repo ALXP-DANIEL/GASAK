@@ -844,45 +844,16 @@ async function main() {
   const productRows = await db
     .insert(products)
     .values([
-      {
-        name: "86 Diamonds",
-        category: "diamonds",
-        description:
-          "MLBB 86 diamonds top-up via player ID. Delivered within 15 minutes.",
-        priceSen: 550,
-        stock: 999,
-        active: true,
-        createdBy: seller.id,
-      },
-      {
-        name: "172 Diamonds",
-        category: "diamonds",
-        description: "MLBB 172 diamonds top-up via player ID.",
-        priceSen: 1100,
-        stock: 999,
-        active: true,
-        createdBy: seller.id,
-      },
-      {
-        name: "Weekly Diamond Pass",
-        category: "weekly_pass",
-        description:
-          "MLBB Weekly Diamond Pass — best value for daily diamonds.",
-        priceSen: 800,
-        stock: 500,
-        active: true,
-        createdBy: seller.id,
-      },
+      // Only joki and merchandise are live shop categories for now — other
+      // categories will be rebuilt from scratch later.
       ...[
-        ["257 Diamonds", "diamonds", 1650, 999],
-        ["344 Diamonds", "diamonds", 2200, 999],
-        ["429 Diamonds", "diamonds", 2750, 999],
-        ["706 Diamonds", "diamonds", 4400, 800],
-        ["Twilight Pass", "weekly_pass", 4200, 100],
-      ].map(([name, category, priceSen, stock]) => ({
+        ["GASAK Team Jersey", 8900, 40],
+        ["GASAK Hoodie", 12_900, 25],
+        ["GASAK Sticker Pack", 1500, 100],
+      ].map(([name, priceSen, stock]) => ({
         name: name as string,
-        category: category as "diamonds" | "weekly_pass" | "joki" | "coaching",
-        description: `${name} package from GASAK shop.`,
+        category: "merchandise" as const,
+        description: `${name} from the GASAK merch store.`,
         priceSen: priceSen as number,
         stock: stock as number,
         active: true,

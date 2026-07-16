@@ -153,6 +153,7 @@ export const productCategoryEnum = pgEnum("product_category", [
   "weekly_pass",
   "joki",
   "coaching",
+  "merchandise",
 ]);
 
 export const orderStatusEnum = pgEnum("order_status", [
@@ -672,7 +673,6 @@ export const jokiServiceImages = createTable("joki_service_images", {
 /** Boost specifics captured at checkout for a joki order. */
 export type JokiOrderDetails = {
   mlbbId: string;
-  serverId: string;
   mode: "per_star" | "package";
   /** free-text, e.g. "Epic III · 2 stars" */
   currentRank?: string;
@@ -684,6 +684,15 @@ export type JokiOrderDetails = {
   starLegs?: { tierName: string; stars: number; priceSen: number }[];
   /** package mode */
   packageName?: string;
+};
+
+/** Delivery address captured at checkout for a physical (merchandise) order. */
+export type ShippingAddress = {
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postcode: string;
 };
 
 export const orders = createTable(
@@ -700,8 +709,12 @@ export const orders = createTable(
       .notNull()
       .references(() => products.id, { onDelete: "restrict" }),
     variantId: uuid("variant_id").references(() => productVariants.id, {
-      onDelete: "restrict",
+      onDelete: "set null",
     }),
+    // Human-readable snapshot of the chosen options ("Size M · Color Black"),
+    // taken at checkout — survives later variant edits/deletions so
+    // fulfillment always knows what was ordered.
+    variantLabel: text("variant_label"),
     quantity: integer("quantity").notNull().default(1),
     unitPriceSen: integer("unit_price_sen").notNull(),
     totalSen: integer("total_sen").notNull(),
@@ -711,6 +724,8 @@ export const orders = createTable(
     billplzBillId: text("billplz_bill_id"),
     // present only on joki (rank boost) orders — see JokiOrderDetails
     jokiDetails: jsonb("joki_details").$type<JokiOrderDetails>(),
+    // present only on merchandise (physical) orders — see ShippingAddress
+    shippingAddress: jsonb("shipping_address").$type<ShippingAddress>(),
     // Joki split payment: 50% deposit before the boost starts, the remaining
     // balance after the boost is done. When depositSen is set the order pays
     // in two Billplz legs; both null on regular product orders.

@@ -4,7 +4,7 @@ import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { sortJokiPackages, sortJokiTiers } from "@lib/joki";
 import { db, jokiPackages, jokiServiceImages, jokiTiers } from "@server/db";
 import { requireOrgRole } from "@server/session";
-import { PageHeader } from "../_components/page-surface";
+import { PageHeader } from "../../_components/page-surface";
 import { PackageFormDialog } from "./_components/package-form";
 import { PackagesTable } from "./_components/packages-table";
 import { ServiceImageForm } from "./_components/service-image-form";

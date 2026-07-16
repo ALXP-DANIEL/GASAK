@@ -64,6 +64,7 @@ import { TiktokLogoIcon } from "@phosphor-icons/react/dist/ssr/TiktokLogo";
 import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { TreeStructureIcon } from "@phosphor-icons/react/dist/ssr/TreeStructure";
 import { TrophyIcon } from "@phosphor-icons/react/dist/ssr/Trophy";
+import { TShirtIcon } from "@phosphor-icons/react/dist/ssr/TShirt";
 import { UploadSimpleIcon } from "@phosphor-icons/react/dist/ssr/UploadSimple";
 import { UserIcon } from "@phosphor-icons/react/dist/ssr/User";
 import { UserGearIcon } from "@phosphor-icons/react/dist/ssr/UserGear";
@@ -126,6 +127,7 @@ export const Icons = {
     Products: PackageIcon,
     Orders: ReceiptIcon,
     Joki: RocketLaunchIcon,
+    Merchandise: TShirtIcon,
     Revenue: CurrencyCircleDollarIcon,
     Community: HandFistIcon,
     Lightning: LightningIcon,

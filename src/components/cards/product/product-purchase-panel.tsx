@@ -38,11 +38,18 @@ export function ProductPurchasePanel({
 
   const [selected, setSelected] = useState<Record<string, string>>({});
 
+  // Inactive variants are hidden from purchase — selecting their combo shows
+  // "Out of stock" instead of letting checkout reject it later.
+  const activeVariants = useMemo(
+    () => product.variants.filter((variant) => variant.active),
+    [product.variants],
+  );
+
   const selectedVariant = useMemo(() => {
     if (!product.hasVariants) return null;
     if (sortedOptions.some((option) => !selected[option.id])) return null;
 
-    return product.variants.find((variant) => {
+    return activeVariants.find((variant) => {
       const values = variant.optionValues.map((v) => v.optionValue);
       return sortedOptions.every((option) => {
         const value = values.find((v) =>
@@ -51,12 +58,12 @@ export function ProductPurchasePanel({
         return value?.value === selected[option.id];
       });
     });
-  }, [product.hasVariants, product.variants, sortedOptions, selected]);
+  }, [product.hasVariants, activeVariants, sortedOptions, selected]);
 
   const priceSen = selectedVariant
     ? selectedVariant.priceSen
     : product.hasVariants
-      ? Math.min(...product.variants.map((v) => v.priceSen), product.priceSen)
+      ? Math.min(...activeVariants.map((v) => v.priceSen), product.priceSen)
       : product.priceSen;
   const stock = selectedVariant
     ? selectedVariant.stock

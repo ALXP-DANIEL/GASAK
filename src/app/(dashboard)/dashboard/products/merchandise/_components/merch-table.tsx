@@ -4,37 +4,23 @@ import { DataTable } from "@components/shared/data-table";
 import { EntityListCard } from "@components/shared/entity-list-card";
 import { Badge } from "@components/ui/shadcn/badge";
 import { formatRM } from "@lib/format";
-import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
 import type { Product } from "@server/db/schema";
 import Image from "next/image";
-import { columns } from "./columns";
+import { merchColumns } from "./merch-columns";
 
-export function ProductsTable({
-  rows,
-  categoryFilterOptions,
-}: {
-  rows: Product[];
-  categoryFilterOptions: { value: string; label: string }[];
-}) {
+export function MerchTable({ rows }: { rows: Product[] }) {
   return (
     <DataTable
-      columns={columns}
+      columns={merchColumns}
       data={rows}
-      emptyMessage="No products yet. Add your first product."
+      emptyMessage="No merch items yet. Add your first product."
       searchColumnId="name"
-      searchPlaceholder="Search products..."
-      facetedFilters={[
-        {
-          columnId: "category",
-          title: "Category",
-          options: categoryFilterOptions,
-        },
-      ]}
+      searchPlaceholder="Search merch..."
       renderMobileCard={(product) => (
         <EntityListCard
           href={`/dashboard/products/${product.id}`}
           title={product.name}
-          meta={`${PRODUCT_CATEGORY_LABELS[product.category]} · ${
+          meta={`${
             product.hasVariants
               ? `from ${formatRM(product.priceSen)}`
               : formatRM(product.priceSen)

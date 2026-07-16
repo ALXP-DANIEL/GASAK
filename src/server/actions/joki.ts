@@ -12,7 +12,7 @@ import type { ActionResult } from "./public";
 
 function revalidateJoki() {
   updateTag("joki");
-  revalidatePath("/dashboard/joki");
+  revalidatePath("/dashboard/products/joki");
   revalidatePath("/shop/joki/per-star");
   revalidatePath("/shop/joki/package");
   revalidatePath("/shop");

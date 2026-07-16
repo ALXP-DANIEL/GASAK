@@ -104,7 +104,9 @@ export default async function ProductPage({
             <div className="mt-5 grid gap-3 text-sm">
               <PurchaseRow label="Delivery">
                 <span className="text-muted-foreground">
-                  MLBB ID or WhatsApp after payment
+                  {product.category === "merchandise"
+                    ? "Shipped to your address after payment"
+                    : "MLBB ID or WhatsApp after payment"}
                 </span>
               </PurchaseRow>
               <PurchaseRow label="Checkout">
@@ -151,7 +153,11 @@ export default async function ProductPage({
               />
               <CheckoutNote
                 icon={<Icons.Domain.Lightning size={16} />}
-                text="Delivery is handled through your MLBB ID or WhatsApp after payment."
+                text={
+                  product.category === "merchandise"
+                    ? "Delivery is handled by post to the address you provide at checkout."
+                    : "Delivery is handled through your MLBB ID or WhatsApp after payment."
+                }
               />
             </div>
           </BrandCard>

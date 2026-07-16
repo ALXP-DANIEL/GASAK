@@ -23,6 +23,8 @@ export type ProductCardData = {
   imageUrl?: string | null;
   /** Shown in the default footer as "N in stock" — omit for non-stock items. */
   stock?: number;
+  /** When true the price renders as "from RM …" (variant products). */
+  hasVariants?: boolean;
 };
 
 export type ProductCardProps = {
@@ -89,7 +91,9 @@ export function ProductCard({
             compact ? "mt-1 text-sm" : "mt-1.5 text-lg",
           )}
         >
-          {formatRM(product.priceSen)}
+          {product.hasVariants
+            ? `from ${formatRM(product.priceSen)}`
+            : formatRM(product.priceSen)}
         </p>
 
         {meta && (

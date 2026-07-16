@@ -122,6 +122,12 @@ export default async function OrderPage({
                     : order.product.name}
               </span>
             </div>
+            {order.variantLabel && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Options</span>
+                <span>{order.variantLabel}</span>
+              </div>
+            )}
             {order.jokiDetails?.mode === "per_star" ? (
               <>
                 <div className="flex justify-between">
@@ -158,9 +164,7 @@ export default async function OrderPage({
               <>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">MLBB ID</span>
-                  <span>
-                    {order.jokiDetails.mlbbId} ({order.jokiDetails.serverId})
-                  </span>
+                  <span>{order.jokiDetails.mlbbId}</span>
                 </div>
                 {order.jokiDetails.currentRank && (
                   <div className="flex justify-between">
@@ -175,6 +179,23 @@ export default async function OrderPage({
                   </div>
                 )}
               </>
+            )}
+            {order.shippingAddress && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Ship to</span>
+                <span className="text-right">
+                  {order.shippingAddress.line1}
+                  {order.shippingAddress.line2 && (
+                    <>
+                      <br />
+                      {order.shippingAddress.line2}
+                    </>
+                  )}
+                  <br />
+                  {order.shippingAddress.postcode} {order.shippingAddress.city},{" "}
+                  {order.shippingAddress.state}
+                </span>
+              </div>
             )}
             <Separator />
             <div className="flex justify-between text-base font-semibold">

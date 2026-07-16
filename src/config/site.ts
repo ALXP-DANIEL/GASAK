@@ -13,7 +13,8 @@ export const siteConfig: SiteConfig = {
     "Mobile Legends",
     "Malaysia",
     "recruitment",
-    "diamonds top-up",
+    "joki rank boost",
+    "merchandise",
   ],
   url: {
     base: env.NEXT_PUBLIC_SITE_URL,

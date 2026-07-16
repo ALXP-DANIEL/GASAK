@@ -1,6 +1,7 @@
 "use client";
 
 import { FormField, FormSelect } from "@components/forms/form-field";
+import { IndexedFormSection } from "@components/forms/form-section";
 import { LaneSelectGroup } from "@components/forms/lane-select-group";
 import { MlbbIdFields } from "@components/forms/mlbb-id-fields";
 import { PhonePrefixField } from "@components/forms/phone-prefix-field";
@@ -114,7 +115,7 @@ export function ApplicationForm({
         </p>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="grid gap-0">
-        <FormSection
+        <IndexedFormSection
           index="01"
           title="Contact"
           description="How the recruitment team should reach you."
@@ -133,9 +134,9 @@ export function ApplicationForm({
               label="Phone (WhatsApp)"
             />
           </div>
-        </FormSection>
+        </IndexedFormSection>
 
-        <FormSection
+        <IndexedFormSection
           index="02"
           title="MLBB profile"
           description="Your in-game identity and current competitive level."
@@ -181,9 +182,9 @@ export function ApplicationForm({
               description="Pick your tier, division, and stars (e.g. Legend V · 3★)."
             />
           </div>
-        </FormSection>
+        </IndexedFormSection>
 
-        <FormSection
+        <IndexedFormSection
           index="03"
           title="Trial role"
           description="The lanes and heroes you want recruiters to evaluate."
@@ -202,9 +203,9 @@ export function ApplicationForm({
               placeholder="e.g. Ling, Fanny, Lancelot, Hayabusa"
             />
           </div>
-        </FormSection>
+        </IndexedFormSection>
 
-        <FormSection
+        <IndexedFormSection
           index="04"
           title="Background"
           description="Short context that helps the team understand your fit."
@@ -224,7 +225,7 @@ export function ApplicationForm({
               placeholder="Playstyle, availability, goals…"
             />
           </div>
-        </FormSection>
+        </IndexedFormSection>
 
         <div className="flex flex-col gap-3 border-t border-primary/20 bg-muted/10 p-6 desktop:flex-row desktop:items-center desktop:justify-between">
           <p className="max-w-xl text-xs leading-6 text-muted-foreground">
@@ -237,32 +238,5 @@ export function ApplicationForm({
         </div>
       </form>
     </BrandCard>
-  );
-}
-
-function FormSection({
-  index,
-  title,
-  description,
-  children,
-}: {
-  index: string;
-  title: string;
-  description: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="grid gap-5 border-t border-border p-6 first:border-t-0 desktop:grid-cols-[10rem_minmax(0,1fr)]">
-      <div>
-        <p className="font-mono text-xs text-primary">{index}</p>
-        <h3 className="mt-2 font-heading text-xl font-bold uppercase tracking-wide">
-          {title}
-        </h3>
-        <p className="mt-2 text-xs leading-6 text-muted-foreground">
-          {description}
-        </p>
-      </div>
-      <div className="min-w-0">{children}</div>
-    </section>
   );
 }

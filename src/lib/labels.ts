@@ -161,6 +161,7 @@ export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, string> = {
   weekly_pass: "Weekly Pass",
   joki: "Joki",
   coaching: "Coaching",
+  merchandise: "Merchandise",
 };
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {

@@ -3,6 +3,7 @@ import { Icons } from "@components/icons";
 import { DeleteButton } from "@components/shared/delete-button";
 import { PageSkeleton } from "@components/shared/page-skeleton";
 import { Badge } from "@components/ui/shadcn/badge";
+import { buttonVariants } from "@components/ui/shadcn/button";
 import {
   Card,
   CardContent,
@@ -14,11 +15,10 @@ import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
 import { deleteProduct } from "@server/actions/shop";
 import { db, products } from "@server/db";
 import { eq } from "drizzle-orm";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireDashboardRole } from "../../_components/dashboard-section";
 import { DetailRow, PageHeader } from "../../_components/page-surface";
-import { ProductFormDialog } from "../_components/product-form";
-import { ProductVariantsDialog } from "../_components/product-variants-form";
 
 async function getProduct(productId: string) {
   return db.query.products.findFirst({
@@ -62,8 +62,12 @@ export default async function ProductDetailPage({
                 <CardTitle>Manage product</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-3">
-                <ProductFormDialog product={product} />
-                <ProductVariantsDialog product={product} />
+                <Link
+                  href={`/dashboard/products/${product.id}/edit`}
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  Edit product
+                </Link>
                 <DeleteButton
                   action={deleteProduct.bind(null, product.id)}
                   title="Delete product?"

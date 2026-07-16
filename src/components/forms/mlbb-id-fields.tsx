@@ -19,16 +19,52 @@ export function MlbbIdFields<
   mlbbIdName,
   serverIdName,
   disabled,
+  showServerId = true,
 }: {
   control: Control<TFieldValues>;
   mlbbIdName: TMlbbName;
-  serverIdName: TServerName;
+  serverIdName?: TServerName;
   disabled?: boolean;
+  /** Set false where the server ID isn't needed — renders a plain MLBB ID field. */
+  showServerId?: boolean;
 }) {
+  if (!showServerId) {
+    return (
+      <Controller
+        control={control}
+        name={mlbbIdName}
+        render={({ field: idField, fieldState: idState }) => (
+          <Field
+            data-invalid={idState.invalid}
+            className={formFieldStyles.fieldShell}
+          >
+            <FieldLabel
+              htmlFor={idField.name}
+              className={formFieldStyles.label}
+            >
+              MLBB ID
+            </FieldLabel>
+            <Input
+              {...idField}
+              id={idField.name}
+              inputMode="numeric"
+              placeholder="123456789"
+              disabled={disabled}
+              aria-invalid={idState.invalid}
+              className={formFieldStyles.control}
+            />
+            <FieldError errors={[idState.error]} />
+          </Field>
+        )}
+      />
+    );
+  }
+
   return (
     <Controller
       control={control}
-      name={serverIdName}
+      // biome-ignore lint/style/noNonNullAssertion: required whenever showServerId is true (the default)
+      name={serverIdName!}
       render={({ field: serverField, fieldState: serverState }) => (
         <Controller
           control={control}

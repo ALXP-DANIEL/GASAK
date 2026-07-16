@@ -1,14 +1,13 @@
 "use client";
 
 import { Badge } from "@components/ui/shadcn/badge";
+import { buttonVariants } from "@components/ui/shadcn/button";
 import { formatRM } from "@lib/format";
-import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
 import type { Product } from "@server/db/schema";
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import { ProductFormDialog } from "./product-form";
 
-export const columns: ColumnDef<Product>[] = [
+export const merchColumns: ColumnDef<Product>[] = [
   {
     id: "name",
     accessorFn: (row) => row.name,
@@ -20,17 +19,6 @@ export const columns: ColumnDef<Product>[] = [
       >
         {row.original.name}
       </Link>
-    ),
-  },
-  {
-    id: "category",
-    accessorFn: (row) => row.category,
-    filterFn: "arrIncludesSome",
-    header: "Category",
-    cell: ({ row }) => (
-      <Badge variant="secondary">
-        {PRODUCT_CATEGORY_LABELS[row.original.category]}
-      </Badge>
     ),
   },
   {
@@ -60,7 +48,12 @@ export const columns: ColumnDef<Product>[] = [
     header: "",
     cell: ({ row }) => (
       <div className="flex justify-end">
-        <ProductFormDialog product={row.original} />
+        <Link
+          href={`/dashboard/products/${row.original.id}/edit`}
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          Edit
+        </Link>
       </div>
     ),
   },

@@ -29,3 +29,36 @@ export function FormSection({
     </section>
   );
 }
+
+/**
+ * Numbered intake-form section — a two-column "01 / Title / description"
+ * sidebar beside the fields, matching the recruitment application form.
+ * Heavier than {@link FormSection}; use for standalone public-facing forms
+ * (multi-section checkouts, applications), not compact dashboard dialogs.
+ */
+export function IndexedFormSection({
+  index,
+  title,
+  description,
+  children,
+}: {
+  index: string;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="grid gap-5 border-t border-border p-6 first:border-t-0 desktop:grid-cols-[10rem_minmax(0,1fr)]">
+      <div>
+        <p className="font-mono text-xs text-primary">{index}</p>
+        <h3 className="mt-2 font-heading text-xl font-bold uppercase tracking-wide">
+          {title}
+        </h3>
+        <p className="mt-2 text-xs leading-6 text-muted-foreground">
+          {description}
+        </p>
+      </div>
+      <div className="min-w-0">{children}</div>
+    </section>
+  );
+}
