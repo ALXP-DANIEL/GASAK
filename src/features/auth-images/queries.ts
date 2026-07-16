@@ -22,9 +22,3 @@ export async function listActiveAuthImages(): Promise<AuthBackdropImage[]> {
     imageUrl: slide.imageUrl,
   }));
 }
-
-export function listDashboardAuthImages() {
-  return db.query.authImages.findMany({
-    orderBy: [asc(authImages.createdAt)],
-  });
-}

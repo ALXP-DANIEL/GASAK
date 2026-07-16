@@ -2,7 +2,7 @@ import "server-only";
 
 import { logActivity } from "@server/activity-log";
 import { db, orders, products, productVariants } from "@server/db";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 
 // NOT a server action on purpose: this trusts its caller and has no auth
@@ -23,6 +23,11 @@ function revalidateShop() {
  * Transitions an order to "paid", reserving stock. Used both for a seller's
  * manual override (verifiedBy set) and automatic gateway confirmation via
  * the Billplz webhook (verifiedBy null — no human verified it).
+ *
+ * Concurrency-safe: Billplz retries webhooks and the sync fallback can race
+ * the webhook, so every transition is a conditional UPDATE — only the caller
+ * that actually flips the row performs the side effects (stock deduction,
+ * activity log). Losers of the race see zero updated rows and return.
  */
 export async function markOrderPaid(
   order: typeof orders.$inferSelect,
@@ -33,7 +38,7 @@ export async function markOrderPaid(
   // — joki orders hang off a zero-stock anchor product.
   if (order.jokiDetails && order.depositSen) {
     if (!order.depositPaidAt) {
-      await db
+      const [row] = await db
         .update(orders)
         .set({
           status: "paid",
@@ -45,7 +50,9 @@ export async function markOrderPaid(
           paymentVerifiedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(orders.id, order.id));
+        .where(and(eq(orders.id, order.id), isNull(orders.depositPaidAt)))
+        .returning({ id: orders.id });
+      if (!row) return; // another confirmation already recorded the deposit
       await logActivity({
         action: "update",
         entityType: "order",
@@ -53,14 +60,22 @@ export async function markOrderPaid(
         description: `Joki order ${order.orderNo}: 50% deposit paid — boost can start`,
       });
     } else if (!order.balancePaidAt) {
-      await db
+      const [row] = await db
         .update(orders)
         .set({
           status: "completed",
           balancePaidAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(orders.id, order.id));
+        .where(
+          and(
+            eq(orders.id, order.id),
+            isNotNull(orders.depositPaidAt),
+            isNull(orders.balancePaidAt),
+          ),
+        )
+        .returning({ id: orders.id });
+      if (!row) return; // another confirmation already recorded the balance
       await logActivity({
         action: "update",
         entityType: "order",
@@ -72,31 +87,47 @@ export async function markOrderPaid(
     return;
   }
 
-  if (order.status === "paid") return; // already marked — avoid double stock deduction
-
-  if (order.variantId) {
-    await db
-      .update(productVariants)
+  // Flip the status first, conditionally — the row update is the lock. Stock
+  // is deducted in the same transaction so a crash can't mark an order paid
+  // without reserving stock (or vice versa).
+  const won = await db.transaction(async (tx) => {
+    const [row] = await tx
+      .update(orders)
       .set({
-        stock: sql`greatest(${productVariants.stock} - ${order.quantity}, 0)`,
+        status: "paid",
+        paymentVerifiedBy: verifiedBy,
+        paymentVerifiedAt: new Date(),
+        updatedAt: new Date(),
       })
-      .where(eq(productVariants.id, order.variantId));
-  } else {
-    await db
-      .update(products)
-      .set({ stock: sql`greatest(${products.stock} - ${order.quantity}, 0)` })
-      .where(eq(products.id, order.productId));
-  }
+      // Only transition orders that are actually awaiting payment — a late
+      // webhook retry against a paid/processing/completed/cancelled order
+      // must not re-deduct stock or downgrade the status.
+      .where(
+        and(
+          eq(orders.id, order.id),
+          inArray(orders.status, ["pending", "waiting_payment"]),
+        ),
+      )
+      .returning({ id: orders.id });
+    if (!row) return false; // already handled — avoid double stock deduction
 
-  await db
-    .update(orders)
-    .set({
-      status: "paid",
-      paymentVerifiedBy: verifiedBy,
-      paymentVerifiedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(orders.id, order.id));
+    if (order.variantId) {
+      await tx
+        .update(productVariants)
+        .set({
+          stock: sql`greatest(${productVariants.stock} - ${order.quantity}, 0)`,
+        })
+        .where(eq(productVariants.id, order.variantId));
+    } else {
+      await tx
+        .update(products)
+        .set({ stock: sql`greatest(${products.stock} - ${order.quantity}, 0)` })
+        .where(eq(products.id, order.productId));
+    }
+    return true;
+  });
+  if (!won) return;
+
   if (!verifiedBy) {
     await logActivity({
       action: "update",

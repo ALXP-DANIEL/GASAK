@@ -181,22 +181,34 @@ export async function onboardApplicant(
     },
   });
 
-  await db.insert(playerProfiles).values({
-    userId: signup.user.id,
-    fullName: application.fullName,
-    ign: application.ign,
-    mlbbId: application.mlbbId,
-    serverId: application.serverId,
-    phone: application.phone,
-    preferredLanes: application.preferredLanes,
-    peakRank: application.peakRank,
-  });
+  // The auth API call above can't join a DB transaction, but the follow-up
+  // writes can share one — a partial failure here would otherwise leave an
+  // account with no profile/squad. If they fail, remove the just-created
+  // account so the admin can safely retry the whole onboard.
+  try {
+    await db.transaction(async (tx) => {
+      await tx.insert(playerProfiles).values({
+        userId: signup.user.id,
+        fullName: application.fullName,
+        ign: application.ign,
+        mlbbId: application.mlbbId,
+        serverId: application.serverId,
+        phone: application.phone,
+        preferredLanes: application.preferredLanes,
+        peakRank: application.peakRank,
+      });
 
-  await db.insert(squadMembers).values({
-    squadId: squad.id,
-    userId: signup.user.id,
-    squadRole: parsed.data.squadRole,
-  });
+      await tx.insert(squadMembers).values({
+        squadId: squad.id,
+        userId: signup.user.id,
+        squadRole: parsed.data.squadRole,
+      });
+    });
+  } catch (err) {
+    await db.delete(user).where(eq(user.id, signup.user.id));
+    console.error("[recruitment] onboard failed, rolled back account:", err);
+    return { ok: false, error: "Onboarding failed — no account was created" };
+  }
   await logActivity({
     actor,
     action: "onboard",

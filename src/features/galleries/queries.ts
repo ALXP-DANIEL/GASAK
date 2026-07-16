@@ -26,9 +26,3 @@ export async function listActiveGalleryImages(): Promise<GalleryImage[]> {
     imageUrl: image.imageUrl,
   }));
 }
-
-export function listDashboardGalleryImages() {
-  return db.query.galleries.findMany({
-    orderBy: [asc(galleries.sortOrder), asc(galleries.createdAt)],
-  });
-}

@@ -15,7 +15,7 @@ import {
   productVariants,
 } from "@server/db";
 import { markOrderPaid } from "@server/order-payment";
-import { saveUpload } from "@server/uploads";
+import { deleteUpload, saveUpload } from "@server/uploads";
 import { eq, sql } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
@@ -122,7 +122,13 @@ export async function updateProduct(
   };
 
   const image = formData.get("image");
+  let previousImageUrl: string | null = null;
   if (image instanceof File && image.size > 0) {
+    const existing = await db.query.products.findFirst({
+      where: eq(products.id, productId),
+      columns: { imageUrl: true },
+    });
+    previousImageUrl = existing?.imageUrl ?? null;
     try {
       updates.imageUrl = await saveUpload(image, "products");
     } catch (err) {
@@ -136,6 +142,9 @@ export async function updateProduct(
     .where(eq(products.id, productId))
     .returning();
   if (!row) return { ok: false, error: "Product not found" };
+  if (updates.imageUrl && previousImageUrl !== updates.imageUrl) {
+    await deleteUpload(previousImageUrl);
+  }
   await logActivity({
     actor,
     action: "update",
@@ -152,6 +161,15 @@ export async function deleteProduct(productId: string): Promise<ActionResult> {
   const actor = await actionUser("admin", "seller");
   if (!actor) return { ok: false, error: "Unauthorized" };
 
+  // Capture hosted image URLs before the cascade delete wipes the rows.
+  const existing = await db.query.products.findFirst({
+    where: eq(products.id, productId),
+    with: {
+      gallery: { columns: { imageUrl: true } },
+      variants: { columns: { imageUrl: true } },
+    },
+  });
+
   let row: typeof products.$inferSelect | undefined;
   try {
     [row] = await db
@@ -165,6 +183,15 @@ export async function deleteProduct(productId: string): Promise<ActionResult> {
     };
   }
   if (!row) return { ok: false, error: "Product not found" };
+
+  if (existing) {
+    const urls = [
+      existing.imageUrl,
+      ...existing.gallery.map((g) => g.imageUrl),
+      ...existing.variants.map((v) => v.imageUrl),
+    ];
+    for (const url of urls) await deleteUpload(url);
+  }
 
   await logActivity({
     actor,
@@ -420,6 +447,7 @@ export async function setProductGalleryFiles(
 
   const product = await db.query.products.findFirst({
     where: eq(products.id, productId),
+    with: { gallery: { columns: { imageUrl: true } } },
   });
   if (!product) return { ok: false, error: "Product not found" };
 
@@ -443,6 +471,12 @@ export async function setProductGalleryFiles(
   await db
     .delete(productGallery)
     .where(eq(productGallery.productId, productId));
+
+  // Files whose rows were replaced/removed are no longer referenced.
+  const kept = new Set(imageUrls);
+  for (const old of product.gallery) {
+    if (!kept.has(old.imageUrl)) await deleteUpload(old.imageUrl);
+  }
 
   if (imageUrls.length > 0) {
     await db.insert(productGallery).values(

@@ -4,7 +4,7 @@ import { logActivity } from "@server/activity-log";
 import { actionUser, canManageSquad, isSquadLeader } from "@server/authz";
 import { db, squadMembers, squadRoleEnum, squads } from "@server/db";
 import { userOrgRole } from "@server/session";
-import { saveUpload } from "@server/uploads";
+import { deleteUpload, saveUpload } from "@server/uploads";
 import { and, eq, ne } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
@@ -136,6 +136,12 @@ export async function updateSquad(
   }
 
   await db.update(squads).set(updates).where(eq(squads.id, squadId));
+  if (updates.logoUrl && updates.logoUrl !== squad.logoUrl) {
+    await deleteUpload(squad.logoUrl);
+  }
+  if (updates.bannerUrl && updates.bannerUrl !== squad.bannerUrl) {
+    await deleteUpload(squad.bannerUrl);
+  }
   await logActivity({
     actor: user,
     action: "update",
@@ -159,6 +165,8 @@ export async function deleteSquad(squadId: string): Promise<ActionResult> {
     .returning();
   if (!row) return { ok: false, error: "Squad not found" };
 
+  await deleteUpload(row.logoUrl);
+  await deleteUpload(row.bannerUrl);
   await logActivity({
     actor: user,
     action: "delete",

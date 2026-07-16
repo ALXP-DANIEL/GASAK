@@ -6,7 +6,7 @@ import { logActivity } from "@server/activity-log";
 import { actionUser } from "@server/authz";
 import { db, laneEnum, playerProfiles, user } from "@server/db";
 import { userOrgRole } from "@server/session";
-import { saveUpload } from "@server/uploads";
+import { deleteUpload, saveUpload } from "@server/uploads";
 import { eq } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
@@ -95,7 +95,13 @@ export async function updateProfile(
   };
 
   const avatar = formData.get("avatar");
+  let previousAvatarUrl: string | null = null;
   if (avatar instanceof File && avatar.size > 0) {
+    const existing = await db.query.user.findFirst({
+      where: eq(user.id, targetUserId),
+      columns: { image: true },
+    });
+    previousAvatarUrl = existing?.image ?? null;
     try {
       userUpdates.image = await saveUpload(avatar, "avatars");
     } catch (err) {
@@ -114,6 +120,9 @@ export async function updateProfile(
         set: { ...profile, updatedAt: new Date() },
       }),
   ]);
+  if (userUpdates.image && previousAvatarUrl !== userUpdates.image) {
+    await deleteUpload(previousAvatarUrl);
+  }
   await logActivity({
     actor,
     action: "update",

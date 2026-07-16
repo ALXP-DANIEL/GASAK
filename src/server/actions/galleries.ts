@@ -3,7 +3,7 @@
 import { logActivity } from "@server/activity-log";
 import { actionUser } from "@server/authz";
 import { db, galleries } from "@server/db";
-import { saveUpload } from "@server/uploads";
+import { deleteUpload, saveUpload } from "@server/uploads";
 import { eq } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
@@ -98,7 +98,13 @@ export async function updateGalleryImage(
   };
 
   const image = formData.get("image");
+  let previousImageUrl: string | null = null;
   if (image instanceof File && image.size > 0) {
+    const existing = await db.query.galleries.findFirst({
+      where: eq(galleries.id, imageId),
+      columns: { imageUrl: true },
+    });
+    previousImageUrl = existing?.imageUrl ?? null;
     try {
       updates.imageUrl = await saveUpload(image, "galleries");
     } catch (err) {
@@ -112,6 +118,9 @@ export async function updateGalleryImage(
     .where(eq(galleries.id, imageId))
     .returning();
   if (!row) return { ok: false, error: "Gallery image not found" };
+  if (updates.imageUrl && previousImageUrl !== updates.imageUrl) {
+    await deleteUpload(previousImageUrl);
+  }
   await logActivity({
     actor,
     action: "update",
@@ -135,6 +144,7 @@ export async function deleteGalleryImage(
     .where(eq(galleries.id, imageId))
     .returning();
   if (!row) return { ok: false, error: "Gallery image not found" };
+  await deleteUpload(row.imageUrl);
   await logActivity({
     actor,
     action: "delete",

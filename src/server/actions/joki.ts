@@ -4,7 +4,7 @@ import { RANK_TIERS } from "@lib/ranks";
 import { logActivity } from "@server/activity-log";
 import { actionUser } from "@server/authz";
 import { db, jokiPackages, jokiServiceImages, jokiTiers } from "@server/db";
-import { saveUpload } from "@server/uploads";
+import { deleteUpload, saveUpload } from "@server/uploads";
 import { and, eq, or } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
@@ -285,6 +285,11 @@ export async function updateJokiServiceImage(
     return { ok: false, error: "Choose an image to upload" };
   }
 
+  const previous = await db.query.jokiServiceImages.findFirst({
+    where: eq(jokiServiceImages.mode, mode),
+    columns: { imageUrl: true },
+  });
+
   let imageUrl: string;
   try {
     imageUrl = await saveUpload(image, "joki");
@@ -299,6 +304,9 @@ export async function updateJokiServiceImage(
       target: jokiServiceImages.mode,
       set: { imageUrl },
     });
+  if (previous && previous.imageUrl !== imageUrl) {
+    await deleteUpload(previous.imageUrl);
+  }
 
   await logActivity({
     actor,

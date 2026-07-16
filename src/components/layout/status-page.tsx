@@ -90,6 +90,7 @@ export default function StatusPage({
                   <Button
                     key={`${href}-${label}`}
                     className={buttonClassName}
+                    nativeButton={false}
                     render={<Link href={href}>{label}</Link>}
                   />
                 );
