@@ -129,6 +129,12 @@ export async function uploadNewsImage(
 
   try {
     const url = await saveUpload(file, "news");
+    await logActivity({
+      actor,
+      action: "upload",
+      entityType: "news",
+      description: "Uploaded a news article image",
+    });
     return { ok: true, data: { url } };
   } catch (err) {
     return { ok: false, error: (err as Error).message };

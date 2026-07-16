@@ -1,9 +1,23 @@
 import "server-only";
 
+import { logActivity } from "@server/activity-log";
 import { Resend } from "resend";
 import { env } from "@/env";
 
 const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
+
+/** Fire-and-forget audit entry — a logging failure must never fail a send. */
+async function logEmail(description: string) {
+  try {
+    await logActivity({
+      action: "email",
+      entityType: "email",
+      description,
+    });
+  } catch (err) {
+    console.error("[GASAK] Failed to log email activity:", err);
+  }
+}
 
 /**
  * Send the password-reset email via Resend. When RESEND_API_KEY is not set
@@ -47,8 +61,13 @@ export async function sendPasswordResetEmail({
 
   if (error) {
     console.error(`[GASAK] Failed to send reset email to ${to}:`, error);
+    await logEmail(
+      `Failed to send password-reset email for ${accountEmail} to ${to}`,
+    );
     throw new Error("Failed to send reset email");
   }
+
+  await logEmail(`Sent password-reset email for ${accountEmail} to ${to}`);
 }
 
 /**
@@ -108,8 +127,81 @@ export async function sendWelcomeEmail({
 
   if (error) {
     console.error(`[GASAK] Failed to send welcome email to ${to}:`, error);
+    await logEmail(
+      `Failed to send welcome email for ${loginEmail} to ${to}${squadName ? ` (${squadName})` : ""}`,
+    );
     throw new Error("Failed to send welcome email");
   }
+
+  await logEmail(
+    `Sent welcome email for ${loginEmail} to ${to}${squadName ? ` (${squadName})` : ""}`,
+  );
+}
+
+/* ------------------------------------------------------------------------ */
+/* Templates — corner-cut HUD card matching the app's esports design.       */
+/* clip-path doesn't work in email clients, so the cut corners (top-right   */
+/* and bottom-left, like the app's .corner-cut panels) are built from       */
+/* border-triangle cells inside a fixed 3-column table.                     */
+/* ------------------------------------------------------------------------ */
+
+const PAGE_BG = "#0c0c0e";
+const CARD_BG = "#141417";
+const PANEL_BG = "#0c0c0e";
+const BORDER = "#26262b";
+const GOLD = "#e0af3b";
+const TEXT = "#f4f4f5";
+const MUTED = "#a1a1aa";
+const FAINT = "#71717a";
+const CUT = 14;
+
+/** Uppercase micro-label with the app's gold accent tick. */
+function tickLabel(text: string) {
+  return `<p style="margin:0;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:${FAINT};"><span style="display:inline-block;width:3px;height:10px;background-color:${GOLD};margin-right:8px;"></span>${text}</p>`;
+}
+
+function goldButton(href: string, label: string) {
+  return `<a href="${href}" style="display:inline-block;background-color:${GOLD};color:${CARD_BG};font-size:13px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:14px 28px;">${label}</a>`;
+}
+
+/**
+ * Wraps content in the corner-cut card: gold top bar, cut top-right and
+ * bottom-left corners, dark page background, gasak.my footer.
+ */
+function emailShell(content: string) {
+  return `<!doctype html>
+<html>
+  <body style="margin:0;padding:0;background-color:${PAGE_BG};font-family:Arial,Helvetica,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${PAGE_BG};padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
+            <tr>
+              <td style="width:${CUT}px;background-color:${CARD_BG};border-top:3px solid ${GOLD};font-size:0;line-height:0;">&nbsp;</td>
+              <td style="background-color:${CARD_BG};border-top:3px solid ${GOLD};font-size:0;line-height:0;">&nbsp;</td>
+              <td style="width:${CUT}px;padding:0;font-size:0;line-height:0;vertical-align:top;">
+                <div style="width:0;height:0;border-bottom:${CUT}px solid ${CARD_BG};border-right:${CUT}px solid ${PAGE_BG};font-size:0;line-height:0;"></div>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3" style="background-color:${CARD_BG};padding:18px 32px 32px;">
+${content}
+              </td>
+            </tr>
+            <tr>
+              <td style="width:${CUT}px;padding:0;font-size:0;line-height:0;vertical-align:bottom;">
+                <div style="width:0;height:0;border-top:${CUT}px solid ${CARD_BG};border-left:${CUT}px solid ${PAGE_BG};font-size:0;line-height:0;"></div>
+              </td>
+              <td style="background-color:${CARD_BG};font-size:0;line-height:0;">&nbsp;</td>
+              <td style="width:${CUT}px;background-color:${CARD_BG};font-size:0;line-height:0;">&nbsp;</td>
+            </tr>
+          </table>
+          <p style="margin:24px 0 0;font-size:11px;letter-spacing:1px;color:#52525b;">© GASAK ESPORTS · <a href="https://gasak.my" style="color:#52525b;text-decoration:none;">GASAK.MY</a></p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
 }
 
 function passwordResetHtml({
@@ -121,47 +213,22 @@ function passwordResetHtml({
   accountEmail: string;
   url: string;
 }) {
-  return `<!doctype html>
-<html>
-  <body style="margin:0;padding:0;background-color:#0c0c0e;font-family:Arial,Helvetica,sans-serif;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0c0c0e;padding:32px 16px;">
-      <tr>
-        <td align="center">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background-color:#141417;border:1px solid #26262b;border-top:3px solid #e0af3b;">
-            <tr>
-              <td style="padding:32px 32px 24px;">
-                <p style="margin:0;font-size:12px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:#e0af3b;">GASAK Esports</p>
-                <h1 style="margin:16px 0 0;font-size:24px;line-height:1.3;text-transform:uppercase;letter-spacing:1px;color:#f4f4f5;">Reset your password</h1>
-                <p style="margin:16px 0 0;font-size:14px;line-height:1.7;color:#a1a1aa;">
+  return emailShell(`
+                <p style="margin:0;font-size:12px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:${GOLD};">GASAK Esports</p>
+                <h1 style="margin:16px 0 0;font-size:24px;line-height:1.3;text-transform:uppercase;letter-spacing:1px;color:${TEXT};">Reset your password</h1>
+                <p style="margin:16px 0 0;font-size:14px;line-height:1.7;color:${MUTED};">
                   Hi ${escapeHtml(userName)}, we received a request to reset the password for
-                  your account <strong style="color:#f4f4f5;">${escapeHtml(accountEmail)}</strong>.
+                  your account <strong style="color:${TEXT};">${escapeHtml(accountEmail)}</strong>.
                   Click the button below to choose a new one.
                 </p>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:0 32px 8px;">
-                <a href="${url}" style="display:inline-block;background-color:#e0af3b;color:#141417;font-size:13px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:14px 28px;">Reset password</a>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:24px 32px 32px;">
-                <p style="margin:0;font-size:12px;line-height:1.7;color:#71717a;">
+                <div style="margin:24px 0 0;">${goldButton(url, "Reset password")}</div>
+                <p style="margin:24px 0 0;font-size:12px;line-height:1.7;color:${FAINT};">
                   This link expires in 1 hour. If you didn't request a reset, you can safely ignore this email — your password stays unchanged.
                 </p>
-                <p style="margin:16px 0 0;font-size:12px;line-height:1.7;color:#71717a;word-break:break-all;">
+                <p style="margin:16px 0 0;font-size:12px;line-height:1.7;color:${FAINT};word-break:break-all;">
                   Button not working? Paste this link into your browser:<br />
-                  <a href="${url}" style="color:#e0af3b;">${url}</a>
-                </p>
-              </td>
-            </tr>
-          </table>
-          <p style="margin:24px 0 0;font-size:11px;color:#52525b;">© GASAK Esports · gasak.my</p>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>`;
+                  <a href="${url}" style="color:${GOLD};">${url}</a>
+                </p>`);
 }
 
 function welcomeHtml({
@@ -178,59 +245,30 @@ function welcomeHtml({
   loginUrl: string;
 }) {
   const intro = squadName
-    ? `Congratulations — you've been accepted into <strong style="color:#f4f4f5;">${escapeHtml(squadName)}</strong> at GASAK Esports! Your player portal account is ready.`
+    ? `Congratulations — you've been accepted into <strong style="color:${TEXT};">${escapeHtml(squadName)}</strong> at GASAK Esports! Your player portal account is ready.`
     : "Your GASAK Esports portal account is ready.";
 
-  return `<!doctype html>
-<html>
-  <body style="margin:0;padding:0;background-color:#0c0c0e;font-family:Arial,Helvetica,sans-serif;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0c0c0e;padding:32px 16px;">
-      <tr>
-        <td align="center">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background-color:#141417;border:1px solid #26262b;border-top:3px solid #e0af3b;">
-            <tr>
-              <td style="padding:32px 32px 24px;">
-                <p style="margin:0;font-size:12px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:#e0af3b;">GASAK Esports</p>
-                <h1 style="margin:16px 0 0;font-size:24px;line-height:1.3;text-transform:uppercase;letter-spacing:1px;color:#f4f4f5;">${squadName ? "Welcome to the team" : "Your account is ready"}</h1>
-                <p style="margin:16px 0 0;font-size:14px;line-height:1.7;color:#a1a1aa;">
+  return emailShell(`
+                <p style="margin:0;font-size:12px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:${GOLD};">GASAK Esports</p>
+                <h1 style="margin:16px 0 0;font-size:24px;line-height:1.3;text-transform:uppercase;letter-spacing:1px;color:${TEXT};">${squadName ? "Welcome to the team" : "Your account is ready"}</h1>
+                <p style="margin:16px 0 0;font-size:14px;line-height:1.7;color:${MUTED};">
                   Hi ${escapeHtml(userName)}, ${intro}
                 </p>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:0 32px;">
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0c0c0e;border:1px solid #26262b;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px;background-color:${PANEL_BG};border:1px solid ${BORDER};border-left:3px solid ${GOLD};">
                   <tr>
                     <td style="padding:16px 20px;">
-                      <p style="margin:0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#71717a;">Login email</p>
-                      <p style="margin:4px 0 0;font-size:14px;color:#f4f4f5;font-family:Consolas,Menlo,monospace;">${escapeHtml(loginEmail)}</p>
-                      <p style="margin:16px 0 0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#71717a;">Temporary password</p>
-                      <p style="margin:4px 0 0;font-size:14px;color:#f4f4f5;font-family:Consolas,Menlo,monospace;">${escapeHtml(tempPassword)}</p>
+                      ${tickLabel("Login email")}
+                      <p style="margin:6px 0 0;font-size:14px;color:${TEXT};font-family:Consolas,Menlo,monospace;">${escapeHtml(loginEmail)}</p>
+                      <div style="margin-top:16px;">${tickLabel("Temporary password")}</div>
+                      <p style="margin:6px 0 0;font-size:14px;color:${TEXT};font-family:Consolas,Menlo,monospace;">${escapeHtml(tempPassword)}</p>
                     </td>
                   </tr>
                 </table>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:24px 32px 8px;">
-                <a href="${loginUrl}" style="display:inline-block;background-color:#e0af3b;color:#141417;font-size:13px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:14px 28px;">Sign in</a>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:24px 32px 32px;">
-                <p style="margin:0;font-size:12px;line-height:1.7;color:#71717a;">
+                <div style="margin:24px 0 0;">${goldButton(loginUrl, "Sign in")}</div>
+                <p style="margin:24px 0 0;font-size:12px;line-height:1.7;color:${FAINT};">
                   For security you'll be asked to set a new password the first time you log in.
                   Keep these details private and delete this email once you've signed in.
-                </p>
-              </td>
-            </tr>
-          </table>
-          <p style="margin:24px 0 0;font-size:11px;color:#52525b;">© GASAK Esports · gasak.my</p>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>`;
+                </p>`);
 }
 
 function escapeHtml(value: string) {

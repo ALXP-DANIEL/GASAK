@@ -427,6 +427,12 @@ export async function uploadVariantImage(
 
   try {
     const url = await saveUpload(file, "products");
+    await logActivity({
+      actor,
+      action: "upload",
+      entityType: "product",
+      description: "Uploaded a product variant image",
+    });
     return { ok: true, data: { url } };
   } catch (err) {
     return { ok: false, error: (err as Error).message };

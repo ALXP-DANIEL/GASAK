@@ -11,6 +11,7 @@ import type {
   ForgotPasswordInput,
   ResetPasswordInput,
 } from "@features/auth/types";
+import { logActivity } from "@server/activity-log";
 import { auth } from "@server/auth";
 import { db, user } from "@server/db";
 import { requireUser } from "@server/session";
@@ -36,6 +37,11 @@ export async function requestPasswordReset(
         redirectTo: "/reset-password",
       },
     });
+    await logActivity({
+      action: "request_reset",
+      entityType: "auth",
+      description: `Password reset requested for ${parsed.data.email}`,
+    });
     return { ok: true, data: result };
   } catch (error) {
     return { ok: false, error: authError(error) };
@@ -56,6 +62,11 @@ export async function resetPassword(
         newPassword: parsed.data.password,
         token: parsed.data.token,
       },
+    });
+    await logActivity({
+      action: "reset_password",
+      entityType: "auth",
+      description: "Password reset completed via emailed link",
     });
     return { ok: true, data: result };
   } catch (error) {
@@ -87,6 +98,13 @@ export async function changePassword(
       .update(user)
       .set({ mustChangePassword: false })
       .where(eq(user.id, actor.id));
+    await logActivity({
+      actor,
+      action: "change_password",
+      entityType: "auth",
+      entityId: actor.id,
+      description: "Changed own password",
+    });
     return { ok: true, data: result };
   } catch (error) {
     return { ok: false, error: authError(error) };
