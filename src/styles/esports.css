@@ -168,3 +168,14 @@
     transform: scale(1.02);
   }
 }
+
+/* Auth background grid: a newly swapped tile image fades in over the
+   previous one for a smooth crossfade instead of a hard swap. */
+@keyframes authGridFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

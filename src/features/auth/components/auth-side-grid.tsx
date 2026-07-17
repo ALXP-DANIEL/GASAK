@@ -90,15 +90,22 @@ function PulseTile({
   duration: number;
 }) {
   const [index, setIndex] = useState(initialIndex);
+  const [prevIndex, setPrevIndex] = useState(initialIndex);
 
   // Swap to a random image at each pulse trough: the interval fires at
   // delay + k * duration, exactly when authGridPulse is at its dimmest.
+  // The outgoing image is kept layered underneath and faded out so the
+  // new image crossfades in smoothly instead of snapping.
   useEffect(() => {
     if (pool.length < 2) return;
     let interval: ReturnType<typeof setInterval>;
     const start = setTimeout(() => {
       interval = setInterval(() => {
-        setIndex(Math.floor(Math.random() * pool.length));
+        const next = Math.floor(Math.random() * pool.length);
+        setIndex((current) => {
+          if (current !== next) setPrevIndex(current);
+          return next;
+        });
       }, duration);
     }, delay);
     return () => {
@@ -107,8 +114,11 @@ function PulseTile({
     };
   }, [pool, delay, duration]);
 
-  const src = pool[index % pool.length]?.imageUrl;
-  if (!src) return null;
+  const currentSrc = pool[index % pool.length]?.imageUrl;
+  const prevSrc = pool[prevIndex % pool.length]?.imageUrl;
+  if (!currentSrc) return null;
+
+  const fadeKey = index;
 
   return (
     <div
@@ -117,13 +127,24 @@ function PulseTile({
         animation: `authGridPulse ${duration}ms ease-in-out ${delay}ms infinite both`,
       }}
     >
+      {prevSrc && prevSrc !== currentSrc ? (
+        <Image
+          key={`prev-${prevIndex}`}
+          src={prevSrc}
+          alt=""
+          fill
+          sizes="(min-width: 768px) 17vw, 33vw"
+          className="object-cover"
+        />
+      ) : null}
       <Image
-        src={src}
+        key={`cur-${fadeKey}`}
+        src={currentSrc}
         alt=""
         fill
         priority={priority}
         sizes="(min-width: 768px) 17vw, 33vw"
-        className="object-cover"
+        className="object-cover animate-[authGridFadeIn_700ms_ease-out]"
       />
 
       {/* Card chrome matching squad/player ContentCardFrame */}

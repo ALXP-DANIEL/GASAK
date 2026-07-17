@@ -138,6 +138,61 @@ export async function sendWelcomeEmail({
   );
 }
 
+/**
+ * Verification code for confirming a personal email — proves the user owns
+ * the inbox before password resets start delivering there.
+ */
+export async function sendPersonalEmailVerificationEmail({
+  to,
+  userName,
+  accountEmail,
+  code,
+}: {
+  to: string;
+  userName: string;
+  /** The @gasak.my login this personal email will be attached to. */
+  accountEmail: string;
+  code: string;
+}) {
+  if (!resend) {
+    console.log(
+      `[GASAK] Personal email verification for ${accountEmail} (to ${to}) — code: ${code}`,
+    );
+    return;
+  }
+
+  const { error } = await resend.emails.send({
+    from: env.EMAIL_FROM,
+    to,
+    subject: `${code} is your GASAK verification code`,
+    html: personalEmailVerificationHtml({ userName, accountEmail, code }),
+    text: [
+      `Hi ${userName},`,
+      "",
+      `Use this code to confirm this inbox as the personal email for your GASAK account ${accountEmail}:`,
+      "",
+      code,
+      "",
+      "The code expires in 10 minutes. If you didn't request this, you can ignore this email.",
+    ].join("\n"),
+  });
+
+  if (error) {
+    console.error(
+      `[GASAK] Failed to send personal email verification to ${to}:`,
+      error,
+    );
+    await logEmail(
+      `Failed to send personal-email verification for ${accountEmail} to ${to}`,
+    );
+    throw new Error("Failed to send verification email");
+  }
+
+  await logEmail(
+    `Sent personal-email verification for ${accountEmail} to ${to}`,
+  );
+}
+
 /* ------------------------------------------------------------------------ */
 /* Templates — corner-cut HUD card matching the app's esports design.       */
 /* clip-path doesn't work in email clients, so the cut corners (top-right   */
@@ -268,6 +323,35 @@ function welcomeHtml({
                 <p style="margin:24px 0 0;font-size:12px;line-height:1.7;color:${FAINT};">
                   For security you'll be asked to set a new password the first time you log in.
                   Keep these details private and delete this email once you've signed in.
+                </p>`);
+}
+
+function personalEmailVerificationHtml({
+  userName,
+  accountEmail,
+  code,
+}: {
+  userName: string;
+  accountEmail: string;
+  code: string;
+}) {
+  return emailShell(`
+                <p style="margin:0;font-size:12px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:${GOLD};">GASAK Esports</p>
+                <h1 style="margin:16px 0 0;font-size:24px;line-height:1.3;text-transform:uppercase;letter-spacing:1px;color:${TEXT};">Confirm your personal email</h1>
+                <p style="margin:16px 0 0;font-size:14px;line-height:1.7;color:${MUTED};">
+                  Hi ${escapeHtml(userName)}, enter this code in the portal to set this inbox
+                  as the personal email for your account <strong style="color:${TEXT};">${escapeHtml(accountEmail)}</strong>.
+                </p>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px;background-color:${PANEL_BG};border:1px solid ${BORDER};border-left:3px solid ${GOLD};">
+                  <tr>
+                    <td style="padding:20px;" align="center">
+                      ${tickLabel("Verification code")}
+                      <p style="margin:10px 0 0;font-size:32px;letter-spacing:10px;color:${TEXT};font-family:Consolas,Menlo,monospace;">${escapeHtml(code)}</p>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:24px 0 0;font-size:12px;line-height:1.7;color:${FAINT};">
+                  This code expires in 10 minutes. If you didn't request it, you can safely ignore this email.
                 </p>`);
 }
 
