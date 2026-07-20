@@ -14,6 +14,7 @@ import {
   squads,
   user,
 } from "@server/db";
+import { sendWelcomeEmail } from "@server/email";
 import { userOrgRole } from "@server/session";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
@@ -178,25 +179,58 @@ export async function onboardApplicant(
       email,
       password: tempPassword,
       role: "user",
+      data: {
+        mustChangePassword: true,
+        // The contact email from the public application form becomes the
+        // delivery inbox for resets and onboarding mail.
+        personalEmail: application.email,
+      },
     },
   });
 
-  await db.insert(playerProfiles).values({
-    userId: signup.user.id,
-    fullName: application.fullName,
-    ign: application.ign,
-    mlbbId: application.mlbbId,
-    serverId: application.serverId,
-    phone: application.phone,
-    preferredLanes: application.preferredLanes,
-    currentRank: application.currentRank,
-  });
+  // The auth API call above can't join a DB transaction, but the follow-up
+  // writes can share one — a partial failure here would otherwise leave an
+  // account with no profile/squad. If they fail, remove the just-created
+  // account so the admin can safely retry the whole onboard.
+  try {
+    await db.transaction(async (tx) => {
+      await tx.insert(playerProfiles).values({
+        userId: signup.user.id,
+        fullName: application.fullName,
+        ign: application.ign,
+        mlbbId: application.mlbbId,
+        serverId: application.serverId,
+        phone: application.phone,
+        preferredLanes: application.preferredLanes,
+        peakRank: application.peakRank,
+      });
 
-  await db.insert(squadMembers).values({
-    squadId: squad.id,
-    userId: signup.user.id,
-    squadRole: parsed.data.squadRole,
-  });
+      await tx.insert(squadMembers).values({
+        squadId: squad.id,
+        userId: signup.user.id,
+        squadRole: parsed.data.squadRole,
+      });
+    });
+  } catch (err) {
+    await db.delete(user).where(eq(user.id, signup.user.id));
+    console.error("[recruitment] onboard failed, rolled back account:", err);
+    return { ok: false, error: "Onboarding failed — no account was created" };
+  }
+  // Congratulate the player and hand over their login. Delivery failure must
+  // not undo a successful onboard — the admin still sees the temp password.
+  let emailSent = true;
+  try {
+    await sendWelcomeEmail({
+      to: application.email,
+      userName: application.fullName,
+      loginEmail: email,
+      tempPassword,
+      squadName: squad.name,
+    });
+  } catch {
+    emailSent = false;
+  }
+
   await logActivity({
     actor,
     action: "onboard",
@@ -213,7 +247,9 @@ export async function onboardApplicant(
   updateTag("players");
   return {
     ok: true,
-    message: `${application.fullName} onboarded to ${squad.name}`,
+    message: emailSent
+      ? `${application.fullName} onboarded to ${squad.name} — login details emailed to ${application.email}`
+      : `${application.fullName} onboarded to ${squad.name} — email failed, share the login details manually`,
     data: { email, tempPassword },
   };
 }

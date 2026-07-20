@@ -7,6 +7,7 @@ import { userOrgRole } from "@server/session";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { parseMYDateTimeLocal } from "@/lib/format";
 import type { ActionResult } from "./public";
 
 const eventSchema = z.object({
@@ -35,8 +36,10 @@ export async function createEvent(
     return { ok: false, error: "You can only create events for your squad" };
   }
 
-  const startsAt = new Date(parsed.data.startsAt);
-  const endsAt = parsed.data.endsAt ? new Date(parsed.data.endsAt) : null;
+  const startsAt = parseMYDateTimeLocal(parsed.data.startsAt);
+  const endsAt = parsed.data.endsAt
+    ? parseMYDateTimeLocal(parsed.data.endsAt)
+    : null;
   if (Number.isNaN(startsAt.getTime())) {
     return { ok: false, error: "Invalid start time" };
   }
@@ -95,8 +98,10 @@ export async function updateEvent(
     return { ok: false, error: "You can only assign your own squad" };
   }
 
-  const startsAt = new Date(parsed.data.startsAt);
-  const endsAt = parsed.data.endsAt ? new Date(parsed.data.endsAt) : null;
+  const startsAt = parseMYDateTimeLocal(parsed.data.startsAt);
+  const endsAt = parsed.data.endsAt
+    ? parseMYDateTimeLocal(parsed.data.endsAt)
+    : null;
   if (Number.isNaN(startsAt.getTime())) {
     return { ok: false, error: "Invalid start time" };
   }

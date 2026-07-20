@@ -104,6 +104,14 @@ export function NavUser({ user }: { user: SidebarUser }) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               render={
+                <a href="/dashboard/profile">
+                  <Icons.Stats.Players />
+                  Profile
+                </a>
+              }
+            />
+            <DropdownMenuItem
+              render={
                 <a href="/dashboard/settings">
                   <Icons.Actions.Settings />
                   Settings
@@ -111,7 +119,7 @@ export function NavUser({ user }: { user: SidebarUser }) {
               }
             />
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={handleSignOut}>
+            <DropdownMenuItem onClick={handleSignOut}>
               <Icons.Actions.SignOut />
               Sign out
             </DropdownMenuItem>

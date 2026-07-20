@@ -2,9 +2,15 @@
 
 import { logActivity } from "@server/activity-log";
 import { actionUser, canManageSquad, isSquadLeader } from "@server/authz";
-import { db, squadMembers, squadRoleEnum, squads } from "@server/db";
+import {
+  db,
+  squadDivisionEnum,
+  squadMembers,
+  squadRoleEnum,
+  squads,
+} from "@server/db";
 import { userOrgRole } from "@server/session";
-import { saveUpload } from "@server/uploads";
+import { deleteUpload, saveUpload } from "@server/uploads";
 import { and, eq, ne } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
@@ -26,6 +32,7 @@ const squadSchema = z.object({
     .regex(/^#[0-9a-fA-F]{6}$/, "Accent must be a hex color")
     .optional(),
   recruiting: z.coerce.boolean().default(false),
+  division: z.enum(squadDivisionEnum.enumValues).optional(),
 });
 
 export async function createSquad(formData: FormData): Promise<ActionResult> {
@@ -37,6 +44,7 @@ export async function createSquad(formData: FormData): Promise<ActionResult> {
     description: formData.get("description") || undefined,
     accentColor: formData.get("accentColor") || undefined,
     recruiting: formData.get("recruiting") === "true",
+    division: formData.get("division") || undefined,
   });
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
@@ -68,6 +76,7 @@ export async function createSquad(formData: FormData): Promise<ActionResult> {
       description: parsed.data.description ?? null,
       accentColor: parsed.data.accentColor ?? null,
       recruiting: parsed.data.recruiting,
+      division: parsed.data.division ?? "gasak",
       logoUrl,
       bannerUrl,
     })
@@ -99,6 +108,7 @@ export async function updateSquad(
     description: formData.get("description") || undefined,
     accentColor: formData.get("accentColor") || undefined,
     recruiting: formData.get("recruiting") === "true",
+    division: formData.get("division") || undefined,
   });
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
@@ -113,6 +123,9 @@ export async function updateSquad(
     description: parsed.data.description ?? null,
     accentColor: parsed.data.accentColor ?? null,
     recruiting: parsed.data.recruiting,
+    // Only change division when the form explicitly sends one — a missing
+    // field must not silently move a squad back to the default division.
+    ...(parsed.data.division ? { division: parsed.data.division } : {}),
   };
 
   if (parsed.data.name !== squad.name) {
@@ -136,6 +149,12 @@ export async function updateSquad(
   }
 
   await db.update(squads).set(updates).where(eq(squads.id, squadId));
+  if (updates.logoUrl && updates.logoUrl !== squad.logoUrl) {
+    await deleteUpload(squad.logoUrl);
+  }
+  if (updates.bannerUrl && updates.bannerUrl !== squad.bannerUrl) {
+    await deleteUpload(squad.bannerUrl);
+  }
   await logActivity({
     actor: user,
     action: "update",
@@ -159,6 +178,8 @@ export async function deleteSquad(squadId: string): Promise<ActionResult> {
     .returning();
   if (!row) return { ok: false, error: "Squad not found" };
 
+  await deleteUpload(row.logoUrl);
+  await deleteUpload(row.bannerUrl);
   await logActivity({
     actor: user,
     action: "delete",

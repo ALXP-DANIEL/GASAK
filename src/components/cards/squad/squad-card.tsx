@@ -1,17 +1,11 @@
 import { ContentCardFrame, contentCardSize } from "@components/cards/shared";
-import { Icons } from "@components/icons";
 import { LinkButton } from "@components/ui/brand";
 import { cn } from "@lib/utils";
 import type { Squad } from "@server/db/schema";
 import Image from "next/image";
-import Link from "next/link";
-
-export type SquadCardVariant = "compact" | "default";
 
 export type SquadCardProps = {
   squad: Squad;
-  memberCount?: number;
-  variant?: SquadCardVariant;
 };
 
 export function isDevelopmentSquad(squad: Pick<Squad, "name" | "description">) {
@@ -20,19 +14,9 @@ export function isDevelopmentSquad(squad: Pick<Squad, "name" | "description">) {
   );
 }
 
-export function SquadCard({
-  squad,
-  memberCount,
-  variant = "compact",
-}: SquadCardProps) {
-  if (variant === "compact") {
-    return <CompactSquadCard squad={squad} />;
-  }
-
-  return <DefaultSquadCard squad={squad} memberCount={memberCount} />;
-}
-
-function CompactSquadCard({ squad }: Pick<SquadCardProps, "squad">) {
+/** Showcase tile used on the home page squads section. For list pages, use
+ * `SquadRowCard` from `@features/squads/components/squad-shared`. */
+export function SquadCard({ squad }: SquadCardProps) {
   const development = isDevelopmentSquad(squad);
 
   return (
@@ -71,58 +55,6 @@ function CompactSquadCard({ squad }: Pick<SquadCardProps, "squad">) {
         View squad
       </LinkButton>
     </ContentCardFrame>
-  );
-}
-
-function DefaultSquadCard({
-  squad,
-  memberCount,
-}: Pick<SquadCardProps, "squad" | "memberCount">) {
-  return (
-    <Link href={`/squads/${squad.id}`} className="block h-full">
-      <ContentCardFrame interactive className={contentCardSize.default}>
-        <div className="relative h-40 w-full overflow-hidden bg-secondary">
-          {squad.bannerUrl && (
-            <Image
-              src={squad.bannerUrl}
-              alt={`${squad.name} banner`}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          )}
-          <div
-            aria-hidden
-            className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-card to-transparent"
-          />
-        </div>
-
-        <div className="relative flex flex-1 flex-col p-6 pt-0">
-          <div className="-mt-8 flex items-end gap-4">
-            <SquadLogo squad={squad} className="size-16 shrink-0" size={64} />
-            <div className="min-w-0 pb-1">
-              <h2 className="truncate font-heading text-xl font-semibold uppercase tracking-wide transition-colors group-hover:text-primary">
-                {squad.name}
-              </h2>
-              {typeof memberCount === "number" && (
-                <p className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Icons.Domain.Members size={12} aria-hidden />
-                  {memberCount} player{memberCount === 1 ? "" : "s"}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-            {squad.description}
-          </p>
-
-          <span className="mt-auto inline-flex items-center gap-1.5 pt-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-foreground/70 transition-colors group-hover:text-primary">
-            Squad profile
-            <Icons.Layout.Navigation.CaretRight size={13} aria-hidden />
-          </span>
-        </div>
-      </ContentCardFrame>
-    </Link>
   );
 }
 

@@ -1,18 +1,14 @@
 import { Skeleton } from "@components/ui/shadcn/skeleton";
-import { DashboardHomeSkeleton } from "./_components/dashboard-bones";
+import { DashboardHomeLoading } from "./_components/dashboard-bones";
 
 /**
- * Instant navigation feedback for the dashboard home route. `DashboardHomeSkeleton`
+ * Instant navigation feedback for the dashboard home route. `DashboardHomeLoading`
  * plays back real bone positions captured from the live page (via `npx boneyard-js
- * build`) with a shimmer sweep; `fallback` is the hand-drawn placeholder shown only
- * if bones haven't been captured yet (e.g. before the first `boneyard-js build` run).
+ * build`) for the role layout the user last saw; `fallback` is the hand-drawn
+ * placeholder shown on the first-ever visit or if bones haven't been captured yet.
  */
 export default function DashboardLoading() {
-  return (
-    <DashboardHomeSkeleton loading fallback={<StaticFallback />}>
-      {null}
-    </DashboardHomeSkeleton>
-  );
+  return <DashboardHomeLoading fallback={<StaticFallback />} />;
 }
 
 function StaticFallback() {

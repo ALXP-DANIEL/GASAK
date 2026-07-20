@@ -1,5 +1,6 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { Icons } from "@components/icons";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { listManagedSquadOptions } from "@features/squads/queries";
 import { EVENT_TYPE_LABELS } from "@lib/labels";
@@ -38,62 +39,64 @@ export default async function SchedulesPage() {
   const nextEvent = upcoming[0];
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Schedules"
-        kicker="Squad"
-        icon={Icons.Domain.Calendar}
-        description="Upcoming and past events for your squads."
-      />
-
-      {nextEvent && (
-        <NextEventCountdown
-          href={`/dashboard/schedules/${nextEvent.id}`}
-          title={nextEvent.title}
-          typeLabel={EVENT_TYPE_LABELS[nextEvent.type]}
-          startsAtIso={nextEvent.startsAt.toISOString()}
-          location={nextEvent.location}
-          squadName={nextEvent.squad?.name ?? null}
-        />
-      )}
-
-      <StatStrip>
-        <StatItem
-          label="This Week"
-          value={thisWeek.length}
-          hint="Next 7 days"
-          icon={Icons.Domain.Lightning}
-        />
-        <StatItem
-          label="Upcoming"
-          value={upcoming.length}
-          hint="On the calendar"
+    <PageSkeleton name="schedules" loading={false}>
+      <div className="flex flex-col gap-6">
+        <PageHeader
+          title="Schedules"
+          kicker="Squad"
           icon={Icons.Domain.Calendar}
+          description="Upcoming and past events for your squads."
         />
-        <StatItem
-          label="All Events"
-          value={rows.length}
-          hint="Including past events"
-          icon={Icons.Domain.Reports}
-        />
-      </StatStrip>
 
-      <ScheduleCalendar
-        events={rows.map((event) => ({
-          id: event.id,
-          title: event.title,
-          type: event.type,
-          startsAt: event.startsAt.toISOString(),
-          endsAt: event.endsAt?.toISOString() ?? null,
-          location: event.location,
-          squadId: event.squadId,
-          squadName: event.squad?.name ?? null,
-          squadAccentColor: event.squad?.accentColor ?? null,
-        }))}
-        squads={squads}
-        canManage={canManage}
-        allowOrgWide={role === "admin"}
-      />
-    </div>
+        {nextEvent && (
+          <NextEventCountdown
+            href={`/dashboard/schedules/${nextEvent.id}`}
+            title={nextEvent.title}
+            typeLabel={EVENT_TYPE_LABELS[nextEvent.type]}
+            startsAtIso={nextEvent.startsAt.toISOString()}
+            location={nextEvent.location}
+            squadName={nextEvent.squad?.name ?? null}
+          />
+        )}
+
+        <StatStrip>
+          <StatItem
+            label="This Week"
+            value={thisWeek.length}
+            hint="Next 7 days"
+            icon={Icons.Domain.Lightning}
+          />
+          <StatItem
+            label="Upcoming"
+            value={upcoming.length}
+            hint="On the calendar"
+            icon={Icons.Domain.Calendar}
+          />
+          <StatItem
+            label="All Events"
+            value={rows.length}
+            hint="Including past events"
+            icon={Icons.Domain.Reports}
+          />
+        </StatStrip>
+
+        <ScheduleCalendar
+          events={rows.map((event) => ({
+            id: event.id,
+            title: event.title,
+            type: event.type,
+            startsAt: event.startsAt.toISOString(),
+            endsAt: event.endsAt?.toISOString() ?? null,
+            location: event.location,
+            squadId: event.squadId,
+            squadName: event.squad?.name ?? null,
+            squadAccentColor: event.squad?.accentColor ?? null,
+          }))}
+          squads={squads}
+          canManage={canManage}
+          allowOrgWide={role === "admin"}
+        />
+      </div>
+    </PageSkeleton>
   );
 }

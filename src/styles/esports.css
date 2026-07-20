@@ -95,9 +95,27 @@
   }
 }
 
+.hero-float {
+  animation: hero-float 6s ease-in-out infinite;
+}
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .splash-overlay {
     display: none;
+  }
+
+  .hero-float {
+    animation: none;
   }
 }
 
@@ -135,4 +153,29 @@
   text-transform: uppercase;
   font-style: italic;
   letter-spacing: 0.03em;
+}
+
+/* Auth background grid: each square tile breathes (fades + swells) on its
+   own randomized cycle; the tile swaps to a random image at each trough. */
+@keyframes authGridPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+/* Auth background grid: a newly swapped tile image fades in over the
+   previous one for a smooth crossfade instead of a hard swap. */
+@keyframes authGridFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

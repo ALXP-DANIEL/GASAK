@@ -3,6 +3,7 @@ export {
   BuyButton,
   type BuyButtonProps,
   ProductCard,
+  type ProductCardData,
   type ProductCardProps,
   ProductPurchasePanel,
   type ProductWithVariants,
@@ -19,5 +20,4 @@ export {
   isDevelopmentSquad,
   SquadCard,
   type SquadCardProps,
-  type SquadCardVariant,
 } from "./squad";

@@ -1,5 +1,6 @@
 "use client";
 
+import { CornerCutBorder } from "@components/shared/corner-cut-border";
 import { Badge } from "@components/ui/shadcn/badge";
 import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
@@ -80,55 +81,60 @@ export function NextEventCountdown({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.22, 0.65, 0.3, 0.9] }}
     >
-      <Link
-        href={href}
-        className="corner-cut hover-lift group relative flex flex-col gap-4 overflow-hidden border border-primary/30 bg-card p-5 desktop:flex-row desktop:items-center desktop:justify-between desktop:p-6"
-      >
-        <div
-          aria-hidden
-          className="bg-grid pointer-events-none absolute inset-0 opacity-50"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-linear-to-r from-primary/10 to-transparent"
-        />
-        <div className="relative grid min-w-0 gap-1.5">
-          <div className="flex items-center gap-2">
-            <span aria-hidden className="h-2.5 w-0.75 -skew-x-12 bg-primary" />
-            <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
-              {isLive ? "Happening now" : "Next up"}
-            </span>
-            {isLive && (
-              <span className="relative flex size-2" aria-hidden>
-                <span className="absolute inline-flex h-full w-full animate-ping bg-primary opacity-75" />
-                <span className="relative inline-flex size-2 bg-primary" />
+      <Link href={href} className="hover-lift group block">
+        <CornerCutBorder
+          borderClassName="bg-primary/30"
+          contentClassName="relative flex flex-col gap-4 overflow-hidden bg-card p-5 desktop:flex-row desktop:items-center desktop:justify-between desktop:p-6"
+        >
+          <div
+            aria-hidden
+            className="bg-grid pointer-events-none absolute inset-0 opacity-50"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-linear-to-r from-primary/10 to-transparent"
+          />
+          <div className="relative grid min-w-0 gap-1.5">
+            <div className="flex items-center gap-2">
+              <span
+                aria-hidden
+                className="h-2.5 w-0.75 -skew-x-12 bg-primary"
+              />
+              <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
+                {isLive ? "Happening now" : "Next up"}
               </span>
+              {isLive && (
+                <span className="relative flex size-2" aria-hidden>
+                  <span className="absolute inline-flex h-full w-full animate-ping bg-primary opacity-75" />
+                  <span className="relative inline-flex size-2 bg-primary" />
+                </span>
+              )}
+            </div>
+            <h2 className="truncate font-heading text-2xl font-bold group-hover:text-primary">
+              {title}
+            </h2>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <Badge variant="outline">{typeLabel}</Badge>
+              {squadName && <span>{squadName}</span>}
+              {location && <span>· {location}</span>}
+            </div>
+          </div>
+
+          <div className="relative flex shrink-0 items-center gap-2 desktop:gap-3">
+            {isLive ? (
+              <span className="text-glow font-heading text-3xl font-bold uppercase text-primary">
+                Live
+              </span>
+            ) : (
+              <>
+                <CountdownDigit value={pad("days")} unit="days" />
+                <CountdownDigit value={pad("hours")} unit="hrs" />
+                <CountdownDigit value={pad("minutes")} unit="min" />
+                <CountdownDigit value={pad("seconds")} unit="sec" />
+              </>
             )}
           </div>
-          <h2 className="truncate font-heading text-2xl font-bold group-hover:text-primary">
-            {title}
-          </h2>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <Badge variant="outline">{typeLabel}</Badge>
-            {squadName && <span>{squadName}</span>}
-            {location && <span>· {location}</span>}
-          </div>
-        </div>
-
-        <div className="relative flex shrink-0 items-center gap-2 desktop:gap-3">
-          {isLive ? (
-            <span className="text-glow font-heading text-3xl font-bold uppercase text-primary">
-              Live
-            </span>
-          ) : (
-            <>
-              <CountdownDigit value={pad("days")} unit="days" />
-              <CountdownDigit value={pad("hours")} unit="hrs" />
-              <CountdownDigit value={pad("minutes")} unit="min" />
-              <CountdownDigit value={pad("seconds")} unit="sec" />
-            </>
-          )}
-        </div>
+        </CornerCutBorder>
       </Link>
     </motion.div>
   );

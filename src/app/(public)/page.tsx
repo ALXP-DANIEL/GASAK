@@ -1,5 +1,6 @@
 "use cache";
 
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { createPageMetadata } from "@lib/metadata";
 import {
   db,
@@ -65,7 +66,7 @@ export default async function HomePage() {
   ]);
 
   return (
-    <>
+    <PageSkeleton name="home" loading={false}>
       <Hero />
       <StatsBar
         stats={{
@@ -79,6 +80,6 @@ export default async function HomePage() {
       <NewsSection items={newsItems} />
       <ProductsSection products={topProducts} />
       <CtaBanner />
-    </>
+    </PageSkeleton>
   );
 }

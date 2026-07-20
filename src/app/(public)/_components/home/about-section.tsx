@@ -1,12 +1,21 @@
 import { Icons } from "@components/icons";
+import Image from "next/image";
 import Link from "next/link";
 
 export function AboutSection() {
   return (
-    <section
-      id="about"
-      className="relative overflow-hidden bg-linear-to-br from-primary/15 via-background to-background"
-    >
+    <section id="about" className="relative overflow-hidden bg-background">
+      <Image
+        src="/images/about-family.png"
+        alt=""
+        fill
+        className="object-cover"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute inset-0 bg-linear-to-br from-primary/15 via-background/90 to-background"
+        aria-hidden="true"
+      />
       <div className="relative mx-auto w-full max-w-7xl px-4 py-14 desktop:px-8 desktop:py-24">
         <div className="mx-auto max-w-lg text-center desktop:mx-0 desktop:text-left">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">

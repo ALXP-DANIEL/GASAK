@@ -190,7 +190,7 @@ export function ApplicationCard({
             <div className="mt-3 grid gap-1.5 text-xs text-muted-foreground">
               <p>
                 {formatLanes(application.preferredLanes)} ·{" "}
-                {formatRank(application.currentRank)}
+                {formatRank(application.peakRank)}
               </p>
               <p className="truncate">
                 Squad: {application.squad?.name ?? "No preference"}
@@ -224,8 +224,8 @@ export function ApplicationCard({
                 value={formatLanes(application.preferredLanes)}
               />
               <DetailRow
-                label="Rank"
-                value={formatRank(application.currentRank)}
+                label="Peak rank"
+                value={formatRank(application.peakRank)}
               />
               <DetailRow label="Hero pool" value={application.heroPool} />
               <DetailRow

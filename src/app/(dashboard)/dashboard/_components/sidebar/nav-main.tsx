@@ -7,6 +7,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   useSidebar,
 } from "@components/ui/shadcn/sidebar";
 import type { DashboardNavGroup } from "@config/dashboard";
@@ -41,23 +44,52 @@ export function NavMain({ groups }: { groups: DashboardNavGroup[] }) {
           )}
           <SidebarGroupContent>
             <SidebarMenu>
-              {group.items.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    tooltip={item.label}
-                    isActive={isActive(item.href)}
-                    className="rounded-none border-l-2 border-transparent data-[active=true]:border-primary data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
-                    render={
-                      <Link href={item.href} onClick={handleNavigate}>
-                        <item.icon
-                          weight={isActive(item.href) ? "fill" : "regular"}
-                        />
-                        <span>{item.label}</span>
-                      </Link>
-                    }
-                  />
-                </SidebarMenuItem>
-              ))}
+              {group.items.map((item) => {
+                const activeChild = item.children?.find((child) =>
+                  isActive(child.href),
+                );
+                const itemActive = isActive(item.href) && !activeChild;
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      tooltip={item.label}
+                      isActive={itemActive}
+                      className="rounded-none border-l-2 border-transparent data-[active=true]:border-primary data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
+                      render={
+                        <Link href={item.href} onClick={handleNavigate}>
+                          <item.icon weight={itemActive ? "fill" : "regular"} />
+                          <span>{item.label}</span>
+                        </Link>
+                      }
+                    />
+                    {item.children && item.children.length > 0 && (
+                      <SidebarMenuSub>
+                        {item.children.map((child) => (
+                          <SidebarMenuSubItem key={child.href}>
+                            <SidebarMenuSubButton
+                              isActive={isActive(child.href)}
+                              className="rounded-none border-l-2 border-transparent data-active:border-primary data-active:bg-primary/10 data-active:text-primary"
+                              render={
+                                <Link
+                                  href={child.href}
+                                  onClick={handleNavigate}
+                                >
+                                  <child.icon
+                                    weight={
+                                      isActive(child.href) ? "fill" : "regular"
+                                    }
+                                  />
+                                  <span>{child.label}</span>
+                                </Link>
+                              }
+                            />
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    )}
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

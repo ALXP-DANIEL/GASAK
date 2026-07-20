@@ -1,4 +1,5 @@
 import { Icons } from "@components/icons";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { getUnreadNewsIds, markNewsRead } from "@server/actions/news";
 import { getManagedSquadIds, getMemberSquadIds } from "@server/authz";
 import { db, news, squads } from "@server/db";
@@ -56,22 +57,24 @@ export default async function NewsPage() {
   ).map((value) => ({ value, label: value }));
 
   return (
-    <main>
-      <PageHeader
-        title="News"
-        kicker="Squad"
-        icon={Icons.Domain.News}
-        description="Global organization news and squad-specific updates."
-      >
-        {(role === "admin" || postableSquads.length > 0) && (
-          <NewsFormDialog
-            squads={postableSquads}
-            allowGlobal={role === "admin"}
-          />
-        )}
-      </PageHeader>
-      <NewsList rows={data} audienceOptions={audienceFilterOptions} />
-    </main>
+    <PageSkeleton name="news" loading={false}>
+      <main>
+        <PageHeader
+          title="News"
+          kicker="Squad"
+          icon={Icons.Domain.News}
+          description="Global organization news and squad-specific updates."
+        >
+          {(role === "admin" || postableSquads.length > 0) && (
+            <NewsFormDialog
+              squads={postableSquads}
+              allowGlobal={role === "admin"}
+            />
+          )}
+        </PageHeader>
+        <NewsList rows={data} audienceOptions={audienceFilterOptions} />
+      </main>
+    </PageSkeleton>
   );
 }
 

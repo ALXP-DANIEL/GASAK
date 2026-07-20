@@ -7,6 +7,7 @@ import type {
   OrgRole,
   PaymentMethod,
   ProductCategory,
+  SquadDivision,
   SquadRole,
   TournamentFormat,
   TournamentStatus,
@@ -21,6 +22,11 @@ export const ORG_ROLE_LABELS: Record<OrgRole, string> = {
 // Temporary alias while call sites migrate to ORG_ROLE_LABELS
 export const ROLE_LABELS = ORG_ROLE_LABELS;
 
+// NOTE: Multi-select lanes + the "Flex" role were disabled per a product
+// decision (GASAK: one lane per player, no Flex). The `flex` label is kept so
+// any DB-backed `flex` values still render, but the UI no longer offers it.
+// Re-enable by restoring the Flex option in LaneSelectGroup and the rules in
+// canonicalizeLanes below.
 export const LANE_LABELS: Record<Lane, string> = {
   exp: "EXP",
   jungle: "Jungle",
@@ -64,16 +70,20 @@ export function normalizeLanes(
  * - de-duplicated and ordered (via {@link normalizeLanes});
  * - Flex is exclusive: if present, it collapses to just `["flex"]`;
  * - selecting all five specific lanes is equivalent to Flex.
+ *
+ * NOTE: Flex + multi-select are disabled per product decision (one lane per
+ * player, no Flex). The rules below are kept commented for future reference.
  */
 export function canonicalizeLanes(
   lanes: readonly (string | null | undefined)[] | null | undefined,
 ): Lane[] {
-  const normalized = normalizeLanes(lanes);
-  if (normalized.includes(FLEX_LANE)) return [FLEX_LANE];
-  if (SPECIFIC_LANES.every((lane) => normalized.includes(lane))) {
-    return [FLEX_LANE];
-  }
-  return normalized;
+  // const normalized = normalizeLanes(lanes);
+  // if (normalized.includes(FLEX_LANE)) return [FLEX_LANE];
+  // if (SPECIFIC_LANES.every((lane) => normalized.includes(lane))) {
+  //   return [FLEX_LANE];
+  // }
+  // return normalized;
+  return normalizeLanes(lanes);
 }
 
 /** Format a player's preferred lanes as a readable label (e.g. "EXP, Mid"). */
@@ -86,12 +96,38 @@ export function formatLanes(
   return normalized.map((lane) => LANE_LABELS[lane]).join(", ");
 }
 
+/** Format a player's MLBB ID with server, e.g. "(2151) 123456789". */
+export function formatMlbbId(
+  mlbbId: string | null | undefined,
+  serverId: string | null | undefined,
+  fallback = "-",
+): string {
+  if (!mlbbId) return fallback;
+  return `${serverId ? `(${serverId}) ` : ""}${mlbbId}`;
+}
+
 export const SQUAD_ROLE_LABELS: Record<SquadRole, string> = {
   leader: "Leader",
   coach: "Coach",
   player: "Player",
   reserve: "Reserve",
 };
+
+export const SQUAD_DIVISION_LABELS: Record<SquadDivision, string> = {
+  gasak: "GASAK",
+  nexus: "Nexus",
+  velrix: "Velrix",
+};
+
+export const SQUAD_DIVISION_SLUGS = [
+  "gasak",
+  "nexus",
+  "velrix",
+] as const satisfies readonly SquadDivision[];
+
+export function isSquadDivision(value: unknown): value is SquadDivision {
+  return (SQUAD_DIVISION_SLUGS as readonly unknown[]).includes(value);
+}
 
 export const APPLICATION_STATUS_LABELS: Record<ApplicationStatus, string> = {
   applied: "Applied",
@@ -142,6 +178,7 @@ export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, string> = {
   weekly_pass: "Weekly Pass",
   joki: "Joki",
   coaching: "Coaching",
+  merchandise: "Merchandise",
 };
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {

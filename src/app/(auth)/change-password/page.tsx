@@ -2,7 +2,7 @@ import { ChangePasswordForm } from "@features/auth/components/change-password-fo
 import { requireUser } from "@server/session";
 
 export default async function ChangePasswordPage() {
-  await requireUser();
+  const user = await requireUser();
 
-  return <ChangePasswordForm />;
+  return <ChangePasswordForm needsPersonalEmail={!user.personalEmail} />;
 }

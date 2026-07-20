@@ -1,6 +1,9 @@
 import { ContentCardGrid, ProductCard } from "@components/cards";
+import { Icons } from "@components/icons";
 import { DeleteButton } from "@components/shared/delete-button";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { Badge } from "@components/ui/shadcn/badge";
+import { buttonVariants } from "@components/ui/shadcn/button";
 import {
   Card,
   CardContent,
@@ -12,11 +15,10 @@ import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
 import { deleteProduct } from "@server/actions/shop";
 import { db, products } from "@server/db";
 import { eq } from "drizzle-orm";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireDashboardRole } from "../../_components/dashboard-section";
 import { DetailRow, PageHeader } from "../../_components/page-surface";
-import { ProductFormDialog } from "../_components/product-form";
-import { ProductVariantsDialog } from "../_components/product-variants-form";
 
 async function getProduct(productId: string) {
   return db.query.products.findFirst({
@@ -39,67 +41,74 @@ export default async function ProductDetailPage({
   if (!product) notFound();
 
   return (
-    <main>
-      <PageHeader
-        title={product.name}
-        breadcrumbLabel={product.name}
-        kicker="Products"
-        description="Preview and manage this shop product."
-      />
+    <PageSkeleton name="products-detail" loading={false}>
+      <main>
+        <PageHeader
+          title={product.name}
+          breadcrumbLabel={product.name}
+          kicker="Products"
+          icon={Icons.Domain.Products}
+          description="Preview and manage this shop product."
+        />
 
-      <div className="grid gap-6 desktop:grid-cols-[minmax(0,1fr)_24rem]">
-        <ContentCardGrid>
-          <ProductCard product={product} variant="default" action={false} />
-        </ContentCardGrid>
+        <div className="grid gap-6 desktop:grid-cols-[minmax(0,1fr)_24rem]">
+          <ContentCardGrid>
+            <ProductCard product={product} variant="default" action={false} />
+          </ContentCardGrid>
 
-        <div className="grid h-fit gap-4">
-          <Card className="shadow-xs">
-            <CardHeader>
-              <CardTitle>Manage product</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3">
-              <ProductFormDialog product={product} />
-              <ProductVariantsDialog product={product} />
-              <DeleteButton
-                action={deleteProduct.bind(null, product.id)}
-                title="Delete product?"
-                description={`This will permanently remove "${product.name}".`}
-                redirectTo="/dashboard/products"
-              />
-            </CardContent>
-          </Card>
+          <div className="grid h-fit gap-4">
+            <Card className="shadow-xs">
+              <CardHeader>
+                <CardTitle>Manage product</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-3">
+                <Link
+                  href={`/dashboard/products/${product.id}/edit`}
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  Edit product
+                </Link>
+                <DeleteButton
+                  action={deleteProduct.bind(null, product.id)}
+                  title="Delete product?"
+                  description={`This will permanently remove "${product.name}".`}
+                  redirectTo="/dashboard/products"
+                />
+              </CardContent>
+            </Card>
 
-          <Card className="shadow-xs">
-            <CardHeader>
-              <CardTitle>Product details</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-4">
-              <DetailRow
-                label="Category"
-                value={PRODUCT_CATEGORY_LABELS[product.category]}
-              />
-              <DetailRow label="Price" value={formatRM(product.priceSen)} />
-              <DetailRow label="Stock" value={product.stock} />
-              <DetailRow
-                label="Variants"
-                value={
-                  product.hasVariants
-                    ? `${product.variants.length} variant${product.variants.length === 1 ? "" : "s"}`
-                    : "None"
-                }
-              />
-              <DetailRow
-                label="Status"
-                value={
-                  <Badge variant={product.active ? "default" : "outline"}>
-                    {product.active ? "Visible" : "Hidden"}
-                  </Badge>
-                }
-              />
-            </CardContent>
-          </Card>
+            <Card className="shadow-xs">
+              <CardHeader>
+                <CardTitle>Product details</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-4">
+                <DetailRow
+                  label="Category"
+                  value={PRODUCT_CATEGORY_LABELS[product.category]}
+                />
+                <DetailRow label="Price" value={formatRM(product.priceSen)} />
+                <DetailRow label="Stock" value={product.stock} />
+                <DetailRow
+                  label="Variants"
+                  value={
+                    product.hasVariants
+                      ? `${product.variants.length} variant${product.variants.length === 1 ? "" : "s"}`
+                      : "None"
+                  }
+                />
+                <DetailRow
+                  label="Status"
+                  value={
+                    <Badge variant={product.active ? "default" : "outline"}>
+                      {product.active ? "Visible" : "Hidden"}
+                    </Badge>
+                  }
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </PageSkeleton>
   );
 }

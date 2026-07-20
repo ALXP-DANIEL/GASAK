@@ -32,8 +32,9 @@ import {
 import { Switch } from "@components/ui/shadcn/switch";
 import { Textarea } from "@components/ui/shadcn/textarea";
 import { compressImage } from "@lib/compress-image";
-import { format } from "date-fns";
-import { useRef, useState } from "react";
+import { cn } from "@lib/utils";
+import { format, parse } from "date-fns";
+import { useEffect, useRef, useState } from "react";
 import {
   type Control,
   Controller,
@@ -59,10 +60,10 @@ const fieldShellClass =
 const labelClass = "text-[0.7rem] font-semibold uppercase text-foreground/80";
 
 const controlClass =
-  "h-10 rounded-md border-border/80 bg-background/80 px-3 text-sm shadow-inner shadow-foreground/[0.03] transition-all placeholder:text-muted-foreground/60 focus-visible:border-primary/70 focus-visible:ring-2 focus-visible:ring-primary/15 aria-invalid:border-destructive/70 aria-invalid:ring-destructive/15";
+  "h-10 rounded-md border-border/80 bg-background/80 px-3 text-sm shadow-inner shadow-foreground/[0.03] transition-all placeholder:text-muted-foreground/60 focus-visible:border-primary/70 focus-visible:ring-2 focus-visible:ring-primary/15 aria-invalid:border-destructive/70 aria-invalid:ring-destructive/15 dark:bg-background/80 dark:disabled:bg-background/50";
 
 const textareaClass =
-  "min-h-28 rounded-md border-border/80 bg-background/80 px-3 py-2.5 text-sm leading-6 shadow-inner shadow-foreground/[0.03] transition-all placeholder:text-muted-foreground/60 focus-visible:border-primary/70 focus-visible:ring-2 focus-visible:ring-primary/15 aria-invalid:border-destructive/70 aria-invalid:ring-destructive/15";
+  "min-h-28 rounded-md border-border/80 bg-background/80 px-3 py-2.5 text-sm leading-6 shadow-inner shadow-foreground/[0.03] transition-all placeholder:text-muted-foreground/60 focus-visible:border-primary/70 focus-visible:ring-2 focus-visible:ring-primary/15 aria-invalid:border-destructive/70 aria-invalid:ring-destructive/15 dark:bg-background/80 dark:disabled:bg-background/50";
 
 const inlineChoiceShellClass =
   "rounded-md border border-border/70 bg-card/70 p-3.5 shadow-sm shadow-foreground/5 transition-colors data-[invalid=true]:border-destructive/60 data-[invalid=true]:bg-destructive/5";
@@ -229,7 +230,7 @@ export function FormSelect<
               id={field.name}
               onBlur={field.onBlur}
               aria-invalid={fieldState.invalid}
-              className={`${controlClass} w-full`}
+              className={cn(controlClass, "w-full data-[size=default]:h-10")}
             >
               <SelectValue placeholder={placeholder}>
                 {(value: string) =>
@@ -516,6 +517,119 @@ export function FormDatePicker<
 }
 
 /* -------------------------------------------------------------------------- */
+/* FormDateTimeField — calendar + time popover, shadcn "date & time" recipe   */
+/* Binds to a "yyyy-MM-dd'T'HH:mm" string, same format as native              */
+/* <input type="datetime-local"> uses, so it's a drop-in replacement.         */
+/* -------------------------------------------------------------------------- */
+
+const DATE_TIME_VALUE_FORMAT = "yyyy-MM-dd'T'HH:mm";
+
+type FormDateTimeFieldProps<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+> = BaseFieldProps<TFieldValues, TName> & {
+  placeholder?: string;
+  fromDate?: Date;
+  toDate?: Date;
+};
+
+export function FormDateTimeField<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  control,
+  name,
+  label,
+  hideLabel,
+  description,
+  disabled,
+  placeholder = "Pick a date & time",
+  fromDate,
+  toDate,
+}: FormDateTimeFieldProps<TFieldValues, TName>) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState }) => {
+        const value: string = field.value ?? "";
+        const selected = value
+          ? parse(value, DATE_TIME_VALUE_FORMAT, new Date())
+          : undefined;
+        const time = value.slice(11, 16);
+
+        function commit(nextDate: Date | undefined, nextTime: string) {
+          if (!nextDate) {
+            field.onChange("");
+            return;
+          }
+          const [hours, minutes] = nextTime
+            ? nextTime.split(":").map(Number)
+            : [0, 0];
+          const combined = new Date(nextDate);
+          combined.setHours(hours ?? 0, minutes ?? 0, 0, 0);
+          field.onChange(format(combined, DATE_TIME_VALUE_FORMAT));
+        }
+
+        return (
+          <Field data-invalid={fieldState.invalid} className={fieldShellClass}>
+            <FieldLabel
+              htmlFor={field.name}
+              className={hideLabel ? "sr-only" : labelClass}
+            >
+              {label}
+            </FieldLabel>
+            <Popover>
+              <PopoverTrigger
+                render={
+                  <Button
+                    id={field.name}
+                    type="button"
+                    variant="outline"
+                    disabled={disabled}
+                    onBlur={field.onBlur}
+                    aria-invalid={fieldState.invalid}
+                    className={`${controlClass} w-full justify-start gap-2 text-left font-normal data-[empty=true]:text-muted-foreground`}
+                    data-empty={!value}
+                  >
+                    <Icons.Domain.Calendar className="size-4 shrink-0" />
+                    {selected ? format(selected, "PPP · p") : placeholder}
+                  </Button>
+                }
+              />
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selected}
+                  onSelect={(date) => commit(date, time || "00:00")}
+                  disabled={[
+                    ...(fromDate ? [{ before: fromDate }] : []),
+                    ...(toDate ? [{ after: toDate }] : []),
+                  ]}
+                  autoFocus
+                />
+                <div className="flex items-center gap-2 border-t border-border/70 p-3">
+                  <Icons.Domain.Time className="size-4 shrink-0 text-muted-foreground" />
+                  <Input
+                    type="time"
+                    value={time}
+                    disabled={!selected}
+                    onChange={(e) => commit(selected, e.target.value)}
+                    className={cn(controlClass, "h-9")}
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
+            {description && <FieldDescription>{description}</FieldDescription>}
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        );
+      }}
+    />
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /* FormFileInput — binds File (or File[] with multiple) into form state       */
 /* -------------------------------------------------------------------------- */
 
@@ -535,6 +649,40 @@ type FormFileInputProps<
   cropConfig?: ImageCropConfig;
 };
 
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function FilePreviewThumb({ file }: { file: File }) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!file.type.startsWith("image/")) return;
+    const objectUrl = URL.createObjectURL(file);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
+
+  if (url) {
+    return (
+      // biome-ignore lint/performance/noImgElement: local object URL preview, not an app asset
+      <img
+        src={url}
+        alt=""
+        className="size-10 shrink-0 rounded-md border border-border/70 object-cover"
+      />
+    );
+  }
+
+  return (
+    <span className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border/70 bg-muted text-muted-foreground">
+      <Icons.Editor.Image size={16} />
+    </span>
+  );
+}
+
 export function FormFileInput<
   TFieldValues extends FieldValues,
   TName extends FieldPath<TFieldValues>,
@@ -551,6 +699,7 @@ export function FormFileInput<
   cropConfig,
 }: FormFileInputProps<TFieldValues, TName>) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [dragOver, setDragOver] = useState(false);
   const [pendingCrop, setPendingCrop] = useState<{
     url: string;
     fileName: string;
@@ -572,51 +721,148 @@ export function FormFileInput<
       <Controller
         name={name}
         control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid} className={fieldShellClass}>
-            <FieldLabel
-              htmlFor={field.name}
-              className={hideLabel ? "sr-only" : labelClass}
+        render={({ field, fieldState }) => {
+          const files: File[] = multiple
+            ? ((field.value as File[] | null) ?? [])
+            : field.value
+              ? [field.value as File]
+              : [];
+
+          async function handleFiles(fileList: FileList | File[]) {
+            const incoming = Array.from(fileList);
+            const file = incoming[0];
+            if (!file) return;
+
+            if (cropConfig && !multiple) {
+              setPendingCrop({
+                url: URL.createObjectURL(file),
+                fileName: file.name,
+                apply: (cropped) => field.onChange(cropped),
+              });
+              return;
+            }
+
+            const compressed = await Promise.all(
+              incoming.map((f) => compressImage(f, imageMaxDimension)),
+            );
+            field.onChange(multiple ? compressed : (compressed[0] ?? null));
+          }
+
+          function removeFile(index: number) {
+            clearInput();
+            if (!multiple) {
+              field.onChange(null);
+              return;
+            }
+            field.onChange(files.filter((_, i) => i !== index));
+          }
+
+          return (
+            <Field
+              data-invalid={fieldState.invalid}
+              className={fieldShellClass}
             >
-              {label}
-            </FieldLabel>
-            <Input
-              id={field.name}
-              name={field.name}
-              type="file"
-              accept={accept}
-              multiple={multiple}
-              disabled={disabled}
-              onBlur={field.onBlur}
-              ref={(node) => {
-                field.ref(node);
-                inputRef.current = node;
-              }}
-              onChange={async (e) => {
-                const files = Array.from(e.target.files ?? []);
-                const file = files[0];
+              <FieldLabel
+                htmlFor={field.name}
+                className={hideLabel ? "sr-only" : labelClass}
+              >
+                {label}
+              </FieldLabel>
 
-                if (cropConfig && !multiple && file) {
-                  setPendingCrop({
-                    url: URL.createObjectURL(file),
-                    fileName: file.name,
-                    apply: (cropped) => field.onChange(cropped),
-                  });
-                  return;
-                }
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: drag-and-drop zone; the overlaid <input type="file"> handles click/keyboard selection */}
+              <div
+                className={cn(
+                  "relative flex min-h-24 flex-col items-center justify-center gap-1.5 rounded-md border border-dashed border-border/70 bg-background/60 px-4 py-5 text-center transition-colors",
+                  !disabled &&
+                    "cursor-pointer hover:border-primary/50 hover:bg-primary/5",
+                  dragOver && "border-primary bg-primary/10",
+                  fieldState.invalid && "border-destructive/60",
+                  disabled && "pointer-events-none opacity-60",
+                )}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragOver(true);
+                }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOver(false);
+                  if (e.dataTransfer.files.length)
+                    void handleFiles(e.dataTransfer.files);
+                }}
+              >
+                <Icons.Actions.Upload
+                  size={18}
+                  className="text-muted-foreground"
+                />
+                <p className="text-xs font-medium text-foreground">
+                  Click to upload or drag and drop
+                </p>
+                {accept && (
+                  <p className="text-[0.68rem] text-muted-foreground">
+                    {accept.replace(/\*/g, "").replace(/,/g, ", ")}
+                  </p>
+                )}
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  type="file"
+                  accept={accept}
+                  multiple={multiple}
+                  disabled={disabled}
+                  onBlur={field.onBlur}
+                  ref={(node) => {
+                    field.ref(node);
+                    inputRef.current = node;
+                  }}
+                  onChange={(e) => {
+                    if (e.target.files?.length)
+                      void handleFiles(e.target.files);
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-invalid={fieldState.invalid}
+                  className="absolute inset-0 size-full cursor-pointer opacity-0"
+                />
+              </div>
 
-                const compressed = await Promise.all(
-                  files.map((f) => compressImage(f, imageMaxDimension)),
-                );
-                field.onChange(multiple ? compressed : (compressed[0] ?? null));
-              }}
-              aria-invalid={fieldState.invalid}
-              className={controlClass}
-            />
-            {description && <FieldDescription>{description}</FieldDescription>}
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
+              {files.length > 0 && (
+                <ul className="grid gap-1.5">
+                  {files.map((file, index) => (
+                    <li
+                      key={`${file.name}-${file.size}-${file.lastModified}`}
+                      className="flex items-center gap-2.5 rounded-md border border-border/70 bg-card/70 p-2"
+                    >
+                      <FilePreviewThumb file={file} />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-medium text-foreground">
+                          {file.name}
+                        </p>
+                        <p className="text-[0.68rem] text-muted-foreground">
+                          {formatFileSize(file.size)}
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-7 shrink-0"
+                        aria-label={`Remove ${file.name}`}
+                        onClick={() => removeFile(index)}
+                      >
+                        <Icons.Layout.Navigation.Close size={14} />
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {description && (
+                <FieldDescription>{description}</FieldDescription>
+              )}
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          );
+        }}
       />
       {cropConfig && (
         <ImageCropDialog

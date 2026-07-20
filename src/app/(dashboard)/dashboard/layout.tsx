@@ -12,6 +12,7 @@ import { env } from "@/env";
 import { CommandPalette } from "./_components/command-palette";
 import { DashboardBreadcrumbs } from "./_components/dashboard-breadcrumbs";
 import { getDashboardContext } from "./_components/dashboard-context";
+import { PersonalEmailPrompt } from "./_components/personal-email-prompt";
 import { AppSidebar } from "./_components/sidebar/app-sidebar";
 
 const showDebugLogin = env.NODE_ENV !== "production";
@@ -95,7 +96,10 @@ async function DashboardShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden p-4 mobile:pb-[calc(env(safe-area-inset-bottom)+1rem)] desktop:p-6">
-          <div className="mx-auto w-full max-w-384">{children}</div>
+          <div className="mx-auto w-full max-w-384">
+            {user.personalEmail ? null : <PersonalEmailPrompt />}
+            {children}
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>

@@ -39,8 +39,16 @@ export const columns: ColumnDef<OrderRow>[] = [
   {
     id: "product",
     header: "Product",
-    cell: ({ row }) =>
-      `${row.original.product.name} x ${row.original.quantity}`,
+    cell: ({ row }) => (
+      <div className="grid gap-0.5">
+        <span>{`${row.original.product.name} x ${row.original.quantity}`}</span>
+        {row.original.variantLabel && (
+          <span className="text-muted-foreground">
+            {row.original.variantLabel}
+          </span>
+        )}
+      </div>
+    ),
   },
   {
     id: "total",

@@ -1,10 +1,12 @@
 "use client";
 
+import { DashboardFormGrid } from "@components/forms/dashboard-form";
 import {
-  DashboardForm,
-  DashboardFormGrid,
-} from "@components/forms/dashboard-form";
-import { FormField, FormSelect } from "@components/forms/form-field";
+  FormDateTimeField,
+  FormField,
+  FormSelect,
+} from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -12,6 +14,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -58,7 +61,7 @@ export function EventFormDialog({
         startsAt: event ? toDateTimeLocal(event.startsAt) : "",
         endsAt: event?.endsAt ? toDateTimeLocal(event.endsAt) : "",
         location: event?.location ?? "",
-        squadId: event?.squadId ?? squadOptions[0]?.value ?? "",
+        squadId: event?.squadId ?? "",
       },
       action: (values) => {
         const payload = {
@@ -87,50 +90,59 @@ export function EventFormDialog({
             Schedule practice, scrims, meetings, or tournaments.
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
-            <FormField control={control} name="title" label="Title" />
-            <DashboardFormGrid>
-              <FormSelect
-                control={control}
-                name="type"
-                label="Type"
-                options={typeOptions}
-              />
-              <FormSelect
-                control={control}
-                name="squadId"
-                label="Squad"
-                options={squadOptions}
-                placeholder="Pick a squad"
-              />
-            </DashboardFormGrid>
-            <DashboardFormGrid>
+        <CredenzaBody>
+          <form id="event-form" onSubmit={handleSubmit} className="grid gap-5">
+            <FormSection title="Event Details">
+              <FormField control={control} name="title" label="Title" />
+              <DashboardFormGrid>
+                <FormSelect
+                  control={control}
+                  name="type"
+                  label="Type"
+                  options={typeOptions}
+                />
+                <FormSelect
+                  control={control}
+                  name="squadId"
+                  label="Squad"
+                  options={squadOptions}
+                  placeholder="Pick a squad"
+                />
+              </DashboardFormGrid>
+              <DashboardFormGrid>
+                <FormDateTimeField
+                  control={control}
+                  name="startsAt"
+                  label="Starts"
+                />
+                <FormDateTimeField
+                  control={control}
+                  name="endsAt"
+                  label="Ends"
+                />
+              </DashboardFormGrid>
+              <FormField control={control} name="location" label="Location" />
               <FormField
                 control={control}
-                name="startsAt"
-                label="Starts"
-                type="datetime-local"
+                name="description"
+                label="Description"
+                as="textarea"
               />
-              <FormField
-                control={control}
-                name="endsAt"
-                label="Ends"
-                type="datetime-local"
-              />
-            </DashboardFormGrid>
-            <FormField control={control} name="location" label="Location" />
-            <FormField
-              control={control}
-              name="description"
-              label="Description"
-              as="textarea"
-            />
-            <Button type="submit" disabled={pending} className="w-fit">
-              {pending ? "Saving..." : isEdit ? "Update event" : "Create event"}
-            </Button>
-          </DashboardForm>
+            </FormSection>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="event-form" disabled={pending}>
+            {pending ? "Saving..." : isEdit ? "Update event" : "Create event"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

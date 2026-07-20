@@ -1,3 +1,4 @@
+import { CornerCutBorder } from "@components/shared/corner-cut-border";
 import { Badge } from "@components/ui/shadcn/badge";
 import type { listTournaments } from "@features/tournaments/queries";
 import { formatDate } from "@lib/format";
@@ -32,42 +33,47 @@ export function TournamentCard({ tournament }: { tournament: TournamentRow }) {
   return (
     <Link
       href={`/dashboard/tournaments/${tournament.id}`}
-      className="hover-lift corner-cut group relative flex flex-col gap-3 overflow-hidden border bg-card p-4 pl-5 shadow-xs"
+      className="hover-lift group block"
     >
-      <span
-        aria-hidden
-        className="absolute inset-y-0 left-0 w-1"
-        style={{
-          backgroundColor: tournament.squad?.accentColor ?? "var(--primary)",
-        }}
-      />
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="truncate font-heading font-bold uppercase tracking-wide group-hover:text-primary">
-            {tournament.name}
-          </h3>
-          <p className="mt-0.5 truncate text-sm text-muted-foreground">
-            {tournament.squad?.name ?? "Unassigned"} ·{" "}
-            {formatDate(tournament.date)}
-          </p>
+      <CornerCutBorder contentClassName="relative flex flex-col gap-3 overflow-hidden bg-card p-4 pl-5 shadow-xs">
+        <span
+          aria-hidden
+          className="absolute inset-y-0 left-0 w-1"
+          style={{
+            backgroundColor: tournament.squad?.accentColor ?? "var(--primary)",
+          }}
+        />
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="truncate font-heading font-bold uppercase tracking-wide group-hover:text-primary">
+              {tournament.name}
+            </h3>
+            <p className="mt-0.5 truncate text-sm text-muted-foreground">
+              {tournament.squad?.name ?? "Unassigned"} ·{" "}
+              {formatDate(tournament.date)}
+            </p>
+          </div>
+          <Badge
+            variant={statusVariant[tournament.status]}
+            className="shrink-0"
+          >
+            {TOURNAMENT_STATUS_LABELS[tournament.status]}
+          </Badge>
         </div>
-        <Badge variant={statusVariant[tournament.status]} className="shrink-0">
-          {TOURNAMENT_STATUS_LABELS[tournament.status]}
-        </Badge>
-      </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-        <span>{TOURNAMENT_FORMAT_LABELS[tournament.format]}</span>
-        {record.played > 0 && (
-          <span className="tabular-nums">
-            {record.wins}W–{record.losses}L
-          </span>
-        )}
-        {tournament.prize && <span>{tournament.prize}</span>}
-        {tournament.placement && (
-          <Badge variant="secondary">{tournament.placement}</Badge>
-        )}
-      </div>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+          <span>{TOURNAMENT_FORMAT_LABELS[tournament.format]}</span>
+          {record.played > 0 && (
+            <span className="tabular-nums">
+              {record.wins}W–{record.losses}L
+            </span>
+          )}
+          {tournament.prize && <span>{tournament.prize}</span>}
+          {tournament.placement && (
+            <Badge variant="secondary">{tournament.placement}</Badge>
+          )}
+        </div>
+      </CornerCutBorder>
     </Link>
   );
 }

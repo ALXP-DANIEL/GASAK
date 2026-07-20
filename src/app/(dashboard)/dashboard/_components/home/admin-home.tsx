@@ -2,7 +2,7 @@ import { type RevenuePoint, RevenueTrendChart } from "@components/charts/lazy";
 import { Icons } from "@components/icons";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
-import { formatDate, formatDateTime, formatRM } from "@lib/format";
+import { formatDate, formatDateTime, formatMY, formatRM } from "@lib/format";
 import { APPLICATION_STATUS_LABELS, EVENT_TYPE_LABELS } from "@lib/labels";
 import {
   applications,
@@ -16,7 +16,7 @@ import {
   tournamentRounds,
   user as users,
 } from "@server/db";
-import { format, startOfMonth, subDays } from "date-fns";
+import { startOfMonth, subDays } from "date-fns";
 import {
   and,
   count,
@@ -133,12 +133,12 @@ export async function AdminHome() {
 
   const revenueTrend: RevenuePoint[] = Array.from({ length: 30 }, (_, i) => {
     const day = subDays(now, 29 - i);
-    return { key: format(day, "yyyy-MM-dd"), label: format(day, "d MMM") };
+    return { key: formatMY(day, "yyyy-MM-dd"), label: formatMY(day, "d MMM") };
   }).map(({ key, label }) => ({
     label,
     revenue:
       paidOrders
-        .filter((order) => format(order.updatedAt, "yyyy-MM-dd") === key)
+        .filter((order) => formatMY(order.updatedAt, "yyyy-MM-dd") === key)
         .reduce((total, order) => total + order.totalSen, 0) / 100,
   }));
 
@@ -146,7 +146,7 @@ export async function AdminHome() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Admin Dashboard"
-        kicker={`Overview — ${format(now, "EEEE, d MMMM")}`}
+        kicker={`Overview — ${formatMY(now, "EEEE, d MMMM")}`}
         icon={Icons.Layout.Navigation.Home}
         description="Organization overview for squads, players, recruitment, and operations."
       />

@@ -1,15 +1,14 @@
 "use client";
 
-import {
-  DashboardForm,
-  DashboardFormGrid,
-} from "@components/forms/dashboard-form";
+import { DashboardFormGrid } from "@components/forms/dashboard-form";
 import { FormField, FormSelect } from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import {
   Credenza,
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -102,12 +101,12 @@ export function LogResultDialog({
     resolver: zodResolver(logResultSchema),
     defaultValues: {
       mode: event.type === "tournament" ? "round" : "match",
-      squadId: event.squadId ?? squads[0]?.value ?? "",
+      squadId: event.squadId ?? "",
       opponent: "",
       result: "",
       notes: "",
       replayLink: "",
-      tournamentId: tournaments[0]?.value ?? "",
+      tournamentId: "",
       roundLabel: "",
       outcome: "pending",
       score: "",
@@ -163,17 +162,23 @@ export function LogResultDialog({
             Record what happened at "{event.title}".
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={form.handleSubmit(onSubmit)}>
-            <FormSelect
-              control={form.control}
-              name="mode"
-              label="Record as"
-              options={modeOptions}
-            />
+        <CredenzaBody>
+          <form
+            id="log-result-form"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="grid gap-5"
+          >
+            <FormSection title="Record As">
+              <FormSelect
+                control={form.control}
+                name="mode"
+                label="Record as"
+                options={modeOptions}
+              />
+            </FormSection>
 
             {mode === "match" ? (
-              <>
+              <FormSection title="Match">
                 <DashboardFormGrid>
                   <FormSelect
                     control={form.control}
@@ -194,9 +199,9 @@ export function LogResultDialog({
                   label="Result"
                   placeholder="e.g. 2-1 Win"
                 />
-              </>
+              </FormSection>
             ) : (
-              <>
+              <FormSection title="Tournament Round">
                 <FormSelect
                   control={form.control}
                   name="tournamentId"
@@ -231,27 +236,38 @@ export function LogResultDialog({
                     placeholder="e.g. 2-1"
                   />
                 </DashboardFormGrid>
-              </>
+              </FormSection>
             )}
 
-            <FormField
-              control={form.control}
-              name="replayLink"
-              label="Replay Link"
-              type="url"
-              placeholder="https://"
-            />
-            <FormField
-              control={form.control}
-              name="notes"
-              label="Notes"
-              as="textarea"
-            />
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : "Log Result"}
-            </Button>
-          </DashboardForm>
+            <FormSection title="Notes">
+              <FormField
+                control={form.control}
+                name="replayLink"
+                label="Replay Link"
+                type="url"
+                placeholder="https://"
+              />
+              <FormField
+                control={form.control}
+                name="notes"
+                label="Notes"
+                as="textarea"
+              />
+            </FormSection>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="log-result-form" disabled={pending}>
+            {pending ? "Saving..." : "Log Result"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

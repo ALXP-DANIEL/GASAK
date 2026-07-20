@@ -2,10 +2,10 @@ import { type RevenuePoint, RevenueTrendChart } from "@components/charts/lazy";
 import { Icons } from "@components/icons";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
-import { formatDateTime, formatRM } from "@lib/format";
+import { formatDateTime, formatMY, formatRM } from "@lib/format";
 import { ORDER_STATUS_LABELS } from "@lib/labels";
 import { db, orders, products } from "@server/db";
-import { format, startOfMonth, subDays } from "date-fns";
+import { startOfMonth, subDays } from "date-fns";
 import { and, count, desc, eq, gte, inArray, sum } from "drizzle-orm";
 import { PageHeader } from "../page-surface";
 import { EmptyState, HomeListItem, HomePanel } from "./widgets";
@@ -69,12 +69,12 @@ export async function SellerHome() {
 
   const revenueTrend: RevenuePoint[] = Array.from({ length: 30 }, (_, i) => {
     const day = subDays(now, 29 - i);
-    return { key: format(day, "yyyy-MM-dd"), label: format(day, "d MMM") };
+    return { key: formatMY(day, "yyyy-MM-dd"), label: formatMY(day, "d MMM") };
   }).map(({ key, label }) => ({
     label,
     revenue:
       paidOrders
-        .filter((order) => format(order.updatedAt, "yyyy-MM-dd") === key)
+        .filter((order) => formatMY(order.updatedAt, "yyyy-MM-dd") === key)
         .reduce((total, order) => total + order.totalSen, 0) / 100,
   }));
 
@@ -82,7 +82,7 @@ export async function SellerHome() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Seller Dashboard"
-        kicker={`Overview — ${format(now, "EEEE, d MMMM")}`}
+        kicker={`Overview — ${formatMY(now, "EEEE, d MMMM")}`}
         icon={Icons.Domain.Shop}
         description="Store overview for orders, products, revenue, and fulfillment."
       />

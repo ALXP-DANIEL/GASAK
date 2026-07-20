@@ -10,12 +10,19 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
+import { PersonalEmailVerification } from "./personal-email-verification";
 
 type ChangePasswordFormInput = z.infer<typeof changePasswordSchema>;
 
-export function ChangePasswordForm() {
+export function ChangePasswordForm({
+  needsPersonalEmail = false,
+}: {
+  /** First-login accounts without a personal inbox get a second step. */
+  needsPersonalEmail?: boolean;
+}) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [step, setStep] = useState<"password" | "personal-email">("password");
 
   const form = useForm<ChangePasswordFormInput>({
     resolver: zodResolver(changePasswordSchema),
@@ -33,7 +40,31 @@ export function ChangePasswordForm() {
     }
 
     toast.success("Password updated.");
+    if (needsPersonalEmail) {
+      setStep("personal-email");
+      return;
+    }
     router.push("/dashboard");
+  }
+
+  if (step === "personal-email") {
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h1 className="font-heading text-2xl font-bold">
+            Add your personal email
+          </h1>
+          <p className="text-balance text-sm text-muted-foreground">
+            Your @gasak.my login has no inbox. Add a real email so password
+            resets and account notices can reach you — we'll send a code to
+            confirm it.
+          </p>
+        </div>
+        <PersonalEmailVerification
+          onVerified={() => router.push("/dashboard")}
+        />
+      </div>
+    );
   }
 
   return (

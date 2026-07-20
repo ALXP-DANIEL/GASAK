@@ -4,6 +4,7 @@ import {
 } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { SegmentedBar } from "@components/charts/segmented-bar";
 import { Icons } from "@components/icons";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { listPlayers } from "@features/players/queries";
 import { LANE_LABELS, LANE_ORDER, normalizeLanes } from "@lib/labels";
@@ -33,43 +34,45 @@ export default async function PlayersPage() {
   const lanesCovered = laneCounts.filter((lane) => lane.value > 0).length;
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Players"
-        kicker="Management"
-        icon={Icons.Stats.Players}
-        description="Registered player profiles."
-      />
-
-      <StatStrip>
-        <StatItem
-          label="Registered"
-          value={rows.length}
-          hint="Player profiles"
-          icon={Icons.Domain.Players}
+    <PageSkeleton name="players" loading={false}>
+      <div className="flex flex-col gap-6">
+        <PageHeader
+          title="Players"
+          kicker="Management"
+          icon={Icons.Stats.Players}
+          description="Registered player profiles."
         />
-        <StatItem
-          label="Ranked"
-          value={ranked}
-          hint="Profiles with a current rank"
-          icon={Icons.Stats.Trophies}
-        />
-        <StatItem
-          label="Lanes Covered"
-          value={`${lanesCovered}/5`}
-          hint="Distinct preferred lanes"
-          icon={Icons.Stats.Goal}
-        />
-      </StatStrip>
 
-      <DashboardPanel
-        title="Lane Coverage"
-        description="Preferred lanes across all registered players"
-      >
-        <SegmentedBar title="Players per lane" segments={laneCounts} />
-      </DashboardPanel>
+        <StatStrip>
+          <StatItem
+            label="Registered"
+            value={rows.length}
+            hint="Player profiles"
+            icon={Icons.Domain.Players}
+          />
+          <StatItem
+            label="Ranked"
+            value={ranked}
+            hint="Profiles with a current rank"
+            icon={Icons.Stats.Trophies}
+          />
+          <StatItem
+            label="Lanes Covered"
+            value={`${lanesCovered}/5`}
+            hint="Distinct preferred lanes"
+            icon={Icons.Stats.Goal}
+          />
+        </StatStrip>
 
-      <PlayersTable rows={rows} laneFilterOptions={laneFilterOptions} />
-    </div>
+        <DashboardPanel
+          title="Lane Coverage"
+          description="Preferred lanes across all registered players"
+        >
+          <SegmentedBar title="Players per lane" segments={laneCounts} />
+        </DashboardPanel>
+
+        <PlayersTable rows={rows} laneFilterOptions={laneFilterOptions} />
+      </div>
+    </PageSkeleton>
   );
 }

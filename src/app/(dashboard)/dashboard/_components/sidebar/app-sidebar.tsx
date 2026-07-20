@@ -37,9 +37,14 @@ export function AppSidebar({
   const groups = dashboardSidebarGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) =>
-        canAccessDashboardItem(item, effectiveAccess),
-      ),
+      items: group.items
+        .filter((item) => canAccessDashboardItem(item, effectiveAccess))
+        .map((item) => ({
+          ...item,
+          children: item.children?.filter((child) =>
+            canAccessDashboardItem(child, effectiveAccess),
+          ),
+        })),
     }))
     .filter((group) => group.items.length > 0);
 

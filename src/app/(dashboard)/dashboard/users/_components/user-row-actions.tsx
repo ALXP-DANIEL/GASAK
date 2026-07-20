@@ -35,6 +35,7 @@ export type UserRow = {
   id: string;
   name: string;
   email: string;
+  personalEmail: string | null;
   role: string;
   ign: string | null;
   banned: boolean;

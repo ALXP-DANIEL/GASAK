@@ -1,8 +1,8 @@
 "use client";
 
-import { DashboardForm } from "@components/forms/dashboard-form";
 import { EmailAliasField } from "@components/forms/email-alias-field";
 import { FormField, FormSelect } from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -10,6 +10,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -29,7 +30,7 @@ const roleOptions = ORG_ROLES.map((item) => ({
   label: ORG_ROLE_LABELS[item],
 }));
 
-const EMAIL_DOMAIN = "gasak.com";
+const EMAIL_DOMAIN = "gasak.my";
 
 const createUserFormSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -40,6 +41,7 @@ const createUserFormSchema = z.object({
       /^[a-zA-Z0-9._-]+$/,
       "Only letters, numbers, dots, underscores, and hyphens",
     ),
+  personalEmail: z.email("Enter a valid personal email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   role: z.enum(ORG_ROLES),
 });
@@ -50,11 +52,18 @@ export function CreateUserDialog() {
   const { open, setOpen, control, pending, handleSubmit } =
     useEntityDialog<CreateUserFormValues>({
       schema: createUserFormSchema,
-      defaultValues: { name: "", emailAlias: "", password: "", role: "user" },
+      defaultValues: {
+        name: "",
+        emailAlias: "",
+        personalEmail: "",
+        password: "",
+        role: "user",
+      },
       action: (values) =>
         createDashboardUser({
           name: values.name,
           email: `${values.emailAlias}@${EMAIL_DOMAIN}`,
+          personalEmail: values.personalEmail,
           password: values.password,
           role: values.role,
         }),
@@ -76,32 +85,54 @@ export function CreateUserDialog() {
             assigned via squad membership, not here.
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
-            <FormField control={control} name="name" label="Name" />
-            <EmailAliasField
-              control={control}
-              name="emailAlias"
-              label="Email"
-              domain={EMAIL_DOMAIN}
-            />
-            <FormField
-              control={control}
-              name="password"
-              label="Temporary password"
-              description="The user must set a new password the first time they log in."
-            />
-            <FormSelect
-              control={control}
-              name="role"
-              label="Role"
-              options={roleOptions}
-            />
-            <Button type="submit" disabled={pending}>
-              {pending ? "Creating..." : "Create user"}
-            </Button>
-          </DashboardForm>
+        <CredenzaBody>
+          <form
+            id="create-user-form"
+            onSubmit={handleSubmit}
+            className="grid gap-5"
+          >
+            <FormSection title="Account">
+              <FormField control={control} name="name" label="Name" />
+              <EmailAliasField
+                control={control}
+                name="emailAlias"
+                label="Email"
+                domain={EMAIL_DOMAIN}
+              />
+              <FormField
+                control={control}
+                name="personalEmail"
+                label="Personal email"
+                type="email"
+                description="Real inbox (e.g. Gmail) — login details and password resets are delivered here."
+              />
+              <FormField
+                control={control}
+                name="password"
+                label="Temporary password"
+                description="Emailed to the personal inbox; the user must set a new password on first login."
+              />
+              <FormSelect
+                control={control}
+                name="role"
+                label="Role"
+                options={roleOptions}
+              />
+            </FormSection>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="create-user-form" disabled={pending}>
+            {pending ? "Creating..." : "Create user"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );
@@ -110,6 +141,10 @@ export function CreateUserDialog() {
 const editUserFormSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.email("Enter a valid email"),
+  personalEmail: z
+    .email("Enter a valid personal email")
+    .or(z.literal(""))
+    .transform((value) => value || null),
 });
 
 type EditUserFormValues = z.infer<typeof editUserFormSchema>;
@@ -118,7 +153,11 @@ export function EditUserDialog({ user }: { user: UserRow }) {
   const { open, setOpen, control, pending, handleSubmit } =
     useEntityDialog<EditUserFormValues>({
       schema: editUserFormSchema,
-      defaultValues: { name: user.name, email: user.email },
+      defaultValues: {
+        name: user.name,
+        email: user.email,
+        personalEmail: user.personalEmail ?? "",
+      },
       action: (values) => updateDashboardUser({ userId: user.id, ...values }),
     });
 
@@ -134,8 +173,12 @@ export function EditUserDialog({ user }: { user: UserRow }) {
           <CredenzaTitle>Edit user</CredenzaTitle>
           <CredenzaDescription>Update name and email.</CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
+        <CredenzaBody>
+          <form
+            id="edit-user-form"
+            onSubmit={handleSubmit}
+            className="grid gap-5"
+          >
             <FormField control={control} name="name" label="Name" />
             <FormField
               control={control}
@@ -143,11 +186,27 @@ export function EditUserDialog({ user }: { user: UserRow }) {
               label="Email"
               type="email"
             />
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : "Save changes"}
-            </Button>
-          </DashboardForm>
+            <FormField
+              control={control}
+              name="personalEmail"
+              label="Personal email"
+              type="email"
+              description="Real inbox for password resets. Leave empty to clear."
+            />
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="edit-user-form" disabled={pending}>
+            {pending ? "Saving..." : "Save changes"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

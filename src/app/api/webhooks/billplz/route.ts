@@ -1,6 +1,6 @@
-import { markOrderPaid } from "@server/actions/shop";
 import { verifyBillplzWebhookSignature } from "@server/billplz";
 import { db, orders } from "@server/db";
+import { markOrderPaid } from "@server/order-payment";
 import { eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 

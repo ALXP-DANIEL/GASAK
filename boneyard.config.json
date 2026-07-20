@@ -1,5 +1,16 @@
 {
   "breakpoints": [375, 768, 1280],
   "out": "./src/bones",
-  "wait": 800
+  "wait": 800,
+  "resolveEnvVars": true,
+  "auth": {
+    "cookies": [
+      {
+        "name": "better-auth.session_token",
+        "value": "env[BONEYARD_SESSION_TOKEN]",
+        "domain": "localhost",
+        "path": "/"
+      }
+    ]
+  }
 }

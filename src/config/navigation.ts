@@ -4,6 +4,7 @@ export const publicNavigation = [
   { label: "Tournaments", href: "/tournaments" },
   { label: "Squads", href: "/squads" },
   { label: "Shop", href: "/shop" },
+  { label: "Gallery", href: "/gallery" },
   { label: "News", href: "/news" },
   { label: "Organization", href: "/organization" },
   { label: "Contact", href: "/contact" },
@@ -15,6 +16,7 @@ export const footerQuickLinks = [
   { label: "Tournaments", href: "/tournaments" },
   { label: "Squads", href: "/squads" },
   { label: "Shop", href: "/shop" },
+  { label: "Gallery", href: "/gallery" },
   { label: "Organization", href: "/organization" },
   { label: "Contact", href: "/contact" },
 ] as const;

@@ -1,13 +1,13 @@
 "use client";
 
 import { FormColorPicker } from "@components/forms/color-picker-field";
-import { DashboardForm } from "@components/forms/dashboard-form";
 import {
   FormField,
   FormFileInput,
   FormSelect,
   FormSwitch,
 } from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { DeleteButton } from "@components/shared/delete-button";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
@@ -16,6 +16,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -48,7 +49,11 @@ import {
   TableHeader,
   TableRow,
 } from "@components/ui/shadcn/table";
-import { formatLanes, SQUAD_ROLE_LABELS } from "@lib/labels";
+import {
+  formatLanes,
+  SQUAD_DIVISION_SLUGS,
+  SQUAD_ROLE_LABELS,
+} from "@lib/labels";
 import {
   addSquadMember,
   deleteSquad,
@@ -57,11 +62,17 @@ import {
   updateSquad,
   updateSquadMemberRole,
 } from "@server/actions/squads";
-import { type Lane, squadRoleEnum } from "@server/db/schema";
+import {
+  type Lane,
+  type SquadDivision,
+  squadRoleEnum,
+} from "@server/db/schema";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { DivisionPicker } from "./division-picker";
 
 type SquadMemberRow = {
   id: string;
@@ -81,6 +92,7 @@ type SquadDetail = {
   accentColor: string | null;
   recruiting: boolean;
   archived: boolean;
+  division: SquadDivision;
   members: SquadMemberRow[];
 };
 
@@ -89,6 +101,7 @@ const squadFormSchema = z.object({
   description: z.string().optional(),
   accentColor: z.string().optional(),
   recruiting: z.boolean(),
+  division: z.enum(SQUAD_DIVISION_SLUGS),
   logo: z.instanceof(File).nullable(),
   banner: z.instanceof(File).nullable(),
 });
@@ -110,6 +123,7 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
       description: squad.description ?? "",
       accentColor: squad.accentColor ?? "",
       recruiting: squad.recruiting,
+      division: squad.division,
       logo: null,
       banner: null,
     },
@@ -119,6 +133,7 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
       if (values.description) formData.set("description", values.description);
       if (values.accentColor) formData.set("accentColor", values.accentColor);
       formData.set("recruiting", String(values.recruiting));
+      formData.set("division", values.division);
       if (values.logo) formData.set("logo", values.logo);
       if (values.banner) formData.set("banner", values.banner);
       return updateSquad(squad.id, formData);
@@ -138,51 +153,78 @@ export function SquadEditDialog({ squad }: { squad: SquadDetail }) {
           <CredenzaTitle>Edit squad</CredenzaTitle>
           <CredenzaDescription>Update squad details.</CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
-            <FormField control={control} name="name" label="Squad name" />
-            <FormField
-              control={control}
-              name="description"
-              label="Description"
-              as="textarea"
-            />
-            <FormColorPicker
-              control={control}
-              name="accentColor"
-              label="Accent color"
-              description="Pick the squad accent used across public squad surfaces."
-              presets={ACCENT_PRESETS}
-            />
-            <FormSwitch
-              control={control}
-              name="recruiting"
-              label="Open for recruitment"
-              description="Show this squad as an optional choice on the public recruitment form."
-            />
-            <FormFileInput
-              control={control}
-              name="logo"
-              label="Logo (replace)"
-              accept="image/*"
-              cropConfig={{ aspect: 1, outputWidth: 512, outputHeight: 512 }}
-            />
-            <FormFileInput
-              control={control}
-              name="banner"
-              label="Banner (replace)"
-              accept="image/*"
-              cropConfig={{
-                aspect: 21 / 9,
-                outputWidth: 1920,
-                outputHeight: 823,
-              }}
-            />
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : "Save changes"}
-            </Button>
-          </DashboardForm>
+        <CredenzaBody>
+          <form
+            id="squad-edit-form"
+            onSubmit={handleSubmit}
+            className="grid gap-5"
+          >
+            <FormSection title="Details">
+              <FormField control={control} name="name" label="Squad name" />
+              <Controller
+                control={control}
+                name="division"
+                render={({ field }) => (
+                  <DivisionPicker
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              <FormField
+                control={control}
+                name="description"
+                label="Description"
+                as="textarea"
+              />
+              <FormColorPicker
+                control={control}
+                name="accentColor"
+                label="Accent color"
+                description="Pick the squad accent used across public squad surfaces."
+                presets={ACCENT_PRESETS}
+              />
+              <FormSwitch
+                control={control}
+                name="recruiting"
+                label="Open for recruitment"
+                description="Show this squad as an optional choice on the public recruitment form."
+              />
+            </FormSection>
+            <FormSection title="Branding">
+              <FormFileInput
+                control={control}
+                name="logo"
+                label="Logo (replace)"
+                accept="image/*"
+                cropConfig={{ aspect: 1, outputWidth: 512, outputHeight: 512 }}
+              />
+              <FormFileInput
+                control={control}
+                name="banner"
+                label="Banner (replace)"
+                accept="image/*"
+                cropConfig={{
+                  aspect: 21 / 9,
+                  outputWidth: 1920,
+                  outputHeight: 823,
+                }}
+              />
+            </FormSection>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="squad-edit-form" disabled={pending}>
+            {pending ? "Saving..." : "Save changes"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );
@@ -274,8 +316,12 @@ export function AddSquadMemberDialog({
             Assign an existing user to this squad's roster.
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
+        <CredenzaBody>
+          <form
+            id="squad-add-member-form"
+            onSubmit={handleSubmit}
+            className="grid gap-5"
+          >
             <FormSelect
               control={control}
               name="userId"
@@ -295,11 +341,20 @@ export function AddSquadMemberDialog({
                 label: SQUAD_ROLE_LABELS[role],
               }))}
             />
-            <Button type="submit" disabled={pending}>
-              {pending ? "Adding..." : "Add to squad"}
-            </Button>
-          </DashboardForm>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="squad-add-member-form" disabled={pending}>
+            {pending ? "Adding..." : "Add to squad"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

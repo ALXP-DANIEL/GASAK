@@ -16,6 +16,7 @@ import { ChartBarIcon } from "@phosphor-icons/react/dist/ssr/ChartBar";
 import { CheckCircleIcon } from "@phosphor-icons/react/dist/ssr/CheckCircle";
 import { CircleIcon } from "@phosphor-icons/react/dist/ssr/Circle";
 import { ClipboardTextIcon } from "@phosphor-icons/react/dist/ssr/ClipboardText";
+import { ClockIcon } from "@phosphor-icons/react/dist/ssr/Clock";
 import { ClockCounterClockwiseIcon } from "@phosphor-icons/react/dist/ssr/ClockCounterClockwise";
 import { CodeIcon } from "@phosphor-icons/react/dist/ssr/Code";
 import { CrosshairIcon } from "@phosphor-icons/react/dist/ssr/Crosshair";
@@ -36,6 +37,7 @@ import { LinkSimpleIcon } from "@phosphor-icons/react/dist/ssr/LinkSimple";
 import { ListIcon } from "@phosphor-icons/react/dist/ssr/List";
 import { ListBulletsIcon } from "@phosphor-icons/react/dist/ssr/ListBullets";
 import { ListNumbersIcon } from "@phosphor-icons/react/dist/ssr/ListNumbers";
+import { LockSimpleIcon } from "@phosphor-icons/react/dist/ssr/LockSimple";
 import { MapPinIcon } from "@phosphor-icons/react/dist/ssr/MapPin";
 import { MinusIcon } from "@phosphor-icons/react/dist/ssr/Minus";
 import { MoonIcon } from "@phosphor-icons/react/dist/ssr/Moon";
@@ -46,6 +48,7 @@ import { PhoneIcon } from "@phosphor-icons/react/dist/ssr/Phone";
 import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { QuotesIcon } from "@phosphor-icons/react/dist/ssr/Quotes";
 import { ReceiptIcon } from "@phosphor-icons/react/dist/ssr/Receipt";
+import { RocketLaunchIcon } from "@phosphor-icons/react/dist/ssr/RocketLaunch";
 import { ShoppingBagIcon } from "@phosphor-icons/react/dist/ssr/ShoppingBag";
 import { SignOutIcon } from "@phosphor-icons/react/dist/ssr/SignOut";
 import { SquaresFourIcon } from "@phosphor-icons/react/dist/ssr/SquaresFour";
@@ -62,6 +65,8 @@ import { TiktokLogoIcon } from "@phosphor-icons/react/dist/ssr/TiktokLogo";
 import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { TreeStructureIcon } from "@phosphor-icons/react/dist/ssr/TreeStructure";
 import { TrophyIcon } from "@phosphor-icons/react/dist/ssr/Trophy";
+import { TShirtIcon } from "@phosphor-icons/react/dist/ssr/TShirt";
+import { UploadSimpleIcon } from "@phosphor-icons/react/dist/ssr/UploadSimple";
 import { UserIcon } from "@phosphor-icons/react/dist/ssr/User";
 import { UserGearIcon } from "@phosphor-icons/react/dist/ssr/UserGear";
 import { UsersFourIcon } from "@phosphor-icons/react/dist/ssr/UsersFour";
@@ -104,6 +109,7 @@ export const Icons = {
     Success: CheckCircleIcon,
     Pending: CircleIcon,
     Failed: XCircleIcon,
+    Locked: LockSimpleIcon,
   },
 
   Stats: {
@@ -122,6 +128,8 @@ export const Icons = {
     Recruitment: ClipboardTextIcon,
     Products: PackageIcon,
     Orders: ReceiptIcon,
+    Joki: RocketLaunchIcon,
+    Merchandise: TShirtIcon,
     Revenue: CurrencyCircleDollarIcon,
     Community: HandFistIcon,
     Lightning: LightningIcon,
@@ -131,6 +139,7 @@ export const Icons = {
     Accounts: UserGearIcon,
     Hierarchy: TreeStructureIcon,
     Audit: ClockCounterClockwiseIcon,
+    Time: ClockIcon,
   },
 
   Actions: {
@@ -144,6 +153,7 @@ export const Icons = {
     CaretUpDown: CaretUpDownIcon,
     SwitchFocus: ArrowsLeftRightIcon,
     Fit: ArrowsOutIcon,
+    Upload: UploadSimpleIcon,
   },
 
   Editor: {

@@ -198,6 +198,12 @@ export function CommandPalette({ access }: { access: DashboardAccess }) {
                 ))}
                 <CommandGroup heading="Account">
                   <CommandItem
+                    value="Profile"
+                    onSelect={() => go("/dashboard/profile")}
+                  >
+                    Profile
+                  </CommandItem>
+                  <CommandItem
                     value="Settings"
                     onSelect={() => go("/dashboard/settings")}
                   >

@@ -1,7 +1,11 @@
+import { Icons } from "@components/icons";
+import { CornerCutBorder } from "@components/shared/corner-cut-border";
 import { LANE_LABELS, LANE_ORDER, normalizeLanes } from "@lib/labels";
 import { cn } from "@lib/utils";
 import type { Lane, SquadRole } from "@server/db/schema";
 import Image from "next/image";
+import Link from "next/link";
+import type { ReactNode } from "react";
 
 export const roleOrder: Record<SquadRole, number> = {
   leader: 0,
@@ -63,6 +67,175 @@ export function SquadLogo({
   );
 }
 
+type SquadRowCardSquad = {
+  name: string;
+  logoUrl: string | null;
+  accentColor: string | null;
+  description?: string | null;
+};
+
+/**
+ * Corner-cut squad row — accent bar, logo, name, member count, optional
+ * badges — shared by the dashboard squads list and the public squad lists.
+ */
+export function SquadRowCard({
+  href,
+  squad,
+  memberCount,
+  showDescription = false,
+  badges,
+}: {
+  href: string;
+  squad: SquadRowCardSquad;
+  memberCount: number;
+  /** Show the squad description under the member count (public lists). */
+  showDescription?: boolean;
+  badges?: ReactNode;
+}) {
+  return (
+    <Link href={href} className="hover-lift group block h-full">
+      <CornerCutBorder
+        className="h-full"
+        contentClassName="relative flex h-full items-center gap-4 overflow-hidden bg-card p-4 shadow-xs"
+      >
+        <span
+          aria-hidden
+          className="absolute inset-y-0 left-0 w-1"
+          style={{ backgroundColor: squad.accentColor ?? "var(--primary)" }}
+        />
+        <SquadLogo src={squad.logoUrl} name={squad.name} className="size-14" />
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-heading text-lg font-bold uppercase tracking-wide group-hover:text-primary">
+            {squad.name}
+          </h3>
+          <p className="truncate text-sm text-muted-foreground">
+            {memberCount} member{memberCount === 1 ? "" : "s"}
+          </p>
+          {showDescription && squad.description && (
+            <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground/80">
+              {squad.description}
+            </p>
+          )}
+          {badges && (
+            <div className="mt-1.5 flex flex-wrap gap-1.5">{badges}</div>
+          )}
+        </div>
+        <Icons.Layout.Navigation.CaretRight
+          aria-hidden
+          className="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+        />
+      </CornerCutBorder>
+    </Link>
+  );
+}
+
+export function HeroMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="border border-primary/20 bg-background/70 p-3">
+      <p className="font-heading text-2xl font-bold text-primary">{value}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+type SquadHeroHeaderSquad = {
+  name: string;
+  description: string | null;
+  bannerUrl: string | null;
+  logoUrl: string | null;
+};
+
+/**
+ * The banner-and-metrics hero header shared by the public squad page and the
+ * dashboard squad detail page — bg-grid texture, corner glow, logo, title,
+ * and a metrics column. `badge` and `metrics` are the only per-page inputs.
+ */
+export function SquadHeroHeader({
+  squad,
+  badge,
+  metrics,
+  size = "md",
+}: {
+  squad: SquadHeroHeaderSquad;
+  badge: ReactNode;
+  metrics: { label: string; value: number }[];
+  /** `lg` is used on the public page; `md` on the denser dashboard page. */
+  size?: "md" | "lg";
+}) {
+  const isLg = size === "lg";
+
+  return (
+    <section className="relative isolate overflow-hidden rounded-lg border border-primary/25 bg-card">
+      {squad.bannerUrl && (
+        <Image
+          src={squad.bannerUrl}
+          alt={`${squad.name} banner`}
+          fill
+          priority
+          className={cn("object-cover", isLg ? "opacity-25" : "opacity-20")}
+        />
+      )}
+      <div className="absolute inset-0 bg-linear-to-r from-background via-background/90 to-background/35" />
+      <div
+        aria-hidden
+        className="bg-grid pointer-events-none absolute inset-0 opacity-70"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full bg-primary/20 blur-3xl"
+      />
+
+      <div
+        className={cn(
+          "relative grid desktop:grid-cols-[1fr_auto]",
+          isLg ? "gap-8 p-6 desktop:p-10" : "gap-6 p-5 desktop:p-8",
+        )}
+      >
+        <div
+          className={cn(
+            "flex min-w-0 flex-col desktop:flex-row desktop:items-end",
+            isLg ? "gap-6" : "gap-5",
+          )}
+        >
+          <SquadLogo
+            src={squad.logoUrl}
+            name={squad.name}
+            className={
+              isLg ? "size-24 desktop:size-32" : "size-24 desktop:size-28"
+            }
+          />
+          <div className="min-w-0">
+            {badge}
+            <h1
+              className={cn(
+                "mt-4 text-balance font-heading font-bold uppercase leading-tight tracking-wide",
+                isLg
+                  ? "text-4xl desktop:text-6xl"
+                  : "text-4xl desktop:text-5xl",
+              )}
+            >
+              {squad.name}
+            </h1>
+            {squad.description && (
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground desktop:text-base">
+                {squad.description}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="grid gap-3 desktop:w-56">
+          {metrics.map((metric) => (
+            <HeroMetric key={metric.label} {...metric} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function SquadStat({
   label,
   value,
@@ -78,9 +251,13 @@ export function SquadStat({
         aria-hidden
         className="absolute top-0 left-0 h-0.5 w-8 -skew-x-12 bg-primary/0 transition-colors group-hover:bg-primary"
       />
-      <span className="corner-cut grid size-9 shrink-0 place-items-center border border-primary/40 bg-primary/10 text-primary">
+      <CornerCutBorder
+        borderClassName="bg-primary/40"
+        className="size-9 shrink-0"
+        contentClassName="grid size-full place-items-center bg-primary/10 text-primary"
+      >
         {icon}
-      </span>
+      </CornerCutBorder>
       <div className="min-w-0">
         <p className="font-heading text-2xl font-bold leading-none tabular-nums">
           {value}
@@ -100,7 +277,7 @@ export function LaneSpread<T extends RosterMember>({
 }) {
   return (
     <div className="grid gap-2">
-      {LANE_ORDER.map((lane) => {
+      {LANE_ORDER.filter((lane) => lane !== "flex").map((lane) => {
         const count = members.filter((member) =>
           normalizeLanes(member.user.profile?.preferredLanes).includes(lane),
         ).length;

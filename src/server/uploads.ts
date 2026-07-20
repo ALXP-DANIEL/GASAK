@@ -24,7 +24,9 @@ export async function saveUpload(
     | "products"
     | "tournaments"
     | "auth-slides"
-    | "news",
+    | "news"
+    | "joki"
+    | "galleries",
 ): Promise<string> {
   if (!ALLOWED_TYPES.has(file.type)) {
     throw new Error("Only JPEG, PNG, WebP or GIF images are allowed");
@@ -39,4 +41,35 @@ export async function saveUpload(
   if (result.error) throw new Error(result.error.message);
 
   return result.data.ufsUrl;
+}
+
+/**
+ * Best-effort removal of an UploadThing-hosted file when its DB row is
+ * deleted or its image replaced, so storage doesn't accumulate orphans.
+ * Non-UploadThing URLs (seed images under /images, external placeholders)
+ * are ignored. Never throws — losing a cleanup is preferable to failing
+ * the user's action after the DB write succeeded.
+ */
+export async function deleteUpload(
+  url: string | null | undefined,
+): Promise<void> {
+  if (!url) return;
+  let key: string | null = null;
+  try {
+    const parsed = new URL(url);
+    const isUploadThing =
+      parsed.hostname === "utfs.io" || parsed.hostname.endsWith(".ufs.sh");
+    // Both hosts serve files at /f/<fileKey>.
+    const match = parsed.pathname.match(/^\/f\/([^/]+)$/);
+    if (isUploadThing && match) key = match[1];
+  } catch {
+    return; // relative or malformed URL — nothing hosted to delete
+  }
+  if (!key) return;
+
+  try {
+    await utapi.deleteFiles(key);
+  } catch (err) {
+    console.warn(`[uploads] failed to delete file ${key}:`, err);
+  }
 }

@@ -7,13 +7,15 @@ import {
   type OrderStatus,
   orders,
   productCategoryEnum,
+  productGallery,
   productOptions,
   productOptionValues,
   products,
   productVariantOptionValues,
   productVariants,
 } from "@server/db";
-import { saveUpload } from "@server/uploads";
+import { markOrderPaid } from "@server/order-payment";
+import { deleteUpload, saveUpload } from "@server/uploads";
 import { eq, sql } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
@@ -96,7 +98,7 @@ export async function createProduct(formData: FormData): Promise<ActionResult> {
   });
 
   revalidateShop();
-  return { ok: true, message: "Product created" };
+  return { ok: true, message: "Product created", data: { productId: row.id } };
 }
 
 export async function updateProduct(
@@ -120,7 +122,13 @@ export async function updateProduct(
   };
 
   const image = formData.get("image");
+  let previousImageUrl: string | null = null;
   if (image instanceof File && image.size > 0) {
+    const existing = await db.query.products.findFirst({
+      where: eq(products.id, productId),
+      columns: { imageUrl: true },
+    });
+    previousImageUrl = existing?.imageUrl ?? null;
     try {
       updates.imageUrl = await saveUpload(image, "products");
     } catch (err) {
@@ -134,6 +142,9 @@ export async function updateProduct(
     .where(eq(products.id, productId))
     .returning();
   if (!row) return { ok: false, error: "Product not found" };
+  if (updates.imageUrl && previousImageUrl !== updates.imageUrl) {
+    await deleteUpload(previousImageUrl);
+  }
   await logActivity({
     actor,
     action: "update",
@@ -150,6 +161,15 @@ export async function deleteProduct(productId: string): Promise<ActionResult> {
   const actor = await actionUser("admin", "seller");
   if (!actor) return { ok: false, error: "Unauthorized" };
 
+  // Capture hosted image URLs before the cascade delete wipes the rows.
+  const existing = await db.query.products.findFirst({
+    where: eq(products.id, productId),
+    with: {
+      gallery: { columns: { imageUrl: true } },
+      variants: { columns: { imageUrl: true } },
+    },
+  });
+
   let row: typeof products.$inferSelect | undefined;
   try {
     [row] = await db
@@ -163,6 +183,15 @@ export async function deleteProduct(productId: string): Promise<ActionResult> {
     };
   }
   if (!row) return { ok: false, error: "Product not found" };
+
+  if (existing) {
+    const urls = [
+      existing.imageUrl,
+      ...existing.gallery.map((g) => g.imageUrl),
+      ...existing.variants.map((v) => v.imageUrl),
+    ];
+    for (const url of urls) await deleteUpload(url);
+  }
 
   await logActivity({
     actor,
@@ -185,52 +214,6 @@ const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   completed: [],
   cancelled: [],
 };
-
-/**
- * Transitions an order to "paid", reserving stock. Used both for a seller's
- * manual override (verifiedBy set) and automatic gateway confirmation via
- * the Billplz webhook (verifiedBy null — no human verified it).
- */
-export async function markOrderPaid(
-  order: typeof orders.$inferSelect,
-  verifiedBy: string | null,
-): Promise<void> {
-  if (order.status === "paid") return; // already marked — avoid double stock deduction
-
-  if (order.variantId) {
-    await db
-      .update(productVariants)
-      .set({
-        stock: sql`greatest(${productVariants.stock} - ${order.quantity}, 0)`,
-      })
-      .where(eq(productVariants.id, order.variantId));
-  } else {
-    await db
-      .update(products)
-      .set({ stock: sql`greatest(${products.stock} - ${order.quantity}, 0)` })
-      .where(eq(products.id, order.productId));
-  }
-
-  await db
-    .update(orders)
-    .set({
-      status: "paid",
-      paymentVerifiedBy: verifiedBy,
-      paymentVerifiedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(orders.id, order.id));
-  if (!verifiedBy) {
-    await logActivity({
-      action: "update",
-      entityType: "order",
-      entityId: order.id,
-      description: `Automatically marked order ${order.orderNo} as paid`,
-    });
-  }
-
-  revalidateShop();
-}
 
 export async function updateOrderStatus(
   orderId: string,
@@ -264,9 +247,11 @@ export async function updateOrderStatus(
     return { ok: true, message: `Order ${order.orderNo} → paid` };
   }
 
-  // Cancelling a paid order returns the reserved stock.
+  // Cancelling a paid order returns the reserved stock. Joki orders never
+  // deducted stock (zero-stock anchor product), so nothing to restore.
   if (
     status === "cancelled" &&
+    !order.jokiDetails &&
     (order.status === "paid" || order.status === "processing")
   ) {
     if (order.variantId) {
@@ -442,8 +427,83 @@ export async function uploadVariantImage(
 
   try {
     const url = await saveUpload(file, "products");
+    await logActivity({
+      actor,
+      action: "upload",
+      entityType: "product",
+      description: "Uploaded a product variant image",
+    });
     return { ok: true, data: { url } };
   } catch (err) {
     return { ok: false, error: (err as Error).message };
   }
+}
+
+/**
+ * Saves up to 3 gallery images for a product. Each slot carries either a new
+ * upload (`galleryImage_${i}`, mirrors the cover-image flow) or the URL of the
+ * existing image to keep (`galleryKeep_${i}`); empty slots are dropped.
+ */
+export async function setProductGalleryFiles(
+  productId: string,
+  formData: FormData,
+): Promise<ActionResult> {
+  const actor = await actionUser("admin", "seller");
+  if (!actor) return { ok: false, error: "Unauthorized" };
+
+  const product = await db.query.products.findFirst({
+    where: eq(products.id, productId),
+    with: { gallery: { columns: { imageUrl: true } } },
+  });
+  if (!product) return { ok: false, error: "Product not found" };
+
+  const imageUrls: string[] = [];
+  for (let i = 0; i < 3; i++) {
+    const file = formData.get(`galleryImage_${i}`);
+    if (file instanceof File && file.size > 0) {
+      try {
+        imageUrls.push(await saveUpload(file, "products"));
+      } catch (err) {
+        return { ok: false, error: (err as Error).message };
+      }
+      continue;
+    }
+    const keep = formData.get(`galleryKeep_${i}`);
+    if (typeof keep === "string" && keep.length > 0) {
+      imageUrls.push(keep);
+    }
+  }
+
+  await db
+    .delete(productGallery)
+    .where(eq(productGallery.productId, productId));
+
+  // Files whose rows were replaced/removed are no longer referenced.
+  const kept = new Set(imageUrls);
+  for (const old of product.gallery) {
+    if (!kept.has(old.imageUrl)) await deleteUpload(old.imageUrl);
+  }
+
+  if (imageUrls.length > 0) {
+    await db.insert(productGallery).values(
+      imageUrls.map((imageUrl, index) => ({
+        productId,
+        imageUrl,
+        sortOrder: index,
+      })),
+    );
+  }
+
+  await logActivity({
+    actor,
+    action: "update",
+    entityType: "product",
+    entityId: productId,
+    description: `Updated gallery for product "${product.name}"`,
+  });
+
+  revalidateShop();
+  revalidatePath(`/dashboard/products/${productId}`);
+  revalidatePath(`/shop/${productId}`);
+  return { ok: true, message: "Gallery saved" };
 }

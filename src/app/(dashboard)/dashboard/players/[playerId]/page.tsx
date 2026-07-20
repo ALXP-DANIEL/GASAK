@@ -2,7 +2,9 @@ import {
   DetailRow,
   PageHeader,
 } from "@app/(dashboard)/dashboard/_components/page-surface";
-import { PlayerCard } from "@components/cards/player/player-card";
+import { ProfileHeroCard } from "@components/cards/player/profile-hero-card";
+import { Icons } from "@components/icons";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { SplitView } from "@components/shared/split-view";
 import { Badge } from "@components/ui/shadcn/badge";
 import {
@@ -12,12 +14,13 @@ import {
   CardTitle,
 } from "@components/ui/shadcn/card";
 import { getPlayer } from "@features/players/queries";
-import { formatLanes, ORG_ROLE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
-import { formatRank } from "@lib/ranks";
+import { ORG_ROLE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
 import { userOrgRole } from "@server/session";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireDashboardRole } from "../../_components/dashboard-section";
+import { ProfileEditDialog } from "../../settings/_components/profile-edit-dialog";
+import { buildProfileFormDefaults } from "../../settings/_components/profile-form-schema";
 
 export default async function PlayerDetailPage({
   params,
@@ -32,86 +35,87 @@ export default async function PlayerDetailPage({
   const profile = player.profile;
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={player.name}
-        breadcrumbLabel={player.name}
-        kicker="Players"
-        description="Player profile"
-        actions={
-          <Badge variant="outline">
-            {ORG_ROLE_LABELS[userOrgRole(player)]}
-          </Badge>
-        }
-      />
-      <SplitView
-        className="gap-4"
-        aside={
-          <PlayerCard
+    <PageSkeleton name="players-detail" loading={false}>
+      <div className="flex flex-col gap-6">
+        <PageHeader
+          title={player.name}
+          breadcrumbLabel={player.name}
+          kicker="Players"
+          icon={Icons.Stats.Players}
+          description="Player profile"
+          actions={
+            <>
+              <Badge variant="outline">
+                {ORG_ROLE_LABELS[userOrgRole(player)]}
+              </Badge>
+              <ProfileEditDialog
+                userId={player.id}
+                imageUrl={player.image}
+                defaultValues={buildProfileFormDefaults(player.name, profile)}
+              />
+            </>
+          }
+        />
+        <SplitView
+          className="gap-4"
+          aside={
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Player details</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-4">
+                  <DetailRow
+                    label="Role"
+                    value={ORG_ROLE_LABELS[userOrgRole(player)]}
+                  />
+                  <DetailRow
+                    label="Full Name"
+                    value={profile?.fullName ?? "—"}
+                  />
+                  <DetailRow label="Email" value={player.email} />
+                  <DetailRow label="Phone" value={profile?.phone ?? "—"} />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="flex flex-col gap-2">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Squads
+                  </p>
+                  {player.memberships.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      Not in any squad yet.
+                    </p>
+                  )}
+                  {player.memberships.map((membership) => (
+                    <div
+                      key={membership.id}
+                      className="flex items-center justify-between gap-3 rounded-md border px-3 py-2"
+                    >
+                      <Link
+                        href={`/dashboard/squads/${membership.squadId}`}
+                        className="text-sm font-medium hover:underline"
+                      >
+                        {membership.squad.name}
+                      </Link>
+                      <Badge variant="outline">
+                        {SQUAD_ROLE_LABELS[membership.squadRole]}
+                      </Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </>
+          }
+        >
+          <ProfileHeroCard
             name={player.name}
-            email={player.email}
             image={player.image}
             profile={profile}
-            showContact
             className="h-fit"
           />
-        }
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle>Player details</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <DetailRow label="Full Name" value={profile?.fullName ?? "—"} />
-            <DetailRow label="Nickname" value={profile?.nickname ?? "—"} />
-            <DetailRow label="IGN" value={profile?.ign ?? "—"} />
-            <DetailRow label="MLBB ID" value={profile?.mlbbId ?? "—"} />
-            <DetailRow label="Server ID" value={profile?.serverId ?? "—"} />
-            <DetailRow label="Phone" value={profile?.phone ?? "—"} />
-            <DetailRow
-              label="Preferred Lanes"
-              value={formatLanes(profile?.preferredLanes)}
-            />
-            <DetailRow
-              label="Current Rank"
-              value={formatRank(profile?.currentRank)}
-            />
-            <DetailRow
-              label="Peak Rank"
-              value={formatRank(profile?.peakRank)}
-            />
-            <DetailRow label="Email" value={player.email} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex flex-col gap-2">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Squads
-            </p>
-            {player.memberships.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                Not in any squad yet.
-              </p>
-            )}
-            {player.memberships.map((membership) => (
-              <div
-                key={membership.id}
-                className="flex items-center justify-between gap-3 rounded-md border px-3 py-2"
-              >
-                <Link
-                  href={`/dashboard/squads/${membership.squadId}`}
-                  className="text-sm font-medium hover:underline"
-                >
-                  {membership.squad.name}
-                </Link>
-                <Badge variant="outline">
-                  {SQUAD_ROLE_LABELS[membership.squadRole]}
-                </Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </SplitView>
-    </div>
+        </SplitView>
+      </div>
+    </PageSkeleton>
   );
 }

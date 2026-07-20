@@ -1,10 +1,12 @@
 "use client";
 
+import { DashboardFormGrid } from "@components/forms/dashboard-form";
 import {
-  DashboardForm,
-  DashboardFormGrid,
-} from "@components/forms/dashboard-form";
-import { FormField, FormSelect } from "@components/forms/form-field";
+  FormDateTimeField,
+  FormField,
+  FormSelect,
+} from "@components/forms/form-field";
+import { FormSection } from "@components/forms/form-section";
 import { Icons } from "@components/icons";
 import { useEntityDialog } from "@components/shared/use-entity-dialog";
 import {
@@ -12,6 +14,7 @@ import {
   CredenzaBody,
   CredenzaContent,
   CredenzaDescription,
+  CredenzaFooter,
   CredenzaHeader,
   CredenzaTitle,
   CredenzaTrigger,
@@ -32,7 +35,7 @@ export function MatchFormDialog({
     useEntityDialog<MatchInput>({
       schema: matchSchema,
       defaultValues: {
-        squadId: squads[0]?.value ?? "",
+        squadId: "",
         opponent: "",
         date: "",
         result: "",
@@ -58,50 +61,58 @@ export function MatchFormDialog({
             Log a scrim or match result for your squad.
           </CredenzaDescription>
         </CredenzaHeader>
-        <CredenzaBody className="grid gap-4">
-          <DashboardForm onSubmit={handleSubmit}>
-            <DashboardFormGrid>
-              <FormSelect
+        <CredenzaBody>
+          <form id="match-form" onSubmit={handleSubmit} className="grid gap-5">
+            <FormSection title="Match">
+              <DashboardFormGrid>
+                <FormSelect
+                  control={control}
+                  name="squadId"
+                  label="Squad"
+                  options={squads}
+                  placeholder="Pick a squad"
+                />
+                <FormDateTimeField control={control} name="date" label="Date" />
+              </DashboardFormGrid>
+              <DashboardFormGrid>
+                <FormField control={control} name="opponent" label="Opponent" />
+                <FormField
+                  control={control}
+                  name="result"
+                  label="Result"
+                  placeholder="e.g. 2-1 Win"
+                />
+              </DashboardFormGrid>
+            </FormSection>
+            <FormSection title="Notes">
+              <FormField
                 control={control}
-                name="squadId"
-                label="Squad"
-                options={squads}
-                placeholder="Pick a squad"
+                name="replayLink"
+                label="Replay Link"
+                type="url"
+                placeholder="https://"
               />
               <FormField
                 control={control}
-                name="date"
-                label="Date"
-                type="datetime-local"
+                name="notes"
+                label="Notes"
+                as="textarea"
               />
-            </DashboardFormGrid>
-            <DashboardFormGrid>
-              <FormField control={control} name="opponent" label="Opponent" />
-              <FormField
-                control={control}
-                name="result"
-                label="Result"
-                placeholder="e.g. 2-1 Win"
-              />
-            </DashboardFormGrid>
-            <FormField
-              control={control}
-              name="replayLink"
-              label="Replay Link"
-              type="url"
-              placeholder="https://"
-            />
-            <FormField
-              control={control}
-              name="notes"
-              label="Notes"
-              as="textarea"
-            />
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : "Record Match"}
-            </Button>
-          </DashboardForm>
+            </FormSection>
+          </form>
         </CredenzaBody>
+        <CredenzaFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="match-form" disabled={pending}>
+            {pending ? "Saving..." : "Record Match"}
+          </Button>
+        </CredenzaFooter>
       </CredenzaContent>
     </Credenza>
   );

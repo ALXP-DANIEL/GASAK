@@ -15,6 +15,8 @@ export const env = createEnv({
     BILLPLZ_X_SIGNATURE_KEY: z.string().optional(),
     BILLPLZ_SANDBOX: z.enum(["true", "false"]).default("true"),
     CHALLONGE_API_KEY: z.string().optional(),
+    RESEND_API_KEY: z.string().optional(),
+    EMAIL_FROM: z.string().default("GASAK <no-reply@gasak.my>"),
   },
   client: {
     NEXT_PUBLIC_SITE_URL: z.url(),
@@ -30,6 +32,8 @@ export const env = createEnv({
     BILLPLZ_X_SIGNATURE_KEY: process.env.BILLPLZ_X_SIGNATURE_KEY,
     BILLPLZ_SANDBOX: process.env.BILLPLZ_SANDBOX,
     CHALLONGE_API_KEY: process.env.CHALLONGE_API_KEY,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   },
   emptyStringAsUndefined: true,

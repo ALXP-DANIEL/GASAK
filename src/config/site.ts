@@ -13,17 +13,16 @@ export const siteConfig: SiteConfig = {
     "Mobile Legends",
     "Malaysia",
     "recruitment",
-    "diamonds top-up",
+    "joki rank boost",
+    "merchandise",
   ],
   url: {
     base: env.NEXT_PUBLIC_SITE_URL,
     author: "https://alifdaniel.dpdns.org",
   },
   links: {
-    github: "https://github.com/ALXP-DANIEL",
-    instagram: "https://www.instagram.com/thealifhaker1/",
-    linkedin: "https://www.linkedin.com/in/thealifhaker1",
-    email: "alifdaniel.workspace@gmail.com",
+    email: "gasakesportofficial@gmail.com",
+    tiktok: "https://www.tiktok.com/@gasak_esport",
   },
   ogImage: `${env.NEXT_PUBLIC_SITE_URL}/api/og`,
 };

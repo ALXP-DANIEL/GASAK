@@ -3,14 +3,18 @@ import { and, eq } from "drizzle-orm";
 import { auth } from "../auth";
 import {
   applications,
-  authSlides,
+  authImages,
   db,
   events,
+  galleries,
+  jokiPackages,
+  jokiTiers,
   news,
   type OrgRole,
   orders,
   organizationPositions,
   playerProfiles,
+  productGallery,
   products,
   scrims,
   squadMembers,
@@ -79,41 +83,194 @@ async function syncDemoAccountRoles() {
     }
   }
 
-  await ensureAuthSlides();
+  await ensureAuthImages();
 }
 
-async function ensureAuthSlides() {
-  const existing = await db.select().from(authSlides).limit(1);
+/**
+ * Seeds the joki (rank boost) catalog: per-star tier rates + flat-rate
+ * package promos, plus the hidden anchor product joki orders attach to
+ * (stock 0 keeps it out of the shop listing). Legacy flat joki products are
+ * deactivated — the /shop/joki calculator replaces them.
+ */
+async function ensureJokiCatalog(createdBy: string | null) {
+  // Legacy rows used short aliases ("Honor"/"Glory") for the two Mythic
+  // sub-tiers — rename in place so `name` matches the real RankTier value
+  // everywhere (fromTierId/toTierId FK references are untouched by this).
+  await db
+    .update(jokiTiers)
+    .set({ name: "Mythical Honor" })
+    .where(eq(jokiTiers.name, "Honor"));
+  await db
+    .update(jokiTiers)
+    .set({ name: "Mythical Glory" })
+    .where(eq(jokiTiers.name, "Glory"));
+
+  // Covers the full MLBB rank ladder, not just Epic..Glory.
+  const defaultTierRates: [string, number][] = [
+    ["Warrior", 50],
+    ["Elite", 80],
+    ["Master", 100],
+    ["Grandmaster", 150],
+    ["Epic", 200],
+    ["Legend", 300],
+    ["Mythic", 350],
+    ["Mythical Honor", 400],
+    ["Mythical Glory", 600],
+    ["Mythical Immortal", 1000],
+  ];
+  const existingTierNames = new Set(
+    (await db.select().from(jokiTiers)).map((t) => t.name),
+  );
+  const missingTiers = defaultTierRates.filter(
+    ([name]) => !existingTierNames.has(name),
+  );
+  if (missingTiers.length > 0) {
+    await db.insert(jokiTiers).values(
+      missingTiers.map(([name, pricePerStarSen]) => ({
+        name,
+        pricePerStarSen,
+      })),
+    );
+  }
+
+  // Package segments are tier-linked so the checkout can price any from→to
+  // range as the cheapest chain (see computeJokiPackagePath). Ensured
+  // additively (never wiped) so admin-added packages survive reseeding.
+  const tiersByName = new Map(
+    (await db.select().from(jokiTiers)).map((t) => [t.name, t.id]),
+  );
+  async function ensureEdge(from: string, to: string, priceSen: number) {
+    const fromTierId = tiersByName.get(from);
+    const toTierId = tiersByName.get(to);
+    if (!fromTierId || !toTierId) return;
+    const exists = await db.query.jokiPackages.findFirst({
+      where: and(
+        eq(jokiPackages.fromTierId, fromTierId),
+        eq(jokiPackages.toTierId, toTierId),
+      ),
+    });
+    if (exists) return;
+    await db.insert(jokiPackages).values({
+      name: `${from} → ${to}`,
+      fromTierId,
+      toTierId,
+      priceSen,
+    });
+  }
+  await ensureEdge("Warrior", "Elite", 500);
+  await ensureEdge("Elite", "Master", 800);
+  await ensureEdge("Master", "Grandmaster", 1200);
+  await ensureEdge("Grandmaster", "Epic", 1500);
+  await ensureEdge("Epic", "Legend", 1500);
+  await ensureEdge("Legend", "Mythic", 6000);
+  await ensureEdge("Epic", "Mythic", 7000);
+  await ensureEdge("Mythic", "Mythical Honor", 8000);
+  await ensureEdge("Mythical Honor", "Mythical Glory", 9000);
+  await ensureEdge("Mythical Glory", "Mythical Immortal", 15_000);
+
+  const anchor = await db.query.products.findFirst({
+    where: and(
+      eq(products.name, "Joki Rank Boost"),
+      eq(products.category, "joki"),
+    ),
+  });
+  if (!anchor) {
+    await db.insert(products).values({
+      name: "Joki Rank Boost",
+      category: "joki",
+      description:
+        "MLBB rank boost by GASAK players — priced per star or by package.",
+      priceSen: 0,
+      stock: 0,
+      active: true,
+      createdBy,
+    });
+  }
+
+  // Retire legacy flat-price joki products (replaced by /shop/joki).
+  const legacyJoki = await db.query.products.findMany({
+    where: and(eq(products.category, "joki"), eq(products.active, true)),
+  });
+  for (const legacy of legacyJoki) {
+    if (legacy.name === "Joki Rank Boost") continue;
+    await db
+      .update(products)
+      .set({ active: false })
+      .where(eq(products.id, legacy.id));
+  }
+}
+
+async function ensureAuthImages() {
+  const existing = await db.select().from(authImages).limit(1);
   if (existing.length > 0) return;
 
-  await db.insert(authSlides).values([
-    {
-      eyebrow: "GASAK Management",
-      title: "Run the squad from one command center",
-      description: "Track schedules, rosters, recruitment, and match activity.",
-      imageUrl: "/images/hero.png",
-      sortOrder: 0,
+  await db.insert(authImages).values(
+    Array.from({ length: 20 }, (_, i) => ({
+      imageUrl: `https://picsum.photos/seed/gasak${i}/1080/1440`,
       active: true,
-    },
-    {
-      eyebrow: "GASAK Management",
-      title: "Keep competitive squads aligned",
-      description:
-        "Leaders manage their own squad flow without losing oversight.",
-      imageUrl: "/images/squad-a.png",
-      sortOrder: 10,
+    })),
+  );
+}
+
+const galleryCaptions = [
+  "Scrim night at the GASAK house",
+  "Champions of the regional qualifier",
+  "Squad grind before worlds",
+  "Drafting the perfect comp",
+  "Post-match debrief",
+  "Merch drop: jersey v2",
+  "Fan meet & greet",
+  "Bootcamp sunrise",
+  "Trophy lift moment",
+  "Mid-laner clutch",
+  "Tactical whiteboard",
+  "Community tournament",
+  "New gaming lounge",
+  "Victory pose",
+  "Coach review session",
+  "Ring light stream setup",
+  "Hype mural wall",
+  "Custom mousepads arrived",
+  "Watch party finals",
+  "Off-season team bonding",
+];
+
+async function ensureGalleries() {
+  const existing = await db.select().from(galleries).limit(1);
+  if (existing.length > 0) return;
+
+  await db.insert(galleries).values(
+    galleryCaptions.map((caption, i) => ({
+      title: caption,
+      description: `A moment from the GASAK family — ${caption}.`,
+      imageUrl: `https://picsum.photos/seed/gallery${i}/1200/900`,
+      sortOrder: i * 10,
       active: true,
-    },
-    {
-      eyebrow: "GASAK Management",
-      title: "Built for the GASAK organization",
-      description:
-        "Admin, seller, leader, and player workflows stay separated.",
-      imageUrl: "/images/about-family.png",
-      sortOrder: 20,
-      active: true,
-    },
-  ]);
+    })),
+  );
+}
+
+async function ensureProductGallery() {
+  const products_ = await db.query.products.findMany({
+    where: eq(products.category, "merchandise"),
+  });
+  if (products_.length === 0) return;
+
+  for (const product of products_) {
+    const existing = await db
+      .select()
+      .from(productGallery)
+      .where(eq(productGallery.productId, product.id));
+    if (existing.length > 0) continue;
+
+    await db.insert(productGallery).values(
+      [0, 1, 2].map((i) => ({
+        productId: product.id,
+        imageUrl: `https://picsum.photos/seed/merch-${product.id.slice(0, 8)}-${i}/1024/1024`,
+        sortOrder: i,
+      })),
+    );
+  }
 }
 
 async function ensureOrganizationPositions(admin: {
@@ -178,6 +335,12 @@ async function main() {
       where: eq(user.email, "admin@gasak.gg"),
     });
     if (admin) await ensureOrganizationPositions(admin);
+    const existingSeller = await db.query.user.findFirst({
+      where: eq(user.email, "seller@gasak.gg"),
+    });
+    await ensureJokiCatalog(existingSeller?.id ?? null);
+    await ensureGalleries();
+    await ensureProductGallery();
     console.log("Database already seeded, skipping.");
     return;
   }
@@ -303,7 +466,7 @@ async function main() {
     })),
   ]);
 
-  const [alpha, academy, bravo, charlie, delta, creators] = await db
+  const allSquads = await db
     .insert(squads)
     .values([
       {
@@ -312,6 +475,7 @@ async function main() {
           "The main competitive roster of GASAK, grinding MPL qualifiers and major community tournaments.",
         logoUrl: "/images/squad-a.png",
         accentColor: "#e0af3b",
+        division: "gasak",
       },
       {
         name: "GASAK Academy",
@@ -319,31 +483,74 @@ async function main() {
           "Development squad for rising talent — the pipeline into GASAK Alpha.",
         logoUrl: "/images/squad-b.png",
         accentColor: "#5fb0ff",
+        division: "gasak",
       },
       {
         name: "GASAK Bravo",
         description: "Second competitive roster focused on weekly cups.",
         logoUrl: "/images/squad-retak.png",
         accentColor: "#3ddc84",
+        division: "gasak",
       },
       {
         name: "GASAK Charlie",
         description: "Community tournament lineup for rising players.",
         logoUrl: "/images/squad-vultra.png",
         accentColor: "#ff6f5e",
+        division: "gasak",
       },
       {
         name: "GASAK Delta",
         description: "Scrim-heavy development roster for role specialists.",
         accentColor: "#c792ff",
+        division: "gasak",
       },
       {
         name: "GASAK Creators",
         description: "Content and coaching squad for public sessions.",
         accentColor: "#ffd35f",
+        division: "gasak",
+      },
+      {
+        name: "Nexus Prime",
+        description:
+          "Nexus flagship roster — aggressive early-game shotcallers.",
+        logoUrl: "/images/squad-retak.png",
+        accentColor: "#ff6f5e",
+        division: "nexus",
+      },
+      {
+        name: "Nexus Surge",
+        description: "Nexus development roster for rising duelists.",
+        accentColor: "#c792ff",
+        division: "nexus",
+      },
+      {
+        name: "Velrix Phantom",
+        description: "Velrix main lineup — control and macro specialists.",
+        accentColor: "#ffd35f",
+        division: "velrix",
+      },
+      {
+        name: "Velrix Tempest",
+        description: "Velrix scrim-heavy roster built around flexible lanes.",
+        accentColor: "#5fb0ff",
+        division: "velrix",
       },
     ])
     .returning();
+
+  const squadByName = Object.fromEntries(allSquads.map((s) => [s.name, s]));
+  const alpha = squadByName["GASAK Alpha"];
+  const academy = squadByName["GASAK Academy"];
+  const bravo = squadByName["GASAK Bravo"];
+  const charlie = squadByName["GASAK Charlie"];
+  const delta = squadByName["GASAK Delta"];
+  const creators = squadByName["GASAK Creators"];
+  const nexusPrime = squadByName["Nexus Prime"];
+  const nexusSurge = squadByName["Nexus Surge"];
+  const velrixPhantom = squadByName["Velrix Phantom"];
+  const velrixTempest = squadByName["Velrix Tempest"];
 
   await db.insert(squadMembers).values([
     { squadId: alpha.id, userId: leader.id, squadRole: "leader" },
@@ -354,9 +561,17 @@ async function main() {
     // Manage/Player focus toggle for org roles that also have a squad.
     { squadId: academy.id, userId: seller.id, squadRole: "coach" },
     ...extraPlayers.map((player, index) => ({
-      squadId: [academy.id, bravo.id, charlie.id, delta.id, creators.id][
-        index % 5
-      ],
+      squadId: [
+        academy.id,
+        bravo.id,
+        charlie.id,
+        delta.id,
+        creators.id,
+        nexusPrime.id,
+        nexusSurge.id,
+        velrixPhantom.id,
+        velrixTempest.id,
+      ][index % 9],
       userId: player.id,
       squadRole: (index % 5 === 0
         ? "leader"
@@ -724,70 +939,16 @@ async function main() {
   const productRows = await db
     .insert(products)
     .values([
-      {
-        name: "86 Diamonds",
-        category: "diamonds",
-        description:
-          "MLBB 86 diamonds top-up via player ID. Delivered within 15 minutes.",
-        priceSen: 550,
-        stock: 999,
-        active: true,
-        createdBy: seller.id,
-      },
-      {
-        name: "172 Diamonds",
-        category: "diamonds",
-        description: "MLBB 172 diamonds top-up via player ID.",
-        priceSen: 1100,
-        stock: 999,
-        active: true,
-        createdBy: seller.id,
-      },
-      {
-        name: "Weekly Diamond Pass",
-        category: "weekly_pass",
-        description:
-          "MLBB Weekly Diamond Pass — best value for daily diamonds.",
-        priceSen: 800,
-        stock: 500,
-        active: true,
-        createdBy: seller.id,
-      },
-      {
-        name: "Joki Mythic → Mythical Honor",
-        category: "joki",
-        description:
-          "Rank boost by GASAK players. Safe, no cheats, VPN protected.",
-        priceSen: 5000,
-        stock: 10,
-        active: true,
-        createdBy: seller.id,
-      },
-      {
-        name: "1-on-1 Coaching (2 hours)",
-        category: "coaching",
-        description:
-          "Personal coaching session with a GASAK Alpha player — VOD review and live queue.",
-        priceSen: 8000,
-        stock: 20,
-        active: true,
-        createdBy: seller.id,
-      },
+      // Only joki and merchandise are live shop categories for now — other
+      // categories will be rebuilt from scratch later.
       ...[
-        ["257 Diamonds", "diamonds", 1650, 999],
-        ["344 Diamonds", "diamonds", 2200, 999],
-        ["429 Diamonds", "diamonds", 2750, 999],
-        ["706 Diamonds", "diamonds", 4400, 800],
-        ["Twilight Pass", "weekly_pass", 4200, 100],
-        ["Rank Push Coaching", "coaching", 12_000, 12],
-        ["Duo Queue Review", "coaching", 6000, 20],
-        ["Joki Legend to Mythic", "joki", 3500, 15],
-        ["Joki Honor to Glory", "joki", 9000, 8],
-        ["Draft Review Session", "coaching", 4500, 25],
-      ].map(([name, category, priceSen, stock]) => ({
+        ["GASAK Team Jersey", 8900, 40],
+        ["GASAK Hoodie", 12_900, 25],
+        ["GASAK Sticker Pack", 1500, 100],
+      ].map(([name, priceSen, stock]) => ({
         name: name as string,
-        category: category as "diamonds" | "weekly_pass" | "joki" | "coaching",
-        description: `${name} package from GASAK shop.`,
+        category: "merchandise" as const,
+        description: `${name} from the GASAK merch store.`,
         priceSen: priceSen as number,
         stock: stock as number,
         active: true,
@@ -804,7 +965,7 @@ async function main() {
       ign: `Trial${index + 1}`,
       mlbbId: String(880_000_000 + index),
       serverId: String(3000 + (index % 5)),
-      currentRank: mkRank(index % 2 === 0 ? "Mythic" : "Legend", 10),
+      peakRank: mkRank(index % 2 === 0 ? "Mythic" : "Legend", 10),
       preferredLanes: [
         (["exp", "jungle", "mid", "gold", "roam"] as const)[index % 5],
       ],
@@ -855,14 +1016,19 @@ async function main() {
     }),
   );
 
-  await ensureAuthSlides();
+  await ensureAuthImages();
+  await ensureGalleries();
+  await ensureProductGallery();
   await ensureOrganizationPositions(admin);
+  await ensureJokiCatalog(seller.id);
 
   console.log("Seed complete.");
   console.log(
     "Logins: admin@gasak.gg/admin123, leader@gasak.gg/leader123, member@gasak.gg/member123, seller@gasak.gg/seller123",
   );
-  console.log(`Squads: ${alpha.name}, ${academy.name}`);
+  console.log(
+    `Squads: ${alpha.name} (gasak), ${nexusPrime.name} (nexus), ${velrixPhantom.name} (velrix)`,
+  );
 }
 
 main().then(

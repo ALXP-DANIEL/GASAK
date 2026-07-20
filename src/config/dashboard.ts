@@ -14,6 +14,8 @@ export type DashboardNavItem = {
   label: string;
   icon: Icon;
   canAccess: (access: DashboardAccess) => boolean;
+  /** Sub-pages rendered as an indented submenu under this item. */
+  children?: DashboardNavItem[];
 };
 
 export type DashboardNavGroup = {
@@ -96,6 +98,26 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         label: "Squads",
         icon: Icons.Domain.Squads,
         canAccess: isAdmin,
+        children: [
+          {
+            href: "/dashboard/squads?division=gasak",
+            label: "Gasak",
+            icon: Icons.Domain.Squads,
+            canAccess: isAdmin,
+          },
+          {
+            href: "/dashboard/squads?division=nexus",
+            label: "Nexus",
+            icon: Icons.Domain.Squads,
+            canAccess: isAdmin,
+          },
+          {
+            href: "/dashboard/squads?division=velrix",
+            label: "Velrix",
+            icon: Icons.Domain.Squads,
+            canAccess: isAdmin,
+          },
+        ],
       },
       {
         href: "/dashboard/players",
@@ -120,6 +142,20 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         label: "Products",
         icon: Icons.Domain.Products,
         canAccess: canUseCommerce,
+        children: [
+          {
+            href: "/dashboard/products/joki",
+            label: "Joki",
+            icon: Icons.Domain.Joki,
+            canAccess: canUseCommerce,
+          },
+          {
+            href: "/dashboard/products/merchandise",
+            label: "Merchandise",
+            icon: Icons.Domain.Merchandise,
+            canAccess: canUseCommerce,
+          },
+        ],
       },
     ],
   },
@@ -134,8 +170,14 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         canAccess: isAdmin,
       },
       {
-        href: "/dashboard/auth-slides",
-        label: "Auth Slides",
+        href: "/dashboard/auth-images",
+        label: "Auth Images",
+        icon: Icons.Editor.Image,
+        canAccess: isAdmin,
+      },
+      {
+        href: "/dashboard/galleries",
+        label: "Gallery",
         icon: Icons.Editor.Image,
         canAccess: isAdmin,
       },

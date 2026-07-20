@@ -46,7 +46,7 @@ export function PhonePrefixField<
               placeholder="12 345 6789"
               disabled={disabled}
               aria-invalid={fieldState.invalid}
-              className="h-10 min-w-0 border-0 bg-transparent shadow-none focus-visible:ring-0"
+              className="h-10 min-w-0 border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
               value={toNationalPhone(field.value ?? "")}
             />
           </div>

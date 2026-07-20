@@ -1,5 +1,6 @@
 import { PageHeader } from "@app/(dashboard)/dashboard/_components/page-surface";
 import { Icons } from "@components/icons";
+import { PageSkeleton } from "@components/shared/page-skeleton";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { listMatches } from "@features/matches/queries";
 import { listManagedSquadOptions } from "@features/squads/queries";
@@ -32,52 +33,54 @@ export default async function MatchesPage() {
   const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Matches"
-        kicker="Squad"
-        icon={Icons.Domain.Scrims}
-        description="Scrim and match records for your squads."
-        actions={canManage ? <MatchFormDialog squads={squads} /> : undefined}
-      />
-
-      <StatStrip>
-        <StatItem
-          label="Played"
-          value={rows.length}
-          hint="All records"
+    <PageSkeleton name="matches" loading={false}>
+      <div className="flex flex-col gap-6">
+        <PageHeader
+          title="Matches"
+          kicker="Squad"
           icon={Icons.Domain.Scrims}
+          description="Scrim and match records for your squads."
+          actions={canManage ? <MatchFormDialog squads={squads} /> : undefined}
         />
-        <StatItem
-          label="Wins"
-          value={wins}
-          hint="Recorded wins"
-          icon={Icons.Stats.Trophies}
-        />
-        <StatItem
-          label="Losses"
-          value={losses}
-          hint="Recorded losses"
-          icon={Icons.Status.Failed}
-        />
-        <StatItem
-          label="Win Rate"
-          value={winRate === null ? "—" : `${winRate}%`}
-          hint={decided > 0 ? `${decided} decided matches` : "No results yet"}
-          icon={Icons.Stats.Goal}
-        />
-      </StatStrip>
 
-      <FormStrip
-        matches={rows.map((row) => ({
-          id: row.id,
-          opponent: row.opponent,
-          result: row.result,
-          date: row.date,
-        }))}
-      />
+        <StatStrip>
+          <StatItem
+            label="Played"
+            value={rows.length}
+            hint="All records"
+            icon={Icons.Domain.Scrims}
+          />
+          <StatItem
+            label="Wins"
+            value={wins}
+            hint="Recorded wins"
+            icon={Icons.Stats.Trophies}
+          />
+          <StatItem
+            label="Losses"
+            value={losses}
+            hint="Recorded losses"
+            icon={Icons.Status.Failed}
+          />
+          <StatItem
+            label="Win Rate"
+            value={winRate === null ? "—" : `${winRate}%`}
+            hint={decided > 0 ? `${decided} decided matches` : "No results yet"}
+            icon={Icons.Stats.Goal}
+          />
+        </StatStrip>
 
-      <MatchesTable rows={rows} squadFilterOptions={squadFilterOptions} />
-    </div>
+        <FormStrip
+          matches={rows.map((row) => ({
+            id: row.id,
+            opponent: row.opponent,
+            result: row.result,
+            date: row.date,
+          }))}
+        />
+
+        <MatchesTable rows={rows} squadFilterOptions={squadFilterOptions} />
+      </div>
+    </PageSkeleton>
   );
 }

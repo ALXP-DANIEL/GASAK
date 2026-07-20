@@ -67,7 +67,7 @@ export function ForgotPasswordForm() {
           name="email"
           label="Email"
           type="email"
-          placeholder="you@gasak.gg"
+          placeholder="you@gasak.my"
           autoComplete="email"
         />
         <Button type="submit" disabled={submitting} className="w-full">

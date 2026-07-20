@@ -1,6 +1,6 @@
 import { Logo } from "@components/layout/logo";
-import { AuthSideCarousel } from "@features/auth/components/auth-side-carousel";
-import { listActiveAuthSlides } from "@features/auth-slides/queries";
+import { AuthSideGrid } from "@features/auth/components/auth-side-grid";
+import { listActiveAuthImages } from "@features/auth-images/queries";
 import { cn } from "@lib/utils";
 
 export default async function AuthLayout({
@@ -8,16 +8,17 @@ export default async function AuthLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const slides = await listActiveAuthSlides();
+  const slides = await listActiveAuthImages();
 
   return (
     <div
       className={cn(
-        "grid min-h-svh bg-background text-foreground",
-        slides.length > 0 && "desktop:grid-cols-2",
+        "relative grid min-h-svh grid-cols-1 bg-background text-foreground",
       )}
     >
-      <div className="flex flex-col gap-4 p-6 desktop:p-10">
+      <AuthSideGrid slides={slides} />
+
+      <div className="relative z-10 flex flex-col gap-4 p-6 desktop:p-10">
         <div className="flex justify-center gap-2 desktop:justify-start">
           <Logo href="/" size={32} wordmark="compact" />
         </div>
@@ -25,11 +26,6 @@ export default async function AuthLayout({
           <div className="w-full max-w-xs">{children}</div>
         </div>
       </div>
-      {slides.length > 0 && (
-        <div className="hidden desktop:block desktop:p-5">
-          <AuthSideCarousel slides={slides} />
-        </div>
-      )}
     </div>
   );
 }

@@ -147,6 +147,43 @@ export function tierBaseOrder(tier: RankTier): number {
   return RANK_TIERS.indexOf(tier) * 1000;
 }
 
+/** Real number of star-ups needed to climb an entire tier (not the ×1000 sort scale). */
+export function tierStarCapacity(tier: RankTier): number {
+  if (isDivisioned(tier)) {
+    const { divisions, starsPerDivision } = DIVISIONED_RANKS[tier];
+    return divisions * starsPerDivision;
+  }
+  const { min, max, uncapped } = MYTHIC_RANKS[tier as MythicTier];
+  return uncapped ? Number.POSITIVE_INFINITY : max - min + 1;
+}
+
+/**
+ * Absolute star-ladder position of a rank, counted as real star-ups from the
+ * bottom of Warrior — unlike {@link rankOrder} (an arbitrary ×1000 sort key),
+ * the difference between two of these is the literal number of wins needed
+ * to climb from one rank to the other. Used to price joki per-star boosts
+ * that cross tier (and therefore rate) boundaries.
+ */
+export function rankAbsoluteIndex(rank: unknown): number | null {
+  const r = normalizeRank(rank);
+  if (!r) return null;
+
+  let cumulative = 0;
+  for (const t of RANK_TIERS) {
+    if (t === r.tier) {
+      if (isDivisioned(t)) {
+        const { divisions, starsPerDivision } = DIVISIONED_RANKS[t];
+        const divisionStrength = divisions - (r.division ?? divisions);
+        return cumulative + divisionStrength * starsPerDivision + r.stars;
+      }
+      const { min } = MYTHIC_RANKS[t as MythicTier];
+      return cumulative + (r.stars - min);
+    }
+    cumulative += tierStarCapacity(t);
+  }
+  return null;
+}
+
 /** Zod schema for a rank field value (object form). */
 export const rankFieldSchema = z
   .object({

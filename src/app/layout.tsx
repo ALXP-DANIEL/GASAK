@@ -33,7 +33,12 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   applicationName: siteConfig.name,
   keywords: siteConfig.keywords,
-  authors: [{ name: siteConfig.author, url: siteConfig.links.github }],
+  authors: [
+    {
+      name: siteConfig.author,
+      //  url: siteConfig.links.github
+    },
+  ],
   creator: siteConfig.author,
   alternates: {
     canonical: "/",
@@ -53,7 +58,7 @@ export const metadata: Metadata = {
     images: [siteConfig.ogImage],
   },
   other: {
-    "github:repo": siteConfig.links.github,
+    // "github:repo": siteConfig.links.github,
   },
 };
 
