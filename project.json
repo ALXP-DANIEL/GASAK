@@ -1,0 +1,42 @@
+{
+  "slug": "gasak",
+  "title": "GASAK",
+  "type": "Full-Stack Web App",
+  "category": "Esports Org Management",
+  "summary": "An org management portal for a Malaysian MLBB esports team — squads, recruitment, events, and a public shop, all role-gated for admins, leaders, members, and sellers.",
+  "overview": "GASAK is a Next.js 16 management system for a Mobile Legends esports organization. It handles squad and player rosters, recruitment applications, a shared event calendar with tournaments and scrims, announcements, and a public shop with guest checkout — all role-gated (Admin / Leader / Member / Seller) via Better Auth. Drizzle ORM + PostgreSQL back the data layer, with Resend for transactional email and UploadThing for media.",
+  "year": "2026",
+  "spotlight": true,
+  "thumbnail": "./metadata/picture/thumbnail.png",
+  "spotlightImage": "",
+  "techStack": [
+    "Next.js 16",
+    "React 19",
+    "TypeScript",
+    "Tailwind CSS 4",
+    "Base UI",
+    "Better Auth",
+    "Drizzle ORM",
+    "PostgreSQL",
+    "TanStack Table",
+    "React Hook Form",
+    "Zod",
+    "Resend",
+    "UploadThing",
+    "Motion",
+    "Biome",
+    "Vercel"
+  ],
+  "highlights": [
+    "Role-gated management portal (Admin / Leader / Member / Seller) for squads, players, and recruitment.",
+    "Shared event calendar for tournaments and scrims, with announcements and match logging.",
+    "Public shop with guest checkout for merchandise and rank-boost (joki) services.",
+    "Better Auth for authentication, with email/password, admin user management, and password reset.",
+    "Drizzle ORM + PostgreSQL data layer with transactional email via Resend."
+  ],
+  "previewImages": [],
+  "actions": {
+    "open": "https://gasak-alifdanielpersonalspace-3754s-projects.vercel.app",
+    "github": "https://github.com/ALXP-DANIEL/gasak"
+  }
+}
