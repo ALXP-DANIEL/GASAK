@@ -54,6 +54,15 @@ export default async function ProductsPage() {
   ]);
   const activeMerch = merchRows.filter((product) => product.active);
 
+  const active = rows.filter((product) => product.active);
+  const outOfStock = active.filter((product) => product.stock === 0);
+  const categoryMix = productCategoryEnum.enumValues.map((category, index) => ({
+    label: PRODUCT_CATEGORY_LABELS[category],
+    value: rows.filter((product) => product.category === category).length,
+    color: `var(--chart-${(index % 5) + 1})`,
+  }));
+  const categories = categoryMix.filter((entry) => entry.value > 0).length;
+
   return (
     <PageSkeleton name="products" loading={false}>
       <main>
