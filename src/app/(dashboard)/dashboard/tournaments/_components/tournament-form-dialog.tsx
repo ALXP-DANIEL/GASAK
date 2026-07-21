@@ -80,6 +80,7 @@ export function TournamentFormDialog({
         name: tournament?.name ?? "",
         organizer: tournament?.organizer ?? "",
         date: tournament ? toDateTimeLocal(tournament.date) : "",
+        prizePool: tournament?.prizePool ?? "",
         prize: tournament?.prize ?? "",
         placement: tournament?.placement ?? "",
         mvp: tournament?.mvp ?? "",
@@ -151,6 +152,12 @@ export function TournamentFormDialog({
                   options={statusOptions}
                 />
               </DashboardFormGrid>
+              <FormField
+                control={control}
+                name="prizePool"
+                label="Prize Pool"
+                placeholder="e.g. RM500 + trophies"
+              />
             </FormSection>
 
             <FormSection title="Results">

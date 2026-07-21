@@ -22,7 +22,7 @@ import {
 } from "@lib/ranks";
 import { cn } from "@lib/utils";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   type Control,
   Controller,
@@ -131,6 +131,15 @@ function RankField<
   const stars = tier
     ? clamp(value.stars ?? bounds.min, bounds.min, effectiveMax)
     : 0;
+
+  // Local text buffer for the stars input — kept separate from the derived
+  // `stars` value so backspacing to an empty string mid-edit doesn't get
+  // immediately overwritten by the clamped/controlled value on every
+  // keystroke, which previously made the field impossible to type into.
+  const [starsInput, setStarsInput] = useState(String(stars));
+  useEffect(() => {
+    setStarsInput(String(stars));
+  }, [stars]);
 
   // Keep the current rank within the maxRank constraint whenever it changes
   // (e.g. the user lowers their peak rank).
@@ -381,13 +390,19 @@ function RankField<
                       min={bounds.min}
                       max={effectiveMax === Infinity ? undefined : effectiveMax}
                       disabled={disabled}
-                      value={stars}
+                      value={starsInput}
                       aria-label="Rank stars"
-                      onBlur={field.onBlur}
+                      onFocus={(event) => event.currentTarget.select()}
+                      onBlur={() => {
+                        field.onBlur();
+                        setStarsInput(String(stars));
+                      }}
                       onChange={(event) => {
-                        const nextValue = event.currentTarget.valueAsNumber;
+                        const raw = event.currentTarget.value;
+                        setStarsInput(raw);
 
-                        if (!Number.isNaN(nextValue)) {
+                        const nextValue = Number(raw);
+                        if (raw !== "" && !Number.isNaN(nextValue)) {
                           setStars(nextValue);
                         }
                       }}

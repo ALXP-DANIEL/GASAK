@@ -27,7 +27,7 @@ import {
   deleteTournamentRound,
 } from "@features/tournaments/actions";
 import { getTournament } from "@features/tournaments/queries";
-import { formatDateTime } from "@lib/format";
+import { formatDate, formatDateTime } from "@lib/format";
 import {
   MATCH_OUTCOME_LABELS,
   TOURNAMENT_FORMAT_LABELS,
@@ -72,7 +72,7 @@ export default async function TournamentDetailPage({
     tournament.squadId
       ? db.query.events.findMany({
           where: eq(events.squadId, tournament.squadId),
-          orderBy: desc(events.startsAt),
+          orderBy: desc(events.date),
           limit: 50,
         })
       : Promise.resolve([]),
@@ -80,7 +80,7 @@ export default async function TournamentDetailPage({
 
   const eventOptions = squadEvents.map((event) => ({
     value: event.id,
-    label: `${event.title} · ${formatDateTime(event.startsAt)}`,
+    label: `${event.title} · ${formatDate(event.date)}`,
   }));
 
   return (
@@ -145,6 +145,7 @@ export default async function TournamentDetailPage({
                 label="Organizer"
                 value={tournament.organizer ?? "—"}
               />
+              <DetailRow label="Prize Pool" value={tournament.prizePool} />
               <DetailRow label="Prize" value={tournament.prize ?? "—"} />
               <DetailRow
                 label="Placement"

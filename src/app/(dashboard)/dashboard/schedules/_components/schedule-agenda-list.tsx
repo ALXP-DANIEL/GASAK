@@ -6,7 +6,6 @@ import { format, isSameDay } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
-import { formatTime } from "@/lib/format";
 
 const MY_TIME_ZONE = "Asia/Kuala_Lumpur";
 
@@ -14,8 +13,7 @@ type ScheduleEvent = {
   id: string;
   title: string;
   type: EventType;
-  startsAt: string;
-  endsAt: string | null;
+  date: string;
   location: string | null;
   squadId: string | null;
   squadName: string | null;
@@ -24,23 +22,21 @@ type ScheduleEvent = {
 
 const DEFAULT_ACCENT_COLOR = "var(--primary)";
 
-/** Malaysia wall-clock day for a stored instant — grouping/comparisons must
+/** Malaysia wall-clock day for a stored date — grouping/comparisons must
  * use this instead of raw Date getters, which reflect the runtime's own
- * timezone and can disagree with what was stored via parseMYDateTimeLocal. */
+ * timezone and can disagree with the intended calendar day. */
 function myDay(date: string) {
   return toZonedTime(new Date(date), MY_TIME_ZONE);
 }
 
-/** Groups events by the calendar day they start on, so a multi-day event
- * (e.g. 4pm–5am) appears once under its start day instead of once per day
- * it overlaps — the header/time text carries the range instead. */
+/** Groups events by their calendar day. */
 function groupByStartDay(events: ScheduleEvent[]) {
   const sorted = [...events].sort(
-    (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
   const groups: { day: Date; events: ScheduleEvent[] }[] = [];
   for (const event of sorted) {
-    const start = myDay(event.startsAt);
+    const start = myDay(event.date);
     const last = groups.at(-1);
     if (last && isSameDay(last.day, start)) {
       last.events.push(event);
@@ -49,16 +45,6 @@ function groupByStartDay(events: ScheduleEvent[]) {
     }
   }
   return groups;
-}
-
-function eventTimeLabel(event: ScheduleEvent) {
-  const startTime = formatTime(event.startsAt);
-  if (!event.endsAt) return startTime;
-  const endTime = formatTime(event.endsAt);
-  if (isSameDay(myDay(event.startsAt), myDay(event.endsAt))) {
-    return `${startTime} – ${endTime}`;
-  }
-  return `${startTime} – ${endTime}, ${format(myDay(event.endsAt), "MMM d")}`;
 }
 
 export function ScheduleAgendaList({ events }: { events: ScheduleEvent[] }) {
@@ -93,9 +79,6 @@ export function ScheduleAgendaList({ events }: { events: ScheduleEvent[] }) {
               onClick={() => router.push(`/dashboard/schedules/${event.id}`)}
               className="flex w-full items-center gap-3 border-b px-4 py-3 text-left hover:bg-accent/50"
             >
-              <span className="w-28 shrink-0 text-muted-foreground text-sm">
-                {eventTimeLabel(event)}
-              </span>
               <span
                 className="h-6 w-1 shrink-0 rounded-full"
                 style={{

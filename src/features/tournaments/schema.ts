@@ -10,6 +10,7 @@ export const tournamentSchema = z.object({
   name: z.string().min(2, "Tournament name is required"),
   organizer: z.string().optional(),
   date: z.string().min(1, "Date is required"),
+  prizePool: z.string().min(1, "Prize pool is required"),
   prize: z.string().optional(),
   placement: z.string().optional(),
   mvp: z.string().optional(),

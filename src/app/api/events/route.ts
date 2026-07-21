@@ -31,8 +31,8 @@ export async function GET() {
     rows.map((event) => ({
       id: event.id,
       title: event.title,
-      start: event.startsAt,
-      end: event.endsAt ?? undefined,
+      start: event.date,
+      allDay: true,
       extendedProps: {
         type: event.type,
         description: event.description,

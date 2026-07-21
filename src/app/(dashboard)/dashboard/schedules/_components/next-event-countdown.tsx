@@ -46,14 +46,14 @@ export function NextEventCountdown({
   href,
   title,
   typeLabel,
-  startsAtIso,
+  dateIso,
   location,
   squadName,
 }: {
   href: string;
   title: string;
   typeLabel: string;
-  startsAtIso: string;
+  dateIso: string;
   location: string | null;
   squadName: string | null;
 }) {
@@ -66,7 +66,8 @@ export function NextEventCountdown({
     return () => clearInterval(timer);
   }, []);
 
-  const target = new Date(startsAtIso).getTime();
+  // Date-only value — countdown to the start of that calendar day.
+  const target = new Date(`${dateIso}T00:00:00`).getTime();
   const parts = now === null ? undefined : partsUntil(target, now);
   const isLive = now !== null && parts === null;
 

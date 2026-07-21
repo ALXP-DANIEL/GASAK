@@ -10,6 +10,7 @@ import { BrandCard } from "@components/ui/brand";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toMalaysiaPhone } from "@lib/phone";
+import { MALAYSIA_STATES } from "@lib/labels";
 import { rankFieldSchema } from "@lib/ranks";
 import { submitApplication } from "@server/actions/public";
 import { laneEnum } from "@server/db/schema";
@@ -22,6 +23,12 @@ const schema = z.object({
   fullName: z.string().min(2, "Full name is required"),
   email: z.email("Enter a valid email"),
   phone: z.string().min(6, "Enter a valid phone number"),
+  age: z
+    .number("Enter your age")
+    .int()
+    .min(13, "Must be at least 13")
+    .max(100, "Enter a valid age"),
+  daerah: z.enum(MALAYSIA_STATES, "Pick your state/daerah"),
   ign: z.string().min(1, "IGN is required"),
   mlbbId: z.string().min(4, "Enter a valid MLBB ID"),
   serverId: z.string().min(1, "Server ID is required"),
@@ -56,6 +63,8 @@ export function ApplicationForm({
       ign: "",
       mlbbId: "",
       serverId: "",
+      age: 0,
+      daerah: undefined,
       squadId: ANY_SQUAD_VALUE,
       peakRank: undefined,
       preferredLanes: [],
@@ -132,6 +141,22 @@ export function ApplicationForm({
               control={control}
               name="phone"
               label="Phone (WhatsApp)"
+            />
+            <FormField
+              control={control}
+              name="age"
+              label="Age"
+              type="number"
+            />
+            <FormSelect
+              control={control}
+              name="daerah"
+              label="Daerah (state)"
+              options={MALAYSIA_STATES.map((state) => ({
+                value: state,
+                label: state,
+              }))}
+              placeholder="Pick your state"
             />
           </div>
         </IndexedFormSection>

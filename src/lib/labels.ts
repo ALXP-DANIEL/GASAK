@@ -204,3 +204,22 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   fpx: "FPX",
   billplz: "Billplz (online)",
 };
+
+export const MALAYSIA_STATES = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Perak",
+  "Perlis",
+  "Pulau Pinang",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "Kuala Lumpur",
+  "Labuan",
+  "Putrajaya",
+] as const;

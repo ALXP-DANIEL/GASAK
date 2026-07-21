@@ -2,7 +2,7 @@
 
 import { DashboardFormGrid } from "@components/forms/dashboard-form";
 import {
-  FormDateTimeField,
+  FormDatePicker,
   FormField,
   FormSelect,
 } from "@components/forms/form-field";
@@ -21,7 +21,6 @@ import {
 } from "@components/ui/credenza";
 import { Button } from "@components/ui/shadcn/button";
 import { eventSchema, ORG_WIDE } from "@features/events/schema";
-import { toDateTimeLocal } from "@lib/format";
 import { EVENT_TYPE_LABELS } from "@lib/labels";
 import { createEvent, updateEvent } from "@server/actions/events";
 import { type Event, eventTypeEnum } from "@server/db/schema";
@@ -58,8 +57,7 @@ export function EventFormDialog({
         title: event?.title ?? "",
         description: event?.description ?? "",
         type: event?.type ?? "practice",
-        startsAt: event ? toDateTimeLocal(event.startsAt) : "",
-        endsAt: event?.endsAt ? toDateTimeLocal(event.endsAt) : "",
+        date: event?.date ?? "",
         location: event?.location ?? "",
         squadId: event?.squadId ?? "",
       },
@@ -109,18 +107,7 @@ export function EventFormDialog({
                   placeholder="Pick a squad"
                 />
               </DashboardFormGrid>
-              <DashboardFormGrid>
-                <FormDateTimeField
-                  control={control}
-                  name="startsAt"
-                  label="Starts"
-                />
-                <FormDateTimeField
-                  control={control}
-                  name="endsAt"
-                  label="Ends"
-                />
-              </DashboardFormGrid>
+              <FormDatePicker control={control} name="date" label="Date" />
               <FormField control={control} name="location" label="Location" />
               <FormField
                 control={control}

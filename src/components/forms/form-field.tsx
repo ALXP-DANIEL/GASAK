@@ -450,6 +450,7 @@ type FormDatePickerProps<
   toDate?: Date;
 };
 
+/** Binds to a "yyyy-MM-dd" string, matching Drizzle's `date` column mode. */
 export function FormDatePicker<
   TFieldValues extends FieldValues,
   TName extends FieldPath<TFieldValues>,
@@ -491,15 +492,23 @@ export function FormDatePicker<
                   data-empty={!field.value}
                 >
                   <Icons.Domain.Calendar className="size-4" />
-                  {field.value ? format(field.value, dateFormat) : placeholder}
+                  {field.value
+                    ? format(parse(field.value, "yyyy-MM-dd", new Date()), dateFormat)
+                    : placeholder}
                 </Button>
               }
             />
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                selected={field.value ?? undefined}
-                onSelect={field.onChange}
+                selected={
+                  field.value
+                    ? parse(field.value, "yyyy-MM-dd", new Date())
+                    : undefined
+                }
+                onSelect={(date) =>
+                  field.onChange(date ? format(date, "yyyy-MM-dd") : "")
+                }
                 disabled={[
                   ...(fromDate ? [{ before: fromDate }] : []),
                   ...(toDate ? [{ after: toDate }] : []),

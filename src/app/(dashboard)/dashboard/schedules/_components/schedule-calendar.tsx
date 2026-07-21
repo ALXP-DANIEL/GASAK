@@ -22,7 +22,7 @@ import listPlugin from "@fullcalendar/react/list";
 import multiMonthPlugin from "@fullcalendar/react/multimonth";
 import timeGridPlugin from "@fullcalendar/react/timegrid";
 import { useScreen } from "@hooks/use-screen";
-import { formatDateTime, formatTime } from "@lib/format";
+import { formatDate } from "@lib/format";
 import { EVENT_TYPE_LABELS } from "@lib/labels";
 import { cn } from "@lib/utils";
 import { CalendarBlankIcon } from "@phosphor-icons/react/dist/ssr/CalendarBlank";
@@ -42,8 +42,7 @@ type ScheduleEvent = {
   id: string;
   title: string;
   type: EventType;
-  startsAt: string;
-  endsAt: string | null;
+  date: string;
   location: string | null;
   squadId: string | null;
   squadName: string | null;
@@ -84,7 +83,7 @@ const DEFAULT_ACCENT_COLOR = "var(--primary)";
 
 function eventCountInRange(events: ScheduleEvent[], start: Date, end: Date) {
   return events.filter((event) => {
-    const date = new Date(event.startsAt);
+    const date = new Date(event.date);
     return date >= start && date < end;
   }).length;
 }
@@ -160,8 +159,8 @@ export function ScheduleCalendar({
       filteredEvents.map((event) => ({
         id: event.id,
         title: event.title,
-        start: event.startsAt,
-        end: event.endsAt ?? undefined,
+        start: event.date,
+        allDay: true,
         color: event.squadAccentColor || DEFAULT_ACCENT_COLOR,
         extendedProps: {
           eventType: event.type,
@@ -343,10 +342,7 @@ export function ScheduleCalendar({
             </span>
             <div className="mt-1.5 grid gap-0.5 text-xs text-muted-foreground">
               <span>{EVENT_TYPE_LABELS[hover.event.type]}</span>
-              <span>
-                {formatDateTime(hover.event.startsAt)}
-                {hover.event.endsAt && ` – ${formatTime(hover.event.endsAt)}`}
-              </span>
+              <span>{formatDate(hover.event.date)}</span>
               {hover.event.location && <span>{hover.event.location}</span>}
               <span>{hover.event.squadName ?? "Organization-wide"}</span>
             </div>

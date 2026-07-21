@@ -85,7 +85,7 @@ export function LogResultDialog({
     id: string;
     title: string;
     type: string;
-    startsAt: string;
+    date: string;
     squadId: string | null;
   };
   /** Squads the user manages — squad picker for the scrim record. */
@@ -122,7 +122,7 @@ export function LogResultDialog({
           ? await createScrim({
               squadId: values.squadId,
               opponent: values.opponent,
-              date: event.startsAt,
+              date: event.date,
               result: values.result,
               notes: values.notes,
               replayLink: values.replayLink,
@@ -131,7 +131,7 @@ export function LogResultDialog({
           : await createTournamentRound(values.tournamentId, {
               roundLabel: values.roundLabel,
               opponent: values.opponent,
-              scheduledAt: event.startsAt,
+              scheduledAt: event.date,
               outcome: values.outcome,
               score: values.score,
               notes: values.notes,

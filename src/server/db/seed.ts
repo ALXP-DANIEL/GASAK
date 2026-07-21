@@ -1,4 +1,6 @@
+import { MALAYSIA_STATES } from "@lib/labels";
 import type { MlbbRank } from "@lib/ranks";
+import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import { auth } from "../auth";
 import {
@@ -589,6 +591,7 @@ async function main() {
     date.setHours(h, 0, 0, 0);
     return date;
   };
+  const inDaysDate = (d: number) => format(inDays(d), "yyyy-MM-dd");
 
   // pastUnloggedScrimEvent is intentionally left unlinked to any scrim/round
   // — it demonstrates the "Log result" flow and the dashboard's
@@ -600,8 +603,7 @@ async function main() {
         title: "Grand Final vs Team Nova",
         description: "Community Cup grand final — best of 5.",
         type: "tournament",
-        startsAt: inDays(-20, 19),
-        endsAt: inDays(-20, 21),
+        date: inDaysDate(-20),
         location: "Online lobby",
         squadId: alpha.id,
         createdBy: admin.id,
@@ -610,8 +612,7 @@ async function main() {
         title: "Scrim vs Ravage GG",
         description: "Scheduled scrim block.",
         type: "scrim",
-        startsAt: inDays(-3, 21),
-        endsAt: inDays(-3, 23),
+        date: inDaysDate(-3),
         location: "In-game custom lobby",
         squadId: alpha.id,
         createdBy: admin.id,
@@ -620,8 +621,7 @@ async function main() {
         title: "Scrim vs Nova Axis",
         description: "Scheduled scrim block — result not logged yet.",
         type: "scrim",
-        startsAt: inDays(-1, 21),
-        endsAt: inDays(-1, 23),
+        date: inDaysDate(-1),
         location: "In-game custom lobby",
         squadId: alpha.id,
         createdBy: admin.id,
@@ -634,8 +634,7 @@ async function main() {
       title: "Weekly Practice",
       description: "Draft practice and macro review.",
       type: "practice",
-      startsAt: inDays(1),
-      endsAt: inDays(1, 22),
+      date: inDaysDate(1),
       location: "Discord — Practice Room",
       squadId: alpha.id,
       createdBy: admin.id,
@@ -644,8 +643,7 @@ async function main() {
       title: "Scrim vs Titan Esports",
       description: "Best of 5, tournament draft rules.",
       type: "scrim",
-      startsAt: inDays(3, 21),
-      endsAt: inDays(3, 23),
+      date: inDaysDate(3),
       location: "In-game custom lobby",
       squadId: alpha.id,
       createdBy: leader.id,
@@ -654,7 +652,7 @@ async function main() {
       title: "All-hands Meeting",
       description: "Monthly org update for every squad.",
       type: "meeting",
-      startsAt: inDays(5, 21),
+      date: inDaysDate(5),
       location: "Discord — Main Stage",
       createdBy: admin.id,
     },
@@ -662,8 +660,7 @@ async function main() {
       title: "Kejohanan MLBB Selangor",
       description: "Community tournament, single elimination.",
       type: "tournament",
-      startsAt: inDays(10, 10),
-      endsAt: inDays(10, 18),
+      date: inDaysDate(10),
       location: "Cyber Arena, Shah Alam",
       squadId: alpha.id,
       createdBy: admin.id,
@@ -679,12 +676,11 @@ async function main() {
       ["Academy Trial Session", "practice", 13, 21, academy.id],
       ["Bravo Review Room", "meeting", 14, 20, bravo.id],
       ["Delta Scrim vs Orion", "scrim", 16, 21, delta.id],
-    ].map(([title, type, day, hour, squadId]) => ({
+    ].map(([title, type, day, , squadId]) => ({
       title: title as string,
       description: `${title} scheduled for GASAK players.`,
       type: type as "practice" | "tournament" | "meeting" | "scrim",
-      startsAt: inDays(day as number, hour as number),
-      endsAt: inDays(day as number, (hour as number) + 2),
+      date: inDaysDate(day as number),
       location: type === "tournament" ? "Online lobby" : "Discord",
       squadId: squadId as string | null,
       createdBy: admin.id,
@@ -698,6 +694,7 @@ async function main() {
         name: "MLBB Community Cup 2026",
         organizer: "Moonton MY",
         date: inDays(-20, 12),
+        prizePool: "RM 5,000",
         prize: "RM 5,000",
         placement: "Champion",
         mvp: "GSK·Aiman",
@@ -709,6 +706,7 @@ async function main() {
         name: "Piala Komuniti KL",
         organizer: "KL Esports Hub",
         date: inDays(-45, 14),
+        prizePool: "RM 2,000",
         prize: "RM 2,000",
         placement: "Semifinal",
         mvp: "GSK·Danish",
@@ -720,6 +718,7 @@ async function main() {
         name: "Klang Valley Round Robin",
         organizer: "Community Hub",
         date: inDays(-6, 18),
+        prizePool: "RM 1,500",
         prize: "RM 1,500",
         placement: null,
         mvp: null,
@@ -731,6 +730,7 @@ async function main() {
         name: "Challonge Demo Bracket",
         organizer: "GASAK Internal",
         date: inDays(-2, 20),
+        prizePool: "TBD",
         prize: null,
         placement: null,
         mvp: null,
@@ -748,6 +748,7 @@ async function main() {
         name: "Merdeka Cup Qualifiers",
         organizer: "Moonton MY",
         date: inDays(15, 14),
+        prizePool: "RM 3,000",
         prize: "RM 3,000",
         placement: null,
         mvp: null,
@@ -759,6 +760,7 @@ async function main() {
         name: "Weekend Warriors Cup",
         organizer: "Community Hub",
         date: inDays(-30, 14),
+        prizePool: "RM 800",
         prize: "RM 800",
         placement: "Cancelled — organizer withdrew",
         mvp: null,
@@ -781,6 +783,7 @@ async function main() {
         name,
         organizer: index % 2 === 0 ? "Community Hub" : "Moonton MY",
         date: inDays(-10 - index * 8, 14),
+        prizePool: `RM ${(index + 1) * 750}`,
         prize: `RM ${(index + 1) * 750}`,
         placement:
           index % 3 === 0 ? "Champion" : index % 3 === 1 ? "Top 8" : "Top 4",
@@ -962,6 +965,8 @@ async function main() {
       fullName: `Applicant ${index + 1}`,
       email: `applicant${index + 1}@gasak.gg`,
       phone: `+60129876${500 + index}`,
+      age: 18 + (index % 10),
+      daerah: MALAYSIA_STATES[index % MALAYSIA_STATES.length],
       ign: `Trial${index + 1}`,
       mlbbId: String(880_000_000 + index),
       serverId: String(3000 + (index % 5)),

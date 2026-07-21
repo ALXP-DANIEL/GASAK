@@ -3,6 +3,7 @@ import type { MlbbRank } from "@lib/ranks";
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  date,
   foreignKey,
   index,
   integer,
@@ -286,6 +287,8 @@ export const applications = createTable("applications", {
   ign: text("ign").notNull(),
   mlbbId: text("mlbb_id").notNull(),
   serverId: text("server_id").notNull(),
+  age: integer("age").notNull(),
+  daerah: text("daerah").notNull(),
   peakRank: jsonb("peak_rank").$type<MlbbRank>().notNull(),
   preferredLanes: laneEnum("preferred_lanes").array().notNull(),
   heroPool: text("hero_pool").notNull(),
@@ -316,8 +319,7 @@ export const events = createTable(
     title: text("title").notNull(),
     description: text("description"),
     type: eventTypeEnum("type").notNull().default("practice"),
-    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
-    endsAt: timestamp("ends_at", { withTimezone: true }),
+    date: date("date", { mode: "string" }).notNull(),
     location: text("location"),
     // null squadId means an org-wide event
     squadId: uuid("squad_id").references(() => squads.id, {
@@ -342,6 +344,7 @@ export const tournaments = createTable(
     name: text("name").notNull(),
     organizer: text("organizer"),
     date: timestamp("date", { withTimezone: true }).notNull(),
+    prizePool: text("prize_pool").notNull(),
     prize: text("prize"),
     // Final standing, freeform: "Champion", "Top 4", "Eliminated R2"
     placement: text("placement"),

@@ -3,6 +3,7 @@ import { Icons } from "@components/icons";
 import { PageSkeleton } from "@components/shared/page-skeleton";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { listManagedSquadOptions } from "@features/squads/queries";
+import { formatMY } from "@lib/format";
 import { EVENT_TYPE_LABELS } from "@lib/labels";
 import { getMemberSquadIds } from "@server/authz";
 import { db, events } from "@server/db";
@@ -25,7 +26,7 @@ export default async function SchedulesPage() {
   const [rows, squads] = await Promise.all([
     db.query.events.findMany({
       where: scopeFilter,
-      orderBy: events.startsAt,
+      orderBy: events.date,
       with: { squad: true },
     }),
     listManagedSquadOptions(role, user.id),
@@ -34,8 +35,10 @@ export default async function SchedulesPage() {
 
   const now = new Date();
   const weekAhead = addDays(now, 7);
-  const upcoming = rows.filter((event) => event.startsAt >= now);
-  const thisWeek = upcoming.filter((event) => event.startsAt < weekAhead);
+  const todayStr = formatMY(now, "yyyy-MM-dd");
+  const weekAheadStr = formatMY(weekAhead, "yyyy-MM-dd");
+  const upcoming = rows.filter((event) => event.date >= todayStr);
+  const thisWeek = upcoming.filter((event) => event.date < weekAheadStr);
   const nextEvent = upcoming[0];
 
   return (
@@ -53,7 +56,7 @@ export default async function SchedulesPage() {
             href={`/dashboard/schedules/${nextEvent.id}`}
             title={nextEvent.title}
             typeLabel={EVENT_TYPE_LABELS[nextEvent.type]}
-            startsAtIso={nextEvent.startsAt.toISOString()}
+            dateIso={nextEvent.date}
             location={nextEvent.location}
             squadName={nextEvent.squad?.name ?? null}
           />
@@ -85,8 +88,7 @@ export default async function SchedulesPage() {
             id: event.id,
             title: event.title,
             type: event.type,
-            startsAt: event.startsAt.toISOString(),
-            endsAt: event.endsAt?.toISOString() ?? null,
+            date: event.date,
             location: event.location,
             squadId: event.squadId,
             squadName: event.squad?.name ?? null,

@@ -1,7 +1,7 @@
 import { Icons } from "@components/icons";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
-import { formatDate, formatDateTime, formatMY } from "@lib/format";
+import { formatDate, formatMY } from "@lib/format";
 import { EVENT_TYPE_LABELS, resultBadgeVariant } from "@lib/labels";
 import { getMemberSquadIds } from "@server/authz";
 import { db, events, news, scrims, squads, tournaments } from "@server/db";
@@ -18,6 +18,7 @@ export async function SquadHome({
 }) {
   const squadIds = await getMemberSquadIds(userId);
   const now = new Date();
+  const todayStr = formatMY(now, "yyyy-MM-dd");
 
   const [mySquads, upcoming, newsItems, squadMatches, squadTournaments] =
     await Promise.all([
@@ -32,13 +33,13 @@ export async function SquadHome({
         .from(events)
         .where(
           and(
-            gte(events.startsAt, now),
+            gte(events.date, todayStr),
             squadIds.length
               ? or(isNull(events.squadId), inArray(events.squadId, squadIds))
               : isNull(events.squadId),
           ),
         )
-        .orderBy(events.startsAt)
+        .orderBy(events.date)
         .limit(6),
       db.query.news.findMany({
         where: squadIds.length
@@ -131,7 +132,7 @@ export async function SquadHome({
               key={event.id}
               href={`/dashboard/schedules/${event.id}`}
               title={event.title}
-              meta={`${formatDateTime(event.startsAt)}${event.location ? ` · ${event.location}` : ""}`}
+              meta={`${formatDate(event.date)}${event.location ? ` · ${event.location}` : ""}`}
               trailing={
                 <Badge variant="outline">{EVENT_TYPE_LABELS[event.type]}</Badge>
               }

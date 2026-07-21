@@ -2,7 +2,7 @@ import { type RevenuePoint, RevenueTrendChart } from "@components/charts/lazy";
 import { Icons } from "@components/icons";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
 import { Badge } from "@components/ui/shadcn/badge";
-import { formatDate, formatDateTime, formatMY, formatRM } from "@lib/format";
+import { formatDate, formatMY, formatRM } from "@lib/format";
 import { APPLICATION_STATUS_LABELS, EVENT_TYPE_LABELS } from "@lib/labels";
 import {
   applications,
@@ -36,6 +36,7 @@ export async function AdminHome() {
   const now = new Date();
   const monthStart = startOfMonth(now);
   const trendStart = subDays(now, 29);
+  const todayStr = formatMY(now, "yyyy-MM-dd");
 
   const [
     [activeTeams],
@@ -89,8 +90,8 @@ export async function AdminHome() {
     db
       .select()
       .from(events)
-      .where(gte(events.startsAt, now))
-      .orderBy(events.startsAt)
+      .where(gte(events.date, todayStr))
+      .orderBy(events.date)
       .limit(5),
     db.query.tournaments.findMany({
       orderBy: (t, { desc: descOp }) => descOp(t.date),
@@ -102,7 +103,7 @@ export async function AdminHome() {
       .from(events)
       .where(
         and(
-          lt(events.startsAt, now),
+          lt(events.date, todayStr),
           inArray(events.type, ["scrim", "tournament"]),
           notExists(
             db.select().from(scrims).where(eq(scrims.eventId, events.id)),
@@ -115,7 +116,7 @@ export async function AdminHome() {
           ),
         ),
       )
-      .orderBy(desc(events.startsAt))
+      .orderBy(desc(events.date))
       .limit(3),
     db
       .select({ totalSen: orders.totalSen, updatedAt: orders.updatedAt })
@@ -203,7 +204,7 @@ export async function AdminHome() {
             key={event.id}
             href={`/dashboard/schedules/${event.id}`}
             title={`Log the result for "${event.title}"`}
-            meta={`Schedule · ${formatDateTime(event.startsAt)}`}
+            meta={`Schedule · ${formatDate(event.date)}`}
             trailing={
               <Badge variant="outline">{EVENT_TYPE_LABELS[event.type]}</Badge>
             }
@@ -233,7 +234,7 @@ export async function AdminHome() {
               key={event.id}
               href={`/dashboard/schedules/${event.id}`}
               title={event.title}
-              meta={formatDateTime(event.startsAt)}
+              meta={formatDate(event.date)}
               trailing={
                 <Badge variant="outline">{EVENT_TYPE_LABELS[event.type]}</Badge>
               }

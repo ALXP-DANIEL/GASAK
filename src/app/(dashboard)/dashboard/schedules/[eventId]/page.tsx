@@ -14,7 +14,7 @@ import {
 import { getEvent } from "@features/events/queries";
 import { listManagedSquadOptions } from "@features/squads/queries";
 import { listTournaments } from "@features/tournaments/queries";
-import { formatDateTime } from "@lib/format";
+import { formatDate, formatMY } from "@lib/format";
 import { EVENT_TYPE_LABELS, MATCH_OUTCOME_LABELS } from "@lib/labels";
 import { deleteEvent } from "@server/actions/events";
 import { canManageSquad, getManagedSquadIds } from "@server/authz";
@@ -49,7 +49,7 @@ export default async function EventDetailPage({
   ]);
 
   const hasResult = Boolean(linkedScrim || linkedRound);
-  const isPast = (event.endsAt ?? event.startsAt) < new Date();
+  const isPast = event.date < formatMY(new Date(), "yyyy-MM-dd");
   const isMatchType = event.type === "scrim" || event.type === "tournament";
   const showLogResult = canManage && isPast && isMatchType && !hasResult;
 
@@ -84,7 +84,7 @@ export default async function EventDetailPage({
                       id: event.id,
                       title: event.title,
                       type: event.type,
-                      startsAt: event.startsAt.toISOString(),
+                      date: event.date,
                       squadId: event.squadId,
                     }}
                     squads={squads}
@@ -116,11 +116,7 @@ export default async function EventDetailPage({
               label="Squad"
               value={event.squad?.name ?? "Organization-wide"}
             />
-            <DetailRow label="Starts" value={formatDateTime(event.startsAt)} />
-            <DetailRow
-              label="Ends"
-              value={event.endsAt ? formatDateTime(event.endsAt) : "—"}
-            />
+            <DetailRow label="Date" value={formatDate(event.date)} />
             <DetailRow label="Location" value={event.location ?? "—"} />
             {event.description && (
               <DetailRow

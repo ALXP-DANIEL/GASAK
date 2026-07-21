@@ -68,6 +68,7 @@ export function TournamentCard({ tournament }: { tournament: TournamentRow }) {
               {record.wins}W–{record.losses}L
             </span>
           )}
+          <span>{tournament.prizePool}</span>
           {tournament.prize && <span>{tournament.prize}</span>}
           {tournament.placement && (
             <Badge variant="secondary">{tournament.placement}</Badge>

@@ -6,7 +6,7 @@ import {
   computeJokiStarPath,
   resolveJokiTier,
 } from "@lib/joki";
-import { canonicalizeLanes } from "@lib/labels";
+import { canonicalizeLanes, MALAYSIA_STATES } from "@lib/labels";
 import { formatRank, rankFieldSchema } from "@lib/ranks";
 import { logActivity } from "@server/activity-log";
 import { createBillplzBill, getBillplzBill } from "@server/billplz";
@@ -36,6 +36,8 @@ const applicationSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
   email: z.email("Enter a valid email"),
   phone: z.string().min(6, "Enter a valid phone number"),
+  age: z.number().int().min(13).max(100),
+  daerah: z.enum(MALAYSIA_STATES),
   ign: z.string().min(1, "IGN is required"),
   mlbbId: z.string().min(4, "Enter a valid MLBB ID"),
   serverId: z.string().min(1, "Server ID is required"),

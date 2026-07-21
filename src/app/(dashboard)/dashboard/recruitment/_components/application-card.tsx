@@ -192,6 +192,9 @@ export function ApplicationCard({
                 {formatLanes(application.preferredLanes)} ·{" "}
                 {formatRank(application.peakRank)}
               </p>
+              <p>
+                {application.age} y/o · {application.daerah}
+              </p>
               <p className="truncate">
                 Squad: {application.squad?.name ?? "No preference"}
               </p>
@@ -219,6 +222,8 @@ export function ApplicationCard({
               />
               <DetailRow label="Email" value={application.email} />
               <DetailRow label="Phone" value={application.phone} />
+              <DetailRow label="Age" value={String(application.age)} />
+              <DetailRow label="Daerah" value={application.daerah} />
               <DetailRow
                 label="Lane"
                 value={formatLanes(application.preferredLanes)}
