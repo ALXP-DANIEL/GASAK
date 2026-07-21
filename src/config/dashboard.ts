@@ -188,6 +188,12 @@ export const dashboardSidebarGroups: DashboardNavGroup[] = [
         canAccess: isAdmin,
       },
       {
+        href: "/dashboard/integrations",
+        label: "Integrations",
+        icon: Icons.Domain.Integrations,
+        canAccess: isAdmin,
+      },
+      {
         href: "/dashboard/logs",
         label: "Logs",
         icon: Icons.Domain.Audit,

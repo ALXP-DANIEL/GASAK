@@ -22,7 +22,9 @@ import {
   productVariants,
   squads,
 } from "@server/db";
+import { notifyDiscord } from "@server/discord";
 import { markOrderPaid } from "@server/order-payment";
+import { notifyWhatsapp } from "@server/whatsapp";
 import { RATE_LIMITED_ERROR, rateLimit } from "@server/rate-limit";
 import { and, count, eq, gte } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
@@ -107,6 +109,15 @@ export async function submitApplication(
     entityId: row.id,
     description: `New public recruitment application from ${row.fullName}`,
   });
+
+  await Promise.all([
+    notifyDiscord(
+      `📥 New recruitment application: **${row.fullName}** (${row.ign}) — ${row.age} y/o, ${row.daerah}`,
+    ),
+    notifyWhatsapp(
+      `📥 New recruitment application: ${row.fullName} (${row.ign}) — ${row.age} y/o, ${row.daerah}`,
+    ),
+  ]);
 
   revalidatePath("/dashboard/recruitment");
   return {

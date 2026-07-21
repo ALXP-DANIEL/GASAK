@@ -9,6 +9,7 @@ export const eventSchema = z.object({
   description: z.string().optional(),
   type: z.enum(eventTypeEnum.enumValues),
   date: z.string().min(1, "Date is required"),
+  prizePool: z.string().optional(),
   location: z.string().optional(),
   squadId: z.string().min(1, "Pick a squad"),
 });

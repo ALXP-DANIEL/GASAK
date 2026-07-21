@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@components/ui/shadcn/card";
 import { getPlayer } from "@features/players/queries";
+import { calculateAge } from "@lib/format";
 import { ROLE_LABELS, SQUAD_ROLE_LABELS } from "@lib/labels";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -63,6 +64,14 @@ export default async function ProfilePage() {
                   />
                   <DetailRow label="Email" value={player.email} />
                   <DetailRow label="Phone" value={profile?.phone ?? "—"} />
+                  <DetailRow
+                    label="Age"
+                    value={
+                      profile?.dob
+                        ? `${calculateAge(profile.dob)} (${profile.dob})`
+                        : "—"
+                    }
+                  />
                 </CardContent>
               </Card>
               <Card>

@@ -228,6 +228,7 @@ export const playerProfiles = createTable("player_profiles", {
   mlbbId: text("mlbb_id"),
   serverId: text("server_id"),
   phone: text("phone"),
+  dob: date("dob", { mode: "string" }),
   preferredLanes: laneEnum("preferred_lanes").array(),
   currentRank: jsonb("current_rank").$type<MlbbRank>(),
   peakRank: jsonb("peak_rank").$type<MlbbRank>(),
@@ -320,6 +321,8 @@ export const events = createTable(
     description: text("description"),
     type: eventTypeEnum("type").notNull().default("practice"),
     date: date("date", { mode: "string" }).notNull(),
+    // Only meaningful when type === "tournament".
+    prizePool: text("prize_pool"),
     location: text("location"),
     // null squadId means an org-wide event
     squadId: uuid("squad_id").references(() => squads.id, {
@@ -560,6 +563,31 @@ export const activityLogs = createTable(
     index("gasak_activity_logs_created_at_idx").on(t.createdAt),
   ],
 );
+
+// Singleton row (id is always "default") holding admin-configurable Discord
+// channel IDs, so channel setup lives in the dashboard instead of env vars.
+export const discordSettings = createTable("discord_settings", {
+  id: text("id").primaryKey().default("default"),
+  recruitmentChannelId: text("recruitment_channel_id"),
+  scheduleChannelId: text("schedule_channel_id"),
+  birthdayChannelId: text("birthday_channel_id"),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// Singleton row (id is always "default") holding admin-configurable WhatsApp
+// recipient lists — comma-separated E.164 numbers, same shape as Discord's
+// channel IDs above but WhatsApp has no "channel", just direct recipients.
+export const whatsappSettings = createTable("whatsapp_settings", {
+  id: text("id").primaryKey().default("default"),
+  recruitmentRecipients: text("recruitment_recipients"),
+  scheduleRecipients: text("schedule_recipients"),
+  birthdayRecipients: text("birthday_recipients"),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
 
 export const products = createTable("products", {
   id: uuid("id")
@@ -1032,6 +1060,8 @@ export type AuthImage = typeof authImages.$inferSelect;
 export type Gallery = typeof galleries.$inferSelect;
 export type OrganizationPosition = typeof organizationPositions.$inferSelect;
 export type ActivityLog = typeof activityLogs.$inferSelect;
+export type DiscordSettings = typeof discordSettings.$inferSelect;
+export type WhatsappSettings = typeof whatsappSettings.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type ProductOption = typeof productOptions.$inferSelect;
 export type ProductOptionValue = typeof productOptionValues.$inferSelect;

@@ -45,6 +45,7 @@ import { NewspaperIcon } from "@phosphor-icons/react/dist/ssr/Newspaper";
 import { PackageIcon } from "@phosphor-icons/react/dist/ssr/Package";
 import { PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { PhoneIcon } from "@phosphor-icons/react/dist/ssr/Phone";
+import { PlugsConnectedIcon } from "@phosphor-icons/react/dist/ssr/PlugsConnected";
 import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { QuotesIcon } from "@phosphor-icons/react/dist/ssr/Quotes";
 import { ReceiptIcon } from "@phosphor-icons/react/dist/ssr/Receipt";
@@ -140,6 +141,7 @@ export const Icons = {
     Hierarchy: TreeStructureIcon,
     Audit: ClockCounterClockwiseIcon,
     Time: ClockIcon,
+    Integrations: PlugsConnectedIcon,
   },
 
   Actions: {

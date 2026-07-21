@@ -1,6 +1,6 @@
 "use client";
 
-import { FormField } from "@components/forms/form-field";
+import { FormDatePicker, FormField } from "@components/forms/form-field";
 import { FormSection } from "@components/forms/form-section";
 import {
   type ImageCropConfig,
@@ -283,6 +283,12 @@ export function ProfileEditDialog({
                     control={control}
                     name="phone"
                     label="Phone"
+                  />
+                  <FormDatePicker
+                    control={control}
+                    name="dob"
+                    label="Date of birth"
+                    description="Used to calculate your age and for birthday shoutouts."
                   />
                 </div>
               </FormSection>

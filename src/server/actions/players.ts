@@ -20,6 +20,7 @@ const profileSchema = z.object({
   mlbbId: z.string().optional(),
   serverId: z.string().optional(),
   phone: z.string().optional(),
+  dob: z.string().optional(),
   preferredLanes: z
     .array(z.enum(laneEnum.enumValues))
     .transform(canonicalizeLanes)
@@ -49,6 +50,7 @@ export async function updateProfile(
       "mlbbId",
       "serverId",
       "phone",
+      "dob",
       "currentRank",
       "peakRank",
     ].map((key) => {

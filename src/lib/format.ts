@@ -61,6 +61,19 @@ export function initials(name: string) {
     .join("");
 }
 
+/** Age in whole years from a "yyyy-MM-dd" date of birth, as of today (MY time). */
+export function calculateAge(dob: string): number {
+  const today = formatMY(new Date(), "yyyy-MM-dd");
+  const [dobYear, dobMonth, dobDay] = dob.split("-").map(Number);
+  const [todayYear, todayMonth, todayDay] = today.split("-").map(Number);
+
+  let age = todayYear - dobYear;
+  if (todayMonth < dobMonth || (todayMonth === dobMonth && todayDay < dobDay)) {
+    age -= 1;
+  }
+  return age;
+}
+
 /** Strips HTML tags for plain-text excerpts (card previews, meta tags). */
 export function stripHtml(source: string) {
   return source

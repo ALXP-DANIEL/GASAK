@@ -9,6 +9,7 @@ const profileFormObject = z.object({
   mlbbId: z.string().optional(),
   serverId: z.string().optional(),
   phone: z.string().optional(),
+  dob: z.string().optional(),
   preferredLanes: z.array(z.string()).optional(),
   currentRank: rankFieldSchema.optional(),
   peakRank: rankFieldSchema.optional(),
@@ -37,6 +38,7 @@ type ProfileFormProfile = {
   mlbbId?: string | null;
   serverId?: string | null;
   phone?: string | null;
+  dob?: string | null;
   preferredLanes?: readonly string[] | null;
   currentRank?: ProfileFormInput["currentRank"] | null;
   peakRank?: ProfileFormInput["peakRank"] | null;
@@ -55,6 +57,7 @@ export function buildProfileFormDefaults(
     mlbbId: profile?.mlbbId ?? "",
     serverId: profile?.serverId ?? "",
     phone: profile?.phone ?? "",
+    dob: profile?.dob ?? "",
     preferredLanes: profile?.preferredLanes ? [...profile.preferredLanes] : [],
     currentRank: profile?.currentRank ?? undefined,
     peakRank: profile?.peakRank ?? undefined,

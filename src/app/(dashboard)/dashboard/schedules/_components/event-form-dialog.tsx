@@ -50,7 +50,7 @@ export function EventFormDialog({
     ? [{ value: ORG_WIDE, label: "Organization-wide" }, ...squads]
     : squads;
 
-  const { open, setOpen, control, pending, handleSubmit } =
+  const { open, setOpen, control, pending, handleSubmit, form } =
     useEntityDialog<EventInput>({
       schema: eventSchema,
       defaultValues: {
@@ -58,6 +58,7 @@ export function EventFormDialog({
         description: event?.description ?? "",
         type: event?.type ?? "practice",
         date: event?.date ?? "",
+        prizePool: event?.prizePool ?? "",
         location: event?.location ?? "",
         squadId: event?.squadId ?? "",
       },
@@ -70,6 +71,8 @@ export function EventFormDialog({
       },
       successMessage: isEdit ? "Event updated" : "Event created",
     });
+
+  const type = form.watch("type");
 
   return (
     <Credenza open={open} onOpenChange={setOpen}>
@@ -108,6 +111,14 @@ export function EventFormDialog({
                 />
               </DashboardFormGrid>
               <FormDatePicker control={control} name="date" label="Date" />
+              {type === "tournament" && (
+                <FormField
+                  control={control}
+                  name="prizePool"
+                  label="Prize Pool"
+                  placeholder="e.g. RM500 + trophies"
+                />
+              )}
               <FormField control={control} name="location" label="Location" />
               <FormField
                 control={control}

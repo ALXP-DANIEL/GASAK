@@ -117,6 +117,12 @@ export default async function EventDetailPage({
               value={event.squad?.name ?? "Organization-wide"}
             />
             <DetailRow label="Date" value={formatDate(event.date)} />
+            {event.type === "tournament" && (
+              <DetailRow
+                label="Prize Pool"
+                value={event.prizePool ?? "—"}
+              />
+            )}
             <DetailRow label="Location" value={event.location ?? "—"} />
             {event.description && (
               <DetailRow

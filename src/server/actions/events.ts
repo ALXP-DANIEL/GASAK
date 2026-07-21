@@ -14,6 +14,7 @@ const eventSchema = z.object({
   description: z.string().optional(),
   type: z.enum(eventTypeEnum.enumValues),
   date: z.string().min(1, "Date is required"),
+  prizePool: z.string().optional(),
   location: z.string().optional(),
   squadId: z.uuid().nullable(),
 });
@@ -41,6 +42,10 @@ export async function createEvent(
       description: parsed.data.description || null,
       type: parsed.data.type,
       date: parsed.data.date,
+      prizePool:
+        parsed.data.type === "tournament"
+          ? parsed.data.prizePool || null
+          : null,
       location: parsed.data.location || null,
       squadId: parsed.data.squadId,
       createdBy: actor.id,
@@ -91,6 +96,10 @@ export async function updateEvent(
       description: parsed.data.description || null,
       type: parsed.data.type,
       date: parsed.data.date,
+      prizePool:
+        parsed.data.type === "tournament"
+          ? parsed.data.prizePool || null
+          : null,
       location: parsed.data.location || null,
       squadId: parsed.data.squadId,
     })
