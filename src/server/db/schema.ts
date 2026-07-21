@@ -366,6 +366,12 @@ export const tournaments = createTable(
     squadId: uuid("squad_id").references(() => squads.id, {
       onDelete: "cascade",
     }),
+    // Set when this tournament was auto-created from a schedule entry of
+    // type "tournament" — see createEvent/updateEvent in
+    // src/server/actions/events.ts. Unique: at most one tournament per event.
+    eventId: uuid("event_id")
+      .references(() => events.id, { onDelete: "set null" })
+      .unique(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -908,12 +914,20 @@ export const applicationRelations = relations(applications, ({ one }) => ({
 export const eventRelations = relations(events, ({ one }) => ({
   squad: one(squads, { fields: [events.squadId], references: [squads.id] }),
   creator: one(user, { fields: [events.createdBy], references: [user.id] }),
+  tournament: one(tournaments, {
+    fields: [events.id],
+    references: [tournaments.eventId],
+  }),
 }));
 
 export const tournamentRelations = relations(tournaments, ({ one, many }) => ({
   squad: one(squads, {
     fields: [tournaments.squadId],
     references: [squads.id],
+  }),
+  event: one(events, {
+    fields: [tournaments.eventId],
+    references: [events.id],
   }),
   rounds: many(tournamentRounds),
 }));

@@ -4,6 +4,6 @@ import { eq } from "drizzle-orm";
 export async function getEvent(id: string) {
   return db.query.events.findFirst({
     where: eq(events.id, id),
-    with: { squad: true },
+    with: { squad: true, tournament: true },
   });
 }

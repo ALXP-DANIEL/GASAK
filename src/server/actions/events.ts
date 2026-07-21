@@ -1,13 +1,58 @@
 "use server";
 
+import { parseMYDateTimeLocal } from "@lib/format";
 import { logActivity } from "@server/activity-log";
 import { actionUser, canManageSquad } from "@server/authz";
-import { db, events, eventTypeEnum } from "@server/db";
+import { db, events, eventTypeEnum, tournaments } from "@server/db";
 import { userOrgRole } from "@server/session";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "./public";
+
+/**
+ * Keeps the auto-created `tournaments` row for a "tournament"-type schedule
+ * entry in sync — create one on first save, update it on edits, or unlink
+ * (never delete: it may already have rounds/results) if the type changes
+ * away from "tournament". This is a lightweight link only; the auto-created
+ * tournament still needs an admin to fill in format/rounds/Challonge if they
+ * want full tracking.
+ */
+async function syncLinkedTournament(event: {
+  id: string;
+  title: string;
+  date: string;
+  prizePool: string | null;
+  squadId: string | null;
+  type: (typeof eventTypeEnum.enumValues)[number];
+}) {
+  const linked = await db.query.tournaments.findFirst({
+    where: eq(tournaments.eventId, event.id),
+  });
+
+  if (event.type !== "tournament") {
+    if (linked) {
+      await db
+        .update(tournaments)
+        .set({ eventId: null })
+        .where(eq(tournaments.id, linked.id));
+    }
+    return;
+  }
+
+  const values = {
+    name: event.title,
+    date: parseMYDateTimeLocal(`${event.date}T00:00`),
+    prizePool: event.prizePool || "TBD",
+    squadId: event.squadId,
+  };
+
+  if (linked) {
+    await db.update(tournaments).set(values).where(eq(tournaments.id, linked.id));
+  } else {
+    await db.insert(tournaments).values({ ...values, eventId: event.id });
+  }
+}
 
 const eventSchema = z.object({
   title: z.string().min(2, "Title is required"),
@@ -51,6 +96,7 @@ export async function createEvent(
       createdBy: actor.id,
     })
     .returning();
+  await syncLinkedTournament(row);
   await logActivity({
     actor,
     action: "create",
@@ -61,6 +107,7 @@ export async function createEvent(
 
   revalidatePath("/dashboard/schedules");
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/tournaments");
   return { ok: true, message: "Event created" };
 }
 
@@ -105,6 +152,15 @@ export async function updateEvent(
     })
     .where(eq(events.id, eventId));
 
+  await syncLinkedTournament({
+    id: eventId,
+    title: parsed.data.title,
+    date: parsed.data.date,
+    prizePool: parsed.data.type === "tournament" ? parsed.data.prizePool || null : null,
+    squadId: parsed.data.squadId,
+    type: parsed.data.type,
+  });
+
   await logActivity({
     actor,
     action: "update",
@@ -116,6 +172,7 @@ export async function updateEvent(
   revalidatePath("/dashboard/schedules");
   revalidatePath(`/dashboard/schedules/${eventId}`);
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/tournaments");
   return { ok: true, message: "Event updated" };
 }
 

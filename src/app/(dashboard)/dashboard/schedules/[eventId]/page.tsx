@@ -124,6 +124,20 @@ export default async function EventDetailPage({
               />
             )}
             <DetailRow label="Location" value={event.location ?? "—"} />
+            {event.tournament && (
+              <DetailRow
+                label="Tournament"
+                value={
+                  <Link
+                    href={`/dashboard/tournaments/${event.tournament.id}`}
+                    className="underline underline-offset-4 hover:text-primary"
+                  >
+                    {event.tournament.name} — track rounds, results &
+                    Challonge sync
+                  </Link>
+                }
+              />
+            )}
             {event.description && (
               <DetailRow
                 label="Description"

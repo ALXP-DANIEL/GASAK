@@ -362,7 +362,7 @@ export async function connectChallongeTournament(
     await db
       .update(tournaments)
       .set({
-        challongeTournamentId: String(remote.id),
+        challongeTournamentId: remote.id,
         challongeUrl: remote.fullChallongeUrl,
         // Reset the participant pick — the linked bracket changed.
         challongeParticipantId: null,
@@ -373,7 +373,7 @@ export async function connectChallongeTournament(
     return {
       ok: true,
       participants: participants.map((p) => ({
-        id: String(p.id),
+        id: p.id,
         name: p.name,
       })),
     };
@@ -426,9 +426,7 @@ export async function syncChallongeTournament(
       fetchChallongeMatches(challongeTournamentId),
     ]);
 
-    const us = participants.find(
-      (p) => String(p.id) === challongeParticipantId,
-    );
+    const us = participants.find((p) => p.id === challongeParticipantId);
     if (!us) {
       return {
         ok: false,
@@ -438,17 +436,15 @@ export async function syncChallongeTournament(
 
     // Group-stage matches reference group player ids instead of the
     // participant id, so build one lookup covering both.
-    const nameByPlayerId = new Map<number, string>();
-    const ourPlayerIds = new Set<number>([us.id, ...us.groupPlayerIds]);
+    const nameByPlayerId = new Map<string, string>();
+    const ourPlayerIds = new Set<string>([us.id, ...us.groupPlayerIds]);
     for (const p of participants) {
       nameByPlayerId.set(p.id, p.name);
       for (const gid of p.groupPlayerIds) nameByPlayerId.set(gid, p.name);
     }
 
-    const ourMatches = matches.filter(
-      (m) =>
-        (m.player1Id !== null && ourPlayerIds.has(m.player1Id)) ||
-        (m.player2Id !== null && ourPlayerIds.has(m.player2Id)),
+    const ourMatches = matches.filter((m) =>
+      m.participantIds.some((id) => ourPlayerIds.has(id)),
     );
 
     const existing = await db.query.tournamentRounds.findMany({
@@ -466,11 +462,11 @@ export async function syncChallongeTournament(
     let updated = 0;
 
     for (const match of ourMatches) {
-      const weArePlayer1 =
-        match.player1Id !== null && ourPlayerIds.has(match.player1Id);
-      const opponentId = weArePlayer1 ? match.player2Id : match.player1Id;
+      const opponentId = match.participantIds.find(
+        (id) => !ourPlayerIds.has(id),
+      );
       const opponent =
-        (opponentId !== null && nameByPlayerId.get(opponentId)) || "TBD";
+        (opponentId && nameByPlayerId.get(opponentId)) || "TBD";
 
       const outcome =
         match.state !== "complete"
@@ -491,10 +487,10 @@ export async function syncChallongeTournament(
         opponent,
         scheduledAt: match.startedAt ? new Date(match.startedAt) : null,
         outcome,
-        score: match.scoresCsv || null,
+        score: match.scores || null,
       };
 
-      const current = existingByChallongeId.get(String(match.id));
+      const current = existingByChallongeId.get(match.id);
       if (current) {
         await db
           .update(tournamentRounds)
@@ -506,7 +502,7 @@ export async function syncChallongeTournament(
           ...values,
           tournamentId,
           sortOrder: nextSortOrder,
-          challongeMatchId: String(match.id),
+          challongeMatchId: match.id,
         });
         nextSortOrder += 1;
         created += 1;
