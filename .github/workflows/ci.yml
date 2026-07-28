@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, gasak]
   pull_request:
-    branches: [main]
+    branches: [main, gasak]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,6 +14,35 @@ jobs:
   ci:
     name: Lint, Type Check & Build
     runs-on: ubuntu-latest
+
+    # `next build` prerenders pages that query the database (/login reads
+    # auth_slides, the squad division pages read squads), so the build needs a
+    # real, schema'd Postgres — dummy env vars alone are not enough.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Throwaway values — CI never talks to the real services. AUTH_SECRET and
+      # UPLOADTHING_TOKEN only need to be non-empty strings, or better-auth and
+      # uploadthing throw while the build prerenders.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      AUTH_SECRET: ci-dummy-secret-not-used-at-build-time-000000
+      UPLOADTHING_TOKEN: ci-dummy-token
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NEXT_TELEMETRY_DISABLED: 1
+
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -30,16 +59,19 @@ jobs:
       - name: Lint (Biome)
         run: npm run lint
 
+      # Creates the tables the prerender queries read. Also means a schema
+      # change that does not apply cleanly fails CI instead of production.
+      - name: Push schema to test database
+        run: npm run db:push -- --force
+
       - name: Generate Next.js route types
         run: npx next typegen
-        env:
-          NEXT_PUBLIC_SITE_URL: http://localhost:3000
 
       - name: Type check
         run: npx tsc --noEmit
 
+      - name: Test
+        run: npm test
+
       - name: Build
         run: npm run build
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
-          NEXT_PUBLIC_SITE_URL: http://localhost:3000
