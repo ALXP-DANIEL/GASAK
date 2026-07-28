@@ -47,8 +47,12 @@ function CatalogSectionCard({
 export default async function ProductsPage() {
   await requireOrgRole("admin", "seller");
 
-  const [merchRows, tiers, packages] = await Promise.all([
+  const [merchRows, accountRows, tiers, packages] = await Promise.all([
     db.select().from(products).where(eq(products.category, "merchandise")),
+    db.query.products.findMany({
+      where: eq(products.category, "account"),
+      with: { accountDetails: true },
+    }),
     db.select().from(jokiTiers),
     db.select().from(jokiPackages),
   ]);
@@ -61,10 +65,17 @@ export default async function ProductsPage() {
           title="Products"
           kicker="Commerce"
           icon={Icons.Domain.Products}
-          description="The shop catalog — joki services and GASAK merchandise."
+          description="The shop catalog — accounts, joki services, and GASAK merchandise."
         />
 
         <div className="grid gap-4 desktop:grid-cols-2">
+          <CatalogSectionCard
+            href="/dashboard/products/accounts"
+            title="Game Accounts"
+            description="MLBB accounts, stats, skins, galleries, and seller enquiries."
+            icon={Icons.Domain.Products}
+            stats={`${accountRows.filter((product) => product.active && !product.accountDetails?.sold).length} available · ${accountRows.length} listings total`}
+          />
           <CatalogSectionCard
             href="/dashboard/products/joki"
             title="Joki Services"

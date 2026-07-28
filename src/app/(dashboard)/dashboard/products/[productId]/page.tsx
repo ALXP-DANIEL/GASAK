@@ -87,7 +87,11 @@ export default async function ProductDetailPage({
                   value={PRODUCT_CATEGORY_LABELS[product.category]}
                 />
                 <DetailRow label="Price" value={formatRM(product.priceSen)} />
-                <DetailRow label="Stock" value={product.stock} />
+                {/* Accounts are one-of-a-kind — stock is always 1 and carries
+                    no meaning; the Sold flag is the real availability state. */}
+                {product.category !== "account" && (
+                  <DetailRow label="Stock" value={product.stock} />
+                )}
                 <DetailRow
                   label="Variants"
                   value={

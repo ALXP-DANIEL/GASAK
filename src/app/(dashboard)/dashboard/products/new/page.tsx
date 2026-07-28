@@ -17,8 +17,8 @@ export default async function NewProductPage({
 }) {
   await requireDashboardRole("admin", "seller");
   const { category } = await searchParams;
-  // Only merchandise is creatable for now — other categories will be rebuilt
-  // from scratch later, so an absent/unknown category falls back to merch.
+  // Merchandise and account listings are creatable here; an absent/unknown
+  // category falls back to merch.
   const fixedCategory: ProductCategory =
     category && isProductCategory(category) ? category : "merchandise";
 

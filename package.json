@@ -10,7 +10,7 @@
     "format": "biome format --write",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx --conditions=react-server --env-file=.env src/server/db/seed.ts",
+    "db:seed": "tsx --env-file=.env src/server/db/seed.ts",
     "test": "vitest run"
   },
   "dependencies": {
@@ -36,6 +36,7 @@
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.2.0",
     "drizzle-orm": "^0.45.2",
+    "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "libphonenumber-js": "^1.13.8",

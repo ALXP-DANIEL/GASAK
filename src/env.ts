@@ -18,8 +18,6 @@ export const env = createEnv({
     RESEND_API_KEY: z.string().optional(),
     EMAIL_FROM: z.string().default("GASAK <no-reply@gasak.my>"),
     DISCORD_BOT_TOKEN: z.string().optional(),
-    WHATSAPP_ACCESS_TOKEN: z.string().optional(),
-    WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
     CRON_SECRET: z.string().optional(),
   },
   client: {
@@ -39,8 +37,6 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN,
-    WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN,
-    WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID,
     CRON_SECRET: process.env.CRON_SECRET,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   },

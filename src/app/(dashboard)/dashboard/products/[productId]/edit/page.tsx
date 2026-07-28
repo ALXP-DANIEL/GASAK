@@ -14,6 +14,7 @@ async function getProduct(productId: string) {
       options: { with: { values: true } },
       variants: { with: { optionValues: { with: { optionValue: true } } } },
       gallery: { orderBy: (g, { asc }) => asc(g.sortOrder) },
+      accountDetails: true,
     },
   });
 }

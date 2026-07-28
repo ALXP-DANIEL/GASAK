@@ -1,10 +1,9 @@
-import { env } from "@/env";
 import { formatMY } from "@lib/format";
 import { db, playerProfiles } from "@server/db";
 import { notifyDiscordBirthday } from "@server/discord";
-import { notifyWhatsappBirthday } from "@server/whatsapp";
 import { isNotNull } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { env } from "@/env";
 
 /**
  * Runs once a day (see vercel.json). Posts a single batched Discord message
@@ -34,12 +33,9 @@ export async function GET(request: Request) {
     const rawNames = birthdays.map(
       (profile) => profile.ign || profile.fullName || profile.user.name,
     );
-    await Promise.all([
-      notifyDiscordBirthday(
-        `🎂 Happy birthday to ${rawNames.map((n) => `**${n}**`).join(", ")}!`,
-      ),
-      notifyWhatsappBirthday(`🎂 Happy birthday to ${rawNames.join(", ")}!`),
-    ]);
+    await notifyDiscordBirthday(
+      `🎂 Happy birthday to ${rawNames.map((n) => `**${n}**`).join(", ")}!`,
+    );
   }
 
   return NextResponse.json({ notified: birthdays.length });

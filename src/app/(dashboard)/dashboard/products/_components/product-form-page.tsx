@@ -8,12 +8,14 @@ import {
   FormSwitch,
 } from "@components/forms/form-field";
 import { IndexedFormSection } from "@components/forms/form-section";
+import { RankSelect } from "@components/forms/rank-select";
 import { TagInput } from "@components/forms/tag-input";
 import { Icons } from "@components/icons";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formatRM } from "@lib/format";
 import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
+import { rankFieldSchema } from "@lib/ranks";
 import {
   createProduct,
   setProductGalleryFiles,
@@ -23,6 +25,7 @@ import {
 } from "@server/actions/shop";
 import {
   type Product,
+  type ProductAccountDetails,
   type ProductCategory,
   type ProductGallery,
   type ProductOption,
@@ -44,6 +47,8 @@ export type ProductWithVariants = Product & {
     optionValues: { optionValue: ProductOptionValue }[];
   })[];
   gallery: ProductGallery[];
+  /** Present only for `category: "account"` listings (1:1 side table). */
+  accountDetails: ProductAccountDetails | null;
 };
 
 const categoryOptions = productCategoryEnum.enumValues.map((item) => ({
@@ -76,10 +81,17 @@ const schema = z
     name: z.string().min(2, "Product name is required"),
     category: z.enum(productCategoryEnum.enumValues),
     description: z.string().optional(),
+    accountRank: rankFieldSchema.nullable().optional(),
+    accountWinRate: numberOrEmpty.optional(),
+    accountSkinCount: numberOrEmpty.optional(),
+    accountHeroCount: numberOrEmpty.optional(),
+    accountSkinDescription: z.string().optional(),
+    accountHighlights: z.string().optional(),
+    accountSold: z.boolean(),
     image: z.instanceof(File).nullable(),
     gallery: z
       .array(z.instanceof(File).nullable())
-      .max(3, "At most 3 gallery images"),
+      .max(8, "At most 8 gallery images"),
     galleryRemove: z.array(z.boolean()),
     active: z.boolean(),
     hasVariants: z.boolean(),
@@ -89,6 +101,39 @@ const schema = z
     variants: z.array(variantDraftSchema),
   })
   .superRefine((data, ctx) => {
+    if (data.category === "account") {
+      // Rank is a structured object, so it is checked separately from the
+      // free-text fields below.
+      if (!data.accountRank?.tier) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["accountRank"],
+          message: "Select the account's highest rank",
+        });
+      }
+      if (
+        typeof data.accountWinRate !== "number" ||
+        data.accountWinRate < 0 ||
+        data.accountWinRate > 100
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["accountWinRate"],
+          message: "Enter a win rate between 0 and 100",
+        });
+      }
+      for (const [field, value, message] of [
+        [
+          "accountSkinDescription",
+          data.accountSkinDescription,
+          "Describe the account's skin collection",
+        ],
+      ] as const) {
+        if (!value?.trim()) {
+          ctx.addIssue({ code: "custom", path: [field], message });
+        }
+      }
+    }
     if (!data.hasVariants) {
       if (typeof data.price !== "number" || data.price <= 0) {
         ctx.addIssue({
@@ -97,10 +142,12 @@ const schema = z
           message: "Enter a valid price",
         });
       }
+      // Accounts have no stock input — submit pins it to 1.
       if (
-        typeof data.stock !== "number" ||
-        !Number.isInteger(data.stock) ||
-        data.stock < 0
+        data.category !== "account" &&
+        (typeof data.stock !== "number" ||
+          !Number.isInteger(data.stock) ||
+          data.stock < 0)
       ) {
         ctx.addIssue({
           code: "custom",
@@ -208,9 +255,19 @@ function buildDefaults(
     name: product?.name ?? "",
     category: product?.category ?? fixedCategory ?? "merchandise",
     description: product?.description ?? "",
+    accountRank: product?.accountDetails?.rank ?? null,
+    accountWinRate:
+      product?.accountDetails?.winRate != null
+        ? Number(product.accountDetails.winRate)
+        : "",
+    accountSkinCount: product?.accountDetails?.skinCount ?? "",
+    accountHeroCount: product?.accountDetails?.heroCount ?? "",
+    accountSkinDescription: product?.accountDetails?.skinDescription ?? "",
+    accountHighlights: product?.accountDetails?.highlights ?? "",
+    accountSold: product?.accountDetails?.sold ?? false,
     image: null,
-    gallery: [null, null, null],
-    galleryRemove: [false, false, false],
+    gallery: Array.from({ length: 8 }, () => null),
+    galleryRemove: Array.from({ length: 8 }, () => false),
     active: product?.active ?? true,
     hasVariants: product?.hasVariants ?? false,
     price: product ? Number((product.priceSen / 100).toFixed(2)) : undefined,
@@ -238,6 +295,7 @@ export function ProductFormPage({
   const { control, handleSubmit } = form;
 
   const hasVariants = useWatch({ control, name: "hasVariants" });
+  const category = useWatch({ control, name: "category" });
   const galleryRemove = useWatch({ control, name: "galleryRemove" });
   const optionsWatch = useWatch({ control, name: "options" });
 
@@ -298,14 +356,30 @@ export function ProductFormPage({
       const rollupPrice = values.hasVariants
         ? Math.min(...variantPrices)
         : Number(values.price || 0);
-      const rollupStock = values.hasVariants
-        ? variantStocks.reduce((sum, n) => sum + n, 0)
-        : Number(values.stock || 0);
+      const rollupStock =
+        values.category === "account"
+          ? 1
+          : values.hasVariants
+            ? variantStocks.reduce((sum, n) => sum + n, 0)
+            : Number(values.stock || 0);
 
       const formData = new FormData();
       formData.set("name", values.name);
       formData.set("category", values.category);
       formData.set("description", values.description ?? "");
+      formData.set(
+        "accountRank",
+        values.accountRank ? JSON.stringify(values.accountRank) : "",
+      );
+      formData.set("accountWinRate", String(values.accountWinRate ?? ""));
+      formData.set("accountSkinCount", String(values.accountSkinCount || ""));
+      formData.set("accountHeroCount", String(values.accountHeroCount || ""));
+      formData.set(
+        "accountSkinDescription",
+        values.accountSkinDescription ?? "",
+      );
+      formData.set("accountHighlights", values.accountHighlights ?? "");
+      formData.set("accountSold", values.accountSold ? "on" : "off");
       formData.set("price", String(rollupPrice));
       formData.set("stock", String(rollupStock));
       formData.set("active", values.active ? "on" : "off");
@@ -342,7 +416,7 @@ export function ProductFormPage({
         }
 
         const galleryForm = new FormData();
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 8; i++) {
           const file = values.gallery?.[i];
           if (file instanceof File) {
             galleryForm.set(`galleryImage_${i}`, file);
@@ -366,9 +440,11 @@ export function ProductFormPage({
 
       toast.success(isEdit ? "Product updated" : "Product created");
       router.push(
-        values.category === "merchandise"
-          ? "/dashboard/products/merchandise"
-          : "/dashboard/products",
+        values.category === "account"
+          ? "/dashboard/products/accounts"
+          : values.category === "merchandise"
+            ? "/dashboard/products/merchandise"
+            : "/dashboard/products",
       );
       router.refresh();
     });
@@ -395,6 +471,57 @@ export function ProductFormPage({
               as="textarea"
               rows={3}
             />
+            {category === "account" && (
+              <div className="grid gap-4 border-t border-border pt-4">
+                <RankSelect
+                  control={control}
+                  name="accountRank"
+                  label="Highest rank"
+                  tierHint="Select the highest rank this account has reached."
+                />
+                <div className="grid gap-4 desktop:grid-cols-2">
+                  <FormField
+                    control={control}
+                    name="accountWinRate"
+                    label="Win rate (%)"
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    max={100}
+                    placeholder="68.5"
+                    description="Percentage only — enter 68.5 for 68.5%."
+                  />
+                  <FormField
+                    control={control}
+                    name="accountSkinCount"
+                    label="Number of skins"
+                    type="number"
+                  />
+                  <FormField
+                    control={control}
+                    name="accountHeroCount"
+                    label="Number of heroes"
+                    type="number"
+                  />
+                </div>
+                <FormField
+                  control={control}
+                  name="accountSkinDescription"
+                  label="Skin collection"
+                  description="Describe notable, limited, collector, legend, or event skins."
+                  as="textarea"
+                  rows={4}
+                />
+                <FormField
+                  control={control}
+                  name="accountHighlights"
+                  label="Other account highlights"
+                  description="Emblems, achievements, rare items, bindings, or anything else the buyer should know."
+                  as="textarea"
+                  rows={4}
+                />
+              </div>
+            )}
           </div>
         </IndexedFormSection>
 
@@ -425,8 +552,8 @@ export function ProductFormPage({
             accept="image/*"
             cropConfig={{ aspect: 1, outputWidth: 1024, outputHeight: 1024 }}
           />
-          <div className="grid gap-4 desktop:grid-cols-3">
-            {[0, 1, 2].map((slot) => {
+          <div className="grid gap-4 desktop:grid-cols-4">
+            {Array.from({ length: 8 }, (_, slot) => slot).map((slot) => {
               const existing = product?.gallery?.[slot]?.imageUrl;
               const removed = galleryRemove?.[slot] ?? false;
               const keepingExisting = Boolean(existing) && !removed;
@@ -477,21 +604,31 @@ export function ProductFormPage({
             })}
           </div>
           <p className="text-xs text-muted-foreground">
-            Up to 3 supplementary gallery images shown on the product page.
+            Up to 8 supplementary gallery images shown on the product page.
           </p>
         </IndexedFormSection>
 
         <IndexedFormSection
           index={fixedCategory ? "03" : "04"}
-          title="Options & variants"
-          description="Turn on for products with choices like size or color — each combination gets its own price, stock, and image."
+          title={
+            category === "account"
+              ? "Price & availability"
+              : "Options & variants"
+          }
+          description={
+            category === "account"
+              ? "One-of-a-kind listing — leave stock at 1 and use the Sold toggle under Visibility once it is gone."
+              : "Turn on for products with choices like size or color — each combination gets its own price, stock, and image."
+          }
         >
           <div className="grid gap-4">
-            <FormSwitch
-              control={control}
-              name="hasVariants"
-              label="This product has multiple options"
-            />
+            {category !== "account" && (
+              <FormSwitch
+                control={control}
+                name="hasVariants"
+                label="This product has multiple options"
+              />
+            )}
 
             {hasVariants && (
               <>
@@ -579,12 +716,16 @@ export function ProductFormPage({
                   label="Price (RM)"
                   type="number"
                 />
-                <FormField
-                  control={control}
-                  name="stock"
-                  label="Stock"
-                  type="number"
-                />
+                {/* Accounts are one-of-a-kind — stock is pinned to 1 on submit
+                    and availability is driven by the Sold toggle instead. */}
+                {category !== "account" && (
+                  <FormField
+                    control={control}
+                    name="stock"
+                    label="Stock"
+                    type="number"
+                  />
+                )}
               </div>
             )}
           </div>
@@ -600,6 +741,14 @@ export function ProductFormPage({
             name="active"
             label="Visible in the public shop"
           />
+          {category === "account" && (
+            <FormCheckbox
+              control={control}
+              name="accountSold"
+              label="Sold"
+              description="The listing stays visible but stops accepting buyer enquiries."
+            />
+          )}
         </IndexedFormSection>
 
         <div className="flex items-center justify-between gap-3 border-t bg-muted/10 p-6">

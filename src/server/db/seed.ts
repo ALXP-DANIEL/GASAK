@@ -2,7 +2,7 @@ import { MALAYSIA_STATES } from "@lib/labels";
 import type { MlbbRank } from "@lib/ranks";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
-import { auth } from "../auth";
+import { createAuth } from "../auth-config";
 import {
   applications,
   authImages,
@@ -16,6 +16,7 @@ import {
   orders,
   organizationPositions,
   playerProfiles,
+  productAccountDetails,
   productGallery,
   products,
   scrims,
@@ -25,6 +26,8 @@ import {
   tournaments,
   user,
 } from "./index";
+
+const auth = createAuth();
 
 /** Helper to build a structured MLBB rank for seed data. */
 const mkRank = (
@@ -202,6 +205,100 @@ async function ensureJokiCatalog(createdBy: string | null) {
   }
 }
 
+/**
+ * Seeds example MLBB account listings with a cover image and a gallery, so the
+ * shop's Accounts section and the seller dashboard have something to show.
+ * One listing is marked sold to exercise the sold-out state.
+ */
+async function ensureAccountListings(createdBy: string | null) {
+  const existing = await db.query.products.findFirst({
+    where: eq(products.category, "account"),
+  });
+  if (existing) return;
+
+  const listings = [
+    {
+      product: {
+        name: "Mythical Glory · Collector Skins",
+        description:
+          "Original-owner account, never traded. Full email access included.",
+        priceSen: 85_000,
+      },
+      details: {
+        rank: mkRank("Mythical Glory", 72),
+        winRate: "68.50",
+        skinCount: 42,
+        heroCount: 78,
+        skinDescription:
+          "Collector Gusion, Legend Lancelot, Epic Chou, plus 3 limited event skins.",
+        highlights:
+          "No ban history, original email included, Advanced Server access.",
+        sold: false,
+      },
+    },
+    {
+      product: {
+        name: "Mythic · Jungle Main Starter",
+        description: "Solid mid-tier account for a jungle main.",
+        priceSen: 32_000,
+      },
+      details: {
+        rank: mkRank("Mythic", 15),
+        winRate: "61.20",
+        skinCount: 21,
+        heroCount: 55,
+        skinDescription:
+          "Epic Ling, Elite Fredrinn, and a full set of starter jungle skins.",
+        highlights: "Clean record, ready for a fresh bind.",
+        sold: false,
+      },
+    },
+    {
+      product: {
+        name: "Epic · Budget Smurf",
+        description: "Cheap smurf for ranked practice.",
+        priceSen: 12_000,
+      },
+      details: {
+        rank: mkRank("Epic", 2, 3),
+        winRate: "54.00",
+        skinCount: 8,
+        heroCount: 30,
+        skinDescription: "Two Epic skins and a handful of Elite skins.",
+        highlights: "Already sold — kept as an example of a sold listing.",
+        sold: true,
+      },
+    },
+  ];
+
+  for (const [index, listing] of listings.entries()) {
+    const [row] = await db
+      .insert(products)
+      .values({
+        ...listing.product,
+        category: "account" as const,
+        stock: 1,
+        active: true,
+        imageUrl: `https://picsum.photos/seed/gasak-account-${index}/1024/1024`,
+        createdBy,
+      })
+      .returning();
+
+    // Category-specific fields live in their own 1:1 table.
+    await db
+      .insert(productAccountDetails)
+      .values({ productId: row.id, ...listing.details });
+
+    await db.insert(productGallery).values(
+      [0, 1, 2, 3].map((slot) => ({
+        productId: row.id,
+        imageUrl: `https://picsum.photos/seed/gasak-account-${index}-${slot}/1024/1024`,
+        sortOrder: slot,
+      })),
+    );
+  }
+}
+
 async function ensureAuthImages() {
   const existing = await db.select().from(authImages).limit(1);
   if (existing.length > 0) return;
@@ -341,6 +438,7 @@ async function main() {
       where: eq(user.email, "seller@gasak.gg"),
     });
     await ensureJokiCatalog(existingSeller?.id ?? null);
+    await ensureAccountListings(existingSeller?.id ?? null);
     await ensureGalleries();
     await ensureProductGallery();
     console.log("Database already seeded, skipping.");
@@ -1026,6 +1124,7 @@ async function main() {
   await ensureProductGallery();
   await ensureOrganizationPositions(admin);
   await ensureJokiCatalog(seller.id);
+  await ensureAccountListings(seller.id);
 
   console.log("Seed complete.");
   console.log(

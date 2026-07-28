@@ -16,6 +16,21 @@ export function formatRM(sen: number) {
  * a browser in a different timezone can show different calendar days for
  * the same stored instant.
  */
+/**
+ * Renders a stored win-rate percentage. The DB column is `numeric(5,2)`, which
+ * drizzle hands back as a string like "68.50" — trailing zeros are dropped so
+ * it reads as "68.5%" rather than "68.50%".
+ */
+export function formatWinRate(
+  value: string | number | null | undefined,
+  fallback = "—",
+) {
+  if (value === null || value === undefined || value === "") return fallback;
+  const numeric = Number(value);
+  if (Number.isNaN(numeric)) return fallback;
+  return `${Number(numeric.toFixed(2))}%`;
+}
+
 export function formatDate(date: Date | string) {
   return formatInTimeZone(new Date(date), MY_TIME_ZONE, "d MMM yyyy");
 }

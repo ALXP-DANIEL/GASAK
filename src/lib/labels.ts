@@ -1,4 +1,5 @@
 import type {
+  AccountEnquiryStatus,
   ApplicationStatus,
   EventType,
   Lane,
@@ -178,7 +179,17 @@ export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, string> = {
   weekly_pass: "Weekly Pass",
   joki: "Joki",
   coaching: "Coaching",
+  account: "Game Accounts",
   merchandise: "Merchandise",
+};
+
+export const ACCOUNT_ENQUIRY_STATUS_LABELS: Record<
+  AccountEnquiryStatus,
+  string
+> = {
+  new: "New",
+  contacted: "Contacted",
+  closed: "Closed",
 };
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {

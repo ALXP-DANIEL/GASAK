@@ -9,8 +9,8 @@ import { RankSelect } from "@components/forms/rank-select";
 import { BrandCard } from "@components/ui/brand";
 import { Button } from "@components/ui/shadcn/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toMalaysiaPhone } from "@lib/phone";
 import { MALAYSIA_STATES } from "@lib/labels";
+import { toMalaysiaPhone } from "@lib/phone";
 import { rankFieldSchema } from "@lib/ranks";
 import { submitApplication } from "@server/actions/public";
 import { laneEnum } from "@server/db/schema";
@@ -142,12 +142,7 @@ export function ApplicationForm({
               name="phone"
               label="Phone (WhatsApp)"
             />
-            <FormField
-              control={control}
-              name="age"
-              label="Age"
-              type="number"
-            />
+            <FormField control={control} name="age" label="Age" type="number" />
             <FormSelect
               control={control}
               name="daerah"

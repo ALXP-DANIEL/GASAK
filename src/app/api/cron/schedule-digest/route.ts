@@ -1,11 +1,10 @@
-import { env } from "@/env";
 import { formatDate } from "@lib/format";
 import { EVENT_TYPE_LABELS } from "@lib/labels";
 import { db, events } from "@server/db";
 import { notifyDiscordSchedule } from "@server/discord";
-import { notifyWhatsappSchedule } from "@server/whatsapp";
 import { gte } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { env } from "@/env";
 
 /**
  * Runs once a day at 15:00 Malaysia time (see vercel.json). Posts a single
@@ -33,14 +32,9 @@ export async function GET(request: Request) {
       `${event.title} (${EVENT_TYPE_LABELS[event.type]}) — ${formatDate(event.date)}${event.squad ? ` · ${event.squad.name}` : ""}`;
     const header = `🗓️ ${newEvents.length} new schedule ${newEvents.length === 1 ? "entry" : "entries"} added today:`;
 
-    await Promise.all([
-      notifyDiscordSchedule(
-        `${header}\n${newEvents.map((event) => `• **${eventLine(event)}**`).join("\n")}`,
-      ),
-      notifyWhatsappSchedule(
-        `${header}\n${newEvents.map((event) => `• ${eventLine(event)}`).join("\n")}`,
-      ),
-    ]);
+    await notifyDiscordSchedule(
+      `${header}\n${newEvents.map((event) => `• **${eventLine(event)}**`).join("\n")}`,
+    );
   }
 
   return NextResponse.json({ notified: newEvents.length });

@@ -1,17 +1,20 @@
 "use cache";
 
 import { ProductPurchasePanel } from "@components/cards";
+import { ProductCarousel } from "@components/cards/product/product-carousel";
 import { ProductGallery } from "@components/cards/product/product-gallery";
 import { Icons } from "@components/icons";
 import { PageSkeleton } from "@components/shared/page-skeleton";
 import { BrandBadge, BrandCard, LinkButton } from "@components/ui/brand";
-import { formatRM } from "@lib/format";
+import { formatRM, formatWinRate } from "@lib/format";
 import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
 import { createPageMetadata } from "@lib/metadata";
+import { formatRank } from "@lib/ranks";
 import { db, products } from "@server/db";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
+import { AccountInterestForm } from "./account-interest-form";
 
 async function getProduct(productId: string) {
   return db.query.products.findFirst({
@@ -20,6 +23,7 @@ async function getProduct(productId: string) {
       options: { with: { values: true } },
       variants: { with: { optionValues: { with: { optionValue: true } } } },
       gallery: { orderBy: (g, { asc }) => asc(g.sortOrder) },
+      accountDetails: true,
     },
   });
 }
@@ -60,6 +64,9 @@ export default async function ProductPage({
   const product = await getProduct(productId);
   if (!product?.active) notFound();
   const categoryLabel = PRODUCT_CATEGORY_LABELS[product.category];
+  const isAccount = product.category === "account";
+  const account = isAccount ? product.accountDetails : null;
+  const isSold = account?.sold ?? false;
   const galleryImages = product.gallery ?? [];
   const allImages = [
     ...(product.imageUrl ? [{ id: "cover", imageUrl: product.imageUrl }] : []),
@@ -75,8 +82,25 @@ export default async function ProductPage({
           </LinkButton>
         </div>
 
-        <section className="grid gap-6 desktop:grid-cols-[minmax(20rem,30rem)_minmax(0,1fr)]">
-          <ProductGallery images={allImages} alt={product.name} />
+        {/* Accounts lead with a full-width 16:9 slideshow plus a thumbnail
+            strip, since screenshots are the main thing a buyer judges.
+            Merchandise keeps the square gallery beside the details. */}
+        {isAccount && allImages.length > 0 && (
+          <section className="mb-6">
+            <ProductCarousel images={allImages} alt={product.name} />
+          </section>
+        )}
+
+        <section
+          className={
+            isAccount
+              ? "grid gap-6"
+              : "grid gap-6 desktop:grid-cols-[minmax(20rem,30rem)_minmax(0,1fr)]"
+          }
+        >
+          {!isAccount && (
+            <ProductGallery images={allImages} alt={product.name} />
+          )}
 
           <BrandCard interactive={false} className="p-5 desktop:p-7">
             <BrandBadge>{categoryLabel}</BrandBadge>
@@ -85,15 +109,42 @@ export default async function ProductPage({
             </h1>
 
             <div className="mt-5">
-              <ProductPurchasePanel product={product} />
+              {isAccount ? (
+                <div className="grid gap-4">
+                  <div className="bg-secondary/70 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                      Price
+                    </p>
+                    <p className="mt-1 font-mono text-3xl font-semibold text-primary desktop:text-4xl">
+                      {formatRM(product.priceSen)}
+                    </p>
+                  </div>
+                  {isSold ? (
+                    <div className="border border-border bg-secondary/40 p-4 text-center">
+                      <p className="font-heading text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                        Sold
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        This account is no longer available.
+                      </p>
+                    </div>
+                  ) : (
+                    <AccountInterestForm product={product} />
+                  )}
+                </div>
+              ) : (
+                <ProductPurchasePanel product={product} />
+              )}
             </div>
 
             <div className="mt-5 grid gap-3 text-sm">
               <PurchaseRow label="Delivery">
                 <span className="text-muted-foreground">
-                  {product.category === "merchandise"
-                    ? "Shipped to your address after payment"
-                    : "MLBB ID or WhatsApp after payment"}
+                  {isAccount
+                    ? "Seller contacts you on WhatsApp with a payment QR, then hands over the account"
+                    : product.category === "merchandise"
+                      ? "Shipped to your address after payment"
+                      : "MLBB ID or WhatsApp after payment"}
                 </span>
               </PurchaseRow>
               <PurchaseRow label="Checkout">
@@ -112,6 +163,24 @@ export default async function ProductPage({
             </h2>
             <div className="mt-5 grid gap-3 mobile:grid-cols-2 desktop:grid-cols-3">
               <ProductFact label="Category" value={categoryLabel} />
+              {account?.rank && (
+                <ProductFact
+                  label="Highest rank"
+                  value={formatRank(account.rank)}
+                />
+              )}
+              {account?.winRate != null && (
+                <ProductFact
+                  label="Win rate"
+                  value={formatWinRate(account.winRate)}
+                />
+              )}
+              {account?.skinCount != null && (
+                <ProductFact label="Skins" value={String(account.skinCount)} />
+              )}
+              {account?.heroCount != null && (
+                <ProductFact label="Heroes" value={String(account.heroCount)} />
+              )}
               {!product.hasVariants && (
                 <ProductFact label="Price" value={formatRM(product.priceSen)} />
               )}
@@ -123,6 +192,26 @@ export default async function ProductPage({
             <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-7 text-muted-foreground desktop:text-base">
               {product.description ?? "Available from GASAK Shop."}
             </p>
+            {account?.skinDescription && (
+              <>
+                <h2 className="mt-8 font-heading text-xl font-bold uppercase tracking-wide">
+                  Skin collection
+                </h2>
+                <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground desktop:text-base">
+                  {account.skinDescription}
+                </p>
+              </>
+            )}
+            {account?.highlights && (
+              <>
+                <h2 className="mt-8 font-heading text-xl font-bold uppercase tracking-wide">
+                  Account highlights
+                </h2>
+                <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground desktop:text-base">
+                  {account.highlights}
+                </p>
+              </>
+            )}
           </BrandCard>
 
           <BrandCard interactive={false} className="h-fit p-5">
@@ -132,7 +221,11 @@ export default async function ProductPage({
             <div className="mt-5 grid gap-3 text-xs text-muted-foreground">
               <CheckoutNote
                 icon={<Icons.Status.Success size={16} />}
-                text="Guest checkout, no account required."
+                text={
+                  isAccount
+                    ? "No checkout needed — leave your details and the seller reaches out."
+                    : "Guest checkout, no account required."
+                }
               />
               <CheckoutNote
                 icon={<Icons.Domain.Orders size={16} />}
@@ -141,9 +234,11 @@ export default async function ProductPage({
               <CheckoutNote
                 icon={<Icons.Domain.Lightning size={16} />}
                 text={
-                  product.category === "merchandise"
-                    ? "Delivery is handled by post to the address you provide at checkout."
-                    : "Delivery is handled through your MLBB ID or WhatsApp after payment."
+                  isAccount
+                    ? "The seller verifies availability and sends a manual payment QR."
+                    : product.category === "merchandise"
+                      ? "Delivery is handled by post to the address you provide at checkout."
+                      : "Delivery is handled through your MLBB ID or WhatsApp after payment."
                 }
               />
             </div>

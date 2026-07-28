@@ -3,9 +3,11 @@
 import { BuyButton, ContentCardGrid, ProductCard } from "@components/cards";
 import { PageSkeleton } from "@components/shared/page-skeleton";
 import { LinkButton, PageHero, SectionHeader } from "@components/ui/brand";
+import { formatWinRate } from "@lib/format";
 import { sortJokiTiers } from "@lib/joki";
 import { PRODUCT_CATEGORY_LABELS } from "@lib/labels";
 import { createPageMetadata } from "@lib/metadata";
+import { formatRank } from "@lib/ranks";
 import {
   db,
   jokiPackages,
@@ -30,28 +32,48 @@ export default async function shopPage() {
   cacheTag("products");
   cacheTag("joki");
 
-  const [merchItems, tierRows, packageRows, serviceImages] = await Promise.all([
-    db.query.products.findMany({
-      where: and(
-        eq(products.active, true),
-        gt(products.stock, 0),
-        // Only joki (own section) and merchandise are live for now.
-        eq(products.category, "merchandise"),
-      ),
-      orderBy: (p, { asc }) => asc(p.priceSen),
-      // Listing cards fall back to the first gallery image when the
-      // product has no cover image.
-      with: {
-        gallery: { orderBy: (g, { asc }) => asc(g.sortOrder), limit: 1 },
-      },
-    }),
-    db.select().from(jokiTiers).where(eq(jokiTiers.active, true)),
-    db.select().from(jokiPackages).where(eq(jokiPackages.active, true)),
-    db
-      .select()
-      .from(jokiServiceImages)
-      .where(inArray(jokiServiceImages.mode, ["per_star", "package"])),
-  ]);
+  const [accountItems, merchItems, tierRows, packageRows, serviceImages] =
+    await Promise.all([
+      db.query.products.findMany({
+        // Accounts are one-of-a-kind: the `sold` flag on the detail row is the
+        // authoritative availability signal, not stock. Sold listings stay
+        // visible (shown with a Sold badge) and sort to the bottom — that part
+        // happens in JS below, since `sold` lives on the joined table.
+        where: and(eq(products.active, true), eq(products.category, "account")),
+        orderBy: (p, { asc }) => asc(p.priceSen),
+        with: {
+          accountDetails: true,
+          gallery: { orderBy: (g, { asc }) => asc(g.sortOrder), limit: 1 },
+        },
+      }),
+      db.query.products.findMany({
+        where: and(
+          eq(products.active, true),
+          gt(products.stock, 0),
+          // Only joki (own section) and merchandise are live for now.
+          eq(products.category, "merchandise"),
+        ),
+        orderBy: (p, { asc }) => asc(p.priceSen),
+        // Listing cards fall back to the first gallery image when the
+        // product has no cover image.
+        with: {
+          gallery: { orderBy: (g, { asc }) => asc(g.sortOrder), limit: 1 },
+        },
+      }),
+      db.select().from(jokiTiers).where(eq(jokiTiers.active, true)),
+      db.select().from(jokiPackages).where(eq(jokiPackages.active, true)),
+      db
+        .select()
+        .from(jokiServiceImages)
+        .where(inArray(jokiServiceImages.mode, ["per_star", "package"])),
+    ]);
+  // Sold listings to the bottom, price order preserved within each group
+  // (Array#sort is stable, and the query already ordered by price).
+  const accountsByAvailability = accountItems.toSorted(
+    (a, b) =>
+      Number(a.accountDetails?.sold ?? false) -
+      Number(b.accountDetails?.sold ?? false),
+  );
   const jokiTiersSorted = sortJokiTiers(tierRows);
   const cheapestPerStar = jokiTiersSorted[0]?.pricePerStarSen ?? 0;
   const cheapestPackage = packageRows.reduce(
@@ -71,7 +93,7 @@ export default async function shopPage() {
           <PageHero
             eyebrow="GASAK Shop"
             title="Gear up for the next push"
-            description="Joki rank boosts and official GASAK merchandise with guest checkout by DuitNow QR, FPX, or card."
+            description="MLBB accounts, joki rank boosts, and official GASAK merchandise. Account and joki payments are arranged manually on WhatsApp."
           />
           <OrderLookup />
         </div>
@@ -140,6 +162,50 @@ export default async function shopPage() {
           </section>
         )}
 
+        {accountItems.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <SectionHeader align="left" title="MLBB Accounts" />
+            <ContentCardGrid>
+              {accountsByAvailability.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    ...product,
+                    imageUrl: product.imageUrl ?? product.gallery[0]?.imageUrl,
+                    description:
+                      [
+                        product.accountDetails?.rank &&
+                          `Rank: ${formatRank(product.accountDetails.rank)}`,
+                        product.accountDetails?.winRate != null &&
+                          `Win rate: ${formatWinRate(product.accountDetails.winRate)}`,
+                        product.accountDetails?.skinCount != null &&
+                          `${product.accountDetails.skinCount} skins`,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ") ||
+                      product.description ||
+                      undefined,
+                  }}
+                  variant="default"
+                  href={`/shop/${product.id}`}
+                  action={
+                    <LinkButton
+                      href={`/shop/${product.id}`}
+                      size="sm"
+                      className="w-full"
+                      variant={
+                        product.accountDetails?.sold ? "outline" : undefined
+                      }
+                    >
+                      {product.accountDetails?.sold ? "Sold" : "View account"}
+                    </LinkButton>
+                  }
+                />
+              ))}
+            </ContentCardGrid>
+          </section>
+        )}
+
         {merchItems.length > 0 && (
           <section className="flex flex-col gap-4">
             <SectionHeader
@@ -178,11 +244,13 @@ export default async function shopPage() {
           </section>
         )}
 
-        {merchItems.length === 0 && !showJokiSection && (
-          <p className="text-muted-foreground">
-            The shop is being restocked — check back soon.
-          </p>
-        )}
+        {accountItems.length === 0 &&
+          merchItems.length === 0 &&
+          !showJokiSection && (
+            <p className="text-muted-foreground">
+              The shop is being restocked — check back soon.
+            </p>
+          )}
       </div>
     </PageSkeleton>
   );

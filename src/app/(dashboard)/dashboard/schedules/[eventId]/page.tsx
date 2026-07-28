@@ -118,10 +118,7 @@ export default async function EventDetailPage({
             />
             <DetailRow label="Date" value={formatDate(event.date)} />
             {event.type === "tournament" && (
-              <DetailRow
-                label="Prize Pool"
-                value={event.prizePool ?? "—"}
-              />
+              <DetailRow label="Prize Pool" value={event.prizePool ?? "—"} />
             )}
             <DetailRow label="Location" value={event.location ?? "—"} />
             {event.tournament && (
@@ -132,8 +129,8 @@ export default async function EventDetailPage({
                     href={`/dashboard/tournaments/${event.tournament.id}`}
                     className="underline underline-offset-4 hover:text-primary"
                   >
-                    {event.tournament.name} — track rounds, results &
-                    Challonge sync
+                    {event.tournament.name} — track rounds, results & Challonge
+                    sync
                   </Link>
                 }
               />

@@ -8,6 +8,7 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
   pgEnum,
   pgTable,
   pgTableCreator,
@@ -161,11 +162,18 @@ export const eventTypeEnum = pgEnum("event_type", [
   "scrim",
 ]);
 
+export const accountEnquiryStatusEnum = pgEnum("account_enquiry_status", [
+  "new",
+  "contacted",
+  "closed",
+]);
+
 export const productCategoryEnum = pgEnum("product_category", [
   "diamonds",
   "weekly_pass",
   "joki",
   "coaching",
+  "account",
   "merchandise",
 ]);
 
@@ -582,19 +590,6 @@ export const discordSettings = createTable("discord_settings", {
     .defaultNow(),
 });
 
-// Singleton row (id is always "default") holding admin-configurable WhatsApp
-// recipient lists — comma-separated E.164 numbers, same shape as Discord's
-// channel IDs above but WhatsApp has no "channel", just direct recipients.
-export const whatsappSettings = createTable("whatsapp_settings", {
-  id: text("id").primaryKey().default("default"),
-  recruitmentRecipients: text("recruitment_recipients"),
-  scheduleRecipients: text("schedule_recipients"),
-  birthdayRecipients: text("birthday_recipients"),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
-
 export const products = createTable("products", {
   id: uuid("id")
     .primaryKey()
@@ -689,6 +684,68 @@ export const productGallery = createTable(
       .defaultNow(),
   },
   (t) => [index("gasak_product_gallery_product_idx").on(t.productId)],
+);
+
+// Category-specific detail table for `category: "account"` listings, hanging
+// off products 1:1. Kept out of `products` so the shared columns (name, price,
+// images, gallery, active) stay category-agnostic and the next category with
+// its own fields gets its own table instead of widening products again — the
+// same shape the joki catalog already uses.
+//
+// A product row is the spine; the absence of a row here simply means the
+// product is not an account listing.
+export const productAccountDetails = createTable("product_account_details", {
+  // The product id doubles as the primary key — one detail row per product.
+  productId: uuid("product_id")
+    .primaryKey()
+    .references(() => products.id, { onDelete: "cascade" }),
+  // Structured MLBB rank (same shape as player profiles) so listings stay
+  // consistent and remain sortable/filterable later.
+  rank: jsonb("rank").$type<MlbbRank>(),
+  // Win rate percentage, 0–100 with two decimals (e.g. "68.50"). Numeric
+  // rather than text so it can be sorted/filtered and cannot hold junk.
+  winRate: numeric("win_rate", { precision: 5, scale: 2 }),
+  skinCount: integer("skin_count"),
+  heroCount: integer("hero_count"),
+  skinDescription: text("skin_description"),
+  highlights: text("highlights"),
+  // Account listings are one-of-a-kind, so "sold" is an explicit flag rather
+  // than a stock count. Sold listings stay visible but stop taking enquiries.
+  sold: boolean("sold").notNull().default(false),
+});
+
+// Buyer enquiries on account listings. There is no online checkout for
+// accounts: the buyer leaves their contact details here and the seller reaches
+// out on WhatsApp from their own number to arrange manual QR payment.
+export const accountEnquiries = createTable(
+  "account_enquiries",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    buyerName: text("buyer_name").notNull(),
+    buyerPhone: text("buyer_phone").notNull(),
+    buyerEmail: text("buyer_email").notNull(),
+    note: text("note"),
+    status: accountEnquiryStatusEnum("status").notNull().default("new"),
+    // Snapshot of the asking price when the enquiry came in, so the record
+    // still makes sense after the seller edits the listing.
+    priceSenAtEnquiry: integer("price_sen_at_enquiry").notNull(),
+    handledBy: text("handled_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    handledAt: timestamp("handled_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("gasak_account_enquiries_product_idx").on(t.productId),
+    index("gasak_account_enquiries_status_idx").on(t.status),
+  ],
 );
 
 // Join table: which option values make up a given variant.
@@ -852,6 +909,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
   }),
   memberships: many(squadMembers),
   organizationPositions: many(organizationPositions),
+  products: many(products),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -974,12 +1032,45 @@ export const newsReadRelations = relations(newsReads, ({ one }) => ({
   }),
 }));
 
-export const productRelations = relations(products, ({ many }) => ({
+export const productRelations = relations(products, ({ one, many }) => ({
+  creator: one(user, {
+    fields: [products.createdBy],
+    references: [user.id],
+  }),
   orders: many(orders),
   options: many(productOptions),
   variants: many(productVariants),
   gallery: many(productGallery),
+  enquiries: many(accountEnquiries),
+  accountDetails: one(productAccountDetails, {
+    fields: [products.id],
+    references: [productAccountDetails.productId],
+  }),
 }));
+
+export const productAccountDetailRelations = relations(
+  productAccountDetails,
+  ({ one }) => ({
+    product: one(products, {
+      fields: [productAccountDetails.productId],
+      references: [products.id],
+    }),
+  }),
+);
+
+export const accountEnquiryRelations = relations(
+  accountEnquiries,
+  ({ one }) => ({
+    product: one(products, {
+      fields: [accountEnquiries.productId],
+      references: [products.id],
+    }),
+    handler: one(user, {
+      fields: [accountEnquiries.handledBy],
+      references: [user.id],
+    }),
+  }),
+);
 
 export const productGalleryRelations = relations(productGallery, ({ one }) => ({
   product: one(products, {
@@ -1075,12 +1166,16 @@ export type Gallery = typeof galleries.$inferSelect;
 export type OrganizationPosition = typeof organizationPositions.$inferSelect;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type DiscordSettings = typeof discordSettings.$inferSelect;
-export type WhatsappSettings = typeof whatsappSettings.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type ProductOption = typeof productOptions.$inferSelect;
 export type ProductOptionValue = typeof productOptionValues.$inferSelect;
 export type ProductVariant = typeof productVariants.$inferSelect;
 export type ProductGallery = typeof productGallery.$inferSelect;
+export type ProductAccountDetails = typeof productAccountDetails.$inferSelect;
+/** A product row plus its account-listing detail row, as the UI consumes it. */
+export type AccountProduct = Product & {
+  accountDetails: ProductAccountDetails | null;
+};
 export type Order = typeof orders.$inferSelect;
 export type JokiTier = typeof jokiTiers.$inferSelect;
 export type JokiPackage = typeof jokiPackages.$inferSelect;
@@ -1099,3 +1194,6 @@ export type TournamentTracking =
 export type ProductCategory = (typeof productCategoryEnum.enumValues)[number];
 export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 export type PaymentMethod = (typeof paymentMethodEnum.enumValues)[number];
+export type AccountEnquiryStatus =
+  (typeof accountEnquiryStatusEnum.enumValues)[number];
+export type AccountEnquiry = typeof accountEnquiries.$inferSelect;

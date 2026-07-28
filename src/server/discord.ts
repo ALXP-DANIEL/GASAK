@@ -1,5 +1,5 @@
-import { env } from "@/env";
 import { getDiscordSettings } from "@server/actions/discord-settings";
+import { env } from "@/env";
 
 /**
  * Fire-and-forget Discord bot message post. Failures are logged, not thrown —
@@ -13,17 +13,14 @@ async function postToDiscord(
   if (!env.DISCORD_BOT_TOKEN || !channelId) return;
 
   try {
-    await fetch(
-      `https://discord.com/api/v10/channels/${channelId}/messages`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
-        },
-        body: JSON.stringify({ content }),
+    await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
       },
-    );
+      body: JSON.stringify({ content }),
+    });
   } catch (error) {
     console.error("Discord bot message failed", error);
   }

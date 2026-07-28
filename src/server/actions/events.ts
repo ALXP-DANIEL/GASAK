@@ -48,7 +48,10 @@ async function syncLinkedTournament(event: {
   };
 
   if (linked) {
-    await db.update(tournaments).set(values).where(eq(tournaments.id, linked.id));
+    await db
+      .update(tournaments)
+      .set(values)
+      .where(eq(tournaments.id, linked.id));
   } else {
     await db.insert(tournaments).values({ ...values, eventId: event.id });
   }
@@ -156,7 +159,8 @@ export async function updateEvent(
     id: eventId,
     title: parsed.data.title,
     date: parsed.data.date,
-    prizePool: parsed.data.type === "tournament" ? parsed.data.prizePool || null : null,
+    prizePool:
+      parsed.data.type === "tournament" ? parsed.data.prizePool || null : null,
     squadId: parsed.data.squadId,
     type: parsed.data.type,
   });

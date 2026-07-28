@@ -465,8 +465,7 @@ export async function syncChallongeTournament(
       const opponentId = match.participantIds.find(
         (id) => !ourPlayerIds.has(id),
       );
-      const opponent =
-        (opponentId && nameByPlayerId.get(opponentId)) || "TBD";
+      const opponent = (opponentId && nameByPlayerId.get(opponentId)) || "TBD";
 
       const outcome =
         match.state !== "complete"

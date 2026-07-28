@@ -98,6 +98,11 @@ type FormFieldProps<
   placeholder?: string;
   autoComplete?: string;
   rows?: number;
+  /** Numeric input constraints — `step` is required for decimal values, since
+   * a number input defaults to step=1 and rejects them. */
+  step?: React.ComponentProps<"input">["step"];
+  min?: React.ComponentProps<"input">["min"];
+  max?: React.ComponentProps<"input">["max"];
 };
 
 export function FormField<
@@ -117,6 +122,9 @@ export function FormField<
   autoComplete,
   disabled,
   rows,
+  step,
+  min,
+  max,
 }: FormFieldProps<TFieldValues, TName>) {
   return (
     <Controller
@@ -168,6 +176,9 @@ export function FormField<
               id={field.name}
               type={type}
               inputMode={inputMode}
+              step={step}
+              min={min}
+              max={max}
               placeholder={placeholder}
               autoComplete={autoComplete}
               disabled={disabled}
@@ -493,7 +504,10 @@ export function FormDatePicker<
                 >
                   <Icons.Domain.Calendar className="size-4" />
                   {field.value
-                    ? format(parse(field.value, "yyyy-MM-dd", new Date()), dateFormat)
+                    ? format(
+                        parse(field.value, "yyyy-MM-dd", new Date()),
+                        dateFormat,
+                      )
                     : placeholder}
                 </Button>
               }

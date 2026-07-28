@@ -1,11 +1,13 @@
 "use server";
 
+import { rankFieldSchema } from "@lib/ranks";
 import { logActivity } from "@server/activity-log";
 import { actionUser } from "@server/authz";
 import {
   db,
   type OrderStatus,
   orders,
+  productAccountDetails,
   productCategoryEnum,
   productGallery,
   productOptions,
@@ -34,6 +36,14 @@ const productSchema = z.object({
   name: z.string().min(2, "Product name is required"),
   category: z.enum(productCategoryEnum.enumValues),
   description: z.string().optional(),
+  // Sent as a JSON string by the form (structured MLBB rank object).
+  accountRank: rankFieldSchema.nullable().optional(),
+  accountWinRate: z.coerce.number().min(0).max(100).optional(),
+  accountSkinCount: z.coerce.number().int().min(0).optional(),
+  accountHeroCount: z.coerce.number().int().min(0).optional(),
+  accountSkinDescription: z.string().optional(),
+  accountHighlights: z.string().optional(),
+  accountSold: z.boolean(),
   price: z
     .string()
     .min(1, "Price is required")
@@ -48,11 +58,98 @@ const productSchema = z.object({
     }),
 });
 
+/**
+ * Account listings carry required fields the other categories do not. The form
+ * enforces these too; repeating them here means the rule holds for any caller,
+ * not just the UI that happens to be in front of it.
+ */
+const accountAwareProductSchema = productSchema.superRefine((data, ctx) => {
+  if (data.category !== "account") return;
+  if (!data.accountRank?.tier) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["accountRank"],
+      message: "Select the account's highest rank",
+    });
+  }
+  if (data.accountWinRate == null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["accountWinRate"],
+      message: "Enter a win rate between 0 and 100",
+    });
+  }
+  if (!data.accountSkinDescription?.trim()) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["accountSkinDescription"],
+      message: "Describe the account's skin collection",
+    });
+  }
+});
+
+/** Structured fields cross the FormData boundary as JSON strings. */
+function parseJsonField(value: FormDataEntryValue | null) {
+  if (typeof value !== "string" || value === "") return undefined;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Account listings keep their category-specific fields in a 1:1 side table
+ * rather than on `products`. Written as an upsert so switching a product into
+ * the account category creates the row and later edits update it in place;
+ * switching back out drops it, since the fields are then meaningless.
+ */
+async function writeAccountDetails(
+  // Runs inside the caller's transaction so a product never lands without its
+  // detail row (which would render as a blank, still-available listing).
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+  productId: string,
+  data: z.infer<typeof productSchema>,
+) {
+  if (data.category !== "account") {
+    await tx
+      .delete(productAccountDetails)
+      .where(eq(productAccountDetails.productId, productId));
+    return;
+  }
+
+  const values = {
+    rank: data.accountRank ?? null,
+    // drizzle's `numeric` column takes a string.
+    winRate: data.accountWinRate != null ? String(data.accountWinRate) : null,
+    skinCount: data.accountSkinCount ?? null,
+    heroCount: data.accountHeroCount ?? null,
+    skinDescription: data.accountSkinDescription ?? null,
+    highlights: data.accountHighlights ?? null,
+    sold: data.accountSold,
+  };
+
+  await tx
+    .insert(productAccountDetails)
+    .values({ productId, ...values })
+    .onConflictDoUpdate({
+      target: productAccountDetails.productId,
+      set: values,
+    });
+}
+
 function parseProductForm(formData: FormData) {
-  return productSchema.safeParse({
+  return accountAwareProductSchema.safeParse({
     name: formData.get("name"),
     category: formData.get("category"),
     description: formData.get("description") || undefined,
+    accountRank: parseJsonField(formData.get("accountRank")),
+    accountWinRate: formData.get("accountWinRate") || undefined,
+    accountSkinCount: formData.get("accountSkinCount") || undefined,
+    accountHeroCount: formData.get("accountHeroCount") || undefined,
+    accountSkinDescription: formData.get("accountSkinDescription") || undefined,
+    accountHighlights: formData.get("accountHighlights") || undefined,
+    accountSold: formData.get("accountSold") === "on",
     price: formData.get("price"),
     stock: formData.get("stock"),
   });
@@ -76,19 +173,23 @@ export async function createProduct(formData: FormData): Promise<ActionResult> {
     }
   }
 
-  const [row] = await db
-    .insert(products)
-    .values({
-      name: parsed.data.name,
-      category: parsed.data.category,
-      description: parsed.data.description ?? null,
-      priceSen: Math.round(Number(parsed.data.price) * 100),
-      stock: Number(parsed.data.stock),
-      imageUrl,
-      active: formData.get("active") === "on",
-      createdBy: actor.id,
-    })
-    .returning();
+  const row = await db.transaction(async (tx) => {
+    const [created] = await tx
+      .insert(products)
+      .values({
+        name: parsed.data.name,
+        category: parsed.data.category,
+        description: parsed.data.description ?? null,
+        priceSen: Math.round(Number(parsed.data.price) * 100),
+        stock: Number(parsed.data.stock),
+        imageUrl,
+        active: formData.get("active") === "on",
+        createdBy: actor.id,
+      })
+      .returning();
+    await writeAccountDetails(tx, created.id, parsed.data);
+    return created;
+  });
   await logActivity({
     actor,
     action: "create",
@@ -136,11 +237,16 @@ export async function updateProduct(
     }
   }
 
-  const [row] = await db
-    .update(products)
-    .set(updates)
-    .where(eq(products.id, productId))
-    .returning();
+  const row = await db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(products)
+      .set(updates)
+      .where(eq(products.id, productId))
+      .returning();
+    if (!updated) return undefined;
+    await writeAccountDetails(tx, updated.id, parsed.data);
+    return updated;
+  });
   if (!row) return { ok: false, error: "Product not found" };
   if (updates.imageUrl && previousImageUrl !== updates.imageUrl) {
     await deleteUpload(previousImageUrl);
@@ -440,7 +546,7 @@ export async function uploadVariantImage(
 }
 
 /**
- * Saves up to 3 gallery images for a product. Each slot carries either a new
+ * Saves up to 8 gallery images for a product. Each slot carries either a new
  * upload (`galleryImage_${i}`, mirrors the cover-image flow) or the URL of the
  * existing image to keep (`galleryKeep_${i}`); empty slots are dropped.
  */
@@ -458,7 +564,7 @@ export async function setProductGalleryFiles(
   if (!product) return { ok: false, error: "Product not found" };
 
   const imageUrls: string[] = [];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 8; i++) {
     const file = formData.get(`galleryImage_${i}`);
     if (file instanceof File && file.size > 0) {
       try {
