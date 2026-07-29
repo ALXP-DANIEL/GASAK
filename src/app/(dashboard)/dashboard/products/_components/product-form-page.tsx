@@ -84,9 +84,7 @@ const schema = z
     accountRank: rankFieldSchema.nullable().optional(),
     accountWinRate: numberOrEmpty.optional(),
     accountSkinCount: numberOrEmpty.optional(),
-    accountHeroCount: numberOrEmpty.optional(),
     accountSkinDescription: z.string().optional(),
-    accountHighlights: z.string().optional(),
     accountSold: z.boolean(),
     image: z.instanceof(File).nullable(),
     gallery: z
@@ -261,9 +259,7 @@ function buildDefaults(
         ? Number(product.accountDetails.winRate)
         : "",
     accountSkinCount: product?.accountDetails?.skinCount ?? "",
-    accountHeroCount: product?.accountDetails?.heroCount ?? "",
     accountSkinDescription: product?.accountDetails?.skinDescription ?? "",
-    accountHighlights: product?.accountDetails?.highlights ?? "",
     accountSold: product?.accountDetails?.sold ?? false,
     image: null,
     gallery: Array.from({ length: 8 }, () => null),
@@ -373,12 +369,10 @@ export function ProductFormPage({
       );
       formData.set("accountWinRate", String(values.accountWinRate ?? ""));
       formData.set("accountSkinCount", String(values.accountSkinCount || ""));
-      formData.set("accountHeroCount", String(values.accountHeroCount || ""));
       formData.set(
         "accountSkinDescription",
         values.accountSkinDescription ?? "",
       );
-      formData.set("accountHighlights", values.accountHighlights ?? "");
       formData.set("accountSold", values.accountSold ? "on" : "off");
       formData.set("price", String(rollupPrice));
       formData.set("stock", String(rollupStock));
@@ -497,26 +491,12 @@ export function ProductFormPage({
                     label="Number of skins"
                     type="number"
                   />
-                  <FormField
-                    control={control}
-                    name="accountHeroCount"
-                    label="Number of heroes"
-                    type="number"
-                  />
                 </div>
                 <FormField
                   control={control}
                   name="accountSkinDescription"
                   label="Skin collection"
                   description="Describe notable, limited, collector, legend, or event skins."
-                  as="textarea"
-                  rows={4}
-                />
-                <FormField
-                  control={control}
-                  name="accountHighlights"
-                  label="Other account highlights"
-                  description="Emblems, achievements, rare items, bindings, or anything else the buyer should know."
                   as="textarea"
                   rows={4}
                 />
@@ -612,12 +592,12 @@ export function ProductFormPage({
           index={fixedCategory ? "03" : "04"}
           title={
             category === "account"
-              ? "Price & availability"
+              ? "Price"
               : "Options & variants"
           }
           description={
             category === "account"
-              ? "One-of-a-kind listing — leave stock at 1 and use the Sold toggle under Visibility once it is gone."
+              ? "One-of-a-kind listing — set the asking price; mark it Sold under Visibility once it is gone."
               : "Turn on for products with choices like size or color — each combination gets its own price, stock, and image."
           }
         >

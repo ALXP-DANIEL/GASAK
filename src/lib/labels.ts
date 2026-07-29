@@ -179,7 +179,7 @@ export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, string> = {
   weekly_pass: "Weekly Pass",
   joki: "Joki",
   coaching: "Coaching",
-  account: "Game Accounts",
+  account: "Buy & Sell Account",
   merchandise: "Merchandise",
 };
 

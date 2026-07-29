@@ -228,11 +228,8 @@ async function ensureAccountListings(createdBy: string | null) {
         rank: mkRank("Mythical Glory", 72),
         winRate: "68.50",
         skinCount: 42,
-        heroCount: 78,
         skinDescription:
           "Collector Gusion, Legend Lancelot, Epic Chou, plus 3 limited event skins.",
-        highlights:
-          "No ban history, original email included, Advanced Server access.",
         sold: false,
       },
     },
@@ -246,10 +243,8 @@ async function ensureAccountListings(createdBy: string | null) {
         rank: mkRank("Mythic", 15),
         winRate: "61.20",
         skinCount: 21,
-        heroCount: 55,
         skinDescription:
           "Epic Ling, Elite Fredrinn, and a full set of starter jungle skins.",
-        highlights: "Clean record, ready for a fresh bind.",
         sold: false,
       },
     },
@@ -263,9 +258,7 @@ async function ensureAccountListings(createdBy: string | null) {
         rank: mkRank("Epic", 2, 3),
         winRate: "54.00",
         skinCount: 8,
-        heroCount: 30,
         skinDescription: "Two Epic skins and a handful of Elite skins.",
-        highlights: "Already sold — kept as an example of a sold listing.",
         sold: true,
       },
     },

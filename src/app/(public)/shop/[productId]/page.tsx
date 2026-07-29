@@ -178,9 +178,6 @@ export default async function ProductPage({
               {account?.skinCount != null && (
                 <ProductFact label="Skins" value={String(account.skinCount)} />
               )}
-              {account?.heroCount != null && (
-                <ProductFact label="Heroes" value={String(account.heroCount)} />
-              )}
               {!product.hasVariants && (
                 <ProductFact label="Price" value={formatRM(product.priceSen)} />
               )}
@@ -199,16 +196,6 @@ export default async function ProductPage({
                 </h2>
                 <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground desktop:text-base">
                   {account.skinDescription}
-                </p>
-              </>
-            )}
-            {account?.highlights && (
-              <>
-                <h2 className="mt-8 font-heading text-xl font-bold uppercase tracking-wide">
-                  Account highlights
-                </h2>
-                <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground desktop:text-base">
-                  {account.highlights}
                 </p>
               </>
             )}

@@ -40,9 +40,7 @@ const productSchema = z.object({
   accountRank: rankFieldSchema.nullable().optional(),
   accountWinRate: z.coerce.number().min(0).max(100).optional(),
   accountSkinCount: z.coerce.number().int().min(0).optional(),
-  accountHeroCount: z.coerce.number().int().min(0).optional(),
   accountSkinDescription: z.string().optional(),
-  accountHighlights: z.string().optional(),
   accountSold: z.boolean(),
   price: z
     .string()
@@ -123,9 +121,7 @@ async function writeAccountDetails(
     // drizzle's `numeric` column takes a string.
     winRate: data.accountWinRate != null ? String(data.accountWinRate) : null,
     skinCount: data.accountSkinCount ?? null,
-    heroCount: data.accountHeroCount ?? null,
     skinDescription: data.accountSkinDescription ?? null,
-    highlights: data.accountHighlights ?? null,
     sold: data.accountSold,
   };
 
@@ -146,9 +142,7 @@ function parseProductForm(formData: FormData) {
     accountRank: parseJsonField(formData.get("accountRank")),
     accountWinRate: formData.get("accountWinRate") || undefined,
     accountSkinCount: formData.get("accountSkinCount") || undefined,
-    accountHeroCount: formData.get("accountHeroCount") || undefined,
     accountSkinDescription: formData.get("accountSkinDescription") || undefined,
-    accountHighlights: formData.get("accountHighlights") || undefined,
     accountSold: formData.get("accountSold") === "on",
     price: formData.get("price"),
     stock: formData.get("stock"),

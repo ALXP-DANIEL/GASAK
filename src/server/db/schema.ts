@@ -706,9 +706,7 @@ export const productAccountDetails = createTable("product_account_details", {
   // rather than text so it can be sorted/filtered and cannot hold junk.
   winRate: numeric("win_rate", { precision: 5, scale: 2 }),
   skinCount: integer("skin_count"),
-  heroCount: integer("hero_count"),
   skinDescription: text("skin_description"),
-  highlights: text("highlights"),
   // Account listings are one-of-a-kind, so "sold" is an explicit flag rather
   // than a stock count. Sold listings stay visible but stop taking enquiries.
   sold: boolean("sold").notNull().default(false),

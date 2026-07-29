@@ -71,7 +71,7 @@ export default async function ProductsPage() {
         <div className="grid gap-4 desktop:grid-cols-2">
           <CatalogSectionCard
             href="/dashboard/products/accounts"
-            title="Game Accounts"
+            title="Buy & Sell Account"
             description="MLBB accounts, stats, skins, galleries, and seller enquiries."
             icon={Icons.Domain.Products}
             stats={`${accountRows.filter((product) => product.active && !product.accountDetails?.sold).length} available · ${accountRows.length} listings total`}

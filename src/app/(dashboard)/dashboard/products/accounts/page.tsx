@@ -24,7 +24,7 @@ export default async function AccountsPage() {
     <PageSkeleton name="accounts" loading={false}>
       <main>
         <PageHeader
-          title="Game Accounts"
+          title="Buy & Sell Account"
           kicker="Commerce"
           icon={Icons.Domain.Products}
           description="MLBB accounts listed for direct buyer enquiries on WhatsApp."
