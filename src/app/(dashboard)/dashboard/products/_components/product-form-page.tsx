@@ -590,11 +590,7 @@ export function ProductFormPage({
 
         <IndexedFormSection
           index={fixedCategory ? "03" : "04"}
-          title={
-            category === "account"
-              ? "Price"
-              : "Options & variants"
-          }
+          title={category === "account" ? "Price" : "Options & variants"}
           description={
             category === "account"
               ? "One-of-a-kind listing — set the asking price; mark it Sold under Visibility once it is gone."
