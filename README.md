@@ -1,15 +1,19 @@
 # GASAK Management System
 
-Esports org management portal for **GASAK** (Malaysian MLBB organization): squads, players, recruitment, calendar, tournaments, scrims, announcements, and a public shop with guest checkout — all role-gated for Admin / Leader / Member / Seller.
+Full-stack operating system for **GASAK**, a Malaysian MLBB organization. It
+combines the public organization site, squad operations, recruitment, competitive
+records, publishing, commerce, payments, and role-specific staff workspaces.
 
 ## Stack
 
-- **Next.js 16** (App Router, Turbopack, `proxy.ts`) + TypeScript
+- **Next.js 16 Canary** (App Router, Turbopack, `proxy.ts`) + React 19 and TypeScript
 - **Tailwind CSS v4** + **shadcn/ui** (radix-lyra style, Phosphor icons)
 - **Better Auth** (email/password, admin plugin for user management, reset password)
 - **Drizzle ORM** + **PostgreSQL** (Docker `dev_postgres`; falls back to embedded PGlite without `DATABASE_URL`)
-- React Hook Form + Zod, TanStack Query, FullCalendar, Recharts
-- Local image uploads served via `/api/files` (swap for UploadThing/S3 later)
+- React Hook Form, Zod, TanStack Table, FullCalendar, Tiptap, and Recharts
+- UploadThing and Resend for media and email delivery
+- Billplz payment webhooks, Discord automation, and Challonge integration
+- Vitest, Biome, and Vercel
 
 ## Getting started
 
@@ -40,7 +44,8 @@ npm run dev
 
 ## Modules
 
-**Public site** — Home, About, Squads (+detail), Players, Recruitment (application form), Shop (guest checkout → order tracking `/shop/order/GSK-XXXXXX` with payment-proof upload), Contact.
+**Public site** — Home, About, Squads, Players, Tournaments, News, Recruitment,
+Gallery, Shop, guest order tracking, and Contact.
 
 **Dashboard** (`/dashboard`, session required via `proxy.ts`, role checks in every layout/page/action):
 
@@ -56,13 +61,22 @@ npm run dev
 | Products / Orders | full access | — | — | CRUD, verify payments, status flow |
 | Users | create, set role, delete | — | — | — |
 
+Additional operational areas include role-specific dashboards, reports, audit
+logs, media management, searchable commands, Discord settings, scheduled
+digests, game-account products, and rank-boost packages.
+
 **Order flow:** Pending → Waiting Payment (proof uploaded) → Paid (seller verifies, stock deducted) → Processing → Completed, with Cancel (restocks paid orders). Payments: DuitNow QR, Bank Transfer (FPX planned).
 
 **Recruitment flow:** Applied → Under Review (assigned to leader) → Trial → Accepted / Rejected.
 
 ## Notes
 
-- **Password reset:** no SMTP configured — reset links are printed to the server console (see `sendResetPassword` in `src/lib/auth.ts`).
-- **Uploads** are stored in `./uploads` (gitignored) and served by `src/app/api/files/[...path]/route.ts`.
+- **Email and uploads:** production delivery uses Resend and UploadThing when
+  their environment variables are configured.
 - **Database scripts:** `npm run db:push` (sync schema), `npm run db:seed` (idempotent), `npm run db:studio` (Drizzle Studio).
 - Remove `DATABASE_URL` from `.env` to run on embedded PGlite (no Docker needed).
+
+## Portfolio metadata
+
+The root [`project.json`](project.json) and artwork in `metadata/picture/` feed
+Alif Daniel's GitHub-backed portfolio CMS.
