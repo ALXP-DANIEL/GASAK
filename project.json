@@ -3,14 +3,14 @@
   "title": "GASAK",
   "type": "Full-Stack Web App",
   "category": "Esports Org Management",
-  "summary": "An org management portal for a Malaysian MLBB esports team — squads, recruitment, events, and a public shop, all role-gated for admins, leaders, members, and sellers.",
-  "overview": "GASAK is a Next.js 16 management system for a Mobile Legends esports organization. It handles squad and player rosters, recruitment applications, a shared event calendar with tournaments and scrims, announcements, and a public shop with guest checkout — all role-gated (Admin / Leader / Member / Seller) via Better Auth. Drizzle ORM + PostgreSQL back the data layer, with Resend for transactional email and UploadThing for media.",
+  "summary": "A complete esports organization operating system for squads, recruitment, tournaments, match records, publishing, commerce, payments, and role-specific staff workflows.",
+  "overview": "GASAK is a full-stack operating platform for a Malaysian Mobile Legends organization. A public site presents the organization, squads, tournaments, news, recruitment, gallery, and storefront; the authenticated application gives admins, sellers, leaders, coaches, and players purpose-built workspaces. It manages rosters, applications, schedules, scrims, tournament rounds, match results, news publishing, merchandise, game accounts, rank-boost packages, orders, payment evidence, reports, galleries, audit logs, and integrations. Better Auth and a layered authorization model protect organization and squad scopes, Drizzle supports PostgreSQL with a local PGlite fallback, and the platform integrates Billplz webhooks, Discord automation, Challonge, Resend, UploadThing, and scheduled operational digests.",
   "year": "2026",
   "spotlight": true,
   "thumbnail": "./metadata/picture/thumbnail.png",
   "spotlightImage": "",
   "techStack": [
-    "Next.js 16",
+    "Next.js 16 Canary",
     "React 19",
     "TypeScript",
     "Tailwind CSS 4",
@@ -19,24 +19,51 @@
     "Drizzle ORM",
     "PostgreSQL",
     "TanStack Table",
+    "FullCalendar",
+    "Tiptap",
+    "Recharts",
     "React Hook Form",
     "Zod",
     "Resend",
     "UploadThing",
+    "Billplz",
+    "Discord",
+    "Challonge",
+    "PGlite",
     "Motion",
+    "Vitest",
     "Biome",
     "Vercel"
   ],
   "highlights": [
-    "Role-gated management portal (Admin / Leader / Member / Seller) for squads, players, and recruitment.",
-    "Shared event calendar for tournaments and scrims, with announcements and match logging.",
-    "Public shop with guest checkout for merchandise and rank-boost (joki) services.",
-    "Better Auth for authentication, with email/password, admin user management, and password reset.",
-    "Drizzle ORM + PostgreSQL data layer with transactional email via Resend."
+    "Dual-scope authorization separates organization roles from squad roles, including a Manage/Player focus for users who wear both hats.",
+    "Squad and player operations cover rosters, lanes, recruitment stages, schedules, scrims, tournament rounds, Challonge data, and match results.",
+    "Public publishing system for organization pages, news, galleries, squads, tournaments, and recruitment applications.",
+    "Commerce supports merchandise, game accounts, rank-boost packages, guest order lookup, payment evidence, Billplz webhooks, and seller workflows.",
+    "Role-specific dashboards, searchable command palette, reports, audit logs, media management, Discord settings, and scheduled digests.",
+    "Better Auth, Drizzle ORM, PostgreSQL/PGlite, Resend, and UploadThing provide authentication, persistence, email, and media infrastructure."
   ],
-  "previewImages": [],
+  "previewImages": [
+    {
+      "src": "./metadata/picture/preview-home.jpeg",
+      "title": "Public Organization Site",
+      "caption": "The public-facing home experience for the esports organization.",
+      "alt": "GASAK esports organization home page"
+    },
+    {
+      "src": "./metadata/picture/preview-auth.jpeg",
+      "title": "Member Access",
+      "caption": "A branded authentication gateway into role-specific organization workspaces.",
+      "alt": "GASAK member sign-in interface"
+    },
+    {
+      "src": "./metadata/picture/preview-shop.jpeg",
+      "title": "Commerce",
+      "caption": "The public shop for merchandise, accounts, and rank-boost services.",
+      "alt": "GASAK public shop"
+    }
+  ],
   "actions": {
-    "open": "https://gasak-alifdanielpersonalspace-3754s-projects.vercel.app",
     "github": "https://github.com/ALXP-DANIEL/gasak"
   }
 }
