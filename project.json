@@ -7,7 +7,7 @@
   "overview": "GASAK is a full-stack operating platform for a Malaysian Mobile Legends organization. A public site presents the organization, squads, tournaments, news, recruitment, gallery, and storefront; the authenticated application gives admins, sellers, leaders, coaches, and players purpose-built workspaces. It manages rosters, applications, schedules, scrims, tournament rounds, match results, news publishing, merchandise, game accounts, rank-boost packages, orders, payment evidence, reports, galleries, audit logs, and integrations. Better Auth and a layered authorization model protect organization and squad scopes, Drizzle supports PostgreSQL with a local PGlite fallback, and the platform integrates Billplz webhooks, Discord automation, Challonge, Resend, UploadThing, and scheduled operational digests.",
   "year": "2026",
   "spotlight": true,
-  "thumbnail": "./metadata/picture/thumbnail.png",
+  "thumbnail": "./metadata/picture/preview-home.jpeg",
   "spotlightImage": "",
   "techStack": [
     "Next.js 16 Canary",
