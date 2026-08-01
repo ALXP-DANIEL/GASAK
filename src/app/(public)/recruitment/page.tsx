@@ -4,6 +4,7 @@ import { Icons } from "@components/icons";
 import { PageSkeleton } from "@components/shared/page-skeleton";
 import { BrandCard, LinkButton } from "@components/ui/brand";
 import { createPageMetadata } from "@lib/metadata";
+import { isModuleEnabled } from "@server/actions/module-controls";
 import { db, squads } from "@server/db";
 import { and, eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
@@ -19,12 +20,16 @@ export const metadata = createPageMetadata({
 export default async function RecruitmentPage() {
   cacheLife("hours");
   cacheTag("squads");
+  cacheTag("recruitment-settings");
 
-  const recruitingSquads = await db
-    .select({ id: squads.id, name: squads.name })
-    .from(squads)
-    .where(and(eq(squads.archived, false), eq(squads.recruiting, true)))
-    .orderBy(squads.name);
+  const [recruitingSquads, intakeOpen] = await Promise.all([
+    db
+      .select({ id: squads.id, name: squads.name })
+      .from(squads)
+      .where(and(eq(squads.archived, false), eq(squads.recruiting, true)))
+      .orderBy(squads.name),
+    isModuleEnabled("recruitment"),
+  ]);
 
   return (
     <PageSkeleton name="recruitment-public" loading={false}>
@@ -101,7 +106,23 @@ export default async function RecruitmentPage() {
             </BrandCard>
           </aside>
 
-          <ApplicationForm squads={recruitingSquads} />
+          {intakeOpen ? (
+            <ApplicationForm squads={recruitingSquads} />
+          ) : (
+            <BrandCard interactive={false} className="p-8 text-center">
+              <Icons.Domain.Recruitment
+                size={32}
+                className="mx-auto text-muted-foreground"
+              />
+              <h2 className="mt-5 font-heading text-2xl font-bold uppercase tracking-wide">
+                Recruitment is currently closed
+              </h2>
+              <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-muted-foreground">
+                We are not accepting new applications right now. Check back
+                later or contact the team for general enquiries.
+              </p>
+            </BrandCard>
+          )}
         </section>
       </main>
     </PageSkeleton>

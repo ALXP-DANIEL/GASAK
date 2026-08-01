@@ -28,6 +28,7 @@ import { RATE_LIMITED_ERROR, rateLimit } from "@server/rate-limit";
 import { and, count, eq, gte } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
+import { isModuleEnabled } from "./module-controls";
 
 export type ActionResult =
   | { ok: true; message?: string; data?: Record<string, string> }
@@ -56,6 +57,10 @@ const applicationSchema = z.object({
 export async function submitApplication(
   input: z.infer<typeof applicationSchema>,
 ): Promise<ActionResult> {
+  if (!(await isModuleEnabled("recruitment"))) {
+    return { ok: false, error: "Recruitment intake is currently closed" };
+  }
+
   const parsed = applicationSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0].message };
