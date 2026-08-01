@@ -15,12 +15,15 @@ import {
 } from "@components/ui/shadcn/card";
 import { ROLE_LABELS } from "@lib/labels";
 import { cn } from "@lib/utils";
+import { getModuleControls } from "@server/actions/module-controls";
 import Link from "next/link";
 import { requireDashboardRole } from "../_components/dashboard-section";
 import { ChangePasswordCard } from "./_components/change-password-card";
+import { ModuleControlsCard } from "./_components/module-controls-card";
 
 export default async function SettingsPage() {
   const { user, role } = await requireDashboardRole();
+  const moduleControls = role === "admin" ? await getModuleControls() : null;
 
   return (
     <PageSkeleton name="settings" loading={false}>
@@ -32,6 +35,20 @@ export default async function SettingsPage() {
           description="Manage your account and app preferences."
           actions={<Badge variant="outline">{ROLE_LABELS[role]}</Badge>}
         />
+        {moduleControls && (
+          <Card className="max-w-3xl">
+            <CardHeader>
+              <CardTitle className="text-base">Module controls</CardTitle>
+              <CardDescription>
+                Control public modules that accept new records. Disabling a
+                module does not affect existing records.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ModuleControlsCard defaults={moduleControls} />
+            </CardContent>
+          </Card>
+        )}
         <Card className="max-w-3xl">
           <CardHeader>
             <CardTitle className="text-base">Account</CardTitle>

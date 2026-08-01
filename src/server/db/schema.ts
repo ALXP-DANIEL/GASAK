@@ -590,6 +590,18 @@ export const discordSettings = createTable("discord_settings", {
     .defaultNow(),
 });
 
+// Admin-controlled kill switches for public modules that accept new records.
+export const moduleControls = createTable("module_controls", {
+  moduleKey: text("module_key").primaryKey(),
+  enabled: boolean("enabled").notNull().default(true),
+  updatedBy: text("updated_by").references(() => user.id, {
+    onDelete: "set null",
+  }),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export const products = createTable("products", {
   id: uuid("id")
     .primaryKey()
