@@ -441,6 +441,12 @@ export async function createBillplzPayment(
     with: { product: true },
   });
   if (!order) return { ok: false, error: "Order not found" };
+  if (order.jokiDetails) {
+    return {
+      ok: false,
+      error: "Jokie payment is arranged manually on WhatsApp",
+    };
+  }
 
   // Joki split payment: leg 1 is the 50% deposit, leg 2 the balance after
   // the boost is done. Regular orders pay the full total in one bill.

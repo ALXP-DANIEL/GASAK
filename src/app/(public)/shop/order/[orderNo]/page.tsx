@@ -221,7 +221,20 @@ export default async function OrderPage({
           </div>
         </BrandCard>
 
-        {awaitingPayment && (
+        {awaitingPayment && splitPayment && (
+          <BrandCard className="p-6">
+            <h2 className="font-heading text-xl font-bold tracking-wide">
+              Payment arranged on WhatsApp
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              The seller will contact you on WhatsApp to confirm your boost,
+              arrange the 50% deposit, and share payment details. The balance is
+              settled after the boost is complete.
+            </p>
+          </BrandCard>
+        )}
+
+        {awaitingPayment && !splitPayment && (
           <BrandCard className="p-6">
             <h2 className="font-heading text-xl font-bold tracking-wide">
               {splitPayment ? "Pay 50% deposit to start" : "Complete payment"}
@@ -237,7 +250,7 @@ export default async function OrderPage({
           </BrandCard>
         )}
 
-        {awaitingBalance && (
+        {awaitingBalance && !splitPayment && (
           <BrandCard className="p-6">
             <h2 className="font-heading text-xl font-bold tracking-wide">
               Pay remaining balance

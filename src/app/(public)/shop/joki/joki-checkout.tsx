@@ -107,7 +107,7 @@ export function JokiCheckout({
       });
 
       if (result.ok && result.data?.orderNo) {
-        toast.success("Joki order placed! Complete your payment.");
+        toast.success("Joki order placed! We’ll contact you on WhatsApp.");
         router.push(`/shop/order/${result.data.orderNo}`);
         return;
       }
