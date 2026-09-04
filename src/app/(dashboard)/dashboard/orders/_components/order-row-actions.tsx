@@ -65,6 +65,29 @@ export function OrderRowActions({
   const shipping = order.shippingAddress;
   const joki = order.jokiDetails;
 
+  const supportsDirectContact =
+    !!joki || order.product.category === "merchandise";
+
+  function contactCustomer() {
+    const orderSummary = joki
+      ? `${joki.currentRank ?? "your current rank"} → ${joki.targetRank ?? "your target rank"}`
+      : `${order.product.name} × ${order.quantity}`;
+    const message = [
+      `Hi ${order.customerName}, thanks for your order ${order.orderNo}.`,
+      `Your total is ${formatRM(order.totalSen)} for ${orderSummary}.`,
+      joki
+        ? "I'll arrange the full payment and boost details with you here."
+        : "I'll confirm payment and delivery details with you here.",
+    ].join(" ");
+    const number = order.customerPhone.replace(/\D/g, "");
+    window.open(
+      `https://wa.me/${number}?text=${encodeURIComponent(message)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+    if (optimisticStatus === "pending") setStatus("waiting_payment");
+  }
+
   return (
     <div className="flex flex-wrap justify-end gap-2">
       <Credenza>
@@ -98,14 +121,6 @@ export function OrderRowActions({
                     value={`${joki.currentRank} → ${joki.targetRank}`}
                   />
                 )}
-                {order.depositSen != null && (
-                  <DetailRow
-                    label="Deposit (50%)"
-                    value={`${formatRM(order.depositSen)} — ${
-                      order.depositPaidAt ? "paid" : "unpaid"
-                    }`}
-                  />
-                )}
               </>
             )}
             {shipping && (
@@ -124,6 +139,14 @@ export function OrderRowActions({
           </CredenzaBody>
         </CredenzaContent>
       </Credenza>
+
+      {supportsDirectContact &&
+        optimisticStatus !== "completed" &&
+        optimisticStatus !== "cancelled" && (
+          <Button size="sm" onClick={contactCustomer}>
+            Contact on WhatsApp
+          </Button>
+        )}
 
       {order.paymentProofUrl && (
         <Credenza>

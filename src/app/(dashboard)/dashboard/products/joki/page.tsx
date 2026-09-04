@@ -1,9 +1,11 @@
 import { Icons } from "@components/icons";
 import { PageSkeleton } from "@components/shared/page-skeleton";
 import { StatItem, StatStrip } from "@components/shared/stat-strip";
+import { buttonVariants } from "@components/ui/shadcn/button";
 import { sortJokiPackages, sortJokiTiers } from "@lib/joki";
 import { db, jokiPackages, jokiServiceImages, jokiTiers } from "@server/db";
 import { requireOrgRole } from "@server/session";
+import Link from "next/link";
 import { PageHeader } from "../../_components/page-surface";
 import { PackageFormDialog } from "./_components/package-form";
 import { PackagesTable } from "./_components/packages-table";
@@ -34,7 +36,14 @@ export default async function JokiConfigPage() {
           kicker="Commerce"
           icon={Icons.Domain.Joki}
           description="Per-star rates and flat-rate packages shown on /shop/joki."
-        />
+        >
+          <Link
+            href="/dashboard/products/joki/enquiries"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Buyer enquiries
+          </Link>
+        </PageHeader>
 
         <div className="flex flex-col gap-6">
           <StatStrip>

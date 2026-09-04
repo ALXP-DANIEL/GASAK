@@ -32,6 +32,12 @@ export default async function MerchandisePage() {
           description="Physical items — jerseys, hoodies, and other GASAK gear."
         >
           <Link
+            href="/dashboard/products/merchandise/enquiries"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Buyer enquiries
+          </Link>
+          <Link
             href="/dashboard/products/new?category=merchandise"
             className={buttonVariants({ variant: "default" })}
           >

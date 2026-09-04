@@ -240,10 +240,7 @@ export function JokiCheckout({
               </span>
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Deposit now (50%) — balance after boost done</span>
-              <span className="font-semibold">
-                {formatRM(Math.ceil(totalSen / 2))}
-              </span>
+              <span>Full payment is arranged with the seller on WhatsApp</span>
             </div>
           </div>
 
@@ -254,7 +251,7 @@ export function JokiCheckout({
           >
             {pending
               ? "Placing order..."
-              : `Place order — ${formatRM(Math.ceil(totalSen / 2))} deposit`}
+              : `Place order — ${formatRM(totalSen)}`}
           </Button>
         </div>
       </form>

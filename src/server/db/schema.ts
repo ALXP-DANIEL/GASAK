@@ -884,9 +884,8 @@ export const orders = createTable(
     jokiDetails: jsonb("joki_details").$type<JokiOrderDetails>(),
     // present only on merchandise (physical) orders — see ShippingAddress
     shippingAddress: jsonb("shipping_address").$type<ShippingAddress>(),
-    // Joki split payment: 50% deposit before the boost starts, the remaining
-    // balance after the boost is done. When depositSen is set the order pays
-    // in two Billplz legs; both null on regular product orders.
+    // Historical joki split-payment values. New joki orders are paid in full
+    // directly with the seller on WhatsApp, so these remain null for them.
     depositSen: integer("deposit_sen"),
     depositPaidAt: timestamp("deposit_paid_at", { withTimezone: true }),
     balancePaidAt: timestamp("balance_paid_at", { withTimezone: true }),

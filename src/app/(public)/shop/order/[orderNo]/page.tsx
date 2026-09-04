@@ -34,12 +34,7 @@ export default async function OrderPage({
   const awaitingPayment =
     order.status === "pending" || order.status === "waiting_payment";
 
-  // Joki split payment: 50% deposit before the boost, balance after it's done.
-  const splitPayment = !!order.jokiDetails && !!order.depositSen;
-  const depositSen = order.depositSen ?? 0;
-  const balanceSen = order.totalSen - depositSen;
-  const awaitingBalance =
-    splitPayment && !!order.depositPaidAt && !order.balancePaidAt && !cancelled;
+  const isJokiOrder = !!order.jokiDetails;
 
   return (
     <PageSkeleton name="shop-order" loading={false}>
@@ -202,63 +197,28 @@ export default async function OrderPage({
               <span>Total</span>
               <span>{formatRM(order.totalSen)}</span>
             </div>
-            {splitPayment && (
-              <>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    Deposit (50%){order.depositPaidAt ? " — paid" : ""}
-                  </span>
-                  <span>{formatRM(depositSen)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    Balance after boost{order.balancePaidAt ? " — paid" : ""}
-                  </span>
-                  <span>{formatRM(balanceSen)}</span>
-                </div>
-              </>
-            )}
           </div>
         </BrandCard>
 
-        {awaitingPayment && splitPayment && (
+        {awaitingPayment && isJokiOrder && (
           <BrandCard className="p-6">
             <h2 className="font-heading text-xl font-bold tracking-wide">
-              Payment arranged on WhatsApp
+              Full payment arranged on WhatsApp
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               The seller will contact you on WhatsApp to confirm your boost,
-              arrange the 50% deposit, and share payment details. The balance is
-              settled after the boost is complete.
+              arrange the full payment, and share payment details.
             </p>
           </BrandCard>
         )}
 
-        {awaitingPayment && !splitPayment && (
+        {awaitingPayment && !isJokiOrder && (
           <BrandCard className="p-6">
             <h2 className="font-heading text-xl font-bold tracking-wide">
-              {splitPayment ? "Pay 50% deposit to start" : "Complete payment"}
+              Complete payment
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              {splitPayment
-                ? `Pay the ${formatRM(depositSen)} deposit securely via Billplz to start your boost. The remaining ${formatRM(balanceSen)} is only due after the joki is done — we'll contact you on WhatsApp.`
-                : `Pay ${formatRM(order.totalSen)} securely via Billplz — choose DuitNow QR, FPX online banking, or a card on the next screen.`}
-            </p>
-            <div className="mt-5">
-              <PaymentForm orderNo={order.orderNo} />
-            </div>
-          </BrandCard>
-        )}
-
-        {awaitingBalance && !splitPayment && (
-          <BrandCard className="p-6">
-            <h2 className="font-heading text-xl font-bold tracking-wide">
-              Pay remaining balance
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Deposit received — your boost is underway. Once our joki confirms
-              the boost is done (we'll contact you on WhatsApp), settle the
-              remaining {formatRM(balanceSen)} here to complete the order.
+              {`Pay ${formatRM(order.totalSen)} securely via Billplz — choose DuitNow QR, FPX online banking, or a card on the next screen.`}
             </p>
             <div className="mt-5">
               <PaymentForm orderNo={order.orderNo} />

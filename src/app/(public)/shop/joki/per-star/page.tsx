@@ -73,8 +73,8 @@ export default async function JokiPerStarPage() {
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
               Pick your current and target rank — stars and price are calculated
-              automatically across every rate tier the boost crosses. Pay 50%
-              deposit to start; the rest is due once the boost is done.
+              automatically across every rate tier the boost crosses. Arrange
+              full payment directly with the seller on WhatsApp.
             </p>
 
             {cheapest && (

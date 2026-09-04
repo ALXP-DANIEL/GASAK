@@ -414,8 +414,6 @@ export async function placeJokiOrder(
       totalSen,
       status: "pending",
       jokiDetails: details,
-      // 50% deposit before the boost starts; balance collected after it's done
-      depositSen: Math.ceil(totalSen / 2),
     })
     .returning();
   await logActivity({
@@ -444,35 +442,13 @@ export async function createBillplzPayment(
   if (order.jokiDetails) {
     return {
       ok: false,
-      error: "Jokie payment is arranged manually on WhatsApp",
+      error: "Joki payment is arranged manually on WhatsApp",
     };
   }
 
-  // Joki split payment: leg 1 is the 50% deposit, leg 2 the balance after
-  // the boost is done. Regular orders pay the full total in one bill.
-  const splitPayment = !!order.jokiDetails && !!order.depositSen;
-  const balanceLeg = splitPayment && !!order.depositPaidAt;
-
-  if (balanceLeg) {
-    if (order.balancePaidAt || order.status === "cancelled") {
-      return { ok: false, error: "This order can no longer be paid" };
-    }
-  } else if (order.status !== "pending" && order.status !== "waiting_payment") {
+  if (order.status !== "pending" && order.status !== "waiting_payment") {
     return { ok: false, error: "This order can no longer be paid" };
   }
-
-  const amountSen = splitPayment
-    ? balanceLeg
-      ? // biome-ignore lint/style/noNonNullAssertion: splitPayment implies depositSen
-        order.totalSen - order.depositSen!
-      : // biome-ignore lint/style/noNonNullAssertion: splitPayment implies depositSen
-        order.depositSen!
-    : order.totalSen;
-  const legLabel = splitPayment
-    ? balanceLeg
-      ? " — Balance (50%)"
-      : " — Deposit (50%)"
-    : "";
 
   let bill: Awaited<ReturnType<typeof createBillplzBill>>;
   try {
@@ -480,8 +456,8 @@ export async function createBillplzPayment(
       name: order.customerName,
       email: order.customerEmail,
       mobile: order.customerPhone,
-      amountSen,
-      description: `${order.product.name} × ${order.quantity} — ${order.orderNo}${legLabel}`,
+      amountSen: order.totalSen,
+      description: `${order.product.name} × ${order.quantity} — ${order.orderNo}`,
       orderNo: order.orderNo,
     });
   } catch (err) {
@@ -493,9 +469,7 @@ export async function createBillplzPayment(
     .set({
       billplzBillId: bill.id,
       paymentMethod: "billplz",
-      // The balance leg is paid while the boost is underway — don't regress
-      // the status ladder back to waiting_payment.
-      status: balanceLeg ? order.status : "waiting_payment",
+      status: "waiting_payment",
       updatedAt: new Date(),
     })
     .where(eq(orders.id, order.id));
@@ -522,17 +496,7 @@ export async function syncBillplzPayment(orderNo: string): Promise<void> {
     where: eq(orders.orderNo, orderNo),
   });
   if (!order?.billplzBillId) return;
-  // Sync applies while awaiting the (first or only) payment, or while a joki
-  // balance bill is outstanding. markOrderPaid clears billplzBillId when the
-  // deposit leg settles, so a paid deposit bill can't be mistaken for the
-  // balance here.
-  const awaitingJokiBalance =
-    !!order.jokiDetails &&
-    !!order.depositSen &&
-    !!order.depositPaidAt &&
-    !order.balancePaidAt &&
-    order.status !== "cancelled";
-  if (order.status !== "waiting_payment" && !awaitingJokiBalance) return;
+  if (order.status !== "waiting_payment") return;
 
   try {
     const bill = await getBillplzBill(order.billplzBillId);
